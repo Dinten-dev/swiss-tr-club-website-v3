@@ -75,7 +75,7 @@ export default function Home() {
 
 function HomePage({t,navigate,openEvent}:{t:typeof copy.de,navigate:(p:Page)=>void,openEvent:(i:number)=>void}) {
   return <>
-    <section className="hero" id="top"><div className="hero-stage"><div className="hero-road" aria-hidden="true"/><div className="hero-copy"><p className="eyebrow">{t.welcome}</p><h1>{t.headline}<br/><em>{t.accent}</em></h1><p className="intro">{t.intro}</p><div className="hero-actions"><button className="primary" onClick={() => navigate('agenda')}>{t.drive}</button><button className="secondary" onClick={() => navigate('club')}>{t.discover} <span>→</span></button></div><div className="hero-facts"><span><strong>50+</strong> Jahre Clubgeschichte</span><span><strong>316</strong> aktive Mitglieder</span><span><strong>8</strong> Regionen</span></div></div><ScrollRoadster/><div className="scroll-cue" aria-hidden="true"><span/>Scrollen zum Drehen</div></div></section>
+    <section className="hero" id="top"><div className="hero-stage"><div className="hero-road" aria-hidden="true"/><div className="hero-copy"><p className="eyebrow">{t.welcome}</p><h1>{t.headline}<br/><em>{t.accent}</em></h1><p className="intro">{t.intro}</p><div className="hero-actions"><button className="primary" onClick={() => navigate('agenda')}>{t.drive}</button><button className="secondary" onClick={() => navigate('club')}>{t.discover} <span>→</span></button></div><div className="hero-facts"><span><strong>50+</strong> Jahre Clubgeschichte</span><span><strong>316</strong> aktive Mitglieder</span><span><strong>8</strong> Regionen</span></div></div><ScrollRoadster/><div className="scroll-cue" aria-hidden="true"><span/>Drehen und losfahren</div></div></section>
     <section className="content-grid"><div className="section-heading"><p className="eyebrow">Unterwegs mit Freunden</p><h2>Die nächsten Erlebnisse</h2></div><div className="events">{events.slice(0,3).map((event,index)=><EventCard key={event.title} event={event} open={() => openEvent(index)}/>)}</div><aside className="magazine-card"><p className="eyebrow">Aktuelle Ausgabe</p><div className="magazine"><span>51. Jahrgang</span><strong>Swiss<br/>TR-Magazin</strong><b>2 | 2026</b></div><h3>Geschichten, Technik und Menschen</h3><p>Für Mitglieder digital verfügbar.</p><button onClick={() => navigate('library')}>Magazin öffnen →</button></aside></section>
     <section className="feature-band"><div><p className="eyebrow">Mehr als ein Automobilclub</p><h2>Menschen. Technik. Leidenschaft.</h2><p>Gemeinsame Ausfahrten, technisches Wissen und Freundschaften über Sprachgrenzen hinweg.</p></div><div className="feature-cards"><article><span>01</span><h3>Fahren</h3><p>Ausfahrten und Treffen in der ganzen Schweiz.</p></article><article><span>02</span><h3>Erhalten</h3><p>Erfahrung und Dokumentation für jeden TR.</p></article><article><span>03</span><h3>Verbinden</h3><p>Acht Regionen, eine lebendige Gemeinschaft.</p></article></div></section>
   </>;
@@ -92,6 +92,7 @@ function ScrollRoadster() {
     let disposed = false;
     let viewer: ViewerElement | null = null;
     const section = hostRef.current?.closest('.hero') as HTMLElement | null;
+    const stage = hostRef.current?.closest('.hero-stage') as HTMLElement | null;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const paintRed = () => {
       const paint = viewer?.model?.materials.find((material) => material.name === 'carpaint');
@@ -101,10 +102,14 @@ function ScrollRoadster() {
       if (!section || !viewer) return;
       const distance = Math.max(section.offsetHeight - window.innerHeight, 1);
       const progress = Math.min(1, Math.max(0, (window.scrollY - section.offsetTop) / distance));
-      const orbit = reduceMotion ? 35 : 35 + progress * 180;
-      const elevation = reduceMotion ? 72 : 72 - Math.sin(progress * Math.PI) * 8;
+      const turnProgress = reduceMotion ? 0 : Math.min(1, progress / 0.62);
+      const driveProgress = reduceMotion ? 0 : Math.max(0, Math.min(1, (progress - 0.62) / 0.38));
+      const orbit = 35 + turnProgress * 180;
+      const elevation = 72 - Math.sin(turnProgress * Math.PI) * 8;
       viewer.setAttribute('camera-orbit', `${orbit}deg ${elevation}deg 105%`);
-      hostRef.current?.style.setProperty('--turn-progress', progress.toFixed(3));
+      hostRef.current?.style.setProperty('--turn-progress', turnProgress.toFixed(3));
+      hostRef.current?.style.setProperty('--drive-progress', driveProgress.toFixed(3));
+      stage?.style.setProperty('--scene-progress', progress.toFixed(3));
     };
     void import('@google/model-viewer').then(() => {
       if (disposed) return;
