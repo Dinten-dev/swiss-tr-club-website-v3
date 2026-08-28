@@ -85,23 +85,42 @@ function ScrollRoadster() {
   const hostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    void import('@google/model-viewer');
+    type ViewerElement = HTMLElement & {
+      loaded?: boolean;
+      model?: { materials: Array<{ name:string; pbrMetallicRoughness:{ setBaseColorFactor:(color:[number,number,number,number])=>void } }> };
+    };
+    let disposed = false;
+    let viewer: ViewerElement | null = null;
     const section = hostRef.current?.closest('.hero') as HTMLElement | null;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const paintRed = () => {
+      const paint = viewer?.model?.materials.find((material) => material.name === 'carpaint');
+      paint?.pbrMetallicRoughness.setBaseColorFactor([0.58, 0.025, 0.035, 1]);
+    };
     const update = () => {
-      const model = hostRef.current?.querySelector('model-viewer');
-      if (!section || !model) return;
+      if (!section || !viewer) return;
       const distance = Math.max(section.offsetHeight - window.innerHeight, 1);
       const progress = Math.min(1, Math.max(0, (window.scrollY - section.offsetTop) / distance));
       const orbit = reduceMotion ? 35 : 35 + progress * 180;
       const elevation = reduceMotion ? 72 : 72 - Math.sin(progress * Math.PI) * 8;
-      model.setAttribute('camera-orbit', `${orbit}deg ${elevation}deg 105%`);
+      viewer.setAttribute('camera-orbit', `${orbit}deg ${elevation}deg 105%`);
       hostRef.current?.style.setProperty('--turn-progress', progress.toFixed(3));
     };
-    update();
+    void import('@google/model-viewer').then(() => {
+      if (disposed) return;
+      viewer = hostRef.current?.querySelector('model-viewer') as ViewerElement | null;
+      viewer?.addEventListener('load', paintRed);
+      if (viewer?.loaded) paintRed();
+      update();
+    });
     window.addEventListener('scroll', update, { passive:true });
     window.addEventListener('resize', update);
-    return () => { window.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
+    return () => {
+      disposed = true;
+      viewer?.removeEventListener('load', paintRed);
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
   }, []);
 
   return <div className="model-art" ref={hostRef}>
@@ -109,7 +128,7 @@ function ScrollRoadster() {
     {createElement('model-viewer', {
       class: 'tr6-model',
       src: '/models/triumph-tr6.glb',
-      poster: '/roadster-pictogram.png',
+      poster: '/models/triumph-tr6-red-poster.png',
       alt: 'Interaktives 3D-Modell eines Triumph TR6',
       'camera-orbit': '35deg 72deg 105%',
       'field-of-view': '28deg',
