@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { createElement, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 type Page = 'home' | 'club' | 'agenda' | 'regions' | 'market' | 'members' | 'forum' | 'gallery' | 'library' | 'directory';
@@ -75,10 +75,53 @@ export default function Home() {
 
 function HomePage({t,navigate,openEvent}:{t:typeof copy.de,navigate:(p:Page)=>void,openEvent:(i:number)=>void}) {
   return <>
-    <section className="hero" id="top"><div className="hero-road" aria-hidden="true"/><div className="hero-copy"><p className="eyebrow">{t.welcome}</p><h1>{t.headline}<br/><em>{t.accent}</em></h1><p className="intro">{t.intro}</p><div className="hero-actions"><button className="primary" onClick={() => navigate('agenda')}>{t.drive}</button><button className="secondary" onClick={() => navigate('club')}>{t.discover} <span>→</span></button></div><div className="hero-facts"><span><strong>50+</strong> Jahre Clubgeschichte</span><span><strong>316</strong> aktive Mitglieder</span><span><strong>8</strong> Regionen</span></div></div><div className="car-art"><Image className="roadster-pictogram" src="/roadster-pictogram.png" width={1774} height={887} alt="Piktogramm eines klassischen Roadsters" priority/></div></section>
+    <section className="hero" id="top"><div className="hero-stage"><div className="hero-road" aria-hidden="true"/><div className="hero-copy"><p className="eyebrow">{t.welcome}</p><h1>{t.headline}<br/><em>{t.accent}</em></h1><p className="intro">{t.intro}</p><div className="hero-actions"><button className="primary" onClick={() => navigate('agenda')}>{t.drive}</button><button className="secondary" onClick={() => navigate('club')}>{t.discover} <span>→</span></button></div><div className="hero-facts"><span><strong>50+</strong> Jahre Clubgeschichte</span><span><strong>316</strong> aktive Mitglieder</span><span><strong>8</strong> Regionen</span></div></div><ScrollRoadster/><div className="scroll-cue" aria-hidden="true"><span/>Scrollen zum Drehen</div></div></section>
     <section className="content-grid"><div className="section-heading"><p className="eyebrow">Unterwegs mit Freunden</p><h2>Die nächsten Erlebnisse</h2></div><div className="events">{events.slice(0,3).map((event,index)=><EventCard key={event.title} event={event} open={() => openEvent(index)}/>)}</div><aside className="magazine-card"><p className="eyebrow">Aktuelle Ausgabe</p><div className="magazine"><span>51. Jahrgang</span><strong>Swiss<br/>TR-Magazin</strong><b>2 | 2026</b></div><h3>Geschichten, Technik und Menschen</h3><p>Für Mitglieder digital verfügbar.</p><button onClick={() => navigate('library')}>Magazin öffnen →</button></aside></section>
     <section className="feature-band"><div><p className="eyebrow">Mehr als ein Automobilclub</p><h2>Menschen. Technik. Leidenschaft.</h2><p>Gemeinsame Ausfahrten, technisches Wissen und Freundschaften über Sprachgrenzen hinweg.</p></div><div className="feature-cards"><article><span>01</span><h3>Fahren</h3><p>Ausfahrten und Treffen in der ganzen Schweiz.</p></article><article><span>02</span><h3>Erhalten</h3><p>Erfahrung und Dokumentation für jeden TR.</p></article><article><span>03</span><h3>Verbinden</h3><p>Acht Regionen, eine lebendige Gemeinschaft.</p></article></div></section>
   </>;
+}
+
+function ScrollRoadster() {
+  const hostRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    void import('@google/model-viewer');
+    const section = hostRef.current?.closest('.hero') as HTMLElement | null;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const update = () => {
+      const model = hostRef.current?.querySelector('model-viewer');
+      if (!section || !model) return;
+      const distance = Math.max(section.offsetHeight - window.innerHeight, 1);
+      const progress = Math.min(1, Math.max(0, (window.scrollY - section.offsetTop) / distance));
+      const orbit = reduceMotion ? 35 : 35 + progress * 180;
+      const elevation = reduceMotion ? 72 : 72 - Math.sin(progress * Math.PI) * 8;
+      model.setAttribute('camera-orbit', `${orbit}deg ${elevation}deg 105%`);
+      hostRef.current?.style.setProperty('--turn-progress', progress.toFixed(3));
+    };
+    update();
+    window.addEventListener('scroll', update, { passive:true });
+    window.addEventListener('resize', update);
+    return () => { window.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
+  }, []);
+
+  return <div className="model-art" ref={hostRef}>
+    <div className="model-halo" aria-hidden="true"/>
+    {createElement('model-viewer', {
+      class: 'tr6-model',
+      src: '/models/triumph-tr6.glb',
+      poster: '/roadster-pictogram.png',
+      alt: 'Interaktives 3D-Modell eines Triumph TR6',
+      'camera-orbit': '35deg 72deg 105%',
+      'field-of-view': '28deg',
+      'shadow-intensity': '1.1',
+      'shadow-softness': '1',
+      exposure: '1.1',
+      loading: 'eager',
+      reveal: 'auto',
+      'interaction-prompt': 'none',
+      'disable-zoom': true,
+    })}
+  </div>;
 }
 
 function PageHero({eyebrow,title,text}:{eyebrow:string,title:string,text:string}) { return <section className="page-hero"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{text}</p></section>; }
