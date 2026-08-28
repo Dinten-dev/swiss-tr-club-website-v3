@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 type Page = 'home' | 'club' | 'agenda' | 'regions' | 'market' | 'members' | 'forum' | 'gallery' | 'library' | 'directory';
 type Lang = 'de' | 'fr';
@@ -40,7 +41,7 @@ export default function Home() {
   return <main>
     <header className="site-header">
       <button className="brand brand-button" onClick={() => navigate('home')} aria-label="Swiss TR-Club Startseite">
-        <span className="brand-mark">TR</span><span><strong>Swiss TR-Club</strong><small>Passion since 1973</small></span>
+        <Image className="brand-logo" src="/strc-logo.png" width={954} height={954} alt="Swiss TR-Club Logo" priority/><span><strong>Swiss TR-Club</strong><small>Passion since 1973</small></span>
       </button>
       <nav aria-label="Hauptnavigation">
         <button className={page==='club'?'active':''} onClick={() => navigate('club')}>{t.club}</button>
@@ -65,7 +66,7 @@ export default function Home() {
     {page==='library' && <LibraryPage/>} 
     {page==='directory' && <DirectoryPage/>} 
 
-    <footer><div className="footer-brand"><span className="brand-mark">TR</span><div><strong>Swiss TR-Club</strong><p>Freude an britischen Roadstern seit 1973.</p></div></div><div><strong>Entdecken</strong><button onClick={() => navigate('club')}>Über den Club</button><button onClick={() => navigate('agenda')}>Veranstaltungen</button><button onClick={() => navigate('regions')}>Regionen</button></div><div><strong>Mitglieder</strong><button onClick={() => navigate('members')}>Dashboard</button><button onClick={() => navigate('forum')}>Forum</button><button onClick={() => navigate('library')}>Bibliothek</button></div><div><strong>Demo-Hinweis</strong><p>Unabhängiger Prototyp mit synthetischen Daten.</p></div></footer>
+    <footer><div className="footer-brand"><Image className="footer-logo" src="/strc-logo.png" width={954} height={954} alt="Swiss TR-Club Logo"/><div><strong>Swiss TR-Club</strong><p>Freude an britischen Roadstern seit 1973.</p></div></div><div><strong>Entdecken</strong><button onClick={() => navigate('club')}>Über den Club</button><button onClick={() => navigate('agenda')}>Veranstaltungen</button><button onClick={() => navigate('regions')}>Regionen</button></div><div><strong>Mitglieder</strong><button onClick={() => navigate('members')}>Dashboard</button><button onClick={() => navigate('forum')}>Forum</button><button onClick={() => navigate('library')}>Bibliothek</button></div><div><strong>Demo-Hinweis</strong><p>Unabhängiger Prototyp mit synthetischen Daten.</p></div></footer>
 
     {selectedEvent!==null && <EventDialog event={events[selectedEvent]} close={() => setSelectedEvent(null)} register={() => { setSelectedEvent(null); notify('Demo-Anmeldung gespeichert.'); }}/>} 
     {toast && <div className="toast" role="status">✓ {toast}</div>}

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   title: 'Swiss TR-Club | British Roadsters seit 1973',
   description: 'Der Schweizer Club für Triumph TR-Sportwagen, gemeinsame Ausfahrten und technische Leidenschaft.',
+  icons: { icon: '/strc-logo.png' },
   openGraph: {
     title: 'Swiss TR-Club',
     description: 'British roadsters. Swiss roads.',
