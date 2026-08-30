@@ -56,7 +56,36 @@ foreach ($metaKeys as $key) {
 
 $invoiceId = 0;
 $mailingId = 0;
+$eventIds = array();
 try {
+    $publishedEventId = wp_insert_post(array(
+        'post_type' => 'strc_event',
+        'post_status' => 'publish',
+        'post_title' => 'STRC Endpoint-Verifikation',
+        'post_excerpt' => 'Öffentlicher Testtermin.',
+        'post_content' => 'Synthetischer Integrationstest.',
+    ));
+    $draftEventId = wp_insert_post(array(
+        'post_type' => 'strc_event',
+        'post_status' => 'draft',
+        'post_title' => 'STRC Versteckter Entwurf',
+    ));
+    strc_assert(is_int($publishedEventId) && $publishedEventId > 0, 'Published event creation failed.');
+    strc_assert(is_int($draftEventId) && $draftEventId > 0, 'Draft event creation failed.');
+    $eventIds = array($publishedEventId, $draftEventId);
+    update_post_meta($publishedEventId, 'strc_start_at', gmdate(DATE_ATOM, strtotime('+10 days')));
+    update_post_meta($publishedEventId, 'strc_location', 'Testort');
+    rest_get_server();
+    $eventRequest = new WP_REST_Request('GET', '/strc/v1/events');
+    $eventRequest->set_param('view', 'all');
+    $eventResponse = rest_do_request($eventRequest);
+    $eventData = $eventResponse->get_data();
+    strc_assert(200 === $eventResponse->get_status(), 'Public event endpoint failed.');
+    strc_assert(is_array($eventData), 'Public event response is invalid.');
+    $publicEventIds = array_map('intval', array_column($eventData['events'] ?? array(), 'id'));
+    strc_assert(in_array($publishedEventId, $publicEventIds, true), 'Published event is missing publicly.');
+    strc_assert(! in_array($draftEventId, $publicEventIds, true), 'Draft event leaked publicly.');
+
     update_option('strc_billing_settings', array(
         'creditor_name' => 'Swiss TR-Club',
         'street' => 'Teststrasse',
@@ -101,6 +130,9 @@ try {
     ));
     strc_assert(0 === $failed, 'Bulk mailing delivery failed.');
 } finally {
+    foreach ($eventIds as $eventId) {
+        wp_delete_post($eventId, true);
+    }
     if ($mailingId > 0) {
         $wpdb->delete($wpdb->prefix . 'strc_mailing_recipients', array('mailing_id' => $mailingId), array('%d'));
         $wpdb->delete($wpdb->prefix . 'strc_mailings', array('id' => $mailingId), array('%d'));

@@ -15,6 +15,7 @@ const required = [
   'wordpress/wp-content/plugins/strc-core/src/Members/MembershipTypePolicy.php',
   'wordpress/wp-content/plugins/strc-core/src/Members/MemberActivationMailer.php',
   'wordpress/wp-content/plugins/strc-core/src/Members/MemberSessionEndpoint.php',
+  'wordpress/wp-content/plugins/strc-core/src/Events/EventPublicEndpoint.php',
   'wordpress/wp-content/themes/strc/theme.json',
   'wordpress/wp-content/themes/strc/templates/index.html',
 ];
