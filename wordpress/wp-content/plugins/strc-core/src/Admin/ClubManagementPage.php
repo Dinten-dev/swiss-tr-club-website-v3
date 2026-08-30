@@ -10,7 +10,9 @@ use SwissTRClub\Core\Finance\InvoiceRepository;
 use SwissTRClub\Core\Finance\QrInvoicePdf;
 use SwissTRClub\Core\Mail\BulkMailer;
 use SwissTRClub\Core\Members\MemberCsvImporter;
+use SwissTRClub\Core\Members\MemberActivationMailer;
 use SwissTRClub\Core\Members\MembershipRepository;
+use SwissTRClub\Core\Members\MembershipTypePolicy;
 
 final class ClubManagementPage
 {
@@ -20,7 +22,8 @@ final class ClubManagementPage
         private readonly CamtImporter $camtImporter,
         private readonly BulkMailer $mailer,
         private readonly QrInvoicePdf $pdf,
-        private readonly MemberCsvImporter $memberImporter
+        private readonly MemberCsvImporter $memberImporter,
+        private readonly MemberActivationMailer $activationMailer
     ) {
     }
 
@@ -53,6 +56,7 @@ final class ClubManagementPage
                 'queue_mailing' => $this->queueMailing(),
                 'send_invoice' => $this->sendInvoice(),
                 'import_members' => $this->importMembers(),
+                'send_activation' => $this->sendActivation(),
                 default => throw new Exception('Unbekannte Aktion.'),
             };
         } catch (Exception $exception) {
@@ -120,7 +124,15 @@ final class ClubManagementPage
     private function updateMember(): void
     {
         $this->requireCapability('strc_manage_members');
-        $this->memberships->update(absint($_POST['membership_id'] ?? 0), sanitize_key(wp_unslash($_POST['status'] ?? 'pending')), sanitize_text_field(wp_unslash($_POST['region'] ?? '')), (float) ($_POST['annual_fee'] ?? 0));
+        $partnerUserId = absint($_POST['partner_user_id'] ?? 0);
+        $this->memberships->update(
+            absint($_POST['membership_id'] ?? 0),
+            sanitize_key(wp_unslash($_POST['status'] ?? 'pending')),
+            sanitize_text_field(wp_unslash($_POST['region'] ?? '')),
+            (float) ($_POST['annual_fee'] ?? 0),
+            sanitize_key(wp_unslash($_POST['membership_type'] ?? 'individual')),
+            $partnerUserId ?: null
+        );
         $this->notice('success', 'Mitgliedschaft aktualisiert.');
     }
 
@@ -132,6 +144,9 @@ final class ClubManagementPage
         $year = gmdate('Y');
         foreach ($this->memberships->all() as $membership) {
             if ('active' !== $membership['status']) {
+                continue;
+            }
+            if ((float) $membership['annual_fee'] <= 0) {
                 continue;
             }
             $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}strc_invoices WHERE user_id = %d AND invoice_number LIKE %s", (int) $membership['user_id'], 'STRC-' . $year . '-%'));
@@ -239,22 +254,45 @@ final class ClubManagementPage
         $this->notice($report['errors'] ? 'warning' : 'success', $message);
     }
 
+    private function sendActivation(): void
+    {
+        $this->requireCapability('strc_manage_members');
+        $this->activationMailer->send(absint($_POST['user_id'] ?? 0));
+        $this->notice('success', 'Aktivierungs-E-Mail wurde versendet.');
+    }
+
     private function renderMembers(): void
     {
+        $members = $this->memberships->all();
         echo '<h2>Mitglieder</h2><p><a class="button button-primary" href="' . esc_url(admin_url('user-new.php')) . '">Mitglied anlegen</a></p>';
-        echo '<details><summary><strong>Mitglieder per CSV importieren</strong></summary><p>Pflichtspalten: <code>email;first_name;last_name</code>. Optional: <code>member_number;status;region;membership_type;annual_fee;phone;street;house_number;postcode;city;country;vehicle</code>.</p><form method="post" enctype="multipart/form-data"><input type="hidden" name="strc_action" value="import_members"><input type="file" name="members_file" accept=".csv,text/csv" required> <select name="import_mode"><option value="dry_run">Nur prüfen</option><option value="commit">Verbindlich importieren</option></select> ';
+        echo '<details><summary><strong>Mitglieder per CSV importieren</strong></summary><p>Pflichtspalten: <code>email;first_name;last_name</code>. Optional: <code>member_number;status;region;membership_type;partner_member_number;annual_fee;phone;street;house_number;postcode;city;country;vehicle</code>.</p><form method="post" enctype="multipart/form-data"><input type="hidden" name="strc_action" value="import_members"><input type="file" name="members_file" accept=".csv,text/csv" required> <select name="import_mode"><option value="dry_run">Nur prüfen</option><option value="commit">Verbindlich importieren</option></select> ';
         wp_nonce_field('strc_club_action', 'strc_nonce');
         submit_button('CSV verarbeiten', 'secondary', 'submit', false);
-        echo '</form></details><hr><table class="widefat striped"><thead><tr><th>Nummer</th><th>Name</th><th>E-Mail</th><th>Status</th><th>Region</th><th>Beitrag</th><th></th></tr></thead><tbody>';
-        foreach ($this->memberships->all() as $member) {
-            echo '<tr><form method="post"><td>' . esc_html((string) $member['member_number']) . '</td><td><a href="' . esc_url(admin_url('user-edit.php?user_id=' . $member['user_id'])) . '">' . esc_html((string) $member['display_name']) . '</a></td><td>' . esc_html((string) $member['user_email']) . '</td><td><select name="status">';
+        echo '</form></details><hr><table class="widefat striped"><thead><tr><th>Nummer</th><th>Name</th><th>E-Mail</th><th>Typ</th><th>Partner</th><th>Status</th><th>Region</th><th>Beitrag</th><th>Aktionen</th></tr></thead><tbody>';
+        foreach ($members as $member) {
+            $formId = 'strc-member-' . (int) $member['id'];
+            echo '<tr><td>' . esc_html((string) $member['member_number']) . '</td><td><a href="' . esc_url(admin_url('user-edit.php?user_id=' . $member['user_id'])) . '">' . esc_html((string) $member['display_name']) . '</a></td><td>' . esc_html((string) $member['user_email']) . '</td><td><select form="' . esc_attr($formId) . '" name="membership_type">';
+            foreach (MembershipTypePolicy::labels() as $type => $label) {
+                echo '<option value="' . esc_attr($type) . '" ' . selected(MembershipTypePolicy::normalize((string) $member['membership_type']), $type, false) . '>' . esc_html($label) . '</option>';
+            }
+            echo '</select></td><td><select form="' . esc_attr($formId) . '" name="partner_user_id"><option value="0">–</option>';
+            foreach ($members as $candidate) {
+                if ((int) $candidate['user_id'] === (int) $member['user_id']) {
+                    continue;
+                }
+                echo '<option value="' . esc_attr((string) $candidate['user_id']) . '" ' . selected((int) ($member['partner_user_id'] ?? 0), (int) $candidate['user_id'], false) . '>' . esc_html((string) $candidate['display_name']) . '</option>';
+            }
+            echo '</select></td><td><select form="' . esc_attr($formId) . '" name="status">';
             foreach (array('pending', 'active', 'grace', 'inactive') as $status) {
                 echo '<option value="' . esc_attr($status) . '" ' . selected($member['status'], $status, false) . '>' . esc_html($status) . '</option>';
             }
-            echo '</select></td><td><input name="region" value="' . esc_attr((string) $member['region']) . '" size="12"></td><td><input name="annual_fee" type="number" step="0.05" value="' . esc_attr((string) $member['annual_fee']) . '" size="7"></td><td><input type="hidden" name="strc_action" value="update_member"><input type="hidden" name="membership_id" value="' . esc_attr((string) $member['id']) . '">';
+            echo '</select></td><td><input form="' . esc_attr($formId) . '" name="region" value="' . esc_attr((string) $member['region']) . '" size="10"></td><td><input form="' . esc_attr($formId) . '" name="annual_fee" type="number" step="0.05" value="' . esc_attr((string) $member['annual_fee']) . '" size="6"></td><td><form id="' . esc_attr($formId) . '" method="post"><input type="hidden" name="strc_action" value="update_member"><input type="hidden" name="membership_id" value="' . esc_attr((string) $member['id']) . '">';
             wp_nonce_field('strc_club_action', 'strc_nonce');
             submit_button('Speichern', 'small', 'submit', false);
-            echo '</td></form></tr>';
+            echo '</form><form method="post"><input type="hidden" name="strc_action" value="send_activation"><input type="hidden" name="user_id" value="' . esc_attr((string) $member['user_id']) . '">';
+            wp_nonce_field('strc_club_action', 'strc_nonce');
+            submit_button('Aktivierung senden', 'small', 'submit', false);
+            echo '</form></td></tr>';
         }
         echo '</tbody></table>';
     }

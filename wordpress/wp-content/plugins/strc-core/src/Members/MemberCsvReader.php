@@ -60,11 +60,17 @@ final class MemberCsvReader
                 $errors[] = 'Zeile ' . ($index + 2) . ': ungültiger Jahresbeitrag.';
                 continue;
             }
+            $membershipType = MembershipTypePolicy::normalize($row['membership_type'] ?? 'individual');
+            if (! MembershipTypePolicy::isAllowed($membershipType)) {
+                $errors[] = 'Zeile ' . ($index + 2) . ': ungültiger Mitgliedschaftstyp.';
+                continue;
+            }
 
             $emails[$email] = true;
             $row['email'] = $email;
             $row['status'] = $status;
             $row['annual_fee'] = number_format((float) $fee, 2, '.', '');
+            $row['membership_type'] = $membershipType;
             $rows[] = $row;
         }
 

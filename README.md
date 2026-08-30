@@ -30,6 +30,9 @@ Open-Source-Website und Clubplattform des Swiss TR-Clubs.
 - Fairgate-unabhängige Datenhaltung im STRC-Core
 - CSV-Prüflauf und kontrollierter Mitgliederimport
 - Inaktive Mitgliedschaften verlieren geschützte Berechtigungen
+- Einzel-, Paar- und Jungmitgliedschaften verwalten
+- Primary und Co-Pilot als getrennte Konten verknüpfen
+- Zeitlich begrenzte Aktivierungslinks sicher versenden
 
 ## Frontend starten
 

@@ -23,7 +23,8 @@ final class Schema
             id bigint unsigned NOT NULL AUTO_INCREMENT,
             user_id bigint unsigned NOT NULL,
             member_number varchar(32) NOT NULL,
-            membership_type varchar(64) NOT NULL DEFAULT 'standard',
+            membership_type varchar(64) NOT NULL DEFAULT 'individual',
+            partner_user_id bigint unsigned NULL,
             status varchar(24) NOT NULL DEFAULT 'active',
             region varchar(64) NOT NULL DEFAULT '',
             started_on date NULL,
@@ -34,6 +35,7 @@ final class Schema
             PRIMARY KEY (id),
             UNIQUE KEY user_id (user_id),
             UNIQUE KEY member_number (member_number),
+            KEY partner_user_id (partner_user_id),
             KEY status (status)
         ) {$charset};");
 
@@ -98,5 +100,7 @@ final class Schema
             UNIQUE KEY mailing_user (mailing_id,user_id),
             KEY status (status)
         ) {$charset};");
+
+        $wpdb->query("UPDATE {$memberships} SET membership_type = 'individual' WHERE membership_type = 'standard'");
     }
 }

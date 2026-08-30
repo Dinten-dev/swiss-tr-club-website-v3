@@ -19,6 +19,7 @@ final class MemberCsvReaderTest extends TestCase
         self::assertSame('anna@example.test', $result['rows'][0]['email']);
         self::assertSame('Anna', $result['rows'][0]['first_name']);
         self::assertSame('125.50', $result['rows'][0]['annual_fee']);
+        self::assertSame('individual', $result['rows'][0]['membership_type']);
     }
 
     public function testRejectsDuplicateEmailAddresses(): void
@@ -45,5 +46,13 @@ final class MemberCsvReaderTest extends TestCase
 
         self::assertSame(array(), $result['rows']);
         self::assertStringContainsString('Mitgliedsstatus', $result['errors'][0]);
+    }
+
+    public function testRejectsInvalidMembershipType(): void
+    {
+        $result = (new MemberCsvReader())->read("email;first_name;last_name;membership_type\na@example.test;Anna;Muster;unknown");
+
+        self::assertSame(array(), $result['rows']);
+        self::assertStringContainsString('Mitgliedschaftstyp', $result['errors'][0]);
     }
 }

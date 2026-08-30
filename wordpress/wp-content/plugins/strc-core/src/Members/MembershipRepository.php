@@ -42,7 +42,7 @@ final class MembershipRepository
             array(
                 'user_id' => $userId,
                 'member_number' => sprintf('STRC-%05d', $userId),
-                'membership_type' => 'standard',
+                'membership_type' => 'individual',
                 'status' => 'active',
                 'region' => '',
                 'started_on' => current_time('Y-m-d'),
@@ -72,24 +72,49 @@ final class MembershipRepository
         return is_array($rows) ? $rows : array();
     }
 
-    public function update(int $membershipId, string $status, string $region, float $annualFee): void
+    public function update(int $membershipId, string $status, string $region, float $annualFee, string $membershipType, ?int $partnerUserId): void
     {
         global $wpdb;
 
         $allowed = array('pending', 'active', 'grace', 'inactive');
         $safeStatus = in_array($status, $allowed, true) ? $status : 'pending';
+        $safeType = MembershipTypePolicy::normalize($membershipType);
+        if (! MembershipTypePolicy::isAllowed($safeType)) {
+            throw new \RuntimeException('Ungültiger Mitgliedschaftstyp.');
+        }
+        $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}strc_memberships WHERE id = %d", $membershipId), ARRAY_A);
+        if (! is_array($membership)) {
+            throw new \RuntimeException('Mitgliedschaft wurde nicht gefunden.');
+        }
+        $userId = (int) $membership['user_id'];
+        $partnerUserId = MembershipTypePolicy::isCouple($safeType) && $partnerUserId ? $partnerUserId : null;
+        if ($partnerUserId === $userId) {
+            throw new \RuntimeException('Ein Mitglied kann nicht sein eigener Partner sein.');
+        }
+        if ($partnerUserId) {
+            $partnerMembership = $this->membershipForUser($partnerUserId);
+            if (! $partnerMembership) {
+                throw new \RuntimeException('Das Partnerkonto besitzt keine Mitgliedschaft.');
+            }
+            if (! MembershipTypePolicy::formsCouple($safeType, (string) $partnerMembership['membership_type'])) {
+                throw new \RuntimeException('Eine Paarmitgliedschaft benötigt Primary und Co-Pilot.');
+            }
+        }
         $wpdb->update(
             $wpdb->prefix . 'strc_memberships',
             array(
+                'membership_type' => $safeType,
+                'partner_user_id' => $partnerUserId,
                 'status' => $safeStatus,
                 'region' => sanitize_text_field($region),
                 'annual_fee' => number_format(max(0, $annualFee), 2, '.', ''),
                 'updated_at' => current_time('mysql'),
             ),
             array('id' => $membershipId),
-            array('%s', '%s', '%s', '%s'),
+            array('%s', '%d', '%s', '%s', '%s', '%s'),
             array('%d')
         );
+        $this->synchronizePartnerLink($userId, $partnerUserId);
         $this->statusCache = array();
     }
 
@@ -128,7 +153,7 @@ final class MembershipRepository
             $table,
             array(
                 'member_number' => $memberNumber,
-                'membership_type' => sanitize_key($row['membership_type'] ?? (string) $membership['membership_type']),
+                'membership_type' => MembershipTypePolicy::normalize($row['membership_type'] ?? (string) $membership['membership_type']),
                 'status' => sanitize_key($row['status'] ?? (string) $membership['status']),
                 'region' => sanitize_text_field($row['region'] ?? (string) $membership['region']),
                 'annual_fee' => $row['annual_fee'] ?? (string) $membership['annual_fee'],
@@ -139,5 +164,55 @@ final class MembershipRepository
             array('%d')
         );
         unset($this->statusCache[$userId]);
+    }
+
+    public function linkByMemberNumbers(string $memberNumber, string $partnerMemberNumber): void
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'strc_memberships';
+        $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE member_number = %s", $memberNumber), ARRAY_A);
+        $partner = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE member_number = %s", $partnerMemberNumber), ARRAY_A);
+        if (! is_array($membership) || ! is_array($partner)) {
+            throw new \RuntimeException('Paarbeziehung verweist auf unbekannte Mitgliedsnummer.');
+        }
+        if (! MembershipTypePolicy::formsCouple((string) $membership['membership_type'], (string) $partner['membership_type'])) {
+            throw new \RuntimeException('Eine Paarmitgliedschaft benötigt Primary und Co-Pilot.');
+        }
+        $this->updatePartner((int) $membership['user_id'], (int) $partner['user_id']);
+        $this->updatePartner((int) $partner['user_id'], (int) $membership['user_id']);
+    }
+
+    /** @return array<string, mixed>|null */
+    private function membershipForUser(int $userId): ?array
+    {
+        global $wpdb;
+
+        $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}strc_memberships WHERE user_id = %d", $userId), ARRAY_A);
+
+        return is_array($membership) ? $membership : null;
+    }
+
+    private function synchronizePartnerLink(int $userId, ?int $partnerUserId): void
+    {
+        global $wpdb;
+
+        $wpdb->query($wpdb->prepare("UPDATE {$wpdb->prefix}strc_memberships SET partner_user_id = NULL WHERE partner_user_id = %d AND user_id <> %d", $userId, $partnerUserId ?: 0));
+        if ($partnerUserId) {
+            $this->updatePartner($partnerUserId, $userId);
+        }
+    }
+
+    private function updatePartner(int $userId, int $partnerUserId): void
+    {
+        global $wpdb;
+
+        $wpdb->update(
+            $wpdb->prefix . 'strc_memberships',
+            array('partner_user_id' => $partnerUserId, 'updated_at' => current_time('mysql')),
+            array('user_id' => $userId),
+            array('%d', '%s'),
+            array('%d')
+        );
     }
 }

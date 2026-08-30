@@ -41,6 +41,21 @@ final class MemberCsvImporter
             }
         }
 
+        if (! $dryRun) {
+            foreach ($parsed['rows'] as $index => $row) {
+                $partnerNumber = trim($row['partner_member_number'] ?? '');
+                $memberNumber = trim($row['member_number'] ?? '');
+                if ('' === $partnerNumber || '' === $memberNumber) {
+                    continue;
+                }
+                try {
+                    $this->memberships->linkByMemberNumbers($memberNumber, $partnerNumber);
+                } catch (Throwable $throwable) {
+                    $report['errors'][] = 'Paarbeziehung ' . ($index + 1) . ': ' . $throwable->getMessage();
+                }
+            }
+        }
+
         return $report;
     }
 
