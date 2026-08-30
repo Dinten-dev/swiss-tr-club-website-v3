@@ -18,7 +18,7 @@ final class InvoiceRepository
         $inserted = $wpdb->insert(
             $table,
             array(
-                'invoice_number' => 'PENDING-' . wp_generate_uuid4(),
+                'invoice_number' => 'PENDING-' . str_replace('-', '', wp_generate_uuid4()),
                 'user_id' => $userId,
                 'membership_id' => $membershipId,
                 'amount' => number_format($amount, 2, '.', ''),

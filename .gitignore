@@ -10,6 +10,8 @@ wordpress/wp-content/upgrade/
 wordpress/wp-content/languages/
 wordpress/wp-content/plugins/*
 !wordpress/wp-content/plugins/strc-core/
+wordpress/wp-content/plugins/strc-core/vendor/
+wordpress/wp-content/plugins/strc-core/.phpunit.cache/
 wordpress/wp-content/themes/*
 !wordpress/wp-content/themes/strc/
 frontend/.vinext/

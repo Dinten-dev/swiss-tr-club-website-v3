@@ -15,6 +15,7 @@ use SwissTRClub\Core\Finance\QrInvoicePdf;
 use SwissTRClub\Core\Mail\BulkMailer;
 use SwissTRClub\Core\Mail\MailConfiguration;
 use SwissTRClub\Core\Members\MemberProfileFields;
+use SwissTRClub\Core\Members\MemberSessionEndpoint;
 use SwissTRClub\Core\Members\MemberActivationMailer;
 use SwissTRClub\Core\Members\MemberCsvImporter;
 use SwissTRClub\Core\Members\MemberCsvReader;
@@ -45,6 +46,7 @@ final class Plugin
         $memberships = new MembershipRepository();
         $memberships->registerHooks();
         (new MembershipAccessGuard($memberships))->registerHooks();
+        (new MemberSessionEndpoint($memberships))->registerHooks();
         $invoices = new InvoiceRepository();
         $mailer = new BulkMailer();
         $mailer->registerHooks();

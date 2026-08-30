@@ -2,7 +2,7 @@
 /**
  * Plugin Name: STRC Core
  * Description: Club-specific business logic for the Swiss TR-Club website.
- * Version: 0.5.0
+ * Version: 0.6.0
  * Requires at least: 7.1
  * Requires PHP: 8.3
  * Author: Swiss TR-Club
@@ -20,7 +20,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('STRC_CORE_VERSION', '0.5.0');
+define('STRC_CORE_VERSION', '0.6.0');
 define('STRC_CORE_FILE', __FILE__);
 define('STRC_CORE_PATH', plugin_dir_path(__FILE__));
 
@@ -40,6 +40,7 @@ require_once STRC_CORE_PATH . 'src/Members/MembershipAccessGuard.php';
 require_once STRC_CORE_PATH . 'src/Members/MemberCsvReader.php';
 require_once STRC_CORE_PATH . 'src/Members/MemberCsvImporter.php';
 require_once STRC_CORE_PATH . 'src/Members/MemberActivationMailer.php';
+require_once STRC_CORE_PATH . 'src/Members/MemberSessionEndpoint.php';
 require_once STRC_CORE_PATH . 'src/Members/MemberProfileFields.php';
 require_once STRC_CORE_PATH . 'src/Finance/QrReference.php';
 require_once STRC_CORE_PATH . 'src/Finance/InvoiceRepository.php';

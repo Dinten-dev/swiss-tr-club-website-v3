@@ -27,7 +27,7 @@ Open-Source-Website und Clubplattform des Swiss TR-Clubs.
 - Schweizer QR-Rechnungen als PDF generieren
 - camt.053- und camt.054-Zahlungen automatisch zuordnen
 - Rundmails warteschlangengesteuert an aktive Mitglieder senden
-- Fairgate-unabhängige Datenhaltung im STRC-Core
+- Eigenständige Datenhaltung im STRC-Core
 - CSV-Prüflauf und kontrollierter Mitgliederimport
 - Inaktive Mitgliedschaften verlieren geschützte Berechtigungen
 - Einzel-, Paar- und Jungmitgliedschaften verwalten
@@ -56,6 +56,14 @@ Mailpit: `http://localhost:8025`
 
 Administration: `WordPress → Clubverwaltung`
 
+Optionale lokale Demo-Zugangsdaten werden in `.env` gesetzt:
+
+```dotenv
+STRC_DEMO_USER=strc_demo
+STRC_DEMO_EMAIL=member@example.test
+STRC_DEMO_PASSWORD=change-me
+```
+
 ## Qualität
 
 ```bash
@@ -69,6 +77,10 @@ cd wordpress/wp-content/plugins/strc-core
 composer install
 composer test
 composer lint
+```
+
+```bash
+docker-compose --profile tools run --rm wpcli wp eval-file scripts/verify-backend.php
 ```
 
 ## Dokumentation

@@ -132,6 +132,12 @@ final class MembershipRepository
         return $this->statusCache[$userId];
     }
 
+    /** @return array<string, mixed>|null */
+    public function findForUser(int $userId): ?array
+    {
+        return $this->membershipForUser($userId);
+    }
+
     /** @param array<string, string> $row */
     public function importUpdate(int $userId, array $row): void
     {

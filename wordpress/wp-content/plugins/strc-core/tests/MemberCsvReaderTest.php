@@ -9,7 +9,7 @@ use SwissTRClub\Core\Members\MemberCsvReader;
 
 final class MemberCsvReaderTest extends TestCase
 {
-    public function testReadsSemicolonSeparatedFairgateStyleExport(): void
+    public function testReadsSemicolonSeparatedMemberExport(): void
     {
         $csv = "E-Mail;Vorname;Nachname;Mitgliederstatus;Jahresbeitrag\nanna@example.test;Anna;Muster;active;125,50";
 

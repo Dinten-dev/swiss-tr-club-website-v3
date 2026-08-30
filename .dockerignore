@@ -1,0 +1,6 @@
+.git
+.env
+frontend/node_modules
+frontend/.next
+frontend/dist
+wordpress/wp-content/plugins/strc-core/vendor

@@ -5,6 +5,16 @@ import Image from 'next/image';
 
 type Page = 'home' | 'club' | 'agenda' | 'regions' | 'market' | 'members' | 'forum' | 'gallery' | 'library' | 'directory';
 type Lang = 'de' | 'fr';
+type MemberSession = {
+  authenticated: boolean;
+  memberAccess: boolean;
+  displayName?: string;
+  vehicle?: string;
+  membership?: { memberNumber:string; status:string; type:string; region:string; startedOn:string } | null;
+};
+
+const wordpressUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL ?? 'http://localhost:8080';
+const frontendUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 const events = [
   { day:'05', month:'JUL', title:'Grilltag Schwaderloch', region:'Nordwestschweiz', price:15, status:'Offen', seats:'18 Plätze frei', text:'Geselliger Grilltag am Rhein mit gemeinsamer Anfahrt.' },
@@ -29,11 +39,20 @@ const copy = {
 export default function Home() {
   const [page, setPage] = useState<Page>('home');
   const [lang, setLang] = useState<Lang>('de');
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [memberSession, setMemberSession] = useState<MemberSession | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<number | null>(null);
   const [cart, setCart] = useState(0);
   const [toast, setToast] = useState('');
   const t = copy[lang];
+
+  useEffect(() => {
+    let active = true;
+    fetch(`${wordpressUrl}/wp-admin/admin-ajax.php?action=strc_session`, { credentials:'include' })
+      .then((response) => response.ok ? response.json() as Promise<MemberSession> : Promise.reject())
+      .then((session) => { if (active) setMemberSession(session); })
+      .catch(() => { if (active) setMemberSession({ authenticated:false, memberAccess:false }); });
+    return () => { active = false; };
+  }, []);
 
   function navigate(next: Page) { setPage(next); setSelectedEvent(null); window.scrollTo({ top:0, behavior:'smooth' }); }
   function notify(message: string) { setToast(message); window.setTimeout(() => setToast(''), 2600); }
@@ -51,7 +70,7 @@ export default function Home() {
       </nav>
       <div className="header-actions">
         <button className="language" onClick={() => setLang(lang==='de'?'fr':'de')} aria-label="Sprache wechseln">{lang.toUpperCase()} <span>⇄</span></button>
-        <button className="login" onClick={() => navigate('members')}>{loggedIn?'Mein Bereich':t.login}</button>
+        <button className="login" onClick={() => navigate('members')}>{memberSession?.memberAccess?'Mein Bereich':t.login}</button>
       </div>
     </header>
 
@@ -60,7 +79,7 @@ export default function Home() {
     {page==='agenda' && <AgendaPage openEvent={setSelectedEvent}/>} 
     {page==='regions' && <RegionsPage notify={notify}/>} 
     {page==='market' && <MarketPage cart={cart} add={() => { setCart(cart+1); notify('Artikel wurde dem Warenkorb hinzugefügt.'); }}/>} 
-    {page==='members' && <MembersPage loggedIn={loggedIn} login={() => { setLoggedIn(true); notify('Anmeldung erfolgreich.'); }} navigate={navigate}/>} 
+    {page==='members' && <MembersPage session={memberSession} navigate={navigate}/>}
     {page==='forum' && <ForumPage notify={notify}/>} 
     {page==='gallery' && <GalleryPage notify={notify}/>} 
     {page==='library' && <LibraryPage/>} 
@@ -159,9 +178,9 @@ function RegionsPage({notify}:{notify:(s:string)=>void}) { return <><PageHero ey
 
 function MarketPage({cart,add}:{cart:number,add:()=>void}) { const [tab,setTab]=useState('Alle'); return <><PageHero eyebrow="Marktplatz" title="Für Fahrer und Fahrzeuge." text="Clubartikel, Ersatzteile und Fahrzeuge aus der Gemeinschaft."/><section className="page-content"><div className="market-head"><div className="filterbar">{['Alle','Shop','Teile','Fahrzeuge'].map(x=><button className={tab===x?'active':''} onClick={()=>setTab(x)} key={x}>{x}</button>)}</div><span className="basket">Warenkorb · {cart}</span></div><div className="product-grid">{products.filter(p=>tab==='Alle'||p.type===tab).map(p=><article key={p.name}><div className="product-image">{p.icon}</div><p className="eyebrow">{p.type}</p><h3>{p.name}</h3><strong>CHF {p.price.toLocaleString('de-CH')}.–</strong><button onClick={add}>{p.type==='Shop'?'In den Warenkorb':'Details anfragen'} →</button></article>)}</div></section></>; }
 
-function MembersPage({loggedIn,login,navigate}:{loggedIn:boolean,login:()=>void,navigate:(p:Page)=>void}) { if(!loggedIn) return <><PageHero eyebrow="Geschützter Bereich" title="Willkommen zurück." text="Anmelden und alle Clubaktivitäten an einem Ort sehen."/><section className="login-panel"><div><p className="secure-label">Geschützter Mitgliederbereich</p><h2>Mitglieder-Login</h2><label>E-Mail-Adresse<input type="email" autoComplete="email"/></label><label>Passwort<input type="password" autoComplete="current-password"/></label><button onClick={login}>Sicher anmelden →</button><a>Passwort vergessen?</a></div><aside><p className="eyebrow">Noch nicht dabei?</p><h2>Gemeinschaft beginnt mit einer ersten Ausfahrt.</h2><p>Mitgliedsanträge werden sicher geprüft und anschliessend mit Fairgate synchronisiert.</p><button>Mitgliedsantrag starten</button></aside></section></>;
+function MembersPage({session,navigate}:{session:MemberSession|null,navigate:(p:Page)=>void}) { if(!session?.memberAccess) return <><PageHero eyebrow="Geschützter Bereich" title="Willkommen zurück." text="Anmelden und alle Clubaktivitäten an einem Ort sehen."/><section className="login-panel"><form method="post" action={`${wordpressUrl}/wp-login.php`}><p className="secure-label">Geschützter Mitgliederbereich</p><h2>Mitglieder-Login</h2>{session?.authenticated&&<p className="login-warning">Ihre Mitgliedschaft besitzt momentan keinen Zugang zum Mitgliederbereich.</p>}<label>E-Mail-Adresse<input name="log" type="email" autoComplete="email" required/></label><label>Passwort<input name="pwd" type="password" autoComplete="current-password" required/></label><input type="hidden" name="redirect_to" value={`${frontendUrl}/?member=1`}/><button type="submit">Sicher anmelden →</button><a href={`${wordpressUrl}/wp-login.php?action=lostpassword`}>Passwort vergessen?</a></form><aside><p className="eyebrow">Noch nicht dabei?</p><h2>Gemeinschaft beginnt mit einer ersten Ausfahrt.</h2><p>Mitgliedsanträge werden persönlich geprüft und direkt durch den Swiss TR-Club verwaltet.</p><button onClick={() => navigate('club')}>Mitgliedschaft ansehen</button></aside></section></>;
   const tools:[Page,string,string][]=[['agenda','◫','Meine Events'],['forum','◎','Forum'],['gallery','▧','Galerie'],['library','▤','Bibliothek'],['directory','◉','Mitglieder'],['market','◇','Marktplatz']];
-  return <><section className="dashboard-hero"><p>Guten Morgen,</p><h1>Peter Muster</h1><span>Mitglied seit 1998 · Region Zürich</span><div><b>TR4A IRS · 1967</b><b>TR6 PI · 1973</b></div></section><section className="dashboard"><div className="dashboard-main"><article><p className="eyebrow">Nächster Termin</p><h2>Sommerausfahrt Lüderenalp</h2><p>09. August · Treffpunkt ACE Café Rothenburg</p><span className="status open">Angemeldet</span></article><article><p className="eyebrow">Aktuell</p><ul><li>Neue Antwort auf «TR6 Overdrive»</li><li>TR-Magazin 2|2026 ist verfügbar</li><li>Bestellung #2026-034 wurde versandt</li></ul></article></div><div className="quick-grid">{tools.map(([target,icon,label])=><button key={label} onClick={()=>navigate(target)}><span>{icon}</span><strong>{label}</strong><small>Öffnen →</small></button>)}</div></section></>; }
+  return <><section className="dashboard-hero"><p>Willkommen,</p><h1>{session.displayName}</h1><span>{session.membership?.memberNumber} · Region {session.membership?.region||'noch nicht zugeordnet'}</span>{session.vehicle&&<div><b>{session.vehicle}</b></div>}</section><section className="dashboard"><div className="dashboard-main"><article><p className="eyebrow">Mitgliedschaft</p><h2>{session.membership?.status==='active'?'Aktiv':'Kulanzstatus'}</h2><p>Ihre Mitgliedsdaten werden direkt durch den Swiss TR-Club verwaltet.</p><span className="status open">Zugang bestätigt</span></article><article><p className="eyebrow">Aktuell</p><ul><li>Clubtermine in der Agenda entdecken</li><li>TR-Magazin digital lesen</li><li>Marktplatz und Forum nutzen</li></ul></article></div><div className="quick-grid">{tools.map(([target,icon,label])=><button key={label} onClick={()=>navigate(target)}><span>{icon}</span><strong>{label}</strong><small>Öffnen →</small></button>)}</div></section></>; }
 
 function ForumPage({notify}:{notify:(s:string)=>void}) { const topics=[['Technik & Werkstatt','TR6 Overdrive – Schaltpunkt einstellen','12 Antworten'],['Ersatzteile gesucht','Differential TR4A gesucht','5 Antworten'],['Ausfahrten & Reisen','Roadbook Alpenpässe 2027','18 Antworten'],['Clubleben','Fotos vom Grilltag','9 Antworten']]; return <><PageHero eyebrow="Mitgliederforum" title="Wissen, das weiterfährt." text="Fragen stellen, Erfahrungen teilen und Lösungen bewahren."/><section className="page-content forum-layout"><div><div className="searchbox">⌕ Themen durchsuchen …</div>{topics.map(t=><article className="topic" key={t[1]}><div><p>{t[0]}</p><h3>{t[1]}</h3><span>Zuletzt aktiv vor 2 Stunden</span></div><b>{t[2]}</b></article>)}</div><aside className="forum-side"><h3>Neues Thema</h3><p>Eine Frage an die Clubgemeinschaft stellen.</p><button onClick={()=>notify('Themeneditor geöffnet.')}>Thema erstellen</button><h3>TR-Experten</h3><p>23 markierte Fachpersonen helfen bei Technikfragen.</p></aside></section></>; }
 

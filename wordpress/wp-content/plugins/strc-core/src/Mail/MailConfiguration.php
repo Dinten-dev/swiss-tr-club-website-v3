@@ -10,7 +10,19 @@ final class MailConfiguration
 {
     public function registerHooks(): void
     {
+        add_filter('wp_mail_from', array($this, 'localFromAddress'));
+        add_filter('wp_mail_from_name', array($this, 'localFromName'));
         add_action('phpmailer_init', array($this, 'configureLocalMailer'));
+    }
+
+    public function localFromAddress(string $address): string
+    {
+        return 'local' === wp_get_environment_type() ? 'noreply@strc.local' : $address;
+    }
+
+    public function localFromName(string $name): string
+    {
+        return 'local' === wp_get_environment_type() ? 'Swiss TR-Club' : $name;
     }
 
     public function configureLocalMailer(PHPMailer $mailer): void
