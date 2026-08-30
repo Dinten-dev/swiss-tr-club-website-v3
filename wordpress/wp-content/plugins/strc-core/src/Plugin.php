@@ -9,6 +9,7 @@ use SwissTRClub\Core\Admin\SystemStatusPage;
 use SwissTRClub\Core\Content\ContentPostTypes;
 use SwissTRClub\Core\Dashboard\DashboardShortcode;
 use SwissTRClub\Core\Events\EventPostType;
+use SwissTRClub\Core\Events\EventPublicEndpoint;
 use SwissTRClub\Core\Finance\CamtImporter;
 use SwissTRClub\Core\Finance\InvoiceRepository;
 use SwissTRClub\Core\Finance\QrInvoicePdf;
@@ -37,6 +38,7 @@ final class Plugin
 
         (new RoleManager())->registerHooks();
         (new EventPostType())->registerHooks();
+        (new EventPublicEndpoint())->registerHooks();
         (new ContentPostTypes())->registerHooks();
         (new DashboardShortcode())->registerHooks();
         (new SystemStatusPage())->registerHooks();

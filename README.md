@@ -22,6 +22,7 @@ Open-Source-Website und Clubplattform des Swiss TR-Clubs.
 
 ## Clubverwaltung
 
+- Veröffentlichte WordPress-Events speisen Startseite und Agenda
 - Mitgliederstatus, Region und Jahresbeitrag verwalten
 - Jahresrechnungen gesammelt erzeugen und versenden
 - Schweizer QR-Rechnungen als PDF generieren
@@ -62,6 +63,7 @@ Optionale lokale Demo-Zugangsdaten werden in `.env` gesetzt:
 STRC_DEMO_USER=strc_demo
 STRC_DEMO_EMAIL=member@example.test
 STRC_DEMO_PASSWORD=change-me
+STRC_SEED_LOCAL_CONTENT=1
 ```
 
 ## Qualität

@@ -66,6 +66,10 @@ if [ -n "${STRC_DEMO_EMAIL:-}" ] && [ -n "${STRC_DEMO_PASSWORD:-}" ]; then
     echo "Local demo member: $STRC_DEMO_EMAIL"
 fi
 
+if [ "${STRC_SEED_LOCAL_CONTENT:-0}" = "1" ]; then
+    compose --profile tools run --rm wpcli wp eval-file scripts/seed-local-content.php
+fi
+
 compose --profile tools run --rm wpcli wp option update permalink_structure '/%postname%/'
 compose --profile tools run --rm wpcli wp rewrite flush --hard
 
