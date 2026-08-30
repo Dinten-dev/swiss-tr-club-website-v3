@@ -342,7 +342,7 @@ Ziel nach Fairgate-Ablösung:
 
 Der vorhandene Prototyp bleibt erhalten und wird nicht als WordPress-Produktionscode missverstanden.
 
-- `strc-demo/` - bestehender UX-Prototyp;
+- `frontend/` - produktives, responsives Web-Frontend;
 - `wordpress/` - reproduzierbare WordPress-Anwendung;
 - `wordpress/wp-content/themes/strc/` - STRC Block Theme;
 - `wordpress/wp-content/plugins/strc-core/` - Clublogik;
@@ -1250,7 +1250,7 @@ Projektquellen:
 - `STRC - Website 3 - Functional Specifications V1.pdf`;
 - `STRC Webseite V3 - Solution Architecture and Development Guide V1.0.pdf`;
 - bestehende Website: <https://swisstrclub.ch/>;
-- aktueller Prototyp: `strc-demo/`.
+- produktives Frontend: `frontend/`.
 
 Technische Primärquellen:
 

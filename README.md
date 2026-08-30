@@ -1,44 +1,65 @@
 # Swiss TR-Club Website V3
 
-Independent open-source prototype for stakeholder review.
+Open-Source-Website und Clubplattform des Swiss TR-Clubs.
 
-> This repository is not an official Swiss TR-Club publication.
+## Architektur
 
-## Status
+- `frontend/`: responsive öffentliche Website und Mitgliederoberfläche
+- `wordpress/`: WordPress-Backend, STRC-Core und Fallback-Theme
+- `compose.yaml`: MariaDB, Redis, WordPress, Nginx, Mailpit
+- `infra/`: Server- und PHP-Konfiguration
+- `scripts/`: lokale Installation und Betrieb
+- `docs/`: Architekturentscheide und Runbooks
 
-- Private local review build
-- Synthetic demonstration data only
-- No Fairgate production connection
-- No live payment processing
+## Rollen
 
-## Local development
+| Rolle | Berechtigungen |
+|---|---|
+| STRC Nutzer | Eigene Inserate und Forumsbeiträge |
+| STRC Redaktor | Blogbeiträge und redaktionelle Inhalte |
+| STRC Administrator | Events und Fahrten verwalten |
+| STRC Developer | Vollständiger Plattformzugriff |
+
+## Frontend starten
 
 ```bash
-cd strc-demo
+cd frontend
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Frontend: `http://localhost:3000`
 
-## Validation
+## WordPress starten
 
 ```bash
-cd strc-demo
-npm run build
-npm run lint
+cp .env.example .env
+./scripts/bootstrap-local.sh
 ```
 
-## Documentation
+WordPress: `http://localhost:8080`
+Mailpit: `http://localhost:8025`
 
-See [STRC_OpenSource_Masterplan_2026_2027.md](STRC_OpenSource_Masterplan_2026_2027.md).
+## Qualität
 
-The earlier Fairgate-first baseline remains available in
-[STRC_Projektplan.md](STRC_Projektplan.md).
+```bash
+cd frontend
+npm run lint
+npm run build
+```
 
-## License
+```bash
+cd wordpress/wp-content/plugins/strc-core
+composer install
+composer test
+composer lint
+```
 
-Source code is available under the MIT License.
+## Dokumentation
 
-Brand names, logos, photographs, and supplied source documents remain subject
-to their respective owners' rights.
+- [Open-Source-Masterplan](STRC_OpenSource_Masterplan_2026_2027.md)
+- [Architekturentscheid](docs/adr/0001-open-source-wordpress-architecture.md)
+
+## Lizenz
+
+Quellcode: MIT. Clubmarke und bereitgestellte Medien ausgenommen.

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "color": {
+      "defaultPalette": false,
+      "palette": [
+        { "slug": "navy", "color": "#071d32", "name": "Club-Navy" },
+        { "slug": "red", "color": "#9e1b1f", "name": "Club-Rot" },
+        { "slug": "cream", "color": "#f4f0e8", "name": "Creme" },
+        { "slug": "sky", "color": "#a8d9ee", "name": "Himmelblau" },
+        { "slug": "ink", "color": "#142231", "name": "Text" },
+        { "slug": "white", "color": "#ffffff", "name": "Weiss" }
+      ]
+    },
+    "layout": { "contentSize": "760px", "wideSize": "1240px" },
+    "spacing": {
+      "spacingScale": { "steps": 7 },
+      "units": ["px", "rem", "vw", "%"]
+    },
+    "typography": {
+      "fluid": true,
+      "fontFamilies": [
+        { "slug": "sans", "name": "Sans", "fontFamily": "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" },
+        { "slug": "serif", "name": "Serif", "fontFamily": "Georgia, 'Times New Roman', serif" }
+      ],
+      "fontSizes": [
+        { "slug": "small", "size": "0.875rem", "name": "Klein" },
+        { "slug": "medium", "size": "1.125rem", "name": "Standard" },
+        { "slug": "large", "size": "clamp(1.5rem, 3vw, 2.25rem)", "name": "Gross" },
+        { "slug": "x-large", "size": "clamp(2.7rem, 7vw, 6.4rem)", "name": "Anzeige" }
+      ]
+    }
+  },
+  "styles": {
+    "color": { "background": "#ffffff", "text": "#142231" },
+    "spacing": { "blockGap": "1.5rem" },
+    "typography": { "fontFamily": "var(--wp--preset--font-family--sans)", "fontSize": "18px", "lineHeight": "1.65" },
+    "elements": {
+      "button": {
+        "border": { "radius": "999px" },
+        "color": { "background": "#9e1b1f", "text": "#ffffff" },
+        "spacing": { "padding": { "top": "0.7rem", "right": "1.35rem", "bottom": "0.7rem", "left": "1.35rem" } },
+        "typography": { "fontSize": "1rem", "fontWeight": "700" }
+      },
+      "heading": { "typography": { "fontFamily": "var(--wp--preset--font-family--serif)", "fontWeight": "700", "lineHeight": "1.08" } },
+      "link": { "color": { "text": "#9e1b1f" } }
+    }
+  }
+}
