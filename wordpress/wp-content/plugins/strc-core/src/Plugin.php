@@ -15,6 +15,9 @@ use SwissTRClub\Core\Finance\QrInvoicePdf;
 use SwissTRClub\Core\Mail\BulkMailer;
 use SwissTRClub\Core\Mail\MailConfiguration;
 use SwissTRClub\Core\Members\MemberProfileFields;
+use SwissTRClub\Core\Members\MemberCsvImporter;
+use SwissTRClub\Core\Members\MemberCsvReader;
+use SwissTRClub\Core\Members\MembershipAccessGuard;
 use SwissTRClub\Core\Members\MembershipRepository;
 use SwissTRClub\Core\Roles\RoleManager;
 
@@ -40,6 +43,7 @@ final class Plugin
 
         $memberships = new MembershipRepository();
         $memberships->registerHooks();
+        (new MembershipAccessGuard($memberships))->registerHooks();
         $invoices = new InvoiceRepository();
         $mailer = new BulkMailer();
         $mailer->registerHooks();
@@ -49,7 +53,8 @@ final class Plugin
             $invoices,
             new CamtImporter($invoices),
             $mailer,
-            new QrInvoicePdf()
+            new QrInvoicePdf(),
+            new MemberCsvImporter($memberships, new MemberCsvReader())
         ))->registerHooks();
     }
 }

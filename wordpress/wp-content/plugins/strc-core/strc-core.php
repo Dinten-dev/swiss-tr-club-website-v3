@@ -2,7 +2,7 @@
 /**
  * Plugin Name: STRC Core
  * Description: Club-specific business logic for the Swiss TR-Club website.
- * Version: 0.3.0
+ * Version: 0.4.0
  * Requires at least: 7.1
  * Requires PHP: 8.3
  * Author: Swiss TR-Club
@@ -20,7 +20,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('STRC_CORE_VERSION', '0.3.0');
+define('STRC_CORE_VERSION', '0.4.0');
 define('STRC_CORE_FILE', __FILE__);
 define('STRC_CORE_PATH', plugin_dir_path(__FILE__));
 
@@ -34,6 +34,10 @@ require_once STRC_CORE_PATH . 'src/Events/EventPostType.php';
 require_once STRC_CORE_PATH . 'src/Content/ContentPostTypes.php';
 require_once STRC_CORE_PATH . 'src/Infrastructure/Schema.php';
 require_once STRC_CORE_PATH . 'src/Members/MembershipRepository.php';
+require_once STRC_CORE_PATH . 'src/Members/MembershipAccessPolicy.php';
+require_once STRC_CORE_PATH . 'src/Members/MembershipAccessGuard.php';
+require_once STRC_CORE_PATH . 'src/Members/MemberCsvReader.php';
+require_once STRC_CORE_PATH . 'src/Members/MemberCsvImporter.php';
 require_once STRC_CORE_PATH . 'src/Members/MemberProfileFields.php';
 require_once STRC_CORE_PATH . 'src/Finance/QrReference.php';
 require_once STRC_CORE_PATH . 'src/Finance/InvoiceRepository.php';

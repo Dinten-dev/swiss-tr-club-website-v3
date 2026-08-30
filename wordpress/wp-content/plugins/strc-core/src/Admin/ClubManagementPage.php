@@ -9,6 +9,7 @@ use SwissTRClub\Core\Finance\CamtImporter;
 use SwissTRClub\Core\Finance\InvoiceRepository;
 use SwissTRClub\Core\Finance\QrInvoicePdf;
 use SwissTRClub\Core\Mail\BulkMailer;
+use SwissTRClub\Core\Members\MemberCsvImporter;
 use SwissTRClub\Core\Members\MembershipRepository;
 
 final class ClubManagementPage
@@ -18,7 +19,8 @@ final class ClubManagementPage
         private readonly InvoiceRepository $invoices,
         private readonly CamtImporter $camtImporter,
         private readonly BulkMailer $mailer,
-        private readonly QrInvoicePdf $pdf
+        private readonly QrInvoicePdf $pdf,
+        private readonly MemberCsvImporter $memberImporter
     ) {
     }
 
@@ -50,6 +52,7 @@ final class ClubManagementPage
                 'import_camt' => $this->importCamt(),
                 'queue_mailing' => $this->queueMailing(),
                 'send_invoice' => $this->sendInvoice(),
+                'import_members' => $this->importMembers(),
                 default => throw new Exception('Unbekannte Aktion.'),
             };
         } catch (Exception $exception) {
@@ -204,9 +207,45 @@ final class ClubManagementPage
         $this->notice('success', 'Rechnung wurde an ' . $user->user_email . ' versendet.');
     }
 
+    private function importMembers(): void
+    {
+        $this->requireCapability('strc_manage_members');
+        $file = $_FILES['members_file'] ?? null;
+        if (! is_array($file) || UPLOAD_ERR_OK !== ($file['error'] ?? UPLOAD_ERR_NO_FILE) || ($file['size'] ?? 0) > 5_000_000) {
+            throw new Exception('Mitglieder-CSV fehlt oder ist zu gross.');
+        }
+        if ('csv' !== strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION))) {
+            throw new Exception('Es sind nur CSV-Dateien erlaubt.');
+        }
+        $content = file_get_contents((string) $file['tmp_name']);
+        if (false === $content) {
+            throw new Exception('CSV-Datei konnte nicht gelesen werden.');
+        }
+
+        $dryRun = 'commit' !== sanitize_key(wp_unslash($_POST['import_mode'] ?? 'dry_run'));
+        $report = $this->memberImporter->import($content, $dryRun);
+        $message = sprintf(
+            '%s: %d gelesen, %d neu, %d aktualisiert, %d übersprungen, %d Fehler.',
+            $dryRun ? 'Prüflauf' : 'Import',
+            $report['read'],
+            $report['created'],
+            $report['updated'],
+            $report['skipped'],
+            count($report['errors'])
+        );
+        if ($report['errors']) {
+            $message .= ' ' . implode(' ', array_slice($report['errors'], 0, 3));
+        }
+        $this->notice($report['errors'] ? 'warning' : 'success', $message);
+    }
+
     private function renderMembers(): void
     {
-        echo '<h2>Mitglieder</h2><p><a class="button button-primary" href="' . esc_url(admin_url('user-new.php')) . '">Mitglied anlegen</a></p><table class="widefat striped"><thead><tr><th>Nummer</th><th>Name</th><th>E-Mail</th><th>Status</th><th>Region</th><th>Beitrag</th><th></th></tr></thead><tbody>';
+        echo '<h2>Mitglieder</h2><p><a class="button button-primary" href="' . esc_url(admin_url('user-new.php')) . '">Mitglied anlegen</a></p>';
+        echo '<details><summary><strong>Mitglieder per CSV importieren</strong></summary><p>Pflichtspalten: <code>email;first_name;last_name</code>. Optional: <code>member_number;status;region;membership_type;annual_fee;phone;street;house_number;postcode;city;country;vehicle</code>.</p><form method="post" enctype="multipart/form-data"><input type="hidden" name="strc_action" value="import_members"><input type="file" name="members_file" accept=".csv,text/csv" required> <select name="import_mode"><option value="dry_run">Nur prüfen</option><option value="commit">Verbindlich importieren</option></select> ';
+        wp_nonce_field('strc_club_action', 'strc_nonce');
+        submit_button('CSV verarbeiten', 'secondary', 'submit', false);
+        echo '</form></details><hr><table class="widefat striped"><thead><tr><th>Nummer</th><th>Name</th><th>E-Mail</th><th>Status</th><th>Region</th><th>Beitrag</th><th></th></tr></thead><tbody>';
         foreach ($this->memberships->all() as $member) {
             echo '<tr><form method="post"><td>' . esc_html((string) $member['member_number']) . '</td><td><a href="' . esc_url(admin_url('user-edit.php?user_id=' . $member['user_id'])) . '">' . esc_html((string) $member['display_name']) . '</a></td><td>' . esc_html((string) $member['user_email']) . '</td><td><select name="status">';
             foreach (array('pending', 'active', 'grace', 'inactive') as $status) {

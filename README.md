@@ -28,6 +28,8 @@ Open-Source-Website und Clubplattform des Swiss TR-Clubs.
 - camt.053- und camt.054-Zahlungen automatisch zuordnen
 - Rundmails warteschlangengesteuert an aktive Mitglieder senden
 - Fairgate-unabhängige Datenhaltung im STRC-Core
+- CSV-Prüflauf und kontrollierter Mitgliederimport
+- Inaktive Mitgliedschaften verlieren geschützte Berechtigungen
 
 ## Frontend starten
 

@@ -52,15 +52,15 @@ Bei einem Widerspruch gilt:
 
 ### 3.2 Noch nicht automatisch entschieden
 
-- Der Vorstand muss die vollständige Fairgate-Ablösung bestätigen.
+- Der Vorstand muss den produktiven Cutover bestätigen.
 - Die Finanzbuchhaltung benötigt eine separate Fachprüfung.
-- Die konkrete CiviCRM-Eignung muss technisch bewiesen werden.
+- STRC-Core-Mitgliederverwaltung benötigt Integrationstests und Fachabnahme.
 - Produktivmigration benötigt Clubfreigabe und Datenschutzprüfung.
 - Kündigungen dürfen erst nach einem belastbaren Go/No-Go erfolgen.
 
 ### 3.3 Übergangsarchitektur
 
-Bis zum bestätigten Cutover bleibt Fairgate für bestehende Mitgliederdaten und Buchhaltung verfügbar. WordPress erhält für den ersten Release einen kontrollierten CSV-Import oder eine minimale API-Anbindung. Danach wird CiviCRM im Schattenbetrieb geprüft. Erst nach nachgewiesener Datenqualität, Betriebsfähigkeit und Vorstandsbeschluss wird das System of Record umgestellt.
+STRC Core ersetzt Mitgliedschaft, Beiträge, Rechnungen, Rundmails und Zahlungsstatus. Fairgate dient nur als befristete Migrationsquelle. Der Cutover erfolgt nach CSV-Prüflauf, Fachabgleich, Backup, Rückrollprobe und Vorstandsbeschluss. CiviCRM bleibt höchstens ein späterer, optionaler Migrationsträger.
 
 ## 4. Harte Termine und Entscheidungstore
 
@@ -69,7 +69,7 @@ Bis zum bestätigten Cutover bleibt Fairgate für bestehende Mitgliederdaten und
 | 4. September 2026 | Architekturentscheid | Übergang und Open-Source-Zielbild bestätigt |
 | 11. September 2026 | UX-Review | Anmeldung, Events, DocLib, Dashboard klickbar |
 | 18. September 2026 | Hostingentscheid | Staging, Backup, Domain, E-Mail beschlossen |
-| 2. Oktober 2026 | Technologie-Gate | CiviCRM, Events, DocLib, Zahlung bewertet |
+| 2. Oktober 2026 | Technologie-Gate | STRC Core, Events, DocLib, Zahlung bewertet |
 | 16. Oktober 2026 | Kündigungs-Gate | Entscheid über Fairgate-Weblizenzen |
 | 30. Oktober 2026 | Stage-Gate | Hauptfunktionen auf Staging testbar |
 | 13. November 2026 | Release-Gate R1 | Minimalwebsite produktionsbereit |
@@ -109,7 +109,7 @@ Nicht enthalten:
 - echte Mitgliederdaten;
 - produktive Zahlungen;
 - produktive E-Mails;
-- Fairgate- oder CiviCRM-Schreibzugriff;
+- Schreibzugriff auf produktive Mitgliederdaten;
 - Produktionsfreigabe.
 
 ### R1 - Minimaler Ersatz des Fairgate-Webmoduls
@@ -137,7 +137,7 @@ Kann später folgen:
 - Onlinezahlung;
 - vollständiger Shop;
 - Forum, Galerie und Marketplace;
-- vollständige CiviCRM-Ablösung.
+- historische Mitgliederdatenmigration.
 
 ### R2 - Mitgliedschaft und Dokumentbibliothek
 
@@ -191,7 +191,7 @@ Zieldatum: spätestens 16. November 2027
 
 Enthält:
 
-- CiviCRM als bestätigtes Mitglieder-System of Record;
+- STRC Core als bestätigtes Mitglieder-System of Record;
 - Beitrags- und Rechnungslösung;
 - geprüfte Paarmitgliedschaften;
 - kontrollierte Finanzübergabe;
@@ -203,7 +203,7 @@ Enthält:
 
 ### 6.1 Grundsatz
 
-WordPress bleibt CMS, Benutzeroberfläche und Authentifizierung. Club-spezifische Logik liegt ausschliesslich im STRC-Core-Plugin. Standardmodule bleiben updatefähig. CiviCRM ist der bevorzugte Kandidat für die spätere integrierte Mitgliederverwaltung, muss aber zuerst den Fit-Gap-Test bestehen.
+WordPress bleibt CMS, Benutzeroberfläche und Authentifizierung. Club-spezifische Logik liegt ausschliesslich im STRC-Core-Plugin. Standardmodule bleiben updatefähig. STRC Core ist das Zielsystem für Mitgliedschaft, Beiträge, QR-Rechnungen, Rundmails und Zahlungsabgleich.
 
 ### 6.2 Datenverantwortung während des Übergangs
 
@@ -211,18 +211,19 @@ WordPress bleibt CMS, Benutzeroberfläche und Authentifizierung. Club-spezifisch
 |---|---|---|
 | Öffentliche Inhalte | WordPress | WordPress |
 | Benutzerkonto und Passwort | WordPress | WordPress |
-| Mitgliedstammdaten | Fairgate | CiviCRM |
-| Mitgliedsstatus | Fairgate/Import | CiviCRM |
-| Paarbeziehung | Fairgate/Import | CiviCRM Household/Relationship |
+| Mitgliedstammdaten | Fairgate-CSV/STRC Core | STRC Core |
+| Mitgliedsstatus | Fairgate-CSV/STRC Core | STRC Core |
+| Paarbeziehung | Fairgate-CSV/STRC Core | STRC Core |
 | Website-Rollen | WordPress | WordPress |
 | Fahrzeuge | STRC Core | STRC Core |
-| Events | WordPress/CiviEvent | WordPress/CiviEvent |
+| Events | WordPress/STRC Core | WordPress/STRC Core |
 | Shop | WooCommerce | WooCommerce |
 | Marketplace | STRC Core | STRC Core |
 | Forum | wpForo | wpForo |
 | Galerie | WordPress/STRC Core | WordPress/STRC Core |
 | Dokumentbibliothek | STRC Core | STRC Core |
-| Buchhaltung | Fairgate | Noch zu wählendes Finanzsystem |
+| Beiträge und Rechnungen | Fairgate-CSV/STRC Core | STRC Core |
+| Finanzbuchhaltung | Bestehender Export | Noch zu wählendes Finanzsystem |
 
 ### 6.3 Empfohlene Komponenten
 
@@ -232,9 +233,9 @@ WordPress bleibt CMS, Benutzeroberfläche und Authentifizierung. Club-spezifisch
 | Editor | Gutenberg/Site Editor | Core statt Elementor | ADR erforderlich |
 | Theme | leichtes STRC Block Theme | im Club-Repository | empfohlen |
 | Mehrsprachigkeit | Polylang Free | Premium nur nach Fit-Gap | Spike |
-| Mitgliedschaft | CiviCRM + Member Sync | Open Source | Spike/Board-Gate |
+| Mitgliedschaft | STRC-Core-Modul | Open Source | verbindlich |
 | Formulare | Forminator Free | generische Formulare | empfohlen |
-| Events | CiviEvent + STRC-Frontend | Open Source | Spike |
+| Events | STRC Core + WordPress | Open Source | verbindlich |
 | Shop | WooCommerce Core | Open Source | verbindlich |
 | Zahlung | zahls.ch oder gleichwertig | nur Transaktionskosten | Spike |
 | Forum | wpForo Free | Open Source | Spike |
@@ -255,11 +256,11 @@ WordPress bleibt CMS, Benutzeroberfläche und Authentifizierung. Club-spezifisch
 | Alt | Neu | Begründung |
 |---|---|---|
 | Elementor bevorzugt | Gutenberg bevorzugt | weniger Abhängigkeiten und Lizenzdruck |
-| Eventin bevorzugt | CiviEvent zuerst prüfen | integrierte Open-Source-Mitgliederdaten |
+| Eventin bevorzugt | STRC-Core-Events | einheitliche Rollen und Datenhaltung |
 | NextGEN bevorzugt | WordPress plus STRC-Workflow | Pro-Funktionen vermeiden |
 | kommerzielle DocLib möglich | eigenes schmales DocLib-Modul | Zugriffsmodell ist club-spezifisch |
 | UpdraftPlus | restic ausserhalb WordPress | unabhängig vom funktionierenden CMS |
-| Fairgate dauerhaft System of Record | CiviCRM als Zielkandidat | neues Update vom 30. August |
+| Fairgate dauerhaft System of Record | STRC Core als Zielsystem | neues Update vom 30. August |
 
 Jede Abweichung erhält ein Architecture Decision Record unter `docs/adr/`.
 
@@ -267,7 +268,7 @@ Jede Abweichung erhält ein Architecture Decision Record unter `docs/adr/`.
 
 ### 7.1 Hetzner ist geeignet
 
-WordPress muss nicht bei WordPress.com gehostet werden. Ein Hetzner-Server kann WordPress, PHP, MariaDB, CiviCRM und die benötigten Dienste betreiben. Entscheidend sind Betrieb, Updates, Backups und Überwachung.
+WordPress muss nicht bei WordPress.com gehostet werden. Ein Hetzner-Server kann WordPress, PHP, MariaDB und die benötigten Dienste betreiben. Entscheidend sind Betrieb, Updates, Backups und Überwachung.
 
 ### 7.2 Empfohlener Aufbau
 
@@ -276,7 +277,7 @@ WordPress muss nicht bei WordPress.com gehostet werden. Ein Hetzner-Server kann 
 - PHP-FPM in unterstützter Version;
 - MariaDB in unterstützter Version;
 - Redis für Object Cache und Locks;
-- WordPress und CiviCRM mit getrennten Datenbankbenutzern;
+- WordPress mit eingeschränktem Datenbankbenutzer;
 - Staging und Produktion logisch getrennt;
 - Uploads und private Dokumente auf getrennten Volumes;
 - Backups verschlüsselt auf externem Backupziel;
@@ -287,7 +288,7 @@ WordPress muss nicht bei WordPress.com gehostet werden. Ein Hetzner-Server kann 
 
 ### 7.3 Mindestressourcen
 
-CiviCRM ist deutlich anspruchsvoller als eine einfache WordPress-Seite. Die kleinste Instanz darf erst nach Lasttest gewählt werden. Der Spike misst:
+Die kleinste Instanz darf erst nach Lasttest gewählt werden. Der Spike misst:
 
 - PHP-Speicherbedarf;
 - Datenbankantwortzeiten;
@@ -372,7 +373,7 @@ Nicht ins Repository gehören:
 
 Das Plugin wird modular aufgebaut:
 
-- `MembershipBridge` - Fairgate/CiviCRM-Verknüpfung;
+- `Members` - Mitgliedschaft, Status und CSV-Migration;
 - `Roles` - Rollen und Capabilities;
 - `Vehicles` - My Triumphs;
 - `Directory` - Mitgliederverzeichnis;
@@ -616,14 +617,14 @@ Zeitraum: 7. September bis 2. Oktober 2026
 
 Tickets:
 
-- `STRC-C001` CiviCRM auf WordPress lokal installieren.
+- `STRC-C001` STRC-Core-Mitgliederverwaltung lokal installieren.
 - `STRC-C002` Einzel-, Paar- und Jungmitgliedschaft modellieren.
 - `STRC-C003` zwei WordPress-Konten je Paar testen.
-- `STRC-C004` CiviCRM Member Sync prüfen.
+- `STRC-C004` Mitgliedsstatus und WordPress-Rollen prüfen.
 - `STRC-C005` 400 synthetische Mitglieder importieren.
-- `STRC-C006` CiviEvent gegen Eventanforderungen testen.
+- `STRC-C006` STRC-Core-Events gegen Anforderungen testen.
 - `STRC-C007` Zahlungs-Sandbox und Webhooks testen.
-- `STRC-C008` Polylang mit Theme, CiviCRM und WooCommerce testen.
+- `STRC-C008` Polylang mit Theme und WooCommerce testen.
 - `STRC-C009` wpForo Rollen und Klassifikationen testen.
 - `STRC-C010` DocLib-Zugriffsschutz als Vertikalschnitt bauen.
 - `STRC-C011` Galerie-Originaldepot testen.
@@ -826,7 +827,7 @@ Zeitraum: Februar bis November 2027
 Tickets:
 
 - `STRC-L001` vollständiges Fairgate-Dateninventar erstellen.
-- `STRC-L002` CiviCRM-Datenmodell formell abnehmen.
+- `STRC-L002` STRC-Core-Datenmodell formell abnehmen.
 - `STRC-L003` Beiträge und Rechnungen pilotieren.
 - `STRC-L004` Buchhaltungsanforderungen aufnehmen.
 - `STRC-L005` Open-Source-Finanzlösung evaluieren.
@@ -1178,8 +1179,8 @@ Jeder Pluginentscheid dokumentiert:
 
 | Risiko | Wirkung | Gegenmassnahme |
 |---|---|---|
-| Vorstand bestätigt Fairgate-Ablösung nicht | Zielarchitektur blockiert | Übergangsbridge beibehalten |
-| CiviCRM ist zu komplex | Betrieb und UX leiden | früher Spike, Custom-Frontend |
+| Vorstand bestätigt Cutover nicht | Migration blockiert | Fairgate nur lesend weiterführen |
+| STRC Core deckt Fachfälle nicht | Betrieb und UX leiden | frühe Integrations- und Fachtests |
 | Januar-Scope ist zu gross | Qualität sinkt | harte Priorisierung, gestaffelte Releases |
 | Paarbeziehungen sind fehlerhaft | falsche Konten/Fahrzeuge | Datenmodell- und Importtests |
 | private Dokumente liegen öffentlich | Datenschutzvorfall | private Storage- und URL-Tests |
@@ -1197,7 +1198,7 @@ Jeder Pluginentscheid dokumentiert:
 
 Vor Vollentwicklung müssen beantwortet sein:
 
-1. Wird CiviCRM als Ziel für Mitgliedschaft akzeptiert?
+1. Wird STRC Core produktiv als Zielsystem abgenommen?
 2. Bleibt Fairgate-Buchhaltung bis November 2027?
 3. Welche Funktionen sind am 20. Januar wirklich zwingend?
 4. Sind Deutsch und Französisch für alle Systemtexte verbindlich?
@@ -1217,13 +1218,13 @@ Die nächste KI-Sitzung soll nicht mit dem Gesamtprojekt beginnen. Sie soll nach
 1. `STRC-A001` Quellenbaseline und Änderungslog.
 2. `STRC-A006` ADR Open-Source-Zielbild.
 3. `STRC-B001` Crawl- und Inhaltsinventar-Konzept.
-4. `STRC-C001` reproduzierbarer CiviCRM-Spike.
-5. `STRC-C002` Paarmitgliedschaft-Fit-Gap.
+4. `STRC-L001` anonymisierten Mitgliederexport definieren.
+5. `STRC-L002` CSV-Prüflauf und Qualitätsbericht abnehmen.
 6. `STRC-C010` geschützte DocLib-Probe.
 7. `STRC-D001` lokale WordPress-Umgebung.
-8. `STRC-D004` STRC-Core-Grundstruktur.
+8. `STRC-F007` inaktive Mitglieder sicher sperren.
 
-Erst nach den C-Tickets wird die endgültige Komponentenliste eingefroren.
+Komponenten werden nach Integrations-, Sicherheits- und Fachtests eingefroren.
 
 ## 25. Erfolgskriterien
 
@@ -1272,4 +1273,5 @@ Technische Primärquellen:
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1 | 30.08.2026 | STRC Core als Fairgate-Ersatz verbindlich festgelegt |
 | 1.0 | 30.08.2026 | Open-Source-Zielbild und KI-Ausführungsplan erstellt |
