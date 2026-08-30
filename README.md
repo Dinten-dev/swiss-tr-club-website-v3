@@ -31,7 +31,10 @@ npm run lint
 
 ## Documentation
 
-See [STRC_Projektplan.md](STRC_Projektplan.md).
+See [STRC_OpenSource_Masterplan_2026_2027.md](STRC_OpenSource_Masterplan_2026_2027.md).
+
+The earlier Fairgate-first baseline remains available in
+[STRC_Projektplan.md](STRC_Projektplan.md).
 
 ## License
 
