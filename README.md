@@ -17,8 +17,17 @@ Open-Source-Website und Clubplattform des Swiss TR-Clubs.
 |---|---|
 | STRC Nutzer | Eigene Inserate und Forumsbeiträge |
 | STRC Redaktor | Blogbeiträge und redaktionelle Inhalte |
-| STRC Administrator | Events und Fahrten verwalten |
+| STRC Administrator | Mitglieder, Finanzen, Rundmails, Events, Fahrten |
 | STRC Developer | Vollständiger Plattformzugriff |
+
+## Clubverwaltung
+
+- Mitgliederstatus, Region und Jahresbeitrag verwalten
+- Jahresrechnungen gesammelt erzeugen und versenden
+- Schweizer QR-Rechnungen als PDF generieren
+- camt.053- und camt.054-Zahlungen automatisch zuordnen
+- Rundmails warteschlangengesteuert an aktive Mitglieder senden
+- Fairgate-unabhängige Datenhaltung im STRC-Core
 
 ## Frontend starten
 
@@ -39,6 +48,8 @@ cp .env.example .env
 
 WordPress: `http://localhost:8080`
 Mailpit: `http://localhost:8025`
+
+Administration: `WordPress → Clubverwaltung`
 
 ## Qualität
 

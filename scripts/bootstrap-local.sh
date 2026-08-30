@@ -14,6 +14,7 @@ set -a
 set +a
 
 docker compose up -d database redis wordpress web mailpit
+docker compose --profile tools run --rm composer install --no-interaction --prefer-dist
 
 if ! docker compose --profile tools run --rm wpcli core is-installed >/dev/null 2>&1; then
     docker compose --profile tools run --rm wpcli core install \

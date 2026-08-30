@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SwissTRClub\Core\Roles;
 
+use SwissTRClub\Core\Infrastructure\Schema;
+
 final class RoleManager
 {
     public function registerHooks(): void
@@ -18,6 +20,7 @@ final class RoleManager
         }
 
         self::install();
+        Schema::install();
         update_option('strc_core_version', STRC_CORE_VERSION, false);
     }
 

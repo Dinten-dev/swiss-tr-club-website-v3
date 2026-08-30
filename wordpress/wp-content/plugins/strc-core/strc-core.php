@@ -2,7 +2,7 @@
 /**
  * Plugin Name: STRC Core
  * Description: Club-specific business logic for the Swiss TR-Club website.
- * Version: 0.2.0
+ * Version: 0.3.0
  * Requires at least: 7.1
  * Requires PHP: 8.3
  * Author: Swiss TR-Club
@@ -20,16 +20,30 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('STRC_CORE_VERSION', '0.2.0');
+define('STRC_CORE_VERSION', '0.3.0');
 define('STRC_CORE_FILE', __FILE__);
 define('STRC_CORE_PATH', plugin_dir_path(__FILE__));
+
+if (file_exists(STRC_CORE_PATH . 'vendor/autoload.php')) {
+    require_once STRC_CORE_PATH . 'vendor/autoload.php';
+}
 
 require_once STRC_CORE_PATH . 'src/Roles/RoleDefinitions.php';
 require_once STRC_CORE_PATH . 'src/Roles/RoleManager.php';
 require_once STRC_CORE_PATH . 'src/Events/EventPostType.php';
 require_once STRC_CORE_PATH . 'src/Content/ContentPostTypes.php';
+require_once STRC_CORE_PATH . 'src/Infrastructure/Schema.php';
+require_once STRC_CORE_PATH . 'src/Members/MembershipRepository.php';
+require_once STRC_CORE_PATH . 'src/Members/MemberProfileFields.php';
+require_once STRC_CORE_PATH . 'src/Finance/QrReference.php';
+require_once STRC_CORE_PATH . 'src/Finance/InvoiceRepository.php';
+require_once STRC_CORE_PATH . 'src/Finance/CamtImporter.php';
+require_once STRC_CORE_PATH . 'src/Finance/QrInvoicePdf.php';
+require_once STRC_CORE_PATH . 'src/Mail/BulkMailer.php';
+require_once STRC_CORE_PATH . 'src/Mail/MailConfiguration.php';
 require_once STRC_CORE_PATH . 'src/Dashboard/DashboardShortcode.php';
 require_once STRC_CORE_PATH . 'src/Admin/SystemStatusPage.php';
+require_once STRC_CORE_PATH . 'src/Admin/ClubManagementPage.php';
 require_once STRC_CORE_PATH . 'src/Infrastructure/Activator.php';
 require_once STRC_CORE_PATH . 'src/Plugin.php';
 

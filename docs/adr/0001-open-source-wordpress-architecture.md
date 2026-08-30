@@ -14,15 +14,15 @@ The original architecture made Fairgate the permanent membership and accounting 
 - Club-specific logic belongs in the STRC Core plugin.
 - WordPress Core and third-party plugins remain unmodified.
 - Gutenberg and a repository-owned block theme replace Elementor by default.
-- CiviCRM is evaluated as the future membership system of record.
-- Fairgate remains available until the board approves a proven cutover.
+- STRC Core is the membership and accounting system of record.
+- Fairgate is replaced after tested data migration and acceptance.
 - WooCommerce remains the operational shop system.
 - Infrastructure-level backups replace plugin-dependent backups.
 - Production is designed for a WordPress-capable Hetzner environment.
 
 ## Consequences
 
-- A CiviCRM fit-gap and load spike is mandatory.
+- CiviCRM remains an optional future migration target.
 - The transition needs an explicit data-ownership matrix.
 - Staging and production require operational Linux competence.
 - The club owns all custom source code and migration tooling.
@@ -32,6 +32,6 @@ The original architecture made Fairgate the permanent membership and accounting 
 
 - Final financial accounting replacement.
 - Final payment provider.
-- Final CiviCRM cutover date.
+- Final production cutover date.
 - Production server size.
-- Any cancellation of an existing Fairgate contract.
+- Cancellation of contracts remains a board decision.

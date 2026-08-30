@@ -100,6 +100,13 @@ services:
       - ./wordpress/wp-content/themes/strc:/var/www/html/wp-content/themes/strc
       - wordpress_uploads:/var/www/html/wp-content/uploads
 
+  composer:
+    image: composer:2.8
+    profiles: ["tools"]
+    working_dir: /app
+    volumes:
+      - ./wordpress/wp-content/plugins/strc-core:/app
+
   mailpit:
     image: axllent/mailpit:v1.27
     restart: unless-stopped

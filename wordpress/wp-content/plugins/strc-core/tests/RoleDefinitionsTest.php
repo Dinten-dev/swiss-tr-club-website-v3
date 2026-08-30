@@ -36,6 +36,9 @@ final class RoleDefinitionsTest extends TestCase
 
         self::assertTrue($administrator['publish_strc_events']);
         self::assertTrue($administrator['publish_strc_drives']);
+        self::assertTrue($administrator['strc_manage_members']);
+        self::assertTrue($administrator['strc_manage_finance']);
+        self::assertTrue($administrator['strc_send_bulk_mail']);
     }
 
     public function testEditorCannotManageEvents(): void

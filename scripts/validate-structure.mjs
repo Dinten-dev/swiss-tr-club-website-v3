@@ -6,6 +6,10 @@ const required = [
   'frontend/public/models/triumph-tr6.glb',
   'wordpress/wp-content/plugins/strc-core/strc-core.php',
   'wordpress/wp-content/plugins/strc-core/src/Content/ContentPostTypes.php',
+  'wordpress/wp-content/plugins/strc-core/src/Admin/ClubManagementPage.php',
+  'wordpress/wp-content/plugins/strc-core/src/Finance/CamtImporter.php',
+  'wordpress/wp-content/plugins/strc-core/src/Finance/QrInvoicePdf.php',
+  'wordpress/wp-content/plugins/strc-core/src/Infrastructure/Schema.php',
   'wordpress/wp-content/themes/strc/theme.json',
   'wordpress/wp-content/themes/strc/templates/index.html',
 ];
@@ -22,7 +26,7 @@ for (const role of ['strc_member', 'strc_editor', 'strc_administrator', 'strc_de
   if (!roles.includes(`'${role}'`)) throw new Error(`Fehlende Rolle: ${role}`);
 }
 
-for (const capability of ['publish_strc_ads', 'publish_strc_topics', 'publish_posts', 'publish_strc_events', 'publish_strc_drives']) {
+for (const capability of ['publish_strc_ads', 'publish_strc_topics', 'publish_posts', 'publish_strc_events', 'publish_strc_drives', 'strc_manage_members', 'strc_manage_finance', 'strc_send_bulk_mail']) {
   if (!roles.includes(`'${capability}'`)) throw new Error(`Fehlende Berechtigung: ${capability}`);
 }
 

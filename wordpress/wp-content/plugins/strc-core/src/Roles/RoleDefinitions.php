@@ -59,10 +59,10 @@ final class RoleDefinitions
             'strc_administrator' => array(
                 'name' => 'STRC Administrator',
                 'capabilities' => self::caps(
-                    'read', 'upload_files',
+                    'read', 'upload_files', 'list_users', 'create_users', 'edit_users', 'promote_users', 'delete_users', 'remove_users',
                     'edit_strc_events', 'publish_strc_events', 'delete_strc_events', 'read_private_strc_events', 'edit_others_strc_events', 'delete_others_strc_events', 'edit_private_strc_events', 'delete_private_strc_events', 'edit_published_strc_events', 'delete_published_strc_events',
                     'edit_strc_drives', 'publish_strc_drives', 'delete_strc_drives', 'read_private_strc_drives', 'edit_others_strc_drives', 'delete_others_strc_drives', 'edit_private_strc_drives', 'delete_private_strc_drives', 'edit_published_strc_drives', 'delete_published_strc_drives',
-                    'strc_manage_events', 'strc_manage_drives'
+                    'strc_manage_events', 'strc_manage_drives', 'strc_manage_members', 'strc_manage_finance', 'strc_send_bulk_mail'
                 ),
             ),
         );

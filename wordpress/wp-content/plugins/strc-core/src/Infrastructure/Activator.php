@@ -13,6 +13,7 @@ final class Activator
     public static function activate(): void
     {
         RoleManager::install();
+        Schema::install();
 
         $events = new EventPostType();
         $events->register();
