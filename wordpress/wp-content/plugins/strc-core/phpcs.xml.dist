@@ -1,18 +1,11 @@
 <?xml version="1.0"?>
 <ruleset name="STRC Core">
-    <description>WordPress coding standards for STRC Core.</description>
+    <description>Modern PHP coding standard for STRC Core.</description>
     <file>strc-core.php</file>
     <file>src</file>
     <exclude-pattern>vendor/*</exclude-pattern>
     <arg name="extensions" value="php"/>
     <arg name="basepath" value="."/>
     <arg value="ps"/>
-    <rule ref="WordPress"/>
-    <rule ref="WordPress-Extra"/>
-    <rule ref="WordPress-Docs"/>
-    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
-        <properties>
-            <property name="prefixes" type="array" value="strc,STRC,SwissTRClub"/>
-        </properties>
-    </rule>
+    <rule ref="PSR12"/>
 </ruleset>
