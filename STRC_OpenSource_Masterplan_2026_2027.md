@@ -1,5 +1,7 @@
 # Swiss TR-Club Website V3 - Open-Source-Masterplan 2026-2027
 
+> **Überholt seit 2. September 2026:** Fairgate bleibt gemäss ADR 0002 das führende System für Mitgliedschaft und Buchhaltung. Alle Ablösungs-, Kündigungs- und STRC-Core-Finanz-Tickets dieses Dokuments sind gestoppt. Weiter gültig sind Website-, WordPress-, Event-, Community-, Shop-, Qualitäts- und Betriebsanforderungen, soweit ADR 0002 ihnen nicht widerspricht.
+
 Version: 1.0  
 Stand: 30. August 2026  
 Status: Arbeits- und Entscheidungsgrundlage  

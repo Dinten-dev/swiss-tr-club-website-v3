@@ -1,6 +1,6 @@
 # ADR 0001: Open-Source-WordPress-Architektur
 
-Status: Accepted for implementation foundation  
+Status: Superseded by ADR 0002
 Date: 2026-08-30
 
 ## Context

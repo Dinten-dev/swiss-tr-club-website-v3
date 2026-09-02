@@ -9,14 +9,13 @@ use WP_User;
 final class MemberProfileFields
 {
     /** @var array<string, string> */
-    private const FIELDS = array(
+    private const FAIRGATE_FIELDS = array(
         'strc_phone' => 'Telefon',
         'strc_street' => 'Strasse',
         'strc_house_number' => 'Hausnummer',
         'strc_postcode' => 'Postleitzahl',
         'strc_city' => 'Ort',
         'strc_country' => 'Land',
-        'strc_vehicle' => 'Triumph-Fahrzeug',
     );
 
     public function registerHooks(): void
@@ -34,13 +33,18 @@ final class MemberProfileFields
         }
         ?>
         <h2><?php echo esc_html__('STRC Mitgliedsdaten', 'strc-core'); ?></h2>
+        <p><?php echo esc_html__('Offizielle Kontaktdaten werden schreibgeschützt aus Fairgate synchronisiert.', 'strc-core'); ?></p>
         <table class="form-table" role="presentation">
-            <?php foreach (self::FIELDS as $key => $label) : ?>
+            <?php foreach (self::FAIRGATE_FIELDS as $key => $label) : ?>
                 <tr>
                     <th><label for="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></label></th>
-                    <td><input class="regular-text" id="<?php echo esc_attr($key); ?>" name="<?php echo esc_attr($key); ?>" value="<?php echo esc_attr((string) get_user_meta($user->ID, $key, true)); ?>"></td>
+                    <td><input class="regular-text" id="<?php echo esc_attr($key); ?>" value="<?php echo esc_attr((string) get_user_meta($user->ID, $key, true)); ?>" readonly></td>
                 </tr>
             <?php endforeach; ?>
+            <tr>
+                <th><label for="strc_vehicle"><?php echo esc_html__('Triumph-Fahrzeug', 'strc-core'); ?></label></th>
+                <td><input class="regular-text" id="strc_vehicle" name="strc_vehicle" value="<?php echo esc_attr((string) get_user_meta($user->ID, 'strc_vehicle', true)); ?>"></td>
+            </tr>
         </table>
         <?php
         wp_nonce_field('strc_member_profile_' . $user->ID, 'strc_member_profile_nonce');
@@ -56,9 +60,6 @@ final class MemberProfileFields
             return;
         }
 
-        foreach (self::FIELDS as $key => $label) {
-            unset($label);
-            update_user_meta($userId, $key, sanitize_text_field(wp_unslash($_POST[$key] ?? '')));
-        }
+        update_user_meta($userId, 'strc_vehicle', sanitize_text_field(wp_unslash($_POST['strc_vehicle'] ?? '')));
     }
 }
