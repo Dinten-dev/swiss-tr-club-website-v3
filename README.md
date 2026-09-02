@@ -1,6 +1,6 @@
 # Swiss TR-Club Website V3
 
-Open-Source-Website und Clubplattform des Swiss TR-Clubs.
+WordPress-Website und Clubplattform des Swiss TR-Clubs mit Fairgate-Integration.
 
 ## Architektur
 
@@ -17,23 +17,19 @@ Open-Source-Website und Clubplattform des Swiss TR-Clubs.
 |---|---|
 | STRC Nutzer | Eigene Inserate und Forumsbeiträge |
 | STRC Redaktor | Blogbeiträge und redaktionelle Inhalte |
-| STRC Administrator | Mitglieder, Finanzen, Rundmails, Events, Fahrten |
+| STRC Administrator | Inhalte, Events und Fairgate-Clubverwaltung |
 | STRC Developer | Vollständiger Plattformzugriff |
 
-## Clubverwaltung
+## Clubverwaltung und Datenhoheit
 
 - Veröffentlichte WordPress-Events speisen Startseite und Agenda
-- Mitgliederstatus, Region und Jahresbeitrag verwalten
-- Jahresrechnungen gesammelt erzeugen und versenden
-- Schweizer QR-Rechnungen als PDF generieren
-- camt.053- und camt.054-Zahlungen automatisch zuordnen
-- Rundmails warteschlangengesteuert an aktive Mitglieder senden
-- Eigenständige Datenhaltung im STRC-Core
-- CSV-Prüflauf und kontrollierter Mitgliederimport
+- Fairgate führt Mitglieder, Mitgliedschaften und Buchhaltung
+- Fairgate verwaltet Rechnungen, Zahlungen und Rundmails
+- Contacts API V2 liefert benötigte Mitgliederdaten
+- WordPress speichert einen minimierten Synchronisationsbestand
+- WordPress-Login bleibt von Fairgate getrennt
 - Inaktive Mitgliedschaften verlieren geschützte Berechtigungen
-- Einzel-, Paar- und Jungmitgliedschaften verwalten
-- Primary und Co-Pilot als getrennte Konten verknüpfen
-- Zeitlich begrenzte Aktivierungslinks sicher versenden
+- Fairgate Contact IDs verknüpfen beide Systeme dauerhaft
 
 ## Frontend starten
 
@@ -64,6 +60,9 @@ STRC_DEMO_USER=strc_demo
 STRC_DEMO_EMAIL=member@example.test
 STRC_DEMO_PASSWORD=change-me
 STRC_SEED_LOCAL_CONTENT=1
+STRC_FAIRGATE_OID=
+STRC_FAIRGATE_ACCESS_KEY=
+STRC_FAIRGATE_ADMIN_URL=
 ```
 
 ## Qualität
@@ -87,8 +86,8 @@ docker-compose --profile tools run --rm wpcli wp eval-file scripts/verify-backen
 
 ## Dokumentation
 
-- [Open-Source-Masterplan](STRC_OpenSource_Masterplan_2026_2027.md)
-- [Architekturentscheid](docs/adr/0001-open-source-wordpress-architecture.md)
+- [Überholter Open-Source-Masterplan](STRC_OpenSource_Masterplan_2026_2027.md)
+- [Aktueller Architekturentscheid](docs/adr/0002-fairgate-system-of-record.md)
 
 ## Lizenz
 
