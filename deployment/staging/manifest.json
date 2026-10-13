@@ -179,8 +179,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/site-content.json",
-      "bytes": 75174,
-      "sha256": "64a96e7d2149de14dd4db12a9c9c3510904a01ed0411d0d082764a2cd5c5828a"
+      "bytes": 75476,
+      "sha256": "bd35f965f1153ddbf2ad27f3bcd0447c9a1fbd9a58424fac903e378f1b2df9c3"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventArchiveRetention.php",
