@@ -12,16 +12,28 @@ type MemberSession = {
   vehicle?: string;
   membership?: { memberNumber:string; status:string; type:string; region:string; startedOn:string } | null;
 };
+type EventTerm = { name:string; slug:string } | null;
+type ClubEvent = {
+  id:number;
+  title:string;
+  summary:string;
+  description:string;
+  startAt:string;
+  endAt:string;
+  location:string;
+  eventType:EventTerm;
+  scope:EventTerm;
+  region:EventTerm;
+  registrationRequired:boolean;
+  registrationStatus:'information'|'scheduled'|'open'|'closed';
+  registrationOpenAt:string;
+  registrationCloseAt:string;
+  capacity:number;
+  image:string;
+};
 
 const wordpressUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL ?? 'http://localhost:8080';
 const frontendUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-
-const events = [
-  { day:'05', month:'JUL', title:'Grilltag Schwaderloch', region:'Nordwestschweiz', price:15, status:'Offen', seats:'18 Plätze frei', text:'Geselliger Grilltag am Rhein mit gemeinsamer Anfahrt.' },
-  { day:'09', month:'AUG', title:'Sommerausfahrt Lüderenalp', region:'Zentralschweiz', price:39, status:'Offen', seats:'7 Plätze frei', text:'Kurvenreiche Tagesausfahrt inklusive Mittagessen.' },
-  { day:'04', month:'SEP', title:'Euromeeting Belgien', region:'International', price:0, status:'Ausgebucht', seats:'Warteliste', text:'37. internationales Treffen europäischer TR-Clubs.' },
-  { day:'25', month:'SEP', title:'TR-Club Weekend Solothurn', region:'Club Schweiz', price:280, status:'Offen', seats:'12 Zimmer frei', text:'Dreitägiges Clubwochenende mit Ausfahrt und Galaabend.' },
-];
 
 const regions = ['Zürich','Zentralschweiz','Nordwestschweiz','Bern','Ostschweiz','Romandie','Tessin','Wallis'];
 const products = [
@@ -40,7 +52,9 @@ export default function Home() {
   const [page, setPage] = useState<Page>('home');
   const [lang, setLang] = useState<Lang>('de');
   const [memberSession, setMemberSession] = useState<MemberSession | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<number | null>(null);
+  const [events, setEvents] = useState<ClubEvent[]>([]);
+  const [eventsState, setEventsState] = useState<'loading'|'ready'|'error'>('loading');
+  const [selectedEvent, setSelectedEvent] = useState<ClubEvent | null>(null);
   const [cart, setCart] = useState(0);
   const [toast, setToast] = useState('');
   const t = copy[lang];
@@ -51,6 +65,15 @@ export default function Home() {
       .then((response) => response.ok ? response.json() as Promise<MemberSession> : Promise.reject())
       .then((session) => { if (active) setMemberSession(session); })
       .catch(() => { if (active) setMemberSession({ authenticated:false, memberAccess:false }); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    fetch(`${wordpressUrl}/wp-json/strc/v1/events?view=upcoming&limit=100`)
+      .then((response) => response.ok ? response.json() as Promise<{events:ClubEvent[]}> : Promise.reject())
+      .then((result) => { if (active) { setEvents(result.events); setEventsState('ready'); } })
+      .catch(() => { if (active) setEventsState('error'); });
     return () => { active = false; };
   }, []);
 
@@ -74,9 +97,9 @@ export default function Home() {
       </div>
     </header>
 
-    {page==='home' && <HomePage t={t} navigate={navigate} openEvent={setSelectedEvent}/>} 
+    {page==='home' && <HomePage t={t} navigate={navigate} events={events} eventsState={eventsState} openEvent={setSelectedEvent}/>}
     {page==='club' && <ClubPage navigate={navigate}/>} 
-    {page==='agenda' && <AgendaPage openEvent={setSelectedEvent}/>} 
+    {page==='agenda' && <AgendaPage events={events} eventsState={eventsState} openEvent={setSelectedEvent}/>}
     {page==='regions' && <RegionsPage notify={notify}/>} 
     {page==='market' && <MarketPage cart={cart} add={() => { setCart(cart+1); notify('Artikel wurde dem Warenkorb hinzugefügt.'); }}/>} 
     {page==='members' && <MembersPage session={memberSession} navigate={navigate}/>}
@@ -87,15 +110,15 @@ export default function Home() {
 
     <footer><div className="footer-brand"><Image className="footer-logo" src="/strc-logo.png" width={954} height={954} alt="Swiss TR-Club Logo"/><div><strong>Swiss TR-Club</strong><p>Freude an britischen Roadstern seit 1973.</p></div></div><div><strong>Entdecken</strong><button onClick={() => navigate('club')}>Über den Club</button><button onClick={() => navigate('agenda')}>Veranstaltungen</button><button onClick={() => navigate('regions')}>Regionen</button></div><div><strong>Mitglieder</strong><button onClick={() => navigate('members')}>Dashboard</button><button onClick={() => navigate('forum')}>Forum</button><button onClick={() => navigate('library')}>Bibliothek</button></div><div><strong>Kontakt & Recht</strong><p>Kontakt · Impressum<br/>Datenschutz · Statuten</p></div></footer>
 
-    {selectedEvent!==null && <EventDialog event={events[selectedEvent]} close={() => setSelectedEvent(null)} register={() => { setSelectedEvent(null); notify('Anmeldung gespeichert.'); }}/>} 
+    {selectedEvent && <EventDialog event={selectedEvent} close={() => setSelectedEvent(null)}/>}
     {toast && <div className="toast" role="status">✓ {toast}</div>}
   </main>;
 }
 
-function HomePage({t,navigate,openEvent}:{t:typeof copy.de,navigate:(p:Page)=>void,openEvent:(i:number)=>void}) {
+function HomePage({t,navigate,events,eventsState,openEvent}:{t:typeof copy.de,navigate:(p:Page)=>void,events:ClubEvent[],eventsState:'loading'|'ready'|'error',openEvent:(event:ClubEvent)=>void}) {
   return <>
     <section className="hero" id="top"><div className="hero-stage"><div className="hero-road" aria-hidden="true"/><div className="hero-copy"><p className="eyebrow">{t.welcome}</p><h1>{t.headline}<br/><em>{t.accent}</em></h1><p className="intro">{t.intro}</p><div className="hero-actions"><button className="primary" onClick={() => navigate('agenda')}>{t.drive}</button><button className="secondary" onClick={() => navigate('club')}>{t.discover} <span>→</span></button></div><div className="hero-facts"><span><strong>50+</strong> Jahre Clubgeschichte</span><span><strong>316</strong> aktive Mitglieder</span><span><strong>8</strong> Regionen</span></div></div><ScrollRoadster/><div className="scroll-cue" aria-hidden="true"><span/>Drehen und losfahren</div></div></section>
-    <section className="content-grid"><div className="section-heading"><p className="eyebrow">Unterwegs mit Freunden</p><h2>Die nächsten Erlebnisse</h2></div><div className="events">{events.slice(0,3).map((event,index)=><EventCard key={event.title} event={event} open={() => openEvent(index)}/>)}</div><aside className="magazine-card"><p className="eyebrow">Aktuelle Ausgabe</p><div className="magazine"><span>51. Jahrgang</span><strong>Swiss<br/>TR-Magazin</strong><b>2 | 2026</b></div><h3>Geschichten, Technik und Menschen</h3><p>Für Mitglieder digital verfügbar.</p><button onClick={() => navigate('library')}>Magazin öffnen →</button></aside></section>
+    <section className="content-grid"><div className="section-heading"><p className="eyebrow">Unterwegs mit Freunden</p><h2>Die nächsten Erlebnisse</h2></div><div className="events"><EventCollectionState state={eventsState} count={events.length}/>{events.slice(0,3).map((event)=><EventCard key={event.id} event={event} open={() => openEvent(event)}/>)}</div><aside className="magazine-card"><p className="eyebrow">Aktuelle Ausgabe</p><div className="magazine"><span>51. Jahrgang</span><strong>Swiss<br/>TR-Magazin</strong><b>2 | 2026</b></div><h3>Geschichten, Technik und Menschen</h3><p>Für Mitglieder digital verfügbar.</p><button onClick={() => navigate('library')}>Magazin öffnen →</button></aside></section>
     <section className="feature-band"><div><p className="eyebrow">Mehr als ein Automobilclub</p><h2>Menschen. Technik. Leidenschaft.</h2><p>Gemeinsame Ausfahrten, technisches Wissen und Freundschaften über Sprachgrenzen hinweg.</p></div><div className="feature-cards"><article><span>01</span><h3>Fahren</h3><p>Ausfahrten und Treffen in der ganzen Schweiz.</p></article><article><span>02</span><h3>Erhalten</h3><p>Erfahrung und Dokumentation für jeden TR.</p></article><article><span>03</span><h3>Verbinden</h3><p>Acht Regionen, eine lebendige Gemeinschaft.</p></article></div></section>
   </>;
 }
@@ -168,11 +191,16 @@ function ScrollRoadster() {
 }
 
 function PageHero({eyebrow,title,text}:{eyebrow:string,title:string,text:string}) { return <section className="page-hero"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{text}</p></section>; }
-function EventCard({event,open}:{event:typeof events[number],open:()=>void}) { return <article className="event-card"><div className="event-date"><strong>{event.day}</strong><span>{event.month}</span></div><div><p>{event.region}</p><h3>{event.title}</h3><span>{event.price?`CHF ${event.price}.–`:'Kostenlos'} · {event.seats}</span></div><button onClick={open} aria-label={`${event.title} öffnen`}>→</button></article>; }
+function eventDateParts(value:string) { const date=new Date(value); if(Number.isNaN(date.getTime())) return {day:'–',month:'DATUM',year:''}; return {day:new Intl.DateTimeFormat('de-CH',{day:'2-digit'}).format(date),month:new Intl.DateTimeFormat('de-CH',{month:'short'}).format(date).replace('.','').toUpperCase(),year:new Intl.DateTimeFormat('de-CH',{year:'numeric'}).format(date)}; }
+function eventDateTime(value:string) { const date=new Date(value); return Number.isNaN(date.getTime())?'Wird bekanntgegeben':new Intl.DateTimeFormat('de-CH',{dateStyle:'long',timeStyle:'short'}).format(date); }
+function eventContext(event:ClubEvent) { return event.region?.name||event.scope?.name||event.eventType?.name||'Swiss TR-Club'; }
+function registrationLabel(status:ClubEvent['registrationStatus']) { return {information:'Keine Anmeldung erforderlich',scheduled:'Anmeldung öffnet später',open:'Anmeldung erforderlich',closed:'Anmeldung geschlossen'}[status]; }
+function EventCollectionState({state,count}:{state:'loading'|'ready'|'error',count:number}) { if(state==='loading') return <p className="collection-state" role="status">Agenda wird geladen …</p>; if(state==='error') return <p className="collection-state error" role="alert">Die Agenda kann momentan nicht geladen werden.</p>; if(count===0) return <p className="collection-state">Momentan sind keine kommenden Veranstaltungen veröffentlicht.</p>; return null; }
+function EventCard({event,open}:{event:ClubEvent,open:()=>void}) { const date=eventDateParts(event.startAt); return <article className="event-card"><div className="event-date"><strong>{date.day}</strong><span>{date.month}</span></div><div><p>{eventContext(event)}</p><h3>{event.title}</h3><span>{event.location||event.eventType?.name} · {registrationLabel(event.registrationStatus)}</span></div><button onClick={open} aria-label={`${event.title} öffnen`}>→</button></article>; }
 
 function ClubPage({navigate}:{navigate:(p:Page)=>void}) { return <><PageHero eyebrow="Der Club" title="Gemeinsam unterwegs seit 1973." text="Der Swiss TR-Club verbindet Menschen, die britische Triumph-Roadster fahren, pflegen und lieben."/><section className="story-grid"><article className="story-main"><p className="eyebrow">Unsere Mission</p><h2>Automobile Geschichte lebendig halten.</h2><p>Wir bewahren nicht nur Fahrzeuge. Wir teilen Wissen, organisieren Erlebnisse und schaffen Verbindungen zwischen Generationen und Sprachregionen.</p><blockquote>«Der TR bringt uns zusammen. Die Freundschaften halten uns zusammen.»</blockquote></article><aside className="timeline"><div><b>1973</b><span>Gründung des Clubs</span></div><div><b>8</b><span>Regionen in der Schweiz</span></div><div><b>316</b><span>Aktive Mitglieder</span></div><div><b>2026</b><span>Neue digitale Plattform</span></div></aside></section><section className="membership-cta"><div><p className="eyebrow">Mitglied werden</p><h2>Ihr Triumph gehört dazu.</h2><p>Profitieren Sie von Veranstaltungen, Wissen und Gemeinschaft.</p></div><button onClick={() => navigate('members')}>Mitgliedschaft entdecken →</button></section></>; }
 
-function AgendaPage({openEvent}:{openEvent:(i:number)=>void}) { const [filter,setFilter]=useState('Alle'); return <><PageHero eyebrow="Veranstaltungen" title="Agenda 2026" text="Clubausfahrten, regionale Treffen und internationale Begegnungen."/><section className="page-content"><div className="filterbar">{['Alle','Club Schweiz','Regionen','International'].map(x=><button className={filter===x?'active':''} onClick={()=>setFilter(x)} key={x}>{x}</button>)}</div><div className="agenda-list">{events.filter(e=>filter==='Alle'||(filter==='Regionen'&&!['Club Schweiz','International'].includes(e.region))||e.region===filter).map((e)=><div className="agenda-row" key={e.title}><div className="agenda-date"><strong>{e.day}</strong><span>{e.month}<br/>2026</span></div><div><p className="eyebrow">{e.region}</p><h2>{e.title}</h2><p>{e.text}</p><span className={`status ${e.status==='Offen'?'open':'closed'}`}>{e.status}</span> <small>{e.seats}</small></div><div className="agenda-price"><strong>{e.price?`CHF ${e.price}.–`:'Kostenlos'}</strong><button onClick={()=>openEvent(events.indexOf(e))}>Details →</button></div></div>)}</div></section></>; }
+function AgendaPage({events,eventsState,openEvent}:{events:ClubEvent[],eventsState:'loading'|'ready'|'error',openEvent:(event:ClubEvent)=>void}) { const [filter,setFilter]=useState('Alle'); const visible=events.filter(event=>filter==='Alle'||(filter==='Club Schweiz'&&event.scope?.slug==='club-national')||(filter==='Regionen'&&event.scope?.slug==='region')||(filter==='International'&&event.scope?.slug==='external')); return <><PageHero eyebrow="Veranstaltungen" title="Agenda" text="Clubausfahrten, regionale Treffen und internationale Begegnungen."/><section className="page-content"><div className="filterbar">{['Alle','Club Schweiz','Regionen','International'].map(x=><button className={filter===x?'active':''} onClick={()=>setFilter(x)} key={x}>{x}</button>)}</div><div className="agenda-list"><EventCollectionState state={eventsState} count={visible.length}/>{visible.map((event)=>{const date=eventDateParts(event.startAt);return <div className="agenda-row" key={event.id}><div className="agenda-date"><strong>{date.day}</strong><span>{date.month}<br/>{date.year}</span></div><div><p className="eyebrow">{eventContext(event)}</p><h2>{event.title}</h2><p>{event.summary}</p><span className={`status ${event.registrationStatus==='open'?'open':'closed'}`}>{registrationLabel(event.registrationStatus)}</span> {event.location&&<small>{event.location}</small>}</div><div className="agenda-price"><strong>{event.eventType?.name||'Clubveranstaltung'}</strong><button onClick={()=>openEvent(event)}>Details →</button></div></div>})}</div></section></>; }
 
 function RegionsPage({notify}:{notify:(s:string)=>void}) { return <><PageHero eyebrow="In Ihrer Nähe" title="Acht Regionen. Ein Club." text="Lokale Treffen, persönliche Kontakte und gemeinsame Ausfahrten."/><section className="page-content regions-grid">{regions.map((region,i)=><article key={region}><span>0{i+1}</span><h2>{region}</h2><p>{28+i*4} Mitglieder · monatlicher Stammtisch</p><button onClick={()=>notify(`Region ${region} geöffnet.`)}>Region ansehen →</button></article>)}</section></>; }
 
@@ -190,4 +218,4 @@ function LibraryPage() { const [q,setQ]=useState(''); const docs=['TR-Magazin 2|
 
 function DirectoryPage() { const [q,setQ]=useState(''); const people=[['Anna Keller','Zürich','TR4A IRS'],['Marc Dubois','Romandie','TR6 PI'],['Luca Bernasconi','Tessin','TR3A'],['Peter Muster','Zürich','TR4A · TR6'],['Eva Meier','Bern','TR5 PI']]; return <><PageHero eyebrow="Nur für Mitglieder" title="Die Clubgemeinschaft." text="Mitglieder und Triumph-Fahrzeuge datensparsam finden."/><section className="page-content directory"><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Name, Region oder Fahrzeug suchen …"/><div className="member-table"><div><b>Mitglied</b><b>Region</b><b>Fahrzeug</b><b></b></div>{people.filter(p=>p.join(' ').toLowerCase().includes(q.toLowerCase())).map((p)=><div key={p[0]}><span className="avatar">{p[0].split(' ').map(x=>x[0]).join('')}</span><strong>{p[0]}</strong><span>{p[1]}</span><span>{p[2]}</span><button>Profil →</button></div>)}</div></section></>; }
 
-function EventDialog({event,close,register}:{event:typeof events[number],close:()=>void,register:()=>void}) { return <div className="modal-backdrop" onMouseDown={close}><section className="modal" role="dialog" aria-modal="true" aria-label={event.title} onMouseDown={e=>e.stopPropagation()}><button className="modal-close" onClick={close}>×</button><p className="eyebrow">{event.region} · {event.day}. {event.month}</p><h2>{event.title}</h2><p>{event.text}</p><div className="detail-box"><span>Teilnahme</span><strong>{event.price?`CHF ${event.price}.–`:'Kostenlos'}</strong><span>Verfügbarkeit</span><strong>{event.seats}</strong></div><button className="modal-action" disabled={event.status!=='Offen'} onClick={register}>{event.status==='Offen'?'Zur Anmeldung →':'Warteliste geschlossen'}</button></section></div>; }
+function EventDialog({event,close}:{event:ClubEvent,close:()=>void}) { const closeRef=useRef<HTMLButtonElement>(null); useEffect(()=>{const onKeyDown=(keyboardEvent:KeyboardEvent)=>{if(keyboardEvent.key==='Escape')close();};const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';window.addEventListener('keydown',onKeyDown);closeRef.current?.focus();return()=>{document.body.style.overflow=previousOverflow;window.removeEventListener('keydown',onKeyDown);};},[close]); return <div className="modal-backdrop" onMouseDown={close}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="event-dialog-title" onMouseDown={e=>e.stopPropagation()}><button ref={closeRef} className="modal-close" onClick={close} aria-label="Eventdetail schliessen">×</button><p className="eyebrow">{eventContext(event)} · {event.eventType?.name}</p><h2 id="event-dialog-title">{event.title}</h2><p>{event.description||event.summary}</p><div className="detail-box"><span>Beginn</span><strong>{event.startAt?eventDateTime(event.startAt):'Wird bekanntgegeben'}</strong><span>Ort</span><strong>{event.location||'Wird bekanntgegeben'}</strong><span>Anmeldung</span><strong>{registrationLabel(event.registrationStatus)}</strong></div><button className="modal-action" onClick={close}>Schliessen</button></section></div>; }

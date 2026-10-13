@@ -17,6 +17,7 @@ cp .env.example .env
 - Mailpit: `http://localhost:8025`
 
 Die Zugangsdaten stammen ausschliesslich aus `.env`.
+Mit `STRC_SEED_LOCAL_CONTENT=1` werden lokale Agenda-Inhalte idempotent angelegt.
 
 ## Frontend
 
