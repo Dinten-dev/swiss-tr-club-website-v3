@@ -14,6 +14,10 @@ x-wordpress-config-extra: &wordpress-config-extra |
   define('WP_CACHE_KEY_SALT', 'strc-local:');
   define('AUTOMATIC_UPDATER_DISABLED', true);
   define('STRC_FRONTEND_ORIGIN', '${STRC_FRONTEND_ORIGIN:-http://localhost:3000}');
+  define('STRC_FAIRGATE_OID', '${STRC_FAIRGATE_OID:-}');
+  define('STRC_FAIRGATE_ACCESS_KEY', '${STRC_FAIRGATE_ACCESS_KEY:-}');
+  define('STRC_FAIRGATE_ADMIN_URL', '${STRC_FAIRGATE_ADMIN_URL:-}');
+  define('STRC_FAIRGATE_API_BASE_URL', '${STRC_FAIRGATE_API_BASE_URL:-https://fsa.fairgate.ch}');
 
 services:
   database:

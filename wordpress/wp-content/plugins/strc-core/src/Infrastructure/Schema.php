@@ -22,6 +22,7 @@ final class Schema
         dbDelta("CREATE TABLE {$memberships} (
             id bigint unsigned NOT NULL AUTO_INCREMENT,
             user_id bigint unsigned NOT NULL,
+            fairgate_contact_id varchar(64) NULL,
             member_number varchar(32) NOT NULL,
             membership_type varchar(64) NOT NULL DEFAULT 'individual',
             partner_user_id bigint unsigned NULL,
@@ -34,6 +35,7 @@ final class Schema
             updated_at datetime NOT NULL,
             PRIMARY KEY (id),
             UNIQUE KEY user_id (user_id),
+            UNIQUE KEY fairgate_contact_id (fairgate_contact_id),
             UNIQUE KEY member_number (member_number),
             KEY partner_user_id (partner_user_id),
             KEY status (status)
