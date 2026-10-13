@@ -226,7 +226,7 @@ function MembersPage({session,navigate}:{session:MemberSession|null,navigate:(p:
   if(session.canEditContent&&session.canManageRoles)extraTools.push({url:'#redaktion',label:'Redaktion',icon:'✎'});
   if(session.canManageEvents)extraTools.push({url:'#agenda-verwalten',label:'Agenda verwalten',icon:'A'});
   if(session.formsInboxUrl)extraTools.push({url:'#antraege',label:'Anträge & Anfragen',icon:'✎'});
-  return <><section className="page-content dashboard-introduction"><ContentBlock id="members.dashboardIntro"/></section><MemberDashboard extraTools={extraTools}/><section className="page-content dashboard-editorial"><article><p className="eyebrow">{c('members.membershipTitle')}</p><ContentBlock id="members.membershipText"/><span className="status open">{t('Zugang bestätigt')}</span></article><article><p className="eyebrow">{c('members.newsTitle')}</p><ContentBlock id="members.newsBody"/></article></section></>; }
+  return <><section className="page-content dashboard-introduction"><ContentBlock id="members.dashboardIntro"/></section><MemberDashboard extraTools={extraTools}/></>; }
 
 
 

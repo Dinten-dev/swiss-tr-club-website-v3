@@ -1141,6 +1141,18 @@
         "default": ""
       },
       {
+        "key": "thankYouTitle",
+        "label": "Anmeldung – Dankestitel",
+        "type": "text",
+        "default": "Herzliches Dankeschön"
+      },
+      {
+        "key": "thankYouText",
+        "label": "Anmeldung – Dankestext",
+        "type": "rich",
+        "default": ""
+      },
+      {
         "key": "image",
         "label": "Bild oben",
         "type": "image",

@@ -21,9 +21,11 @@ cd ..
 node scripts/verify-staging-snapshot.mjs
 ```
 
-Einige Änderungen auf Staging wurden im ausgelieferten JavaScript vorgenommen. Sie sind vollständig als überprüfbare Delta-Datei `deployment/staging/app.bundle.delta.json` erfasst. Der WordPress-Build erstellt zuerst das vorhandene Frontend in einem temporären Verzeichnis und ergänzt danach genau diese Änderungen. Ausgangs- und Ergebnisdatei werden per SHA-256 geprüft. Alle aktuell verwendeten JavaScript-Dateien und das CSS müssen dem gesicherten Staging-Stand entsprechen. Vorhandene ältere Chunks werden ebenfalls erhalten und durch das Manifest geprüft.
+Die Anpassungen, die auf Staging zunächst direkt im ausgelieferten JavaScript vorgenommen wurden (Mitglieder-Dashboard, TR-Magazin-Flipbook, Bibliothek, Marktplatz-Fahrzeugformular, Dankestext der Anmeldung), sind in die React-/TypeScript-Quellen übernommen. Die frühere Delta-Datei `deployment/staging/app.bundle.delta.json` entfällt.
 
-`npm run build:wordpress:source` baut ausschließlich die React-/TypeScript-Quellen. Bei späteren Änderungen müssen die erfassten Bundle-Anpassungen in die ursprünglichen Komponenten übernommen oder die Delta-Datei bewusst aktualisiert werden. Ein veränderter Ausgangsbuild bricht den Snapshot-Build ab, damit diese Anpassungen nicht unbemerkt verschwinden.
+`npm run build:wordpress` baut die Quellen, kopiert das Ergebnis nach `wordpress/wp-content/themes/strc-app/build/` und trägt die Prüfsummen der neu erzeugten JavaScript- und CSS-Dateien in `deployment/staging/manifest.json` ein. Build und Manifest werden danach gemeinsam eingecheckt; erst dann entspricht der Repository-Stand wieder dem, was auf Staging ausgeliefert wird. Vorhandene ältere Chunks bleiben erhalten und werden weiterhin durch das Manifest geprüft. Sollte später erneut eine Delta-Datei angelegt werden, wendet das Skript sie wie bisher an und prüft Ausgangs- und Ergebnisdatei per SHA-256.
+
+`npm run build:wordpress:source` baut ausschließlich die React-/TypeScript-Quellen, ohne Manifest-Aktualisierung.
 
 ## Konfiguration und Veröffentlichung
 
