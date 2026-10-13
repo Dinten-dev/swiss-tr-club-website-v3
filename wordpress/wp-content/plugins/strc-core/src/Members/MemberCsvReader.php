@@ -19,7 +19,7 @@ final class MemberCsvReader
         }
 
         $delimiter = substr_count($lines[0], ';') >= substr_count($lines[0], ',') ? ';' : ',';
-        $header = array_map(array($this, 'normalizeHeader'), str_getcsv(array_shift($lines), $delimiter));
+        $header = array_map(array($this, 'normalizeHeader'), str_getcsv(array_shift($lines), $delimiter, '"', ''));
         $missing = array_diff(self::REQUIRED, $header);
         if ($missing) {
             return array('rows' => array(), 'errors' => array('Fehlende Spalten: ' . implode(', ', $missing)));
@@ -32,7 +32,7 @@ final class MemberCsvReader
             if ('' === trim($line)) {
                 continue;
             }
-            $values = str_getcsv($line, $delimiter);
+            $values = str_getcsv($line, $delimiter, '"', '');
             if (count($values) !== count($header)) {
                 $errors[] = 'Zeile ' . ($index + 2) . ': Spaltenanzahl stimmt nicht.';
                 continue;

@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace SwissTRClub\Core\Admin;
 
+use SwissTRClub\Core\Integrations\Fairgate\FairgateConfiguration;
+
 final class SystemStatusPage
 {
+    public function __construct(private readonly ?FairgateConfiguration $fairgate = null)
+    {
+    }
+
     public function registerHooks(): void
     {
         add_action('admin_menu', array($this, 'registerPage'));
@@ -35,6 +41,8 @@ final class SystemStatusPage
             __('Environment', 'strc-core') => wp_get_environment_type(),
             __('Pretty permalinks', 'strc-core') => get_option('permalink_structure') ? __('Enabled', 'strc-core') : __('Disabled', 'strc-core'),
             __('Debug display', 'strc-core') => (defined('WP_DEBUG_DISPLAY') && WP_DEBUG_DISPLAY) ? __('Enabled', 'strc-core') : __('Disabled', 'strc-core'),
+            __('Mitgliedschaft und Buchhaltung', 'strc-core') => __('Fairgate (führendes System)', 'strc-core'),
+            __('Fairgate Contacts API', 'strc-core') => $this->fairgate?->isConfigured() ? __('Configured', 'strc-core') : __('Not configured', 'strc-core'),
         );
         ?>
         <div class="wrap">
