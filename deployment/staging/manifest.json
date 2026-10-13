@@ -23,7 +23,8 @@
     "wp-config.php and credentials",
     "wp-content/uploads",
     "Composer vendor files, restored with composer.lock",
-    "WordPress core and third-party plugins, version-locked above"
+    "WordPress core and third-party plugins, version-locked above",
+    "Generated library import catalog (operational content metadata)"
   ],
   "files": [
     {
@@ -35,11 +36,6 @@
       "path": "wordpress/wp-content/plugins/strc-core/composer.lock",
       "bytes": 106078,
       "sha256": "c03c67b13b39905c93f85bc27d2444dda171cace48fb12d5e1ad8a68ecbf3b00"
-    },
-    {
-      "path": "wordpress/wp-content/plugins/strc-core/data/library-import-manifest.json",
-      "bytes": 152745,
-      "sha256": "94700b3dc29acb365302debbd645b97df5e99b9193e1e400090befbde0b23873"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/phpunit.xml.dist",
