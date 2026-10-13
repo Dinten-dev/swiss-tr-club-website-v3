@@ -1,0 +1,1912 @@
+{
+  "format": 1,
+  "capturedOn": "2026-10-13",
+  "sourceUrl": "https://staging.swisstrclub.ch/",
+  "theme": "strc-app",
+  "wordpressVersion": "7.1.3",
+  "plugins": [
+    {
+      "slug": "strc-core",
+      "version": "0.10.0"
+    },
+    {
+      "slug": "woocommerce",
+      "version": "11.1.2"
+    },
+    {
+      "slug": "zahls-ch-payment-gateway",
+      "version": "2.0.7"
+    }
+  ],
+  "excluded": [
+    "WordPress database and member records",
+    "wp-config.php and credentials",
+    "wp-content/uploads",
+    "Composer vendor files, restored with composer.lock",
+    "WordPress core and third-party plugins, version-locked above"
+  ],
+  "files": [
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/composer.json",
+      "bytes": 688,
+      "sha256": "de0d933a633843b72d650b67ff1657d956d11ee1fefe04bbf340ef4d3cfbc2d0"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/composer.lock",
+      "bytes": 106078,
+      "sha256": "c03c67b13b39905c93f85bc27d2444dda171cace48fb12d5e1ad8a68ecbf3b00"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/data/library-import-manifest.json",
+      "bytes": 152745,
+      "sha256": "94700b3dc29acb365302debbd645b97df5e99b9193e1e400090befbde0b23873"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/phpunit.xml.dist",
+      "bytes": 283,
+      "sha256": "4d3b93e2a842738095f74618db0f343b6e751d1a3f83b51c40b26269b639a468"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Admin/ClubManagementPage.php",
+      "bytes": 20719,
+      "sha256": "afb1f64b008e1ca7f21d673024b6e1ba90c1ae670f578cef3ea224d866013e02"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Admin/FairgateAdministrationPage.php",
+      "bytes": 9064,
+      "sha256": "6a7601e0fc299b49af04fd791de495cbbd9ef04d75fb834ec265f7b7f20d5f91"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Admin/FairgateImportPage.php",
+      "bytes": 5650,
+      "sha256": "eff4c52481a988ee50e4b4429cf0593ee347a1d4ce8d5aa38b8aa198e2df977e"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Admin/MemberSetupPage.php",
+      "bytes": 5059,
+      "sha256": "cf58a898a25922205127a3746bbd9a83e0a87e52ecabea921d4a9cb5b36218e8"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Admin/SystemStatusPage.php",
+      "bytes": 2444,
+      "sha256": "221c5183c55f7f10fc5d1c99ea76b0f5926e4ea2f93387a67732dbe261401609"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Admin/WelcomeMailSettingsPage.php",
+      "bytes": 4099,
+      "sha256": "9fc752a51fa3d00d1f58a0b45324a1603544444b4dd984fc9d2e6625e3749d3b"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/CatalogSettings.php",
+      "bytes": 3955,
+      "sha256": "55b86847914acae167bed91eea5dfde5bfb568079754dd1337648cc9292af1c5"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/CommunityEndpoint.php",
+      "bytes": 46459,
+      "sha256": "f76de10bc0c6b209aa04161351a22ab7c583f0072c53b4f9980e0356b68a9a6c"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/ForumSettings.php",
+      "bytes": 9006,
+      "sha256": "751882819143cc63f04aac76f846d52d78ef2e42f508cb6587d0ff6df82d85a6"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/GalleryRetention.php",
+      "bytes": 1185,
+      "sha256": "0c27338110547861011cb63d8349fbd21706d0daeaab6cec55b082dc71c7743c"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/LibraryImportCommand.php",
+      "bytes": 8903,
+      "sha256": "46db257c570cc989eed927f80b72d4feccff082c27879c48cf51708778fdded9"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/LibraryPolicy.php",
+      "bytes": 6316,
+      "sha256": "28d7158cee5f34e4490bf0d61a09576838c5b4f7d0a80bc0477cbbebf1200af5"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/PrivateUploadStore.php",
+      "bytes": 11594,
+      "sha256": "174b471a8a1bf8ae914aa909da3c3303ea630998013d3962330ff1717e77f103"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/SubmissionNotifications.php",
+      "bytes": 1589,
+      "sha256": "6d0dea6acfc5ae6e20226a0473ceda645e0946c3531babf327f440d02fc441f3"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Community/library-types.json",
+      "bytes": 2146,
+      "sha256": "136d84886cc5234443274a6afcd9bcbffb85bdc4d24a337df3705838cf9f52f7"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Content/ContentPostTypes.php",
+      "bytes": 2627,
+      "sha256": "fb0c35206309377dd425cffa4e36599e9ff5ff2c85cefca710af7c18f2e60aff"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Content/HomepageActivity.php",
+      "bytes": 3669,
+      "sha256": "052155e3b170e2cfe23b18b1e01399cbb46b2606f5324e827d6165d406b4ef9d"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Content/HomepageEndpoint.php",
+      "bytes": 4645,
+      "sha256": "f7d61f66f8d892b5853f3b2164a6e6f4c9301cbdd76d0fa46e11be837187931f"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Content/HomepageHighlights.php",
+      "bytes": 6931,
+      "sha256": "36af610f5239a9d456543bba67af71c7614ee804806b83321731af28644fd283"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Content/MagazineEndpoint.php",
+      "bytes": 15103,
+      "sha256": "7a5a52b235b67cd595d8abedfad9f57941e6cef8a3faddfd65cedc7c5794c926"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Dashboard/DashboardShortcode.php",
+      "bytes": 4138,
+      "sha256": "734abd1dc64a5f9886d47615a5e3b6aa4429ec803b5bbf4556760b71b77f3af3"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Dashboard/MemberDashboardEndpoint.php",
+      "bytes": 6428,
+      "sha256": "9686ac5e684ae70067ee1d5fcef1356f1fa3af1517ce60ff63a93cfd2350fa34"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/EditorialAccess.php",
+      "bytes": 3369,
+      "sha256": "5fba8fef8426c7dc8fb09cdff8661dd9aa1d1ad23de03d965990339b6f226e40"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/EditorialEndpoint.php",
+      "bytes": 28181,
+      "sha256": "4b3e7819041b532f02ac7c84b1d5737bf91d3e89621ddb3937623f26fb29a558"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/PublicDocumentUpload.php",
+      "bytes": 2056,
+      "sha256": "f06b6605d69719e6a3cd0627332a8d025bd5070a0c8f8cd16505901f93f055d7"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/PublicImageUpload.php",
+      "bytes": 1368,
+      "sha256": "0b80009e5b2411eb19072345c7f2a7b083a0f8307b1081acf6e57e5830989aaf"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/regional-fields.json",
+      "bytes": 1806,
+      "sha256": "59182d0e03afa5c8a171174b8c707179c9a0cac0c1b29da3a19599b68a75f4b9"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/site-content.json",
+      "bytes": 75174,
+      "sha256": "64a96e7d2149de14dd4db12a9c9c3510904a01ed0411d0d082764a2cd5c5828a"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventArchiveRetention.php",
+      "bytes": 1501,
+      "sha256": "c57705810f9c861e3b3b9170df90b35345e3adf969a6feeaf64b08be57dc9b3b"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventManagementEndpoint.php",
+      "bytes": 16965,
+      "sha256": "c1f09e638ed380c5dce474e60143dd1a3a60f9ccb1f6b3142670fcbb7e6256d6"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventPostType.php",
+      "bytes": 6634,
+      "sha256": "16930e356d0ff23072f24f2cfd2f9fb02f669fd024f2ec192c4a3ed72e44f10c"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventPublicEndpoint.php",
+      "bytes": 10551,
+      "sha256": "e73ceaf4a8c204123490432be0047e33d9b27ab7342666f172a983cf6cdc0a0b"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Events/RegionDirectory.php",
+      "bytes": 6628,
+      "sha256": "47e24e193ddd70b87a6660327972e0e1fc67432e8b68236ef195c2dbdb39022c"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Events/RegionalEventAccess.php",
+      "bytes": 4180,
+      "sha256": "0c4d33815b3a3f7919265e49c7fa57592c560db5cd9888c246fe7fd3b3e209a3"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Finance/CamtImporter.php",
+      "bytes": 4545,
+      "sha256": "32ef79bcd9d222b623e93f2543e55552a12d37793ac7f9ab9e07ac6b56f1ae76"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Finance/InvoiceRepository.php",
+      "bytes": 3232,
+      "sha256": "c5930281947218842ae2cdf275bc67951febc5b444d713c4d7527a97a64611c7"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Finance/QrInvoicePdf.php",
+      "bytes": 3660,
+      "sha256": "bc294bd18396708a06c1c4842fd485437947c8781f63c70a60779e2ddab97f2e"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Finance/QrReference.php",
+      "bytes": 945,
+      "sha256": "45282ed19d8808f144b4e4b356f69ed8a2263ae0ec2c852515e82cfecd11855f"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Forms/ApplicationInbox.php",
+      "bytes": 2327,
+      "sha256": "b1f936d0ab422befb6d3e07de7a981e34402763f0b1b4eaac581e4f0810b9a6c"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Forms/EventFinance.php",
+      "bytes": 6073,
+      "sha256": "c0017b72d0af76f0f572e1c43c1bbd14587792a2ef4963ee4d5e90c058b63daf"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Forms/EventPayments.php",
+      "bytes": 17847,
+      "sha256": "8cdf18c7dade73254cf1565c680b7bfee4e61a670ebeebb5cb524e24053be4a9"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Forms/EventRegistration.php",
+      "bytes": 22672,
+      "sha256": "74c68b33ba3b80681dda45a5449be49b2944764d6dcd0e57ee6ab7a1246ab86b"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Forms/FormFields.php",
+      "bytes": 5351,
+      "sha256": "99e299496374b387ae30d99dc7024078d61bc9b14c3737f809c6d22499c1bd17"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Forms/FormStore.php",
+      "bytes": 4784,
+      "sha256": "6cd435004b748dc5871b1983c44f780d367433cd614843af233e0096fd346847"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Forms/FormsAdministration.php",
+      "bytes": 6265,
+      "sha256": "9cd0388afed9b22f706b2640e52308028039f3a1cfe2e308090a09c4ffdb1276"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Forms/FormsEndpoint.php",
+      "bytes": 10548,
+      "sha256": "8b8fba6a22c4ed3c96f0d54b0af26dd995522aeb353ad3fc00ddc381eae3e176"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Http/AjaxRequest.php",
+      "bytes": 1671,
+      "sha256": "b110d1838bc5f6e264890309b817a42e007977429a62652a1545a5af15312757"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Http/UserLanguage.php",
+      "bytes": 844,
+      "sha256": "ef55a59b71bfd6c0cb36e6313f0880ffde3587d50d3c970ca426249e11818426"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Infrastructure/Activator.php",
+      "bytes": 601,
+      "sha256": "87005e471ea27d0413281492b8e227527360e7b001bf22ebdb3309425721317b"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Infrastructure/Schema.php",
+      "bytes": 5544,
+      "sha256": "ff23f462bfa22bd9ea6b70ba783ac9af5de808fc42c249acb011b55699de4428"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateApiException.php",
+      "bytes": 320,
+      "sha256": "76c35c1a09f465ea3da330354107acf6d782a9594e7b156940c1cd7633872a14"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateApplicationSettings.php",
+      "bytes": 2464,
+      "sha256": "4b7c5c9611df3a800b5fc2269703f5ee25c70f9c07e75cab4f886323cfa9605a"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateApplications.php",
+      "bytes": 7236,
+      "sha256": "55fb32f275d5a39710ec8c8e8b8db85337d3f3f8a05b8fd2533ede628ab4f0bd"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateClient.php",
+      "bytes": 7826,
+      "sha256": "3a847a5f95f4ca147be888d6d71ddb1565a0aa05a9f8b2e3f66c67b008245dd4"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateConfiguration.php",
+      "bytes": 1716,
+      "sha256": "89e15c5084be863085becb33b2efd327088762310f81ea0066dd8bd3eaaa8bee"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateGateway.php",
+      "bytes": 3137,
+      "sha256": "9f677fb092ea369f09d2a5548dfec07d1e051bfaca28510bcaaa394c8ad811dc"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateMemberMapping.php",
+      "bytes": 2968,
+      "sha256": "271bc63d0995ec9a7ee2eab570068386a69223011f820535f7baca31e69abd4b"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateMemberSync.php",
+      "bytes": 1998,
+      "sha256": "d2de1b6d0b303a3854a85775409c6854da79b187ee56cdf45e3dc553384c7d10"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateOnboardingSettings.php",
+      "bytes": 5829,
+      "sha256": "391aa6006ae42926f2a901bb48689ce06f3c0e1efc17853d6337b93773ef0308"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateStagingImport.php",
+      "bytes": 11352,
+      "sha256": "95edd50c013d2166109ee5b24879fbc775dead65c38bb5cc816dacc90a6ff0a3"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Zahls/ZahlsClient.php",
+      "bytes": 3541,
+      "sha256": "fb4f008d48131abb93924ce2ad38ce095c70de265d8fb3c10feeb43420c607c4"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Mail/ApplicationNotification.php",
+      "bytes": 7771,
+      "sha256": "6582186289b67b4efdb590af6dd7542ffd38d93175bfabf0b1812fca9b7ea792",
+      "stagingSha256": "ebb3f4c227858ec86e27bfb5c126b4902594c54878c6f8b57229803b8ecdb5a1",
+      "configurationNormalization": "Administrator recipient reads admin_email instead of an inline personal email; verified equal on staging."
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Mail/BulkMailer.php",
+      "bytes": 2811,
+      "sha256": "7b94e7b398d48bd390ca56edf3fbae0fb6041c4e3b92256c202ebe153f3b7e78"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Mail/MailConfiguration.php",
+      "bytes": 1135,
+      "sha256": "0f086d6e4899e0d3f1a9097c37211572ec3b354be0cce21c2039bcac0e45a5a2"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Mail/NewsletterEndpoint.php",
+      "bytes": 9439,
+      "sha256": "02bbffd16deed4fda42a50d46c1dae380590d270ebadb4ee4d5c0e70d9cfd670"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Mail/WelcomeMailSettings.php",
+      "bytes": 3881,
+      "sha256": "5ca1628f02102db2b01685c9ff4eb71c6e681ac7f4711bf8bf908f9d36072582"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Marketplace/MarketplaceEndpoint.php",
+      "bytes": 23780,
+      "sha256": "82c942f756e4b3877b30db91b69c4d7f44b9c0ff5ca9d97fab9328cf1e831cbf"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/ApplicationAdmission.php",
+      "bytes": 19191,
+      "sha256": "91c4f8f56e73528c446451569e9dd1d3e480f079322543f4f22f0cc798e7453b"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberActivationMailer.php",
+      "bytes": 1416,
+      "sha256": "4c57b37b07bec3cadddbb71a4aa6e4e26afa4e719146a28a5aedbafebadf934f"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberCsvImporter.php",
+      "bytes": 4209,
+      "sha256": "879e0bdb22b95a8e0c45684098987410c8c73073af1c21fce386ac858bbc42cc"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberCsvReader.php",
+      "bytes": 3667,
+      "sha256": "8f27835fcf5e1e9416f7b709d054c513042b7e7e33e0f5a351a5e9498e8fef97"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberDirectoryEndpoint.php",
+      "bytes": 7078,
+      "sha256": "e617108a1af78883f6755efa9c696e7506f5ea08238cb2ecb38101790bcf1059"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberProfileFields.php",
+      "bytes": 2536,
+      "sha256": "c3dc273009bb1dba10d15b03b4231f6c407433c0866f62564c34118092412551"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberSessionEndpoint.php",
+      "bytes": 3357,
+      "sha256": "cb48e797d59000ea63e2ec2a2550dc61a97a6ed0519f16bcc53f4349023b6ac8"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberSetupPreparation.php",
+      "bytes": 5728,
+      "sha256": "3924e7b6d86d64229c341a194a89943bcb86cd5d3f24d6717f1af266a2ca1160"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MembershipAccessGuard.php",
+      "bytes": 1462,
+      "sha256": "7dda19d62cd8726f0faa344d4aa1e17901fca49b0aa1a99d016c8607362011ea"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MembershipAccessPolicy.php",
+      "bytes": 1823,
+      "sha256": "cea951481d5a112db6f9e118380cfc0ba9772094d555c62b71dba4cc22321f63"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MembershipRepository.php",
+      "bytes": 10586,
+      "sha256": "0341a8d789c0d0be52b82efb42294c4050de44fe45897f09f1c7ddcadda70d37"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Members/MembershipTypePolicy.php",
+      "bytes": 1645,
+      "sha256": "3f50298843235aeb298c0d4c08ad9133916ba3dff9c325380226a8e9a0336089"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Plugin.php",
+      "bytes": 5083,
+      "sha256": "c43404bfa411c0e3212a29b1ecfdc7a61730abaec684e5683733c1f05e30d6d8"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleDefinitions.php",
+      "bytes": 7535,
+      "sha256": "411c7a22ea871698dcb00fc71ab6230943b1422fdc15095cc7032ec43ed23d53"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleManager.php",
+      "bytes": 2454,
+      "sha256": "d1198f72560220bfbf2eb5aaaab117ef3bae082839e828cf6365dcaa8105ccd2"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Shop/InvoiceGateway.php",
+      "bytes": 1770,
+      "sha256": "03dd26f5ca98600e4172dbf9122c976fd557d1d765ff29a2b5688f283cb2eb07"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopAccessPolicy.php",
+      "bytes": 1363,
+      "sha256": "cd35247e0a8b61fa6040cc5c0cb28e8eb7cee9ce4409817c4a7095f931908958"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopEndpoint.php",
+      "bytes": 17223,
+      "sha256": "bdd0275ccf5d023a87c17a889b98997400816dc295aa7b3c15b2109dfa3cbc3f"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopOperations.php",
+      "bytes": 14877,
+      "sha256": "464a89ca051feb3101feafa7eb84e5becb216f9ae0589cf4815a50f1fe1490d5"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/strc-core.php",
+      "bytes": 3540,
+      "sha256": "d999f652c17a84a97bd257d36a32ce8e96be2fd28e292b4066bf0440378790bb"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-BKn-0vHj.js",
+      "bytes": 5558,
+      "sha256": "3ed0361681e29a978f87036f26d70ea9ba269c3ed185def2c3e5ea5793372e79"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CxMz7wG9.js",
+      "bytes": 5776,
+      "sha256": "4b56ea23e41c1b116ae7f545ab28940d4d81a14a119dc573d636ba73b1061691"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DGDcPB2N.js",
+      "bytes": 5552,
+      "sha256": "96bda537c6563beb5f0269ec83e579291abc7bde0089c439b3867a3694225bf0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DUNlM3fB.js",
+      "bytes": 8199,
+      "sha256": "d8dc61cb42893a0c1ac6404034d6b6aa136ea70b1c9daae017261d0a3ad204b4"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-fBf1UM1C.js",
+      "bytes": 5552,
+      "sha256": "b5f617c6625c308313e216bb0569e43d04539f8e3cd5639ea1c41493b06bd37b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-rfxj-Rnc.js",
+      "bytes": 5734,
+      "sha256": "4a6cbff576171a38bcb1aa69b29ba99da92f454ec307a4dcc3d0acdf3c6018eb"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-Dog8d5kH.js",
+      "bytes": 62104,
+      "sha256": "45ba35d9cfa0cc59f88634ddf0f4bee871d170982c5aa523162599ca19cf06cd"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/app.css",
+      "bytes": 210777,
+      "sha256": "50dbe103fa01b3e640807b29d4798460be337119feb9b5f973415687e30ec3d5"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/app.js",
+      "bytes": 759349,
+      "sha256": "01f9085e045181df0d90d97788bb1712beaaa2381f810f9b1a3121711b4a9fe6"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
+      "bytes": 926,
+      "sha256": "d6ac3a798f4e288b893ba8739c14217caa2b141298274690e299c4206cb832ab"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/chunk-C_CI6nMA.js",
+      "bytes": 760,
+      "sha256": "cbff65dd5cce79f21cde48b7cbcea61b57689eb2950bcea210eb593921074ded"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/abend-am-see.jpg",
+      "bytes": 230409,
+      "sha256": "1368484580c17ad74313415845f66a7383eb8aa9730eb5e573683cf26d05cfc8"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/alpenstrasse.jpg",
+      "bytes": 767980,
+      "sha256": "33b73b4f4ca6e53175b4b029f2941aff03d7c5adf54678c9a4ebb9878d378b62"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/club-morgenlicht.jpg",
+      "bytes": 86731,
+      "sha256": "f0dac13469de3a6ab7fdd3cb831534ab1ca97a38a118da10eb71fb610f58da32"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/magazine/tr-magazine-3-2026-spread-1.jpg",
+      "bytes": 436861,
+      "sha256": "c12bc687c074d72eed40ed63fc8a19ec9b2e24a54495cd1664ef9375167d5792"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/magazine/tr-magazine-3-2026-spread-2.jpg",
+      "bytes": 335756,
+      "sha256": "03de4834d1f1e13ed75657e44778107eb4f1d6f928e6ae376f042e2e9ab32551"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/magazine/tr-magazine-3-2026-spread-3.jpg",
+      "bytes": 377533,
+      "sha256": "e9f26bc9ad3af978cbf3af2079782389b9fa6ba9c47747e21e18862b1431fc37"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/morgenlicht.jpg",
+      "bytes": 84698,
+      "sha256": "02b54826c7fcd29768dad93f089768634705c130661a1390462d7dd2acd7febb"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/motorraum.jpg",
+      "bytes": 236671,
+      "sha256": "75860e7f10f2e2adec391bba28b79cc1e421b19e665f2c894d0147fb30117935"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/passfahrt.jpg",
+      "bytes": 641697,
+      "sha256": "351e6d52b4162fd51bba76fa7a796c909f5bff2890585c60b4962ecbe23b0f60"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/reisegepaeck.jpg",
+      "bytes": 324767,
+      "sha256": "d72814383e22a5c0165e092b4d94f9df8d8d5e7ee65b067ceae4ba4bd269139e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/roadster-am-see.jpg",
+      "bytes": 542985,
+      "sha256": "dfab9bb731702c32eb1b2c0371167eeb5ae7c34532bb4fb8b314f52ce22a7352"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/scheinwerfer.jpg",
+      "bytes": 210087,
+      "sha256": "d68ec05af4f3dbb3818845d29035d2861ac18841772e82acc5b8dbfa9743d2f0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/sponsors/1.png",
+      "bytes": 27729,
+      "sha256": "c5aa3b54668b9c326529856bb98476bd54de2ee035247e66c436a8e89c62c41e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/sponsors/2.png",
+      "bytes": 43197,
+      "sha256": "37a31ce156dc076e0ce2c65385d463d157408bda55a09553920b6708019e0e21"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/sponsors/3.png",
+      "bytes": 35527,
+      "sha256": "91ada25f1e5d3fa79fa995ab854d422e599cdc5ef3489b95f69a24c795f3f337"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/sponsors/4.png",
+      "bytes": 12785,
+      "sha256": "01f49984f1af8274e1f98425ffddc5e209162cad079b20738a68af5315069c0a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/sponsors/5.png",
+      "bytes": 87807,
+      "sha256": "befd5c1b4a5b247db926622ef0a82c63e92ac505bae32d6bf6d1c863925d0b29"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/sponsors/6.png",
+      "bytes": 50973,
+      "sha256": "da80c9661f8b636a8442d16e39ce75f943e35cf1b4ce28b60122620c8e81032c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/sponsors/7.png",
+      "bytes": 56744,
+      "sha256": "f52d7e9e888a4408c12d7b04b5aa3d9d671c7fc5ee9454a1a33cc4ba224b4fa5"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/sponsors/8.png",
+      "bytes": 36243,
+      "sha256": "1238d65a040c32abf32d94dc45ae5f8c36140898ba18f68e3e17a9a9b9d14a1c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/tr6-detail.jpg",
+      "bytes": 152668,
+      "sha256": "f26e9dc78bffdc72d1cbf290b8a247daeb6c9c5a437821a47856a5720c432753"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/treffen-am-see.jpg",
+      "bytes": 607833,
+      "sha256": "7cb1955638101828d172c687105a1246ceb9f7d5a5f83f2dc9bdd7eb7a6f559f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/triumph-details.jpg",
+      "bytes": 81470,
+      "sha256": "e90733da917cf128aa1c4a285b4c7c3228bc8767a6a0269d09eb8652713bc017"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/jsx-runtime-CdS6qnrt.js",
+      "bytes": 10267,
+      "sha256": "200a8824c0478033cecf94820f24a5c2e6a20f8085ee91e0f1687b877d279d28"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/leaflet-src-BUmUk9La.js",
+      "bytes": 188395,
+      "sha256": "d9e3ab8e0278e95a0770072ff90982a9327cb7520823f6904da6168cf9b79937"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/leaflet-src-D6jcGlyP.js",
+      "bytes": 188395,
+      "sha256": "b07bf48bdd62a1882b2e073d2449d62589e03c1cd57b194b26b8a16d943692ab"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/leaflet-src-vRtLPdAS.js",
+      "bytes": 188384,
+      "sha256": "9b9f4383d577ca4f5b0ebd29e6601702dc01b468dca9f541ea0e7006345c64c3"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/model-viewer-w-Jgjb_o.js",
+      "bytes": 1223770,
+      "sha256": "10db6346beac9a710c430b34c596cba252d535bbb1e604f5f232b97fdbdf6c94"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/models/triumph-tr6-red-poster.png",
+      "bytes": 183236,
+      "sha256": "021100904e04d4f36a907843170678e5b9aa6fd6fd3a3b7e8581a2ae3f94ff19"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/models/triumph-tr6.glb",
+      "bytes": 31918740,
+      "sha256": "17290eb0c878701403c28bff87f449604da7d29e4d9404ede0374dcdfe2ce596"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/og.png",
+      "bytes": 1141433,
+      "sha256": "335f2114e3e1ab8b078c4eebdc88d6df121e82b03876e007c9fddf27d0f99781"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdf-BdiGqHcD.js",
+      "bytes": 620452,
+      "sha256": "e235f5960ec8071b19ee3360974b9fbb289c8640542390d444a059a5ab1b5dbd"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdf-CnPiFuPD.js",
+      "bytes": 620452,
+      "sha256": "e235f5960ec8071b19ee3360974b9fbb289c8640542390d444a059a5ab1b5dbd"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdf-DBtmXMOj.js",
+      "bytes": 541546,
+      "sha256": "5522e9384419340d648b960cb76f23b4c8ec483c6f810032accf0d7d3579d089"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdf-Dd-1NuIm.js",
+      "bytes": 620452,
+      "sha256": "e235f5960ec8071b19ee3360974b9fbb289c8640542390d444a059a5ab1b5dbd"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/78-EUC-H.bcmap",
+      "bytes": 2404,
+      "sha256": "d92a261336dc18b8c03a46eb4d462382d33f4338fa195d303256b2031434c874"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/78-EUC-V.bcmap",
+      "bytes": 173,
+      "sha256": "61670bebc4e4827b67230c054fd0d820d6e30c3584d02e386804e62bbedc032a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/78-H.bcmap",
+      "bytes": 2379,
+      "sha256": "ece6415b853d61e1b2560165151407d35cf16e6556932b85a13ea75276b77402"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/78-RKSJ-H.bcmap",
+      "bytes": 2398,
+      "sha256": "696b1f973c97623496703809eaaa5f9b40696c77540057413f4b826a08edfa7b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/78-RKSJ-V.bcmap",
+      "bytes": 173,
+      "sha256": "53cb6d560ab377da48cf65d6dcacb0bdb31f13fab7066c580de38c12a73a7ff9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/78-V.bcmap",
+      "bytes": 169,
+      "sha256": "289000f02fd34872b6975503217f33abae6bee676e7d28f640473a67c8db1712"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/78ms-RKSJ-H.bcmap",
+      "bytes": 2651,
+      "sha256": "a2442595218f5f8bd8e1b42188e368587d876cfe0cc4cd87196f077c878f72e2"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/78ms-RKSJ-V.bcmap",
+      "bytes": 290,
+      "sha256": "f8ddceba96bfd9d3740bd1789ee30d1f47c78371520a8084f71f7df58f19be0b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/83pv-RKSJ-H.bcmap",
+      "bytes": 905,
+      "sha256": "44040051ec818fe09b9703472bea72efd2759d5eeb5ff0d77c718d6bb5e6d1df"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/90ms-RKSJ-H.bcmap",
+      "bytes": 721,
+      "sha256": "c13e043e85ff715b75bb03801e8fd0fb8f3a75e4a48496faa6baaf92b5b48ba1"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/90ms-RKSJ-V.bcmap",
+      "bytes": 290,
+      "sha256": "499bb916ce1adbe4289b6e5811f4dc20eb238cdc2ffad20cf26ae56716885bab"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/90msp-RKSJ-H.bcmap",
+      "bytes": 715,
+      "sha256": "7b8b3b8bbf821702e9a4df9f3596ce292380c8c1b0925dedadbb4e4b2d80498b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/90msp-RKSJ-V.bcmap",
+      "bytes": 291,
+      "sha256": "6296c2b5c07dca8128e96d5296d621a3268803d4fa0e5812a21e52fe2802aacb"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/90pv-RKSJ-H.bcmap",
+      "bytes": 982,
+      "sha256": "fb5103f03d3a34547e18d316e52b6d9b26e485c662999222f84d2ba54c2e4fa8"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/90pv-RKSJ-V.bcmap",
+      "bytes": 260,
+      "sha256": "7bcb5ad2ba55b9662ce379e16c2d9cc2b82d621a579807353741172e4af615c2"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Add-H.bcmap",
+      "bytes": 2419,
+      "sha256": "a2ffab28b990998181bcca9b0e914bb2207820f100ae31d5c469444892e5ad8e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Add-RKSJ-H.bcmap",
+      "bytes": 2413,
+      "sha256": "b29f4b52e2465d0485856d5e69f1ba69927deb2848d8fd328c8035583b35bb7e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Add-RKSJ-V.bcmap",
+      "bytes": 287,
+      "sha256": "2aa2232c283a3f5d0997c2834a36cead0b79ce2657944cfeed08140c293460ff"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Add-V.bcmap",
+      "bytes": 282,
+      "sha256": "25125d3b1be64e86b2df5b3344170b45a42bcaa0b46e43a34314ef73c166e542"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-CNS1-0.bcmap",
+      "bytes": 317,
+      "sha256": "8c65be9d51a9f269a547dc12460707aaf4031ab67ebe8a2900f4b4cc6b3e450e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-CNS1-1.bcmap",
+      "bytes": 371,
+      "sha256": "73152bc1a59cc594b414ac6068be48e5512b96ae85920c40e32a99269fdb0c04"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-CNS1-2.bcmap",
+      "bytes": 376,
+      "sha256": "a1b8d353bdef9584c820464e8f1c9e2013d64ebf433cba0aa831dddf515818c2"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-CNS1-3.bcmap",
+      "bytes": 401,
+      "sha256": "2ffc0c75c79fafde506163d3c08c390d183251009f3fbf6ae50d1167d14b9570"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-CNS1-4.bcmap",
+      "bytes": 405,
+      "sha256": "98a1f470c878c6b9691a4d7aef776af8ac9b55f5587c9fafa00547f3bf655716"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-CNS1-5.bcmap",
+      "bytes": 406,
+      "sha256": "ddd6e29955eb8cb545f2ebd09c628c3bbda5023256eda1b728f743c75fb77829"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-CNS1-6.bcmap",
+      "bytes": 406,
+      "sha256": "317bb2db71e0e5b7b0c47b75de1da915c2e22f65f0c0861507f9ca7ba238f8a2"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-CNS1-UCS2.bcmap",
+      "bytes": 41193,
+      "sha256": "e665837f2197c6bd08cd8955ad4d6932cee2398e2e328b25b00e6bfb3bd72af9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-GB1-0.bcmap",
+      "bytes": 217,
+      "sha256": "8b81cce8a11d510e505704953cfa4e4ab080c1a0cab991145a3512ee433946b9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-GB1-1.bcmap",
+      "bytes": 250,
+      "sha256": "0426983081788ec7202703e71f1efa4b860f75b936994236010b39d89251a81e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-GB1-2.bcmap",
+      "bytes": 465,
+      "sha256": "e67b37a83b160ab3831306a71a605893b24454ee81ac9b6123bf2d3984d268d5"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-GB1-3.bcmap",
+      "bytes": 470,
+      "sha256": "aa299afc3e12a28726147305f191be28c7498078c8b182ece7886ac79cd99078"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-GB1-4.bcmap",
+      "bytes": 601,
+      "sha256": "8fbd7d74c2ddb1350c1cecce54a73fde3f5453093d4bed445283ec0033d2097f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-GB1-5.bcmap",
+      "bytes": 625,
+      "sha256": "c22cb2fcff24112fa31dab2111bdc51957006576d31aad5a25e67793ac01428c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-GB1-UCS2.bcmap",
+      "bytes": 33974,
+      "sha256": "20507620260c0c935c35afc1e70e5888aa7125d5ec7ffc03cef1959feb2c1641"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Japan1-0.bcmap",
+      "bytes": 225,
+      "sha256": "464f08905236f5703b1f5cf8358767c8b18e6bcc808840d081f1de2c7ab38134"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Japan1-1.bcmap",
+      "bytes": 226,
+      "sha256": "4c823848722187d1ffe75ae3f5f9126ccd2d7895a05fad14c919fb119e037008"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Japan1-2.bcmap",
+      "bytes": 233,
+      "sha256": "7810fb808e367e70429e90a9478fe6a3fdc3e214f25c7582ce9c2da6a242315c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Japan1-3.bcmap",
+      "bytes": 242,
+      "sha256": "84deb1828711ad3d390c9899c38abce1bf619d65ff7bf1a326ec95acc45f08f8"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Japan1-4.bcmap",
+      "bytes": 337,
+      "sha256": "3f8a4f974919c2b8bae5d10175ffa2673be140481e00840542c85d48ef184067"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Japan1-5.bcmap",
+      "bytes": 430,
+      "sha256": "1d3ce4ff28d977f8cf37a912ae4ec811f4175c3167b1ec0b2567feec3e79e1db"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Japan1-6.bcmap",
+      "bytes": 485,
+      "sha256": "5609797b9401b30be72ef9645da62a87829f058c3be4b5c623383119f584b1d9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Japan1-UCS2.bcmap",
+      "bytes": 40951,
+      "sha256": "66c5d0dc4964f4093e77b194023f3a0f689324028ec8330e1e1d0570bcba7c2f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Korea1-0.bcmap",
+      "bytes": 241,
+      "sha256": "dfb8c3874f0e5a8c3acf597d2c12d2b63e90bc5e4f0fce990ec4c56077d80b32"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Korea1-1.bcmap",
+      "bytes": 386,
+      "sha256": "62f277b7b1c441c007797ae707d5c37258d029ce4661a2b911e2e1ee35e6adc1"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Korea1-2.bcmap",
+      "bytes": 391,
+      "sha256": "1d77068af462f96d7ad28ad7e7d43eef6423c685b479d7dc25ff5df38db0380d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Adobe-Korea1-UCS2.bcmap",
+      "bytes": 23293,
+      "sha256": "857b723088be97255053562bfa41bd1075a7f7910d3bab59a0645c8bbc7060ff"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/B5-H.bcmap",
+      "bytes": 1086,
+      "sha256": "718ad0ffbef4c34f8f3f31292c462e519cd567a5511fc8b346c60010d64f4ef9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/B5-V.bcmap",
+      "bytes": 142,
+      "sha256": "b5c37383517477620ced927b6b4ffd4f4cc6230d8051b5b46a21d6768e07f7d8"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/B5pc-H.bcmap",
+      "bytes": 1099,
+      "sha256": "bab6028aead1d6149400e904ab10cfd319082d826473ed4c582c8eeed920f17e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/B5pc-V.bcmap",
+      "bytes": 144,
+      "sha256": "41543142b9767f3b76133899fc8453282b01ad3c653acaeea42d78c5a7d08c63"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/CNS-EUC-H.bcmap",
+      "bytes": 1780,
+      "sha256": "e8f89cd61e6486b948205da46499d659ed0aed949b7095fd3c8e95ffe2b0e7a9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/CNS-EUC-V.bcmap",
+      "bytes": 1920,
+      "sha256": "cae422bec2ac6dbe86bf921cec942bacd2d0b733ffcca5f91b3ba14e917025a0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/CNS1-H.bcmap",
+      "bytes": 706,
+      "sha256": "e8487971ab20cd16f3de3e8ac56ec994b72b658ad113f2818239dfd5108f501a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/CNS1-V.bcmap",
+      "bytes": 143,
+      "sha256": "42df8076aaa7574505e7304af83a3323ec032c4177d64b1309db8c043d594a8a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/CNS2-H.bcmap",
+      "bytes": 504,
+      "sha256": "bc6024d274d440f0625c69e25f37036ef6cb6689432ceaa160d3432a2a716ca7"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/CNS2-V.bcmap",
+      "bytes": 93,
+      "sha256": "2e4f70a8afd23a121030fc2e5b5f3816e903b11e7ba8b8c09654b31c80399c38"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/ETHK-B5-H.bcmap",
+      "bytes": 4426,
+      "sha256": "d2f10fa519336bc4efcc7b6deb9604b75429946b40d82e311cb3a97a1994c89a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/ETHK-B5-V.bcmap",
+      "bytes": 158,
+      "sha256": "1fea3fd0d9f0f679f80505800851ef2e4131d81127e18c006938ffa2f4c8b247"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/ETen-B5-H.bcmap",
+      "bytes": 1125,
+      "sha256": "87ee6b3f5bfda5fe26fa35431264c7d73070d10dbbf398a75185d63ae322c18d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/ETen-B5-V.bcmap",
+      "bytes": 158,
+      "sha256": "47dc0d2c21e3bde317947aec1675ceabc1d5460a60bf9c24334b8c407a17172c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/ETenms-B5-H.bcmap",
+      "bytes": 101,
+      "sha256": "d5f5a73da4173b7da9a3a20e16f26f9cd5d12deb1553409919e0cec6fd37fdee"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/ETenms-B5-V.bcmap",
+      "bytes": 172,
+      "sha256": "18252fca90f472f479af1bddd60d6ab51c8e1b55dcf6845951426504934543e0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/EUC-H.bcmap",
+      "bytes": 578,
+      "sha256": "f9939cd57fccdc65c5d9f4c205fd497ebdbd283643308da5663801a8c1d9c595"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/EUC-V.bcmap",
+      "bytes": 170,
+      "sha256": "1283a50a706507c4436da83ede9ad7a4440be25378f2e96f6c81a430081426a3"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Ext-H.bcmap",
+      "bytes": 2536,
+      "sha256": "4000ed4e61a1c668ef453bbd0603cfa383defa793abd46a57ed870d7f527350b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Ext-RKSJ-H.bcmap",
+      "bytes": 2542,
+      "sha256": "e0d2f0df337660e73813238dd4a725f11f0621b90f3273857db253d0e7694caa"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Ext-RKSJ-V.bcmap",
+      "bytes": 218,
+      "sha256": "f617a22b6d67febb187990952006c91a9f5a4db21155d268c656252d0c21985d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Ext-V.bcmap",
+      "bytes": 215,
+      "sha256": "c2087fb845a9e3acea0c2922cd40e6af67e11957bec74dcd597f1285edd490ce"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GB-EUC-H.bcmap",
+      "bytes": 549,
+      "sha256": "928bad06fd84a48f5ba7150d7716609119fb660f2aaa73eccad81ddab9b9d203"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GB-EUC-V.bcmap",
+      "bytes": 179,
+      "sha256": "a9ad88ac2479da529b16dc48abc5952332e27bc355335f91df5729a587533324"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GB-H.bcmap",
+      "bytes": 528,
+      "sha256": "1018c777a8910b5bb46d7d54a4aee9d51ca5cff8addb2b41c969d9101cb3fd1c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GB-V.bcmap",
+      "bytes": 175,
+      "sha256": "0b96789143c0bbf9f1641ae7165b3456dccd14dabffcbb0bd654d5bf6f94f863"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBK-EUC-H.bcmap",
+      "bytes": 14692,
+      "sha256": "2103fed28650ede096a2281104a1a8a4304dae0db414342c636867522307123b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBK-EUC-V.bcmap",
+      "bytes": 180,
+      "sha256": "a7fd35dd14d9dbdb955f34e6c0630618b6620dfd09d4283b2f65a65ce77fcaea"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBK2K-H.bcmap",
+      "bytes": 19662,
+      "sha256": "3d919ae72af16c5cc6846ec87a4326a9f125e493c59d3628429d35c2c95fe8c4"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBK2K-V.bcmap",
+      "bytes": 219,
+      "sha256": "b927fdfd595c07ce9158bf2ec13f4641b2e83b01c70989dadfabd6ed7c6ac2dc"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBKp-EUC-H.bcmap",
+      "bytes": 14686,
+      "sha256": "d15ebd8e81fb4fe8a244f1b1e877922e03500ac69eddf5001093e502430451d2"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBKp-EUC-V.bcmap",
+      "bytes": 181,
+      "sha256": "fdc736d46e642625dccc8ad8c59f2c69fc7db7a13f2e799c6c6b779e707bb97a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBT-EUC-H.bcmap",
+      "bytes": 7290,
+      "sha256": "dc5f44e48a39f3367ae28665027d8ab1d8cedb5a9dcc5068a900acd6709f60f9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBT-EUC-V.bcmap",
+      "bytes": 180,
+      "sha256": "a1ad24e63653b8aa388c18fa5e498f007564e43dde699a9f91ccb4645c999be8"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBT-H.bcmap",
+      "bytes": 7269,
+      "sha256": "8afda745a505763f3ff54c8126eeb48ef376ea9ed07d9f42ff9a22c5c547ec57"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBT-V.bcmap",
+      "bytes": 176,
+      "sha256": "cdc2ec5c3c7c7033290c9a8894878202f08674eb9b1ae7d36218430326768771"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBTpc-EUC-H.bcmap",
+      "bytes": 7298,
+      "sha256": "7b23e2f7bfdb6c918f567b7324bf858f398bd8cd5f268d74ece19a3c91bf4f32"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBTpc-EUC-V.bcmap",
+      "bytes": 182,
+      "sha256": "d7a1b13ead9ab511cf2cd01de6ce8b02aa8e8767e84895337d7a3b67f039f93b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBpc-EUC-H.bcmap",
+      "bytes": 557,
+      "sha256": "3c4a4eb82f05abe51f6650985c630e180438bfdd491318f5d20d2ec29236e1c3"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/GBpc-EUC-V.bcmap",
+      "bytes": 181,
+      "sha256": "215bdfa2842705624b4cf4cd29b8e3c720f1e192365e0305c11030a424c84d7c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/H.bcmap",
+      "bytes": 553,
+      "sha256": "a0233e21047ec00b852125b243cbcf30abee511155b6d8159c24f944384bc9ee"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKdla-B5-H.bcmap",
+      "bytes": 2654,
+      "sha256": "5242bce18fb13ab4cc59b146a03eba36e4ce42667eeff09e10981a9d2aa4996b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKdla-B5-V.bcmap",
+      "bytes": 148,
+      "sha256": "2e0537f786c0791d41a925f72bad2d4e7268aa6cbf15a1400a722672cec38e2c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKdlb-B5-H.bcmap",
+      "bytes": 2414,
+      "sha256": "fdc8159984bf5dbe475c0d5dfcb621ecee4dea07c38c668bd77f4c679e23b9b3"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKdlb-B5-V.bcmap",
+      "bytes": 148,
+      "sha256": "b249eb9dcb915ab45057c5d4d7aa55ef88d0efbb092af6bae0b2d4705d139abf"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKgccs-B5-H.bcmap",
+      "bytes": 2292,
+      "sha256": "ab64c7fc5e9b2e97750cc4f269b0da14fd8649e49151b7598c8df86599bac591"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKgccs-B5-V.bcmap",
+      "bytes": 149,
+      "sha256": "02ebdf7cdffb5395fb21091cd58a013a18ae5388922822f9dc6292ef16b98956"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKm314-B5-H.bcmap",
+      "bytes": 1772,
+      "sha256": "bfd8bbde6b36a9da4c1c902c74121a30d9807a7079a00eeea218be6adc223cef"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKm314-B5-V.bcmap",
+      "bytes": 149,
+      "sha256": "2a64a815cfb6fdd480674a868762e3d161fda17543b20c9209978559f0667164"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKm471-B5-H.bcmap",
+      "bytes": 2171,
+      "sha256": "49d7c037758826b5b6c0fa329c35bbf25d3943197754e72ecd30c6fb04d745e6"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKm471-B5-V.bcmap",
+      "bytes": 149,
+      "sha256": "be24c109e78aa4fe3c1f27d30aab3ed0741e783fa1b6b6c2719741072b54b132"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKscs-B5-H.bcmap",
+      "bytes": 4437,
+      "sha256": "08599378f41d96b40537adef6e6edcc4a787bc63f5accf47c026df4905a13914"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/HKscs-B5-V.bcmap",
+      "bytes": 159,
+      "sha256": "d073542b7dad1c4cbf01c1af5f0cd13218d1281a491956e310c55702fc8705c4"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Hankaku.bcmap",
+      "bytes": 132,
+      "sha256": "b454701f7aecd7856769016dfd04ca64280a060f2c67a2466d50b4395d24974e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Hiragana.bcmap",
+      "bytes": 124,
+      "sha256": "2ed669394756dd9458651cd9995ab29ab691ecb7686659003306cdf22767a414"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSC-EUC-H.bcmap",
+      "bytes": 1848,
+      "sha256": "6784e16dbc5861c036c23d3e55f0d4ba0975a3e464da0ee8e49bcfff0be070c4"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSC-EUC-V.bcmap",
+      "bytes": 164,
+      "sha256": "fdb36bad85e9924823d49db374067988e024cf80fc894711f2c9178951cbbe95"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSC-H.bcmap",
+      "bytes": 1831,
+      "sha256": "c1f6d61f1d3304fd539a65ae72624fa567ecc3853bf52e283958a7a2515b3eee"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSC-Johab-H.bcmap",
+      "bytes": 16791,
+      "sha256": "939993d213f68db763bf156217c217ae23af082b91a0eacecf3d11eb4ff8ef8c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSC-Johab-V.bcmap",
+      "bytes": 166,
+      "sha256": "5d61967aac0e666def721e8b8d0fed8f95a879a14f2e76ce516c3d11c621e519"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSC-V.bcmap",
+      "bytes": 160,
+      "sha256": "d7da5afd9f1fe74816d79c9325f0139a4efb6438664ebfdf9a7aa92f3034360f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSCms-UHC-H.bcmap",
+      "bytes": 2787,
+      "sha256": "5b70d8f6a4fa9e2283dc649f0ff95d906d56efbee50a20e8d2faec3a8fed078e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSCms-UHC-HW-H.bcmap",
+      "bytes": 2789,
+      "sha256": "a5e6ba22aceb02fdedee11bfb9ed138463d89e85b87810b9f075b469d936f8ec"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSCms-UHC-HW-V.bcmap",
+      "bytes": 169,
+      "sha256": "890332a6a26880d463a12f2a6ff048bf9cf7e45077cfb1ca8815b89baa7bf411"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSCms-UHC-V.bcmap",
+      "bytes": 166,
+      "sha256": "1631b531c9a40c8cbe24c2317dba107362e49fa6e18af620414d627c111d570c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSCpc-EUC-H.bcmap",
+      "bytes": 2024,
+      "sha256": "709480682c55cedbb0124b9960d78e28febeee0df2e34607d61aac6601647ec7"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/KSCpc-EUC-V.bcmap",
+      "bytes": 166,
+      "sha256": "031707887d6fc2378a36cdb6775334fd7a236c3f95048d8436abf43fe26fc49d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Katakana.bcmap",
+      "bytes": 100,
+      "sha256": "3b6ca6642fbf8822da00d5e58a8aa275216d5c32dbf2bd73e934197fc9fc5c53"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/LICENSE",
+      "bytes": 2080,
+      "sha256": "aa92ab5a472974865a96fd4a4e9c13bb41bf6fe1b309cb6b8da48bc9e19839a2"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/NWP-H.bcmap",
+      "bytes": 2765,
+      "sha256": "286c6c9e335da330928a01edc3c97a3a623f1f7f3c42762b0a7dc2f651b1a78f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/NWP-V.bcmap",
+      "bytes": 252,
+      "sha256": "3a75fb7b59adfb172710758c425d8ac6c93fd5360a64dd4afd5dd04e60ab4b4d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/RKSJ-H.bcmap",
+      "bytes": 534,
+      "sha256": "a70de61a22a898f693f02cc011c3e3cff2e10aaa7cddb4661e456a21ae859f78"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/RKSJ-V.bcmap",
+      "bytes": 170,
+      "sha256": "68c1a64506471a524ea5cfc3b3a9f8f70031989a6bd95427b1351f33ccf50b06"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/Roman.bcmap",
+      "bytes": 96,
+      "sha256": "1c6b3ef9d9e5cb1aa329142ce9414b90f9b6d7f9182a2a9e927378dab8f0d43f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniCNS-UCS2-H.bcmap",
+      "bytes": 48280,
+      "sha256": "779428116752f34e2490a1941d24e4634c71e3c22d053b811d2090ae2fb3c704"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniCNS-UCS2-V.bcmap",
+      "bytes": 156,
+      "sha256": "1e5cc184b850ea44abc2df8ae5674279df668e8edf5e2a1a2ea2bd77adbd280f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniCNS-UTF16-H.bcmap",
+      "bytes": 50419,
+      "sha256": "32ff139b3c7b91d6ad25f994701f3ce7b242906022c418fd73e6493fc228bfe5"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniCNS-UTF16-V.bcmap",
+      "bytes": 156,
+      "sha256": "278eb1e68d1a236c60ef59472cf0176ee0d45f364285e76ca12419a08d46fb9a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniCNS-UTF32-H.bcmap",
+      "bytes": 52679,
+      "sha256": "bf26eb67fe19ee5ba915799e80ca72408400aa8342fdf6a244a4f44de8f97336"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniCNS-UTF32-V.bcmap",
+      "bytes": 160,
+      "sha256": "f7da3caf83ceb1cb37936fa10700d9ba6e9c3f72c5bc9724e3ac79bff0c0179e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniCNS-UTF8-H.bcmap",
+      "bytes": 53629,
+      "sha256": "2f2a742bcd1a84a148a4a518b9eed51a8f9c6ca5ed3bc5e2e41fff97de5dc2d8"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniCNS-UTF8-V.bcmap",
+      "bytes": 157,
+      "sha256": "b7c3f10780a8c62dd1c8ff6c30dc1e4e23b6cdc87c3a96fcd514cc98ffd3af9d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniGB-UCS2-H.bcmap",
+      "bytes": 43366,
+      "sha256": "9201569b402e81ad8860650bd86350c4fa28e5dd5971f05fcacaf40f51de18ed"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniGB-UCS2-V.bcmap",
+      "bytes": 193,
+      "sha256": "f10282335e4d64203bc2a653a3a47d745ec76c8ae04549f4d50180c1899be216"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniGB-UTF16-H.bcmap",
+      "bytes": 44086,
+      "sha256": "386fd39581245c034da016a92d23f3df1117d169f996100050b264fc09a84e35"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniGB-UTF16-V.bcmap",
+      "bytes": 178,
+      "sha256": "0473cfbba612b92dd9918f0ff8aee9112897c48e0ffdc0eb82da3144ed8ea84a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniGB-UTF32-H.bcmap",
+      "bytes": 45738,
+      "sha256": "f48a145dc4e3ed1dca1dde7111716a72306a2a4191ab05c6bae3a5c3a961cd2f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniGB-UTF32-V.bcmap",
+      "bytes": 182,
+      "sha256": "106acc49b7118bdef944e32107b4f348238f3929a0a15d3b7aab7b9101535993"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniGB-UTF8-H.bcmap",
+      "bytes": 46837,
+      "sha256": "f217b439c80ee5fa1bc2cf6d1defcc319f8d84483d166a00ee199e05a68588df"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniGB-UTF8-V.bcmap",
+      "bytes": 181,
+      "sha256": "a64df947632878eacc532fa193c735c92a383b7d66e6f8374ac193af7c64fc63"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UCS2-H.bcmap",
+      "bytes": 25439,
+      "sha256": "ad2352f40870880fbf7f8ee5abadff743fbd025fbf9830b8ada472d1c5e4da0b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UCS2-HW-H.bcmap",
+      "bytes": 119,
+      "sha256": "16e87edca954177c0881c874859d6783220925d821b5cdfb8755b61ebd93f9ce"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UCS2-HW-V.bcmap",
+      "bytes": 680,
+      "sha256": "1973457e2c0192819947e56068625b34fb9a72ecc8a476ce6d7eaae5f73e2e5c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UCS2-V.bcmap",
+      "bytes": 664,
+      "sha256": "42a133d8e2ce9dd6d2288018e01592d2bf2435b326d39b94ea0b6e6a44ac33d3"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UTF16-H.bcmap",
+      "bytes": 39443,
+      "sha256": "f6a89c5688978548c83fcee990e205bc63c74274d5c69b49032a3bd4c49a05ee"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UTF16-V.bcmap",
+      "bytes": 643,
+      "sha256": "c67126fc7c73850855186bb0d6482ac0a365057e0b58778c4ab9f234683fef53"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UTF32-H.bcmap",
+      "bytes": 40539,
+      "sha256": "96195950ce0fe24443d8eb426fa6b88534ec421d7bef9046f0b2362809cfba73"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UTF32-V.bcmap",
+      "bytes": 677,
+      "sha256": "ed4dafda402bdd19c4d5d8bf2ab41473c0f86f384552b4c7b963d6627daedeb1"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UTF8-H.bcmap",
+      "bytes": 41695,
+      "sha256": "798fb0bf06ab0788d1f6a91c2db7de581612eef03c628f10e8f7ecd8f70ab448"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS-UTF8-V.bcmap",
+      "bytes": 678,
+      "sha256": "1021611424f913b2df0bfdbe94bd327c04e224ec89d8e821c6501ea3d21f4265"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS2004-UTF16-H.bcmap",
+      "bytes": 39534,
+      "sha256": "710a32d7cb43fd6bd9dbf30da5971f8c941590f74441e208d852c2be0e74cc97"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS2004-UTF16-V.bcmap",
+      "bytes": 647,
+      "sha256": "3b149aff5c5707b57fb3215d1775852c8b1f413ec0f679ea628f25cf87fe098d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS2004-UTF32-H.bcmap",
+      "bytes": 40630,
+      "sha256": "8d2658e18741af7937d586a57c89729a6fec0d86121197c1f8518aa58b29cdfb"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS2004-UTF32-V.bcmap",
+      "bytes": 681,
+      "sha256": "6dd475782f2897648a683c48b2fa015a15b8f06856760bddc8a17a63f418bacb"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS2004-UTF8-H.bcmap",
+      "bytes": 41779,
+      "sha256": "691c614ce432b3e62486efb54e5c84c6da5afe9b51b21253bde4758feb484183"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJIS2004-UTF8-V.bcmap",
+      "bytes": 682,
+      "sha256": "40a8c7ea2d46711c5f78fc9a878a7db68b1543ba5cd60ecf14f519a2deb829b7"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJISPro-UCS2-HW-V.bcmap",
+      "bytes": 705,
+      "sha256": "6826f94d789d7bf1960668c1c5819c34c9585c1b23152fbc19ee81c7df08524b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJISPro-UCS2-V.bcmap",
+      "bytes": 689,
+      "sha256": "493de9fd1a08f7946065d8ab58f0c3c9fe489f5a0f109f2d05a3169b4bd5789f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJISPro-UTF8-V.bcmap",
+      "bytes": 726,
+      "sha256": "6181d382cf736c5e09492e8be9f26f31fa25b7462253f23ab16646af432cad81"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJISX0213-UTF32-H.bcmap",
+      "bytes": 40517,
+      "sha256": "692044e1fb33445668632bc9fe7386805c624864be1ddeb29d65bb0c99fc630c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJISX0213-UTF32-V.bcmap",
+      "bytes": 684,
+      "sha256": "dd54e16ca7bffb3a886242549b2bf7d78a277087f7c60d2636f118c21a5b0646"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJISX02132004-UTF32-H.bcmap",
+      "bytes": 40608,
+      "sha256": "f80ea5a989be30ccda5a8804baef6d3b4b044d2b339bf8b31c671b2466171cf6"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniJISX02132004-UTF32-V.bcmap",
+      "bytes": 688,
+      "sha256": "94c22bd99e771c5fbe0dd8dc39850570d4db0075074aca13e272813edd7cc57f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniKS-UCS2-H.bcmap",
+      "bytes": 25783,
+      "sha256": "a1081396ab4adb6f4a5b6c15f896963c244c1c9bcb65ce5616d06096a1b9811c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniKS-UCS2-V.bcmap",
+      "bytes": 178,
+      "sha256": "6cab547431958fbdc1d401d06ebd4dd61a73f5509a10f974df32bcbca11a2e43"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniKS-UTF16-H.bcmap",
+      "bytes": 26327,
+      "sha256": "42d35b396286499dfae1737a07adb3a64500df37b426580bfb1d3ea872938519"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniKS-UTF16-V.bcmap",
+      "bytes": 164,
+      "sha256": "5bdb7390c80dcc136cb47d41dc7460082560969c17322ee739fe3020fb642410"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniKS-UTF32-H.bcmap",
+      "bytes": 26451,
+      "sha256": "3a01ec51ed1b828101351e337ffb8250abe11880032e5210f881170fed2588de"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniKS-UTF32-V.bcmap",
+      "bytes": 168,
+      "sha256": "dfda895eceaed081af030dbbb962b49629eea817fc3c02bae15db93d0c68acd7"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniKS-UTF8-H.bcmap",
+      "bytes": 27790,
+      "sha256": "3fac9c65145f72d7d42157a3b9c5ed6904632184e6a0888f2b828699afd2002f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/UniKS-UTF8-V.bcmap",
+      "bytes": 169,
+      "sha256": "9ecc6cf30dd354b9778ddba163b6cc7302b087ce9f39d1ba73472d2b75ed13ca"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/V.bcmap",
+      "bytes": 166,
+      "sha256": "b9ad1c0c09ff14bca52f9a28a9767eb857ad0e8946e64ba14c7387a7eb69866a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/cmaps/WP-Symbol.bcmap",
+      "bytes": 179,
+      "sha256": "543923bead225732aba30976690ee89095a19628277b5863efecc2c728d5d7bf"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/pdf.worker.min.js",
+      "bytes": 1317034,
+      "sha256": "a33cfe728c584fdba4fcc1fd54bcdc2f9f2f13889ddbb5b2bd1d0f8cbe49b84e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/pdf.worker.min.mjs",
+      "bytes": 1317034,
+      "sha256": "a33cfe728c584fdba4fcc1fd54bcdc2f9f2f13889ddbb5b2bd1d0f8cbe49b84e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitDingbats.pfb",
+      "bytes": 29513,
+      "sha256": "845c752392b6c914fb989c75a08b7792b88f542d2499042ef2889f8c814a16ed"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitFixed.pfb",
+      "bytes": 17597,
+      "sha256": "b6c8fe53f134b8b6d4578cd2d544df4cee9624c4efa8d51a560fb40ea296101b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitFixedBold.pfb",
+      "bytes": 18055,
+      "sha256": "f1b7159702973f54fc86254ea38bcf3712b2a736eb3a0995751e9f4bb45ad603"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitFixedBoldItalic.pfb",
+      "bytes": 19151,
+      "sha256": "8a000945843bd31add06aee63bf9fd41b7578b4f3242a4b7cd46349ad9d24d4d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitFixedItalic.pfb",
+      "bytes": 18746,
+      "sha256": "5007faf8320fa1fcc08b8894b356ad976f60b992ba29ee5272578bbdebaf3876"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitSerif.pfb",
+      "bytes": 19469,
+      "sha256": "4f57d2b9d884af8f907bf22df6019b52d86cbf6214fdbd02b1ae05472a543f35"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitSerifBold.pfb",
+      "bytes": 19395,
+      "sha256": "0bdf4b04e964139818d51eda03d566ba999fc3ba2421b1c6c51f9dc969022e80"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitSerifBoldItalic.pfb",
+      "bytes": 20733,
+      "sha256": "a406cac82583bf98175cb62c87ed5e95c45fbb34eece63a10b0a13e793cb2e10"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitSerifItalic.pfb",
+      "bytes": 21227,
+      "sha256": "610ae0687198045c4db5d1a6650fd5e92536631706382eb8b72e38df578d0ae9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/FoxitSymbol.pfb",
+      "bytes": 16729,
+      "sha256": "47967d055530e7357088a08403115425643ec2cdfd6201ba8af0fbd7116c1539"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/LICENSE_FOXIT",
+      "bytes": 1553,
+      "sha256": "b578cdd2345840ada550bd12519533812320d5f1d21cf4c1c7e1b1b0a31c98b7"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/LICENSE_LIBERATION",
+      "bytes": 22154,
+      "sha256": "d2c4d5b3e115a519cb58eb691aa64538397e2611f9ebe801392cf9667997e7dc"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/LiberationSans-Bold.ttf",
+      "bytes": 137052,
+      "sha256": "361c61b82d575c5c35fd9157fda8b0194bcfcd0d88ea8521a4fb5dd53d33dddc"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/LiberationSans-BoldItalic.ttf",
+      "bytes": 135124,
+      "sha256": "a224075ac17495ad0a3af3bc0a419ac0704a8b3fd1095456201fb9b095fc281d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/LiberationSans-Italic.ttf",
+      "bytes": 162036,
+      "sha256": "832b4406dbef23628800d3aaad21048534ac84d7e3ad955be83b8172ed8ef512"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/standard_fonts/LiberationSans-Regular.ttf",
+      "bytes": 139512,
+      "sha256": "f8ace1f892b2bd9dc1792ba7f097fa7588f84fed48321480e04de5390828221f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/LICENSE_JBIG2",
+      "bytes": 12862,
+      "sha256": "9e66b7f1b934a28b37f3bc4dac97915de1674271e79a0a88182a18ed9731b4d1"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/LICENSE_OPENJPEG",
+      "bytes": 2112,
+      "sha256": "a6af136f3e15038a666b61f376612a07d9a4e48cb7c01adbf3e33b3f14ab49b6"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/LICENSE_PDFJS_JBIG2",
+      "bytes": 555,
+      "sha256": "aad3cce09842e00e9e11ad5e8fef8cc02fbc3a3768fe2f007443b9cee37aaee5"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/LICENSE_PDFJS_OPENJPEG",
+      "bytes": 1285,
+      "sha256": "717fc62da03292dbb4dd0c8280bd4ce7bb8550dcf31d772bc93455fb50313425"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/LICENSE_PDFJS_QCMS",
+      "bytes": 1036,
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/LICENSE_QCMS",
+      "bytes": 1121,
+      "sha256": "36d847ae882f6574ebc72f56a4f354e4f104fde4a584373496482e97d52d31bc"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/jbig2.wasm",
+      "bytes": 104852,
+      "sha256": "e6bee67724a7b5436fe8162638e3708cfc8d52b6342db69a49715e30ff27cfdc"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/jbig2_nowasm_fallback.js",
+      "bytes": 145703,
+      "sha256": "04c795a6657a4553a64b781ea3e85256203d913c3b71b72b85fa3ce00622f458"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/openjpeg.wasm",
+      "bytes": 252032,
+      "sha256": "004a0e62db930ba9ff2a22212f4554d0bb57a0635a8287caf70f98117cee14ba"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/openjpeg_nowasm_fallback.js",
+      "bytes": 451590,
+      "sha256": "0f998419819da4491d8302222aa9e2ff2494685641aa2a6c21c3760c29f3e319"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/qcms_bg.wasm",
+      "bytes": 96589,
+      "sha256": "663d86126d5f5fcb1c61490f94353e2a8375660b8c5498ab3ebab5a34b08800e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/quickjs-eval.js",
+      "bytes": 6232,
+      "sha256": "fe7930418e869791ce892567dbd0bc4698152b7e550b5cefa553992c56ddc325"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/pdfjs/wasm/quickjs-eval.wasm",
+      "bytes": 469105,
+      "sha256": "7bcacc9f22cacf7e9b23866d2a6d1639693d40c7f144e41b7c69ed37ba9cbe8f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/00000325-Zuerich_Grossmuenster_4x3.png",
+      "bytes": 414053,
+      "sha256": "8c7186a6ee869eb28b6fac1f78ec1f6dd6394865cece49b331a18e2d435e6d7d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/00000326-Aarau_Obertorturm_4x3.png",
+      "bytes": 439204,
+      "sha256": "34ccdd82c4eb310113f9d0decdbf015f66a3eabf8d83e2f5d90e9ed015a5c92a"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/00000327-Basel_Muenster_4x3.png",
+      "bytes": 399097,
+      "sha256": "6e95dd74d84478df9ecd91b794342f13b46b0f3c47f703dd043abf2dbbd091ee"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/00000328-Bern_Zytglogge_4x3.png",
+      "bytes": 442382,
+      "sha256": "26f92b246ede45724621d02efca5379c0f43f9e5d5f38cbca34b8aef2b1dba02"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/00000329-Luzern_Kapellbruecke_4x3.png",
+      "bytes": 387060,
+      "sha256": "33bbe6052bac92780d396e22b28ee28c01a1f7322cb06ef3c2adc33f0a42bf67"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/00000330-St_Gallen_Kathedrale_4x3.png",
+      "bytes": 461251,
+      "sha256": "d6989652d859d83c994ce887f355da4202dfb93b9650622114a578be5d8d516d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/00000331-TRiungsters_TR_Roadster_4x3.png",
+      "bytes": 702754,
+      "sha256": "497b299ae55f68a54a17b52012671d0cf16c40bc33acf8cda8809c686cf742bb"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/00000332-Waadt_Schloss_Chillon_4x3.png",
+      "bytes": 425933,
+      "sha256": "9cfa967e0648809035d7263710e215440ddc8a88a15c5aa21d379bf42d957ad6"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/bern-silhouette.png",
+      "bytes": 66347,
+      "sha256": "3c7ab7076d7755c7583a6e9a1e8fd0613a2cd2d546fa19fedad5846095ce6b00"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/bern.svg",
+      "bytes": 806,
+      "sha256": "0d8f64e516c38a9882c78a8e38c3849354600df7f9453b530030b09d5bdce40b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/innerschweiz-silhouette.png",
+      "bytes": 50864,
+      "sha256": "51f08f43fb283ca73d71d3f7acf29acf808ddeba74c4f160ccd395e3bd056c3c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/innerschweiz.svg",
+      "bytes": 710,
+      "sha256": "90417ec55b49cb9f5ec4ddf5030ba740a61659b2223844359761d336a8d7d09e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/mittelland.svg",
+      "bytes": 721,
+      "sha256": "9b851d2694bab8e88c421e59f3ec603bf10332e7cfc4e4d1a3ec91123cef7bb8"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/nordwestschweiz-silhouette.png",
+      "bytes": 79144,
+      "sha256": "11536c48e250d06cd07be00eb3f571ca477cf39df282103d4bdcc918f510a009"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/nordwestschweiz.svg",
+      "bytes": 649,
+      "sha256": "df8f42e12b811d3fa594a477b8432ca4a90604980cf54bd8aa91a51a7402c926"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/ostschweiz-silhouette.png",
+      "bytes": 64790,
+      "sha256": "316e09e40fd7391d4f33ab0101cbb41a6f3be8348b4ebc2f9489d542020a37a6"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/ostschweiz.svg",
+      "bytes": 681,
+      "sha256": "a008656baecbafed9232360bd3ca7d9684d1494ee97a7bbde3f654ab81aeec26"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/region-bern.jpg",
+      "bytes": 41945,
+      "sha256": "50d3afecfc244cdaa4e5e834ab28a250a8e40d233c2ac297f1b4a248fc7c0b4c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/region-innerschweiz.jpg",
+      "bytes": 34170,
+      "sha256": "e99b8f071ba50be704bbeeb0ec846d0221756dc30b6eea78a629ec506858cacd"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/region-mittelland.jpg",
+      "bytes": 41614,
+      "sha256": "12df1645cc8c144525de8213271b7c487100dc855e00db3c350b1300d5dcb1ee"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/region-nordwestschweiz.jpg",
+      "bytes": 35356,
+      "sha256": "36ed08cc5b62c1cbcc65e41d978069a1e24cf7d39a0441bd432a5972546cddf0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/region-ostschweiz.jpg",
+      "bytes": 43258,
+      "sha256": "5a8dfad36a483cbc1fbc6b3300d55512d47d07cd293a0314ab5b83faefaba2ba"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/region-suisse-romande.jpg",
+      "bytes": 37428,
+      "sha256": "01321be8ae0f388bd6da5b1b9362c54187c45a955936ad27f829d6af0da2400f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/region-triungsters.jpg",
+      "bytes": 44312,
+      "sha256": "9241f7e98b535e086d7eb04b63710dbf704f2cb8f1a52078d6941997e2376fce"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/region-zuerich.jpg",
+      "bytes": 38684,
+      "sha256": "fec906d40f916d3bc76341ed4aa6b8ed13e8076eeccffa96e654434cfe2c5ba0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/romandie.svg",
+      "bytes": 723,
+      "sha256": "a40adedb3b3387e33bcfbde1d48739a8314c13a1e277e1fb020192a88dfce51e"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/suisse-romandie-silhouette.png",
+      "bytes": 63228,
+      "sha256": "862659931ac805a1c9f291d8915ee1b254412ea3c3b27e19ecfd4000e5c04055"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/triungsters-silhouette.png",
+      "bytes": 189565,
+      "sha256": "9f0ab92d9e1ee0b718dd8bbf389ad8eb4daa0a7763697719e1a9dec82f06f310"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/triungsters.svg",
+      "bytes": 651,
+      "sha256": "2cd77057894ea163fd28302fbdd45bdbecbf55e7c420152b42aa7c1eeda8bbd7"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/zuerich-silhouette.png",
+      "bytes": 77140,
+      "sha256": "8d8d3630d3eb7d1926c8a318c9bb42c07c75f768cc48c9cc9860d7c130d71989"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/regions/zuerich.svg",
+      "bytes": 735,
+      "sha256": "bf75323d60050f20b08e20bc7d66f7d751633e16705832ebfde7ee7cff6fa5c9"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/roadster-pictogram.png",
+      "bytes": 335082,
+      "sha256": "df65c066ce81781ff152b20434245e277c02eea425fe1a5a0026585f2d1c3ac0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/strc-logo.png",
+      "bytes": 509560,
+      "sha256": "e42d05c5e791cd1b70dc3c6dc91492b16444f9dbc99ce7386412623f9346b81d"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/footer.php",
+      "bytes": 456,
+      "sha256": "f79152606edaa7c21291a009dfce4db50e5b4d18bb5dc37099c8c01fc25da111"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/functions.php",
+      "bytes": 1205,
+      "sha256": "2c481c6ba5d2b4bc9fc08bce2b538d49fef946d2070c1d3962ddb96bd9ddc30b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/header.php",
+      "bytes": 877,
+      "sha256": "bcd0e9fbbf1a85112785d1e98f11661352fe966cff7deb5c0b14399a973fb550"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/index.php",
+      "bytes": 1877,
+      "sha256": "7fbc814c361da13e3ddcb6580fe715ca0d13d6f82e43d9e0b105fea8499f9e94"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/style.css",
+      "bytes": 184,
+      "sha256": "e50bc178af836235eea1f986263baaf505ca0b7f96f82b59d3ddd0030850a40f"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/woocommerce.php",
+      "bytes": 293,
+      "sha256": "1b081d89f7b036644229ac0c5b6ca61209522dd52b2a10961a75ecbb91ebb535"
+    }
+  ]
+}

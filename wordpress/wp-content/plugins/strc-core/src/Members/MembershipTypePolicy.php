@@ -14,6 +14,7 @@ final class MembershipTypePolicy
             'couple_primary' => 'Paarmitglied Primary',
             'couple_partner' => 'Paarmitglied Co-Pilot',
             'youth' => 'Jungmitglied',
+            'honorary' => 'Ehrenmitglied',
         );
     }
 

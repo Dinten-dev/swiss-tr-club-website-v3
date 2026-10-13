@@ -11,3 +11,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY infra/docker/wordpress/uploads.ini /usr/local/etc/php/conf.d/strc-uploads.ini
+
+# Member photographs and community uploads must survive container recreation.
+RUN mkdir -p /var/www/private && chown www-data:www-data /var/www/private && chmod 700 /var/www/private

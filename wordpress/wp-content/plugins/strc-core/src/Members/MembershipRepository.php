@@ -116,6 +116,7 @@ final class MembershipRepository
         );
         $this->synchronizePartnerLink($userId, $partnerUserId);
         $this->statusCache = array();
+        $this->revokeFunctionalRolesOnIneligibility($userId, (string) $membership['status'], $safeStatus);
     }
 
     public function statusForUser(int $userId): ?string
@@ -135,7 +136,10 @@ final class MembershipRepository
     /** @return array<string, mixed>|null */
     public function findForUser(int $userId): ?array
     {
-        return $this->membershipForUser($userId);
+        $row = $this->membershipForUser($userId);
+        // The read-only import has no official number until Fairgate exposes it.
+        if ($row && $row['member_number']==='FG:'.($row['fairgate_contact_id']??'') && get_user_meta($userId,'strc_fairgate_number_pending',true)==='1') $row['member_number']='';
+        return $row;
     }
 
     /** @param array<string, string> $row */
@@ -170,6 +174,20 @@ final class MembershipRepository
             array('%d')
         );
         unset($this->statusCache[$userId]);
+        $this->revokeFunctionalRolesOnIneligibility($userId, (string) $membership['status'], sanitize_key($row['status'] ?? (string) $membership['status']));
+    }
+
+    /** Reactivation restores normal membership access, never former responsibilities. */
+    private function revokeFunctionalRolesOnIneligibility(int $userId, string $previous, string $next): void
+    {
+        if (! MembershipAccessPolicy::grantsMemberAccess($previous) || MembershipAccessPolicy::grantsMemberAccess($next)) return;
+        $user = get_userdata($userId);
+        if (! $user) return;
+        $functional = array_merge(array_diff(array_keys(\SwissTRClub\Core\Roles\RoleDefinitions::assignable()), array('strc_developer')), array('strc_moderator','strc_editor','strc_administrator'));
+        $removed = array_values(array_intersect($user->roles, $functional));
+        if (! $removed) return;
+        update_user_meta($userId, 'strc_revoked_functional_roles', array('roles'=>$removed,'at'=>gmdate(DATE_ATOM),'reason'=>'membership-ineligible'));
+        foreach ($removed as $role) $user->remove_role($role);
     }
 
     public function linkByMemberNumbers(string $memberNumber, string $partnerMemberNumber): void

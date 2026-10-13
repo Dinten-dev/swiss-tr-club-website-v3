@@ -15,14 +15,11 @@
 
 ## Berechtigungsmodell
 
-| Rolle | Darf |
-|---|---|
-| Nutzer | Eigene Inserate und Themen verwalten |
-| Redaktor | Blogbeiträge publizieren |
-| Administrator | Inhalte, Events und Fairgate-Zugänge verwalten |
-| Developer | Alle WordPress- und STRC-Funktionen |
+Aktueller Staging-Stand vom 5. Oktober 2026: Mitgliedschaft und Funktionsrollen werden getrennt behandelt. Zwölf additive Funktionsrollen sind visuell zuweisbar; Regionen und Veranstaltungen begrenzen Zuständigkeiten. Moderationsrechte sind modulbezogen.
 
-WordPress-Administratoren erhalten alle STRC-Berechtigungen.
+Die [Rollenmatrix](../reviews/spec-completion-2026-10-05/roles-matrix.md) beschreibt die aktuelle Zuordnung. Webmaster und technische WordPress-Verwaltung erhalten keinen automatischen Zugriff auf vertrauliche Vorstandsdokumente. Restricted benötigt die separat vergebene Vorstandsrolle.
+
+Der [Prüfbericht](../reviews/spec-completion-2026-10-05/README.md) enthält getestete Grenzen und offene Fairgate-/Zahlungsprozesse. Die folgenden Produktionsbausteine beschreiben die Zielarchitektur; sie bestätigen keine Aktivierung aller Bausteine auf Staging.
 
 ## Datenhoheit
 

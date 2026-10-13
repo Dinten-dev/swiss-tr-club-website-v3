@@ -1,0 +1,46 @@
+import { readFileSync, writeFileSync, mkdtempSync, readdirSync, cpSync, rmSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { resolve, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const frontend = resolve(root, 'frontend');
+const output = resolve(root, 'wordpress/wp-content/themes/strc-app/build');
+const delta = JSON.parse(readFileSync(resolve(root, 'deployment/staging/app.bundle.delta.json'), 'utf8'));
+const manifest = JSON.parse(readFileSync(resolve(root, 'deployment/staging/manifest.json'), 'utf8'));
+const sha256 = data => createHash('sha256').update(data).digest('hex');
+const temporary = mkdtempSync(join(tmpdir(), 'strc-staging-build-'));
+
+try {
+  execFileSync(process.execPath, [resolve(frontend, 'node_modules/vite/bin/vite.js'), 'build', '--config', 'vite.wordpress.config.ts'], {
+    cwd: frontend,
+    env: { ...process.env, STRC_BUILD_DIR: temporary },
+    stdio: 'inherit',
+  });
+  const entry = resolve(temporary, 'app.js');
+  const base = readFileSync(entry, 'utf8');
+  if (sha256(base) !== delta.baseSha256) {
+    throw new Error('Source build changed. Integrate the recorded staging delta into the source before replacing the staging snapshot.');
+  }
+  const lines = base.match(/[^\n]*\n|[^\n]+$/g) || [];
+  for (const change of [...delta.changes].reverse()) {
+    lines.splice(change.start, change.remove, ...change.insert);
+  }
+  const restored = lines.join('');
+  if (sha256(restored) !== delta.targetSha256) throw new Error('Staging delta failed its checksum check.');
+  writeFileSync(entry, restored);
+  // Validate compiled entries before touching the retained deployment snapshot.
+  for (const name of readdirSync(temporary).filter(name => /\.(js|css)$/.test(name))) {
+    const record = manifest.files.find(file => file.path === `wordpress/wp-content/themes/strc-app/build/${name}`);
+    if (!record || sha256(readFileSync(resolve(temporary, name))) !== record.sha256) {
+      throw new Error(`Compiled asset differs from staging: ${name}`);
+    }
+  }
+  // Keep older chunks present on staging; every retained file is checksummed.
+  cpSync(temporary, output, { recursive: true });
+  execFileSync(process.execPath, [resolve(root, 'scripts/verify-staging-snapshot.mjs')], { stdio: 'inherit' });
+} finally {
+  rmSync(temporary, { recursive: true, force: true });
+}

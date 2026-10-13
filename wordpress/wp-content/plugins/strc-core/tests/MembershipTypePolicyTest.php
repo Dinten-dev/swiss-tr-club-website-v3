@@ -12,7 +12,7 @@ final class MembershipTypePolicyTest extends TestCase
     public function testSupportsRequiredMembershipTypes(): void
     {
         self::assertSame(
-            array('individual', 'couple_primary', 'couple_partner', 'youth'),
+            array('individual', 'couple_primary', 'couple_partner', 'youth', 'honorary'),
             array_keys(MembershipTypePolicy::labels())
         );
     }

@@ -18,6 +18,12 @@ x-wordpress-config-extra: &wordpress-config-extra |
   define('STRC_FAIRGATE_ACCESS_KEY', '${STRC_FAIRGATE_ACCESS_KEY:-}');
   define('STRC_FAIRGATE_ADMIN_URL', '${STRC_FAIRGATE_ADMIN_URL:-}');
   define('STRC_FAIRGATE_API_BASE_URL', '${STRC_FAIRGATE_API_BASE_URL:-https://fsa.fairgate.ch}');
+  define('STRC_FAIRGATE_APPLICATION_ENABLED', getenv('STRC_FAIRGATE_APPLICATION_ENABLED') === '1');
+  define('STRC_FAIRGATE_APPLICATION_FIELDS', json_decode(getenv('STRC_FAIRGATE_APPLICATION_FIELDS_JSON') ?: '{}', true) ?: []);
+  define('STRC_FAIRGATE_SYNC_FIELDS', json_decode(getenv('STRC_FAIRGATE_SYNC_FIELDS_JSON') ?: '{}', true) ?: []);
+  define('STRC_FAIRGATE_STATUS_VALUES', json_decode(getenv('STRC_FAIRGATE_STATUS_VALUES_JSON') ?: '{}', true) ?: []);
+  define('STRC_BREVO_API_KEY', getenv('STRC_BREVO_API_KEY') ?: '');
+  define('STRC_BREVO_LIST_ID', getenv('STRC_BREVO_LIST_ID') ?: '');
 
 services:
   database:
@@ -66,9 +72,21 @@ services:
       WORDPRESS_DB_NAME: ${STRC_DB_NAME:-strc_wordpress}
       WORDPRESS_DB_USER: ${STRC_DB_USER:-strc}
       WORDPRESS_DB_PASSWORD: ${STRC_DB_PASSWORD:-local-only-change-me}
+      STRC_FAIRGATE_APPLICATION_ENABLED: ${STRC_FAIRGATE_APPLICATION_ENABLED:-0}
+      STRC_FAIRGATE_APPLICATION_FIELDS_JSON: ${STRC_FAIRGATE_APPLICATION_FIELDS_JSON:-}
+      STRC_FAIRGATE_SYNC_FIELDS_JSON: ${STRC_FAIRGATE_SYNC_FIELDS_JSON:-}
+      STRC_FAIRGATE_STATUS_VALUES_JSON: ${STRC_FAIRGATE_STATUS_VALUES_JSON:-}
+      STRC_ZAHLS_ENABLED: ${STRC_ZAHLS_ENABLED:-0}
+      STRC_ZAHLS_INSTANCE: ${STRC_ZAHLS_INSTANCE:-}
+      STRC_ZAHLS_API_KEY: ${STRC_ZAHLS_API_KEY:-}
+      STRC_ZAHLS_WEBHOOK_KEY: ${STRC_ZAHLS_WEBHOOK_KEY:-}
+      STRC_ZAHLS_MODE: ${STRC_ZAHLS_MODE:-TEST}
+      STRC_ZAHLS_HOLD_MINUTES: ${STRC_ZAHLS_HOLD_MINUTES:-15}
+      STRC_EVENT_TREASURY_EMAIL: ${STRC_EVENT_TREASURY_EMAIL:-}
       WORDPRESS_CONFIG_EXTRA: *wordpress-config-extra
     volumes:
       - wordpress_core:/var/www/html
+      - wordpress_private:/var/www/private
       - ./wordpress/wp-content/plugins/strc-core:/var/www/html/wp-content/plugins/strc-core
       - ./wordpress/wp-content/themes/strc:/var/www/html/wp-content/themes/strc
       - ./scripts:/var/www/html/scripts:ro
@@ -102,9 +120,21 @@ services:
       WORDPRESS_DB_NAME: ${STRC_DB_NAME:-strc_wordpress}
       WORDPRESS_DB_USER: ${STRC_DB_USER:-strc}
       WORDPRESS_DB_PASSWORD: ${STRC_DB_PASSWORD:-local-only-change-me}
+      STRC_FAIRGATE_APPLICATION_ENABLED: ${STRC_FAIRGATE_APPLICATION_ENABLED:-0}
+      STRC_FAIRGATE_APPLICATION_FIELDS_JSON: ${STRC_FAIRGATE_APPLICATION_FIELDS_JSON:-}
+      STRC_FAIRGATE_SYNC_FIELDS_JSON: ${STRC_FAIRGATE_SYNC_FIELDS_JSON:-}
+      STRC_FAIRGATE_STATUS_VALUES_JSON: ${STRC_FAIRGATE_STATUS_VALUES_JSON:-}
+      STRC_ZAHLS_ENABLED: ${STRC_ZAHLS_ENABLED:-0}
+      STRC_ZAHLS_INSTANCE: ${STRC_ZAHLS_INSTANCE:-}
+      STRC_ZAHLS_API_KEY: ${STRC_ZAHLS_API_KEY:-}
+      STRC_ZAHLS_WEBHOOK_KEY: ${STRC_ZAHLS_WEBHOOK_KEY:-}
+      STRC_ZAHLS_MODE: ${STRC_ZAHLS_MODE:-TEST}
+      STRC_ZAHLS_HOLD_MINUTES: ${STRC_ZAHLS_HOLD_MINUTES:-15}
+      STRC_EVENT_TREASURY_EMAIL: ${STRC_EVENT_TREASURY_EMAIL:-}
       WORDPRESS_CONFIG_EXTRA: *wordpress-config-extra
     volumes:
       - wordpress_core:/var/www/html
+      - wordpress_private:/var/www/private
       - ./wordpress/wp-content/plugins/strc-core:/var/www/html/wp-content/plugins/strc-core
       - ./wordpress/wp-content/themes/strc:/var/www/html/wp-content/themes/strc
       - ./scripts:/var/www/html/scripts:ro
@@ -127,4 +157,5 @@ volumes:
   database_data:
   redis_data:
   wordpress_core:
+  wordpress_private:
   wordpress_uploads:

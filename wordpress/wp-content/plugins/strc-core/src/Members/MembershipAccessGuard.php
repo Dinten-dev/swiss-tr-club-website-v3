@@ -27,10 +27,12 @@ final class MembershipAccessGuard
     {
         unset($requiredCapabilities, $arguments);
 
-        if (! in_array('strc_member', $user->roles, true)) {
+        $functionalRoles = array_merge(array_diff(array_keys(\SwissTRClub\Core\Roles\RoleDefinitions::assignable()), array('strc_developer')), array('strc_moderator'));
+        $hasMemberRole = in_array('strc_member', $user->roles, true);
+        if (! $hasMemberRole && ! array_intersect($functionalRoles, $user->roles)) {
             return $allCapabilities;
         }
-        if (MembershipAccessPolicy::grantsMemberAccess($this->memberships->statusForUser($user->ID))) {
+        if ($hasMemberRole && MembershipAccessPolicy::grantsMemberAccess($this->memberships->statusForUser($user->ID))) {
             return $allCapabilities;
         }
 

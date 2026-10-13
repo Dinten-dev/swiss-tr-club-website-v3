@@ -1,0 +1,2766 @@
+{
+  "home": {
+    "title": "Startseite",
+    "route": "#",
+    "fields": [
+      {
+        "key": "eyebrow",
+        "label": "Lead – Oberzeile",
+        "type": "text",
+        "default": "Swiss TR-Club · Seit 1975"
+      },
+      {
+        "key": "title",
+        "label": "Lead – Überschrift",
+        "type": "text",
+        "default": "Leidenschaft, die verbindet."
+      },
+      {
+        "key": "heroImage",
+        "label": "Lead – Hintergrundbild",
+        "type": "image",
+        "default": "/club/scheinwerfer.jpg"
+      },
+      {
+        "key": "intro",
+        "label": "Einstieg – Kurztext",
+        "type": "rich",
+        "default": "<p>Gemeinsam unterwegs. Mit unseren Triumphs und den Menschen dahinter. Entdecke Ausfahrten, geteiltes Wissen und ein Clubleben, das Generationen verbindet.</p>"
+      },
+      {
+        "key": "mission",
+        "label": "Leitbild – aufklappbarer Text",
+        "type": "rich",
+        "default": "<p>Wir pflegen ein aktives und abwechslungsreiches Clubleben, das Menschen mit ihrer gemeinsamen Begeisterung für Triumph TR-Fahrzeuge verbindet. Im Mittelpunkt stehen die Freude am Fahren, die Leidenschaft für klassische Automobile und eine lebendige Gemeinschaft.</p>\n      <p>Mit Ausfahrten, Veranstaltungen und persönlichen Begegnungen schaffen wir bleibende Erlebnisse und fördern den offenen, generationenübergreifenden Austausch. Langjährige Enthusiasten und neue Interessierte sind gleichermassen willkommen.</p>\n      <p>Freundschaft, Respekt und gegenseitige Unterstützung prägen unser Vereinsleben – mit dem gemeinsamen Ziel, die Faszination unserer TRs lebendig zu halten und weiterzugeben.</p>"
+      },
+      {
+        "key": "heroAction",
+        "label": "Einstieg – Hauptlink",
+        "type": "text",
+        "default": "Ausfahrten entdecken"
+      },
+      {
+        "key": "heroSecondaryAction",
+        "label": "Einstieg – Link zum Club",
+        "type": "text",
+        "default": "Den Club kennenlernen"
+      },
+      {
+        "key": "photoLabel",
+        "label": "Einstieg – Bildbereich",
+        "type": "text",
+        "default": "Einblicke ins Clubleben"
+      },
+      {
+        "key": "missionSummary",
+        "label": "Leitbild – Kurzfassung",
+        "type": "text",
+        "default": "Die Freude am Fahren bringt uns zusammen. Freundschaft und gegenseitige Unterstützung halten uns zusammen."
+      },
+      {
+        "key": "missionToggle",
+        "label": "Leitbild – Aufklappen",
+        "type": "text",
+        "default": "Was uns verbindet"
+      },
+      {
+        "key": "newsLabel",
+        "label": "Kachel Neuigkeiten",
+        "type": "text",
+        "default": "Neuigkeiten"
+      },
+      {
+        "key": "agendaLabel",
+        "label": "Kachel Agenda",
+        "type": "text",
+        "default": "Agenda"
+      },
+      {
+        "key": "activityLabel",
+        "label": "Kachel Aktivitäten",
+        "type": "text",
+        "default": "Member activity"
+      },
+      {
+        "key": "activityTitle",
+        "label": "Aktivitäten – Titel",
+        "type": "text",
+        "default": "Unser Club lebt vom Mitmachen"
+      },
+      {
+        "key": "activityText",
+        "label": "Aktivitäten – Kurztext",
+        "type": "text",
+        "default": "Fotos teilen, Fragen stellen und Erfahrungen austauschen."
+      },
+      {
+        "key": "newsTitle",
+        "label": "News – Überschrift",
+        "type": "text",
+        "default": "Neues aus dem Clubleben."
+      },
+      {
+        "key": "newsIntro",
+        "label": "News – Einleitung",
+        "type": "text",
+        "default": "Geschichten, Rückblicke und Neuigkeiten aus dem Swiss TR-Club."
+      },
+      {
+        "key": "memberTitle",
+        "label": "Mitglieder – Überschrift",
+        "type": "text",
+        "default": "Dein Club auf einen Blick."
+      },
+      {
+        "key": "memberIntro",
+        "label": "Mitglieder – Einleitung",
+        "type": "text",
+        "default": "Termine entdecken, das TR-Magazin lesen und mit dem Club in Verbindung bleiben."
+      },
+      {
+        "key": "sponsorsTitle",
+        "label": "Partner – Überschrift",
+        "type": "text",
+        "default": "Gemeinsam mehr bewegen."
+      },
+      {
+        "key": "sponsorsIntro",
+        "label": "Partner – Einleitung",
+        "type": "text",
+        "default": "Unterstützer des Swiss TR-Clubs."
+      },
+      {
+        "key": "photos",
+        "label": "Einstieg – Bilder: links Triumphs, rechts Ausflüge",
+        "type": "images",
+        "default": [
+          {
+            "url": "/club/club-morgenlicht.jpg",
+            "alt": "Club-Roadster im Morgenlicht vor einer Bergkulisse"
+          },
+          {
+            "url": "/club/alpenstrasse.jpg",
+            "alt": "Serpentinen einer Alpenstrasse aus der Vogelperspektive"
+          },
+          {
+            "url": "/club/roadster-am-see.jpg",
+            "alt": "Triumph-Roadster bei einem Treffen am See"
+          },
+          {
+            "url": "/club/triumph-details.jpg",
+            "alt": "Rote Triumph-Roadster und glänzende Chromdetails"
+          },
+          {
+            "url": "/club/tr6-detail.jpg",
+            "alt": "Rotes Triumph-TR6-Heck mit britischem Emblem"
+          },
+          {
+            "url": "/club/treffen-am-see.jpg",
+            "alt": "Roadster und Besucher auf einer Wiese am See mit Bergen im Hintergrund"
+          },
+          {
+            "url": "/club/abend-am-see.jpg",
+            "alt": "Triumph-Roadster am See im Abendlicht"
+          },
+          {
+            "url": "/club/morgenlicht.jpg",
+            "alt": "Sonnenlicht auf der Motorhaube eines offenen Roadsters"
+          },
+          {
+            "url": "/club/scheinwerfer.jpg",
+            "alt": "Scheinwerfer und Chromstossstange eines roten Triumph"
+          },
+          {
+            "url": "/club/passfahrt.jpg",
+            "alt": "Mehrere Triumph-Roadster auf einer kurvigen Bergstrasse"
+          },
+          {
+            "url": "/club/motorraum.jpg",
+            "alt": "Motorraum eines roten klassischen Roadsters"
+          },
+          {
+            "url": "/club/reisegepaeck.jpg",
+            "alt": "Heck eines hellblauen Triumph mit Chromgepäckträger"
+          }
+        ]
+      },
+      {
+        "key": "partners",
+        "label": "Sponsoren",
+        "type": "partners",
+        "default": [
+          {
+            "image": "/club/sponsors/1.png",
+            "name": "BELMOT Swiss",
+            "url": "http://www.belmot.ch"
+          },
+          {
+            "image": "/club/sponsors/2.png",
+            "name": "British Classic Cars AG",
+            "url": "http://www.british-classics.ch"
+          },
+          {
+            "image": "/club/sponsors/3.png",
+            "name": "Emil Frey Classics AG",
+            "url": "https://www.emilfreyclassics.ch/"
+          },
+          {
+            "image": "/club/sponsors/4.png",
+            "name": "FRANKS Originale",
+            "url": "http://franks-originale.ch"
+          },
+          {
+            "image": "/club/sponsors/5.png",
+            "name": "Garage Messmer GmbH",
+            "url": "http://www.garagemessmer.ch"
+          },
+          {
+            "image": "/club/sponsors/6.png",
+            "name": "Jaggi Autosattlerei GmbH",
+            "url": "http://www.autosattlerei-jaggi.ch/oldtimer"
+          },
+          {
+            "image": "/club/sponsors/7.png",
+            "name": "Jäggi Classics",
+            "url": "http://jaeggi-classics.ch"
+          },
+          {
+            "image": "/club/sponsors/8.png",
+            "name": "West-Classic",
+            "url": "http://www.west-classic.ch/"
+          }
+        ]
+      },
+      {
+        "key": "clubLandingTitle",
+        "label": "Clubkachel – Titel",
+        "type": "text",
+        "default": "Der Club"
+      },
+      {
+        "key": "clubLandingText",
+        "label": "Clubkachel – Text",
+        "type": "text",
+        "default": "Organisation, Leitbild, Regionen und die Triumph TR-Modelle."
+      },
+      {
+        "key": "agendaLandingTitle",
+        "label": "Eventkachel – Titel",
+        "type": "text",
+        "default": "Events & Agenda"
+      },
+      {
+        "key": "agendaLandingText",
+        "label": "Eventkachel – Text",
+        "type": "text",
+        "default": "Ausfahrten, regionale Treffen und gemeinsame Erlebnisse."
+      },
+      {
+        "key": "marketLandingTitle",
+        "label": "Marktplatzkachel – Titel",
+        "type": "text",
+        "default": "Marktplatz"
+      },
+      {
+        "key": "marketLandingText",
+        "label": "Marktplatzkachel – Text",
+        "type": "text",
+        "default": "Fahrzeuge, Ersatzteile und Zubehör entdecken und weitergeben."
+      },
+      {
+        "key": "historyLabel",
+        "label": "Kachel Clubgeschichte – Oberzeile",
+        "type": "text",
+        "default": "Club-Geschichte"
+      },
+      {
+        "key": "historyTitle",
+        "label": "Kachel Clubgeschichte – Titel",
+        "type": "text",
+        "default": "Wie alles begann."
+      },
+      {
+        "key": "historyText",
+        "label": "Kachel Clubgeschichte – Kurztext",
+        "type": "text",
+        "default": "Vier Triumph-Fans, eine Idee und eine Leidenschaft, die seit 1975 verbindet."
+      },
+      {
+        "key": "historyYear",
+        "label": "Kachel Clubgeschichte – Jahreszahl",
+        "type": "text",
+        "default": "1975"
+      },
+      {
+        "key": "dashboardTitle",
+        "label": "Dashboard-Verweis – Titel",
+        "type": "text",
+        "default": "Dein Club. Auch zwischen den Ausfahrten."
+      },
+      {
+        "key": "dashboardText",
+        "label": "Dashboard-Verweis – Kurztext",
+        "type": "text",
+        "default": "Termine planen, Erfahrungen teilen und mit anderen Mitgliedern in Verbindung bleiben."
+      }
+    ]
+  },
+  "club": {
+    "title": "Club – Übersicht und Leitbild",
+    "route": "#club",
+    "fields": [
+      {
+        "key": "eyebrow",
+        "label": "Oberzeile",
+        "type": "text",
+        "default": "Der Club"
+      },
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Gemeinsam unterwegs seit 1975."
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Der Swiss TR-Club verbindet Menschen, die britische Triumph-Roadster fahren, pflegen und lieben."
+      },
+      {
+        "key": "missionLabel",
+        "label": "Leitbild – Oberzeile",
+        "type": "text",
+        "default": "Unser Leitbild"
+      },
+      {
+        "key": "missionTitle",
+        "label": "Leitbild – Überschrift",
+        "type": "text",
+        "default": "Was uns verbindet."
+      },
+      {
+        "key": "body",
+        "label": "Vollständiges Leitbild",
+        "type": "rich",
+        "default": "<p>Wir pflegen ein aktives und abwechslungsreiches Clubleben, das Menschen mit der gemeinsamen Begeisterung für die Triumph TR-Fahrzeuge verbindet. Im Mittelpunkt stehen die Freude am Fahren, die Leidenschaft für klassische Automobile und die Pflege einer lebendigen Gemeinschaft.</p><p>Mit gemeinsamen Ausfahrten, Veranstaltungen und persönlichen Begegnungen schaffen wir bleibende Erlebnisse und fördern den Austausch unter Gleichgesinnten. Dabei verbinden wir Tradition, Fahrspass und technische Begeisterung mit Offenheit, Kollegialität und gegenseitiger Unterstützung.</p><p>Unser Club steht für einen offenen und aktiven Dialog über Generationen hinweg. Wir möchten sowohl langjährige Enthusiasten als auch neue Interessierte willkommen heissen und ein Umfeld schaffen, in dem sich Menschen aller Altersklassen wohlfühlen und ihre Begeisterung für TRs teilen können.</p><p>Die Freude an unseren TRs bildet das Herzstück unseres Vereinslebens – verbunden mit Freundschaft, Respekt und dem gemeinsamen Ziel, die Faszination der Fahrzeuge lebendig zu halten und weiterzugeben.</p>"
+      },
+      {
+        "key": "facts",
+        "label": "Club-Fakten",
+        "type": "rich",
+        "default": "<p><strong>1975</strong> – Gründung des Clubs</p><p><strong>8</strong> – Regionen in der Schweiz</p><p><strong>TR</strong> – Gemeinsame Leidenschaft</p><p><strong>2026</strong> – Neue digitale Plattform</p>"
+      },
+      {
+        "key": "joinTitle",
+        "label": "Mitgliedschaft – Überschrift",
+        "type": "text",
+        "default": "Ihr Triumph gehört dazu."
+      },
+      {
+        "key": "joinText",
+        "label": "Mitgliedschaft – Text",
+        "type": "rich",
+        "default": "<p>Profitieren Sie von Veranstaltungen, Wissen und Gemeinschaft.</p>"
+      },
+      {
+        "key": "organisationText",
+        "label": "Kachel Organisation",
+        "type": "text",
+        "default": "Vorstand, Aufgaben und Ansprechpersonen."
+      },
+      {
+        "key": "missionText",
+        "label": "Kachel Leitbild",
+        "type": "text",
+        "default": "Unsere Werte und die Freude am gemeinsamen Unterwegssein."
+      },
+      {
+        "key": "regionsText",
+        "label": "Kachel Regionen",
+        "type": "text",
+        "default": "Treffen und Kontakte in Ihrer Nähe."
+      },
+      {
+        "key": "membershipText",
+        "label": "Kachel Anmeldung",
+        "type": "text",
+        "default": "Den Club kennenlernen und Mitglied werden."
+      },
+      {
+        "key": "modelsTitle",
+        "label": "TR-Box – Titel",
+        "type": "text",
+        "default": "Die Triumph TRs"
+      },
+      {
+        "key": "modelsText",
+        "label": "TR-Box – Text",
+        "type": "text",
+        "default": "Entdecken Sie die Modelle und ihre Geschichten."
+      },
+      {
+        "key": "triungstersText",
+        "label": "Kachel TRiungsters",
+        "type": "text",
+        "default": "Die nächste Generation im Swiss TR-Club."
+      },
+      {
+        "key": "landingBody",
+        "label": "Landingpage – freier Inhalt",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "landingImage",
+        "label": "Landingpage – Bild",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "landingImageFrame",
+        "label": "Landingpage – Bild: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "landingImage"
+      },
+      {
+        "key": "landingImageAlt",
+        "label": "Landingpage – Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "landingImageCaption",
+        "label": "Landingpage – Bildlegende",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "historyTitle",
+        "label": "Kachel Club-Geschichte – Titel",
+        "type": "text",
+        "default": "Club-Geschichte"
+      },
+      {
+        "key": "historyText",
+        "label": "Kachel Club-Geschichte – Beschreibung",
+        "type": "text",
+        "default": "Unsere Anfänge, gemeinsame Erlebnisse und mehr als fünf Jahrzehnte Leidenschaft."
+      },
+      {
+        "key": "missionImage",
+        "label": "Leitbild: Bild rechts",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "missionImageFrame",
+        "label": "Leitbild: Bild rechts: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "missionImage"
+      },
+      {
+        "key": "missionImageAlt",
+        "label": "Leitbild: Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "joinEyebrow",
+        "label": "Mitglied werden: rote Überschrift",
+        "type": "text",
+        "default": "Mitglied werden"
+      },
+      {
+        "key": "joinButton",
+        "label": "Mitglied werden: Button",
+        "type": "text",
+        "default": "Zur Anmeldung"
+      },
+      {
+        "key": "organisationTitle",
+        "label": "Organisation: Kacheltitel",
+        "type": "text",
+        "default": "Organisation"
+      },
+      {
+        "key": "missionCardTitle",
+        "label": "Leitbild: Kacheltitel",
+        "type": "text",
+        "default": "Leitbild"
+      },
+      {
+        "key": "regionsTitle",
+        "label": "Regionen: Kacheltitel",
+        "type": "text",
+        "default": "Regionen"
+      },
+      {
+        "key": "triungstersTitle",
+        "label": "TRiungsters: Kacheltitel",
+        "type": "text",
+        "default": "TRiungsters"
+      }
+    ]
+  },
+  "agenda": {
+    "title": "Agenda – Landingpage",
+    "route": "#agenda",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Agenda"
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung und Filtertitel (drei Bereiche mit | trennen)",
+        "type": "text",
+        "default": "Clubausfahrten, regionale Treffen und internationale Begegnungen."
+      },
+      {
+        "key": "clubTitle",
+        "label": "Clubkachel – Titel",
+        "type": "text",
+        "default": "Club Schweiz"
+      },
+      {
+        "key": "clubText",
+        "label": "Clubkachel – Text",
+        "type": "text",
+        "default": "Gemeinsam unterwegs mit dem ganzen Club."
+      },
+      {
+        "key": "regionalTitle",
+        "label": "Regionskachel – Titel",
+        "type": "text",
+        "default": "Regionale Treffen"
+      },
+      {
+        "key": "regionalText",
+        "label": "Regionskachel – Text",
+        "type": "text",
+        "default": "Persönliche Begegnungen in Ihrer Nähe."
+      },
+      {
+        "key": "externalTitle",
+        "label": "Externe Kachel – Titel",
+        "type": "text",
+        "default": "Externe Events"
+      },
+      {
+        "key": "externalText",
+        "label": "Externe Kachel – Text",
+        "type": "text",
+        "default": "Weitere Treffen rund um klassische Fahrzeuge."
+      },
+      {
+        "key": "landingBody",
+        "label": "Landingpage – freier Inhalt",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "landingImage",
+        "label": "Landingpage – Bild",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "landingImageFrame",
+        "label": "Landingpage – Bild: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "landingImage"
+      },
+      {
+        "key": "landingImageAlt",
+        "label": "Landingpage – Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "landingImageCaption",
+        "label": "Landingpage – Bildlegende",
+        "type": "text",
+        "default": ""
+      }
+    ]
+  },
+  "regions": {
+    "title": "Regionen – Landingpage",
+    "route": "#regionen",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Unsere Regionen"
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Lokal präsent – lokal aktiv."
+      },
+      {
+        "key": "landingBody",
+        "label": "Landingpage – freier Inhalt",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "landingImage",
+        "label": "Landingpage – Bild",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "landingImageFrame",
+        "label": "Landingpage – Bild: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "landingImage"
+      },
+      {
+        "key": "landingImageAlt",
+        "label": "Landingpage – Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "landingImageCaption",
+        "label": "Landingpage – Bildlegende",
+        "type": "text",
+        "default": ""
+      }
+    ]
+  },
+  "market": {
+    "title": "Marktplatz – Landingpage",
+    "route": "#marktplatz",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Von Mitglied zu Mitglied."
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Teile, Fahrzeuge und Zubehör. Inserat erstellen, Interessenten finden und direkt miteinander Kontakt aufnehmen."
+      },
+      {
+        "key": "shopTitle",
+        "label": "Shopkachel – Titel",
+        "type": "text",
+        "default": "TR-Shop"
+      },
+      {
+        "key": "shopText",
+        "label": "Shopkachel – Text",
+        "type": "text",
+        "default": "Clubartikel und Informationen zur Bestellung."
+      },
+      {
+        "key": "partsTitle",
+        "label": "Teilekachel – Titel",
+        "type": "text",
+        "default": "Ersatzteile"
+      },
+      {
+        "key": "partsText",
+        "label": "Teilekachel – Text",
+        "type": "text",
+        "default": "Passendes für Pflege, Reparatur und Restauration."
+      },
+      {
+        "key": "partsGuide",
+        "label": "Ersatzteile – Anleitung",
+        "type": "text",
+        "default": "Wähle ein Triumph-Modell und suche nach einem Teil oder Stichwort. Beide Angaben werden gemeinsam berücksichtigt. Jeder Eintrag in der Liste öffnet das vollständige Inserat."
+      },
+      {
+        "key": "carsTitle",
+        "label": "Fahrzeugkachel – Titel",
+        "type": "text",
+        "default": "Fahrzeuge"
+      },
+      {
+        "key": "carsText",
+        "label": "Fahrzeugkachel – Text",
+        "type": "text",
+        "default": "Triumph-Roadster mit Geschichte suchen und anbieten."
+      },
+      {
+        "key": "landingBody",
+        "label": "Landingpage – freier Inhalt",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "landingImage",
+        "label": "Landingpage – Bild",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "landingImageFrame",
+        "label": "Landingpage – Bild: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "landingImage"
+      },
+      {
+        "key": "landingImageAlt",
+        "label": "Landingpage – Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "landingImageCaption",
+        "label": "Landingpage – Bildlegende",
+        "type": "text",
+        "default": ""
+      }
+    ]
+  },
+  "forum": {
+    "title": "Forum – Einleitung",
+    "route": "#forum",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Forum"
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Fragen stellen, Erfahrungen teilen und Dateien austauschen."
+      }
+    ]
+  },
+  "gallery": {
+    "title": "Galerie – Einleitung",
+    "route": "#galerie",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Galerie"
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Bilder von Ausfahrten, Treffen und Triumph-Fahrzeugen teilen."
+      }
+    ]
+  },
+  "library": {
+    "title": "Bibliothek – Einleitung",
+    "route": "#bibliothek",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Bibliothek"
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Dokumente, Magazine und technisches Wissen miteinander teilen."
+      }
+    ]
+  },
+  "members": {
+    "title": "Dashboard und Mitglieder-Login",
+    "route": "#mitglieder",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Willkommen zurück."
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Anmelden und alle Clubaktivitäten an einem Ort sehen."
+      },
+      {
+        "key": "welcome",
+        "label": "Dashboard – Begrüssung",
+        "type": "text",
+        "default": "Willkommen,"
+      },
+      {
+        "key": "dashboardIntro",
+        "label": "Dashboard – Einleitung",
+        "type": "rich",
+        "default": "<p>Ihr Zugang zum Clubleben: Termine entdecken, Erfahrungen teilen und in Verbindung bleiben.</p>"
+      },
+      {
+        "key": "membershipTitle",
+        "label": "Dashboard – Mitgliedschaftstitel",
+        "type": "text",
+        "default": "Mitgliedschaft"
+      },
+      {
+        "key": "membershipText",
+        "label": "Dashboard – Mitgliedschaftshinweis",
+        "type": "rich",
+        "default": "<p>Ihre Mitgliedsdaten werden direkt durch den Swiss TR-Club verwaltet.</p>"
+      },
+      {
+        "key": "newsTitle",
+        "label": "Dashboard – Infobox-Titel",
+        "type": "text",
+        "default": "Aktuell"
+      },
+      {
+        "key": "newsBody",
+        "label": "Dashboard – Infobox-Inhalt",
+        "type": "rich",
+        "default": "<ul><li>Clubtermine in der Agenda entdecken</li><li>Eigene Inserate im Marktplatz erstellen</li><li>Fotos, Dokumente und Erfahrungen mit Mitgliedern teilen</li></ul>"
+      }
+    ]
+  },
+  "contact": {
+    "title": "Kontakt & Impressum",
+    "route": "#kontakt",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Kontakt & Impressum"
+      },
+      {
+        "key": "body",
+        "label": "Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Datenschutz",
+    "route": "#datenschutz",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Datenschutz"
+      },
+      {
+        "key": "body",
+        "label": "Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "statutes": {
+    "title": "Statuten",
+    "route": "#statuten",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Statuten"
+      },
+      {
+        "key": "body",
+        "label": "Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "global": {
+    "title": "Logo, Navigation und Fusszeile",
+    "route": "#",
+    "fields": [
+      {
+        "key": "name",
+        "label": "Clubname",
+        "type": "text",
+        "default": "Swiss TR-Club"
+      },
+      {
+        "key": "tagline",
+        "label": "Logo-Zusatz",
+        "type": "text",
+        "default": "Passion since 1975"
+      },
+      {
+        "key": "logo",
+        "label": "Clublogo",
+        "type": "image",
+        "default": "/strc-logo.png"
+      },
+      {
+        "key": "logoFrame",
+        "label": "Clublogo: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "logo"
+      },
+      {
+        "key": "footer",
+        "label": "Text in der Fusszeile",
+        "type": "text",
+        "default": "Freude an britischen Roadstern seit 1975."
+      },
+      {
+        "key": "navClub",
+        "label": "Tab Club",
+        "type": "text",
+        "default": "Club"
+      },
+      {
+        "key": "navAgenda",
+        "label": "Tab Agenda",
+        "type": "text",
+        "default": "Agenda"
+      },
+      {
+        "key": "navRegions",
+        "label": "Tab Regionen",
+        "type": "text",
+        "default": "Regionen"
+      },
+      {
+        "key": "navMarket",
+        "label": "Tab Marktplatz",
+        "type": "text",
+        "default": "Marktplatz"
+      },
+      {
+        "key": "navLogin",
+        "label": "Tab Login",
+        "type": "text",
+        "default": "Mitglieder-Login"
+      }
+    ]
+  },
+  "organisation": {
+    "title": "Organisation",
+    "route": "#organisation",
+    "template": "article",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "Organisation"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "lead",
+        "label": "Lead über dem Organisationsbild",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "sidebarTitle",
+        "label": "Infobox – Titel",
+        "type": "text",
+        "default": "Auf einen Blick"
+      },
+      {
+        "key": "sidebar",
+        "label": "Infobox – Kontakte und Aufgaben",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "boardTitle",
+        "label": "Vorstand – Gruppentitel",
+        "type": "text",
+        "default": "Vorstand"
+      },
+      {
+        "key": "boardPortraits",
+        "label": "Vorstand – Porträts",
+        "type": "people",
+        "maxItems": 7,
+        "default": [
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          }
+        ]
+      },
+      {
+        "key": "functionsTitle",
+        "label": "Weitere Funktionen – Gruppentitel",
+        "type": "text",
+        "default": "Weitere Funktionen"
+      },
+      {
+        "key": "functionsPortraits",
+        "label": "Weitere Funktionen – Porträts",
+        "type": "people",
+        "maxItems": 5,
+        "default": [
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          },
+          {
+            "image": "",
+            "name": "",
+            "role": ""
+          }
+        ]
+      }
+    ]
+  },
+  "membership": {
+    "title": "Anmeldung",
+    "route": "#anmeldung",
+    "template": "article",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "Anmeldung"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "sidebarTitle",
+        "label": "Infobox – Titel",
+        "type": "text",
+        "default": "Mitglied werden"
+      },
+      {
+        "key": "sidebar",
+        "label": "Infobox – Mitgliedschaft und Beiträge",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "shop": {
+    "title": "TR-Shop",
+    "route": "#tr-shop",
+    "template": "article",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR-Shop"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "sidebarTitle",
+        "label": "Infobox – Titel",
+        "type": "text",
+        "default": "Kontakt und Bestellung"
+      },
+      {
+        "key": "sidebar",
+        "label": "Infobox – Bestellinformationen",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr2": {
+    "title": "TR2",
+    "route": "#tr-modelle/tr2",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR2"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr3": {
+    "title": "TR3",
+    "route": "#tr-modelle/tr3",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR3"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr3a": {
+    "title": "TR3A",
+    "route": "#tr-modelle/tr3a",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR3A"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr4": {
+    "title": "TR4",
+    "route": "#tr-modelle/tr4",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR4"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr4a": {
+    "title": "TR4A",
+    "route": "#tr-modelle/tr4a",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR4A"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr5": {
+    "title": "TR5",
+    "route": "#tr-modelle/tr5",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR5"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr250": {
+    "title": "TR250",
+    "route": "#tr-modelle/tr250",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR250"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr6": {
+    "title": "TR6",
+    "route": "#tr-modelle/tr6",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR6"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr7": {
+    "title": "TR7",
+    "route": "#tr-modelle/tr7",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR7"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "model-tr8": {
+    "title": "TR8",
+    "route": "#tr-modelle/tr8",
+    "template": "vehicle",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TR8"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Ein Platz für die Geschichte, Besonderheiten und Technik dieses Triumphs."
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<p>Hier entsteht das Modellporträt: mit einer kurzen Einführung, besonderen Merkmalen und Tipps aus dem Club. Die Redaktion ergänzt den endgültigen Text.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "years",
+        "label": "Bauzeit",
+        "type": "text",
+        "default": "Beispiel: 1960–1965",
+        "legacy": true
+      },
+      {
+        "key": "engine",
+        "label": "Motor",
+        "type": "text",
+        "default": "Beispiel: Reihenmotor",
+        "legacy": true
+      },
+      {
+        "key": "displacement",
+        "label": "Hubraum",
+        "type": "text",
+        "default": "Beispiel: 2’000 cm³",
+        "legacy": true
+      },
+      {
+        "key": "power",
+        "label": "Leistung",
+        "type": "text",
+        "default": "Beispiel: 100 PS",
+        "legacy": true
+      },
+      {
+        "key": "transmission",
+        "label": "Getriebe",
+        "type": "text",
+        "default": "Beispiel: 4-Gang-Schaltgetriebe",
+        "legacy": true
+      },
+      {
+        "key": "production",
+        "label": "Stückzahl",
+        "type": "text",
+        "default": "Beispiel: 10’000 Fahrzeuge",
+        "legacy": true
+      },
+      {
+        "key": "factsNote",
+        "label": "Hinweis zu Varianten / Quellen",
+        "type": "rich",
+        "default": "<p>Alle Fahrzeugangaben sind unverbindliche Musterwerte. Die tatsächlichen Daten und Quellen werden durch die Redaktion ergänzt.</p>",
+        "legacy": true
+      },
+      {
+        "key": "exampleNote",
+        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "type": "text",
+        "default": "Beispielansicht · Daten noch nicht bestätigt"
+      },
+      {
+        "key": "factsTitle",
+        "label": "Überschrift der Faktenbox",
+        "type": "text",
+        "default": "Fahrzeugdaten"
+      },
+      {
+        "key": "factsBody",
+        "label": "Faktenbox: frei beschreibbarer Inhalt",
+        "type": "rich",
+        "default": ""
+      }
+    ]
+  },
+  "triungsters": {
+    "title": "TRiungsters",
+    "route": "#triungsters",
+    "template": "article",
+    "initialStatus": "draft",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "TRiungsters"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "image",
+        "label": "Bild oben",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageFrame",
+        "label": "Bild oben: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "image"
+      },
+      {
+        "key": "imageAlt",
+        "label": "Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bildlegende / Bildnachweis",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "sidebarTitle",
+        "label": "Infobox – Titel",
+        "type": "text",
+        "default": "Auf einen Blick"
+      },
+      {
+        "key": "sidebar",
+        "label": "Infobox – Kontakte und weitere Informationen",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "contactName",
+        "label": "Kontakt: Name",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "contactRole",
+        "label": "Kontakt: Funktion",
+        "type": "text",
+        "default": "Regionalleitung"
+      },
+      {
+        "key": "contactImage",
+        "label": "Kontakt: Portrait",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "contactImageFrame",
+        "label": "Kontakt: Portrait: Einpassen",
+        "type": "imageFrame",
+        "default": "contain|50|50",
+        "imageKey": "contactImage"
+      },
+      {
+        "key": "contactPhone",
+        "label": "Kontakt: Telefon",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "contactEmail",
+        "label": "Kontakt: E-Mail",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "meetName",
+        "label": "Treffpunkt: Name",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "meetAddress",
+        "label": "Treffpunkt: Adresse",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "meetSchedule",
+        "label": "Treffpunkt: Rhythmus und Uhrzeit (zwei Zeilen möglich)",
+        "type": "textarea",
+        "default": ""
+      },
+      {
+        "key": "meetDates",
+        "label": "Nächste Treffen / Stammtische",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "whatsappUrl",
+        "label": "WhatsApp: Beitrittslink",
+        "type": "url",
+        "default": ""
+      },
+      {
+        "key": "whatsappQr",
+        "label": "WhatsApp: QR-Code als Bild",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "news",
+        "label": "Regionale Neuigkeiten",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "eventBody",
+        "label": "Regionale Veranstaltung: Zusatzinformationen",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "toolbarText",
+        "label": "Text oberhalb der Kontaktkachel",
+        "type": "text",
+        "default": "Die nächste Generation im Swiss TR-Club"
+      }
+    ]
+  },
+  "history": {
+    "title": "Club-Geschichte",
+    "route": "#club-geschichte",
+    "template": "article",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Seitentitel",
+        "type": "text",
+        "default": "Unsere Club-Geschichte"
+      },
+      {
+        "key": "intro",
+        "label": "Kurze Einleitung",
+        "type": "text",
+        "default": "Seit 1975 verbindet uns die Begeisterung für Triumph."
+      },
+      {
+        "key": "image",
+        "label": "Logo links",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "imageAlt",
+        "label": "Logo links – Beschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "imageCaption",
+        "label": "Bisherige Bildlegende (wird auf dieser Seite nicht angezeigt)",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "secondaryLogo",
+        "label": "Logo rechts",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "secondaryLogoAlt",
+        "label": "Logo rechts – Beschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
+        "key": "body",
+        "label": "Text – erste Spalte",
+        "type": "rich",
+        "default": "<h2>Eine gemeinsame Idee</h2><p>Als Ersatzteile in der Schweiz immer schwieriger erhältlich wurden, gründeten vier Triumph-Enthusiasten 1975 die TR-Register Swiss-Group. Aus einer praktischen Herausforderung entstand eine Gemeinschaft.</p><h2>Mehr Zuspruch als erwartet</h2><p>Für den Anfang hatten sich die Gründer 15 Mitglieder gewünscht. Bereits im ersten Jahr zählte der Club 60 Mitglieder.</p><h2>50 Jahre gemeinsam unterwegs</h2><p>2025 feierte der Swiss TR-Club sein 50-jähriges Bestehen mit mehr als 300 Mitgliedern. Die gemeinsame Leidenschaft für die britischen Roadster verbindet bis heute.</p>"
+      },
+      {
+        "key": "bodySecondary",
+        "label": "Text – zweite Spalte (optional; leer = eine Spalte)",
+        "type": "rich",
+        "default": ""
+      },
+      {
+        "key": "sidebarTitle",
+        "label": "Statistik – Titel",
+        "type": "text",
+        "default": "Die Anfänge auf einen Blick"
+      },
+      {
+        "key": "sidebar",
+        "label": "Statistik – Zahlen, Meilensteine und Quellen",
+        "type": "rich",
+        "default": "<p><strong>1975</strong><br>Gründung der TR-Register Swiss-Group</p><p><strong>4 Gründer</strong><br>Gemeinsam gegen den Ersatzteilmangel</p><p><strong>60 Mitglieder</strong><br>Bereits im ersten Clubjahr</p><p><strong>2025</strong><br>50-jähriges Jubiläum</p>"
+      },
+      {
+        "key": "photos",
+        "label": "Einstieg – Bilder: links Triumphs, rechts Ausflüge",
+        "type": "storyImages",
+        "default": [
+          {
+            "url": "/club/treffen-am-see.jpg",
+            "alt": "Club-Impression: Roadster bei einem Treffen am See",
+            "position": "2"
+          },
+          {
+            "url": "/club/passfahrt.jpg",
+            "alt": "Club-Impression: gemeinsam unterwegs auf einer Passstrasse",
+            "position": "4"
+          }
+        ],
+        "maxItems": 3
+      },
+      {
+        "key": "logoScale",
+        "label": "Optische Grösse Logo 1 in Prozent (100–150)",
+        "type": "text",
+        "default": "120"
+      },
+      {
+        "key": "secondaryLogoScale",
+        "label": "Optische Grösse Logo 2 in Prozent (100–150)",
+        "type": "text",
+        "default": "100"
+      }
+    ]
+  }
+}

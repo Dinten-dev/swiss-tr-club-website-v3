@@ -31,6 +31,18 @@ final class MemberSessionEndpoint
         wp_send_json(array(
             'authenticated' => true,
             'memberAccess' => $memberAccess,
+            'marketplaceNonce' => $memberAccess ? wp_create_nonce('strc_marketplace') : null,
+            'communityNonce' => $memberAccess ? wp_create_nonce('strc_community') : null,
+            'formsInboxUrl'=>current_user_can('strc_manage_members')?admin_url('admin.php?page=strc-forms'):null,
+            'applicationsNonce'=>current_user_can('strc_manage_members')?wp_create_nonce('strc_applications'):null,
+            'canEditContent' => \SwissTRClub\Core\Editorial\EditorialAccess::available(),
+            'editorialNonce' => \SwissTRClub\Core\Editorial\EditorialAccess::available() ? wp_create_nonce('strc_editorial') : null,
+            'editableDocuments' => array_values(array_filter(array_keys(\SwissTRClub\Core\Editorial\EditorialEndpoint::schema()), array(\SwissTRClub\Core\Editorial\EditorialAccess::class, 'document'))),
+            'logoutUrl' => html_entity_decode(wp_logout_url(home_url('/')), ENT_QUOTES, 'UTF-8'),
+            'canManageEvents' => \SwissTRClub\Core\Events\RegionalEventAccess::canManage(),
+            'eventsNonce' => \SwissTRClub\Core\Events\RegionalEventAccess::canManage() ? wp_create_nonce('strc_events') : null,
+            'canAssignRegions' => \SwissTRClub\Core\Events\RegionalEventAccess::isGlobal() && current_user_can('edit_users'),
+            'canCreateAd' => $memberAccess && current_user_can('publish_strc_ads'),
             'displayName' => $user->display_name,
             'membership' => $membership ? array(
                 'memberNumber' => (string) $membership['member_number'],

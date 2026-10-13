@@ -103,6 +103,39 @@ final class Schema
             KEY status (status)
         ) {$charset};");
 
+        self::installNewsletter();
+
         $wpdb->query("UPDATE {$memberships} SET membership_type = 'individual' WHERE membership_type = 'standard'");
+    }
+
+    public static function installNewsletter(): void
+    {
+        global $wpdb;
+
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        $charset = $wpdb->get_charset_collate();
+        $newsletter = $wpdb->prefix . 'strc_newsletter_subscribers';
+
+        dbDelta("CREATE TABLE {$newsletter} (
+            id bigint unsigned NOT NULL AUTO_INCREMENT,
+            user_id bigint unsigned NULL,
+            email varchar(190) NOT NULL,
+            display_name varchar(190) NOT NULL DEFAULT '',
+            status varchar(24) NOT NULL DEFAULT 'pending',
+            confirmation_hash char(64) NULL,
+            unsubscribe_hash char(64) NOT NULL,
+            consent_source varchar(64) NOT NULL DEFAULT 'website-form',
+            requested_at datetime NOT NULL,
+            confirmed_at datetime NULL,
+            unsubscribed_at datetime NULL,
+            brevo_status varchar(24) NOT NULL DEFAULT 'idle',
+            brevo_attempts smallint unsigned NOT NULL DEFAULT 0,
+            brevo_updated_at datetime NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY email (email),
+            UNIQUE KEY unsubscribe_hash (unsubscribe_hash),
+            KEY user_id (user_id),
+            KEY status (status)
+        ) {$charset};");
     }
 }

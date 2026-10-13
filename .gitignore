@@ -18,3 +18,27 @@ frontend/.vinext/
 frontend/.next/
 frontend/dist/
 frontend/.wrangler/
+
+!wordpress/wp-content/themes/strc-app/
+frontend/*.tsbuildinfo
+
+# Local credentials; never publish
+.private/
+
+# Internal staging reports, contact data, and one-off operational scripts
+/docs/reviews/
+/docs/runbooks/
+/docs/homepage-spezifikation.md
+/docs/kundenrueckmeldungen-umsetzung.md
+/docs/tickets/STRC-M001-marketplace.md
+/frontend/public/club/magazine/
+/scripts/verify-*
+!/scripts/verify-fairgate.php
+/scripts/cleanup-*
+/scripts/publish-*
+/scripts/rollback-*
+/scripts/seed-*
+/scripts/apply-peter-notes.php
+/scripts/link-fairgate-staging-webmaster.php
+/scripts/build-library-import-manifest.py
+/wordpress/wp-content/plugins/strc-core/data/library-import-manifest.json

@@ -10,10 +10,47 @@ use Exception;
 final class EventPostType
 {
     public const POST_TYPE = 'strc_event';
+    public const EVENT_TYPES = array(
+        'tagesausfahrt' => 'Tagesausfahrt',
+        'weekend' => 'Weekend',
+        'meeting' => 'Meeting',
+        'weekend-meeting' => 'Weekend Meeting (bisherige Zuordnung)',
+        'workshops' => 'Workshops',
+        'andere' => 'andere',
+    );
 
     public function registerHooks(): void
     {
         add_action('init', array($this, 'register'));
+        EventArchiveRetention::registerHooks();
+        add_action('init', array($this, 'ensureEventTypes'), 11);
+        add_action('init', array(RegionDirectory::class, 'synchronize'), 20);
+        add_filter('pre_delete_post', array($this, 'retainArchivedEvents'), 10, 3);
+    }
+
+    public function ensureEventTypes(): void
+    {
+        foreach (self::EVENT_TYPES as $slug => $name) {
+            if (! get_term_by('slug', $slug, 'strc_event_type')) {
+                wp_insert_term($name, 'strc_event_type', array('slug' => $slug));
+            }
+        }
+    }
+
+    public function retainArchivedEvents(mixed $delete, \WP_Post $post, bool $forceDelete): mixed
+    {
+        unset($forceDelete);
+
+        if (null !== $delete || self::POST_TYPE !== $post->post_type || 'trash' !== $post->post_status) {
+            return $delete;
+        }
+
+        $archivedAt = (int) get_post_meta($post->ID, '_wp_trash_meta_time', true);
+        if (EventArchiveRetention::shouldRetain($archivedAt, (int) current_time('timestamp', true))) {
+            return false;
+        }
+
+        return $delete;
     }
 
     public function register(): void
@@ -49,9 +86,9 @@ final class EventPostType
         $this->registerTaxonomies();
 
         $terms = array(
-            'strc_event_type' => array('Run', 'Meeting', 'Multi-day Tour', 'Workshop', 'AGM', 'Other Club Event', 'External Event'),
+            'strc_event_type' => array_merge(array('Run', 'Meeting', 'Multi-day Tour', 'Workshop', 'AGM', 'Other Club Event', 'External Event'), array_values(self::EVENT_TYPES)),
             'strc_event_scope' => array('Club / National', 'Region', 'External'),
-            'strc_region' => array('Zürich', 'Zentralschweiz', 'Nordwestschweiz', 'Bern', 'Ostschweiz', 'Romandie', 'Tessin', 'Wallis', 'Outside Switzerland'),
+            'strc_region' => array_values(RegionDirectory::REGIONS),
         );
 
         foreach ($terms as $taxonomy => $names) {
@@ -88,7 +125,7 @@ final class EventPostType
 
     private function registerMeta(): void
     {
-        $stringFields = array('strc_start_at', 'strc_end_at', 'strc_location', 'strc_registration_open_at', 'strc_registration_close_at');
+        $stringFields = array('strc_start_at', 'strc_end_at', 'strc_location', 'strc_registration_open_at', 'strc_registration_close_at', 'strc_title_fr');
 
         foreach ($stringFields as $field) {
             register_post_meta(
@@ -104,6 +141,7 @@ final class EventPostType
             );
         }
 
+        register_post_meta(self::POST_TYPE, 'strc_description_fr', array('type'=>'string','single'=>true,'show_in_rest'=>true,'sanitize_callback'=>array(\SwissTRClub\Core\Editorial\EditorialAccess::class,'html'),'auth_callback'=>array($this,'canEditMeta')));
         register_post_meta(
             self::POST_TYPE,
             'strc_registration_required',

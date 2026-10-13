@@ -24,7 +24,7 @@ set +a
 
 compose up -d database redis wordpress web mailpit
 compose exec --user root -T wordpress sh -c \
-    'mkdir -p /var/www/html/wp-content/uploads && chown -R www-data:www-data /var/www/html/wp-content/uploads'
+    'mkdir -p /var/www/html/wp-content/uploads /var/www/private && chown -R www-data:www-data /var/www/html/wp-content/uploads /var/www/private && chmod 700 /var/www/private'
 compose --profile tools run --rm composer install --no-interaction --prefer-dist \
     --ignore-platform-req=ext-bcmath \
     --ignore-platform-req=ext-gd

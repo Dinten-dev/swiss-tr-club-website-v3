@@ -1,0 +1,133 @@
+[
+  {
+    "key": "magazine",
+    "label": "TR-Magazin",
+    "access": "open",
+    "fields": [
+      "issue",
+      "year"
+    ]
+  },
+  {
+    "key": "newsletter",
+    "label": "TR-Newsletter-Archiv",
+    "access": "open",
+    "fields": [
+      "issue",
+      "year"
+    ]
+  },
+  {
+    "key": "manual",
+    "label": "Werkstatthandbücher",
+    "access": "open",
+    "fields": [
+      "model",
+      "year"
+    ]
+  },
+  {
+    "key": "parts",
+    "label": "Ersatzteilkataloge",
+    "access": "open",
+    "fields": [
+      "model",
+      "year"
+    ]
+  },
+  {
+    "key": "technical",
+    "label": "Technische Dokumente",
+    "access": "open",
+    "fields": [
+      "model",
+      "component"
+    ]
+  },
+  {
+    "key": "vehicle",
+    "label": "Fahrzeugdokumente",
+    "access": "open",
+    "fields": [
+      "model",
+      "year"
+    ]
+  },
+  {
+    "key": "roadbook",
+    "label": "Roadbooks",
+    "access": "open",
+    "fields": [
+      "region",
+      "start",
+      "end",
+      "distance",
+      "drivingTime",
+      "duration",
+      "year"
+    ]
+  },
+  {
+    "key": "statutes",
+    "label": "Statuten / Mitgliederreglemente",
+    "access": "open",
+    "fields": [
+      "version",
+      "date"
+    ]
+  },
+  {
+    "key": "club",
+    "label": "Allgemeine Clubdokumente",
+    "access": "open",
+    "fields": [
+      "version",
+      "date"
+    ]
+  },
+  {
+    "key": "agm",
+    "label": "Finanz- / GV-Unterlagen für Mitglieder",
+    "access": "open",
+    "fields": [
+      "year",
+      "occasion"
+    ]
+  },
+  {
+    "key": "operations",
+    "label": "Operative Arbeitsdokumente",
+    "access": "limited",
+    "fields": [
+      "version",
+      "date"
+    ]
+  },
+  {
+    "key": "regional",
+    "label": "Regional- / Moderatorendokumente",
+    "access": "limited",
+    "fields": [
+      "region",
+      "date"
+    ]
+  },
+  {
+    "key": "board",
+    "label": "Interne Vorstandsunterlagen",
+    "access": "restricted",
+    "fields": [
+      "date",
+      "version"
+    ]
+  },
+  {
+    "key": "confidential",
+    "label": "Vertrauliche Finanz- / Führungsunterlagen",
+    "access": "restricted",
+    "fields": [
+      "year",
+      "version"
+    ]
+  }
+]

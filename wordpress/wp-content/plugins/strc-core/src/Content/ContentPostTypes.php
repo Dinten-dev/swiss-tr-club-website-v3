@@ -15,6 +15,8 @@ final class ContentPostTypes
     {
         $this->registerType('strc_drive', 'Fahrten', 'Fahrt', 'fahrten', 'dashicons-location-alt', array('strc_drive', 'strc_drives'));
         $this->registerType('strc_ad', 'Inserate', 'Inserat', 'marktplatz', 'dashicons-megaphone', array('strc_ad', 'strc_ads'));
+        $this->registerType('strc_album', 'Galerie', 'Album', 'galerie', 'dashicons-format-gallery', array('strc_topic', 'strc_topics'));
+        $this->registerType('strc_document', 'Bibliothek', 'Dokument', 'bibliothek', 'dashicons-media-document', array('strc_topic', 'strc_topics'));
         $this->registerType('strc_topic', 'Forum', 'Forumsbeitrag', 'forum', 'dashicons-format-chat', array('strc_topic', 'strc_topics'), true);
     }
 
@@ -28,6 +30,7 @@ final class ContentPostTypes
         array $capabilityType,
         bool $comments = false
     ): void {
+        $private = in_array($postType, array('strc_topic', 'strc_album', 'strc_document'), true);
         $supports = array('title', 'editor', 'excerpt', 'thumbnail', 'author', 'revisions');
         if ($comments) {
             $supports[] = 'comments';
@@ -44,10 +47,13 @@ final class ContentPostTypes
                     'view_item' => $singular . ' ansehen',
                     'search_items' => $plural . ' durchsuchen',
                 ),
-                'public' => true,
-                'show_in_rest' => true,
-                'has_archive' => $slug,
-                'rewrite' => array('slug' => $slug),
+                'public' => ! $private && $postType !== 'strc_ad',
+                'publicly_queryable' => ! $private && $postType !== 'strc_ad',
+                'exclude_from_search' => $private,
+                'show_ui' => ! $private,
+                'show_in_rest' => ! $private && $postType !== 'strc_ad',
+                'has_archive' => $private ? false : $slug,
+                'rewrite' => $private ? false : array('slug' => $slug),
                 'menu_icon' => $icon,
                 'supports' => $supports,
                 'capability_type' => $capabilityType,

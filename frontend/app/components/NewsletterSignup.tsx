@@ -1,0 +1,10 @@
+'use client';
+
+import {useState} from 'react';
+import {wordpressUrl} from './ClubApi';
+
+export default function NewsletterSignup(){
+ const [message,setMessage]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);
+ async function submit(form:HTMLFormElement){setBusy(true);setMessage('');setError('');try{const data=new FormData(form);data.set('action','strc_newsletter');data.set('operation','subscribe');const response=await fetch(`${wordpressUrl}/wp-admin/admin-ajax.php`,{method:'POST',credentials:'include',body:data});const result=await response.json() as {success:boolean;data?:{message?:string}};if(!response.ok||!result.success)throw new Error(result.data?.message||'Anmeldung konnte nicht verarbeitet werden.');form.reset();setMessage(result.data?.message||'Bitte E-Mail prüfen und Anmeldung bestätigen.');}catch(reason){setError(reason instanceof Error?reason.message:'Anmeldung fehlgeschlagen.');}finally{setBusy(false);}}
+ return <section className="newsletter-signup" id="newsletter" aria-labelledby="newsletter-title"><div><p className="eyebrow">Auf dem Laufenden</p><h2 id="newsletter-title">Swiss TR-Club Newsletter</h2><p>Neuigkeiten, Ausfahrten und Geschichten aus dem Club direkt per E-Mail.</p></div><form onSubmit={event=>{event.preventDefault();void submit(event.currentTarget);}}><label>Name (optional)<input name="name" maxLength={190} autoComplete="name"/></label><label>E-Mail-Adresse<input name="email" type="email" required autoComplete="email" maxLength={190}/></label><label className="newsletter-consent"><input type="checkbox" name="consent" value="1" required/><span>Ich möchte Clubneuigkeiten per E-Mail erhalten. Ich kann mich jederzeit abmelden. <a href="#datenschutz">Datenschutzhinweise</a></span></label><label className="newsletter-honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off"/></label><button className="market-primary" disabled={busy}>{busy?'Wird gesendet …':'Newsletter abonnieren'}</button>{message&&<p className="newsletter-status" role="status">{message}</p>}{error&&<p className="newsletter-error" role="alert">{error}</p>}</form></section>;
+}

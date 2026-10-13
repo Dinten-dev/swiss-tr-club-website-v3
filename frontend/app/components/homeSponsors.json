@@ -1,0 +1,50 @@
+[
+  {
+    "name": "BELMOT Swiss",
+    "url": "http://www.belmot.ch",
+    "image": "https://swisstrclub.ch/uploads/3171/contact/companylogo/width_150/2026-Logo-Belmot-Swiss.png",
+    "file": "sponsors/1.png"
+  },
+  {
+    "name": "British Classic Cars AG",
+    "url": "http://www.british-classics.ch",
+    "image": "https://swisstrclub.ch/uploads/3171/contact/companylogo/width_150/2026-Logo-British-Classic-Cars.png",
+    "file": "sponsors/2.png"
+  },
+  {
+    "name": "Emil Frey Classics AG",
+    "url": "https://www.emilfreyclassics.ch/",
+    "image": "https://swisstrclub.ch/uploads/3171/contact/companylogo/width_150/2026-Logo-Emil-Frey-Classics.png",
+    "file": "sponsors/3.png"
+  },
+  {
+    "name": "FRANKS Originale",
+    "url": "http://franks-originale.ch",
+    "image": "https://swisstrclub.ch/uploads/3171/contact/companylogo/width_150/2026-Logo-Franks-Originale.png",
+    "file": "sponsors/4.png"
+  },
+  {
+    "name": "Garage Messmer GmbH",
+    "url": "http://www.garagemessmer.ch",
+    "image": "https://swisstrclub.ch/uploads/3171/contact/companylogo/width_150/2026-Logo-Garage_Messmer.png",
+    "file": "sponsors/5.png"
+  },
+  {
+    "name": "Jaggi Autosattlerei GmbH",
+    "url": "http://www.autosattlerei-jaggi.ch/oldtimer",
+    "image": "https://swisstrclub.ch/uploads/3171/contact/companylogo/width_150/2026-Logo-Jaggi-Sattlerei.png",
+    "file": "sponsors/6.png"
+  },
+  {
+    "name": "Jäggi Classics",
+    "url": "http://jaeggi-classics.ch",
+    "image": "https://swisstrclub.ch/uploads/3171/contact/companylogo/width_150/2026-Logo-Jäggi-Classics.png",
+    "file": "sponsors/7.png"
+  },
+  {
+    "name": "West-Classic",
+    "url": "http://www.west-classic.ch/",
+    "image": "https://swisstrclub.ch/uploads/3171/contact/companylogo/width_150/West-Classic-Logo.png",
+    "file": "sponsors/8.png"
+  }
+]

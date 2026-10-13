@@ -1,0 +1,30 @@
+'use client';
+import {t} from './UILanguage';
+import {useEffect,useId,useRef,useState} from 'react';
+
+type Editor={initialized:boolean;hasFocus:()=>boolean;addButton:(name:string,options:unknown)=>void;execCommand:(command:string,ui:boolean,value?:unknown)=>void;focus:()=>void;selection:{getBookmark:(type?:number,normalized?:boolean)=>unknown;moveToBookmark:(bookmark:unknown)=>void;getNode:()=>HTMLElement};getContent:()=>string;setContent:(html:string)=>void;on:(events:string,callback:()=>void)=>void;setMode?:(mode:string)=>void;mode?:{set:(mode:string)=>void}};
+declare global {interface Window {wp?:{editor?:{initialize:(id:string,options:unknown)=>void;remove:(id:string)=>void}};tinymce?:{get:(id:string)=>Editor|undefined}}}
+export default function RichEditor({label,value,onChange,disabled=false}:{label:string;value:string;onChange:(html:string)=>void;disabled?:boolean}) {
+ const id='strc-editor-'+useId().replace(/[^a-z0-9]/gi,'');const change=useRef(onChange);const currentValue=useRef(value);const currentDisabled=useRef(disabled);const pendingValues=useRef<string[]>([]);const synchronizing=useRef(false);const [failed,setFailed]=useState(false);const [link,setLink]=useState<string|null>(null);const bookmark=useRef<unknown>(null);const linkInput=useRef<HTMLInputElement>(null);
+ useEffect(()=>{change.current=onChange;},[onChange]);
+ useEffect(()=>{let attempts=0;let stopped=false;let timer:ReturnType<typeof setTimeout>;
+  const start=()=>{if(stopped)return;if(!window.wp?.editor){if(++attempts<80){timer=setTimeout(start,100);return;}setFailed(true);return;}
+   window.wp.editor.initialize(id,{tinymce:{wpautop:true,menubar:false,height:280,plugins:'lists,paste,wordpress',toolbar1:'undo redo | strcparagraph strcheading | bold italic | bullist numlist outdent indent | blockquote | strclink unlink | removeformat',toolbar2:'',block_formats:'Absatz=p;Überschrift 2=h2;Überschrift 3=h3',content_style:'body{font-family:Arial,sans-serif;font-size:18px;line-height:1.65;color:#13202b}img{max-width:100%;height:auto}',setup:(editor:Editor)=>{editor.addButton('strcparagraph',{text:'Absatz',onclick:()=>editor.execCommand('FormatBlock',false,'p')});editor.addButton('strcheading',{text:'Überschrift',onclick:()=>editor.execCommand('FormatBlock',false,'h2')});editor.addButton('strclink',{icon:'link',tooltip:'Link einfügen / ändern',onclick:()=>{bookmark.current=editor.selection.getBookmark();setLink(editor.selection.getNode().closest('a')?.getAttribute('href')||'');}});editor.on('init',()=>{synchronizing.current=true;editor.setContent(currentValue.current);synchronizing.current=false;const mode=currentDisabled.current?'readonly':'design';if(editor.mode)editor.mode.set(mode);else editor.setMode?.(mode);});editor.on('change input undo redo',()=>{if(synchronizing.current)return;const html=editor.getContent();pendingValues.current.push(html);change.current(html);});}},quicktags:false,mediaButtons:false});
+  };start();return()=>{stopped=true;clearTimeout(timer);window.wp?.editor?.remove(id);};
+ },[id]);
+ // React echoes must not replace TinyMCE's live DOM: that discards the caret.
+ useEffect(()=>{currentValue.current=value;const editor=window.tinymce?.get(id);
+  const echoed=pendingValues.current.lastIndexOf(value);
+  if(echoed!==-1){pendingValues.current.splice(0,echoed+1);return;}
+  if(!editor?.initialized||editor.getContent()===value)return;
+  pendingValues.current=[];
+  const selection=editor.hasFocus()?editor.selection.getBookmark(2,true):null;
+  synchronizing.current=true;
+  try{editor.setContent(value);if(selection)editor.selection.moveToBookmark(selection);}finally{synchronizing.current=false;}
+ },[id,value]);
+ useEffect(()=>{currentDisabled.current=disabled;const editor=window.tinymce?.get(id);const mode=disabled?'readonly':'design';if(editor?.mode)editor.mode.set(mode);else editor?.setMode?.(mode);},[disabled,id]);
+ const editingLink=link!==null;
+ useEffect(()=>{if(editingLink)linkInput.current?.focus();},[editingLink]);
+ function applyLink(){const editor=window.tinymce?.get(id);if(!editor)return;const url=(link||'').trim();if(url&&!/^(https?:\/\/|mailto:|tel:|#|\/(?!\/))/i.test(url)){linkInput.current?.setCustomValidity('Bitte eine vollständige Adresse mit https:// angeben.');linkInput.current?.reportValidity();return;}editor.focus();editor.selection.moveToBookmark(bookmark.current);editor.execCommand(url?'mceInsertLink':'unlink',false,url?{href:url}:undefined);const html=editor.getContent();pendingValues.current.push(html);change.current(html);setLink(null);}
+ return <div className="rich-editor"><label htmlFor={id}>{label}</label>{failed&&<p role="alert">Der Texteditor konnte nicht geladen werden. Bitte die Seite neu laden.</p>}<textarea id={id} defaultValue={value} style={{visibility:'hidden',height:0}} aria-hidden="true"/>{link!==null&&<div className="editorial-link"><label>Linkadresse<input ref={linkInput} value={link} placeholder="https://…" onChange={event=>{event.target.setCustomValidity('');setLink(event.target.value);}} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();applyLink();}}}/></label><button type="button" className="club-secondary" onClick={applyLink}>Link übernehmen</button><button type="button" className="club-secondary" onClick={()=>setLink(null)}>{t('Abbrechen')}</button></div>}<p className="club-hint">Für Listen «Aufzählung» oder «Nummerierung» wählen. Innerhalb einer Liste rückt Tab den Punkt ein, Umschalt+Tab aus. Die Pfeiltasten in der Werkzeugleiste funktionieren ebenfalls.</p></div>;
+}

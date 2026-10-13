@@ -17,6 +17,53 @@ final class EventPublicEndpoint
 
     public function registerRoute(): void
     {
+        register_rest_route('strc/v1', '/regions', array(
+            'methods' => 'GET',
+            'permission_callback' => '__return_true',
+            'callback' => function (): WP_REST_Response {
+                $terms = RegionDirectory::terms();
+                if (! $terms) {
+                    return new WP_REST_Response(array('message' => 'Regionen konnten nicht geladen werden.'), 503);
+                }
+                global $wpdb;
+                $membershipTable = $wpdb->prefix . 'strc_memberships';
+                $activeMembers = (int) $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$membershipTable} WHERE status IN ('active','grace')");
+                $assignedMembers = 0;
+                $regionCounts = array();
+                $regionalMembers = (int) $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$membershipTable} WHERE status IN ('active','grace') AND membership_type <> 'youth'");
+                $youthTotal = (int) $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$membershipTable} WHERE status IN ('active','grace') AND membership_type = 'youth'");
+                $counts = $wpdb->get_results("SELECT region, COUNT(DISTINCT user_id) AS member_count FROM {$membershipTable} WHERE status IN ('active','grace') AND membership_type <> 'youth' AND TRIM(region) <> '' GROUP BY region", ARRAY_A);
+                foreach (is_array($counts) ? $counts : array() as $row) {
+                    $canonical = RegionDirectory::canonicalName((string) $row['region']);
+                    if ($canonical === null) {
+                        continue;
+                    }
+                    $key = sanitize_title($canonical);
+                    $regionCounts[$key] = ($regionCounts[$key] ?? 0) + (int) $row['member_count'];
+                    $assignedMembers += (int) $row['member_count'];
+                }
+                $membershipsComplete = $activeMembers > 0 && $regionalMembers + $youthTotal === $activeMembers && $regionalMembers === $assignedMembers;
+                $youthCount = $membershipsComplete || $youthTotal > 0 ? $youthTotal : null;
+                $regions = array();
+                foreach ($terms as $term) {
+                    $key = sanitize_title($term->name);
+                    $hasCount = array_key_exists($key, $regionCounts);
+                    $regions[] = array('name' => $term->name, 'slug' => $term->slug, 'description' => wp_strip_all_tags($term->description), 'memberCount' => $membershipsComplete || $hasCount ? ($regionCounts[$key] ?? 0) : null);
+                }
+                return new WP_REST_Response(array('regions' => $regions, 'triungstersMemberCount' => $youthCount), 200);
+            },
+        ));
+        register_rest_route('strc/v1', '/information', array(
+            'methods' => 'GET',
+            'permission_callback' => '__return_true',
+            'callback' => function (WP_REST_Request $request): WP_REST_Response {
+                $paths = array('contact' => 'kontakt', 'privacy' => 'datenschutz', 'statutes' => 'statuten');
+                $path = $paths[(string) $request->get_param('section')] ?? '';
+                $page = '' !== $path ? get_page_by_path($path) : null;
+                $visible = $page && 'publish' === $page->post_status && '' === $page->post_password;
+                return new WP_REST_Response(array('content' => $visible ? wp_strip_all_tags(strip_shortcodes($page->post_content)) : ''), 200);
+            },
+        ));
         register_rest_route(
             'strc/v1',
             '/events',
@@ -25,11 +72,13 @@ final class EventPublicEndpoint
                 'callback' => array($this, 'listEvents'),
                 'permission_callback' => '__return_true',
                 'args' => array(
+                    'language'=>array('default'=>'de','sanitize_callback'=>'sanitize_key','validate_callback'=>static fn(mixed $value):bool=>in_array($value,array('de','fr'),true)),
                     'view' => array(
                         'default' => 'upcoming',
                         'sanitize_callback' => 'sanitize_key',
                         'validate_callback' => static fn (mixed $value): bool => in_array($value, array('upcoming', 'past', 'all'), true),
                     ),
+                    'page'=>array('default'=>1,'sanitize_callback'=>'absint','validate_callback'=>static fn(mixed $v):bool=>(int)$v>=1&&(int)$v<=1000),
                     'limit' => array(
                         'default' => 20,
                         'sanitize_callback' => 'absint',
@@ -50,7 +99,9 @@ final class EventPublicEndpoint
             'meta_key' => 'strc_start_at',
             'orderby' => 'meta_value',
             'order' => 'past' === $view ? 'DESC' : 'ASC',
-            'no_found_rows' => true,
+            'has_password'=>false,
+            'paged'=>max(1,(int)$request->get_param('page')),
+            'no_found_rows' => false,
         );
 
         if ('all' !== $view) {
@@ -63,24 +114,29 @@ final class EventPublicEndpoint
         }
 
         $query = new WP_Query($queryArgs);
-        $events = array_map(fn ($post): array => $this->present((int) $post->ID), $query->posts);
+        $events = array_map(fn ($post): array => $this->present((int) $post->ID, (string) $request->get_param('language')), $query->posts);
 
-        return new WP_REST_Response(array('events' => $events), 200);
+        return new WP_REST_Response(array('events' => $events,'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts), 200);
     }
 
     /** @return array<string, mixed> */
-    private function present(int $postId): array
+    private function present(int $postId, string $language = 'de'): array
     {
         $startAt = (string) get_post_meta($postId, 'strc_start_at', true);
         $registrationRequired = (bool) get_post_meta($postId, 'strc_registration_required', true);
         $registrationOpenAt = (string) get_post_meta($postId, 'strc_registration_open_at', true);
         $registrationCloseAt = (string) get_post_meta($postId, 'strc_registration_close_at', true);
+        $titleFr = (string) get_post_meta($postId, 'strc_title_fr', true);
+        $descriptionFr = (string) get_post_meta($postId, 'strc_description_fr', true);
+        $title = $language === 'fr' && trim($titleFr) !== '' ? $titleFr : get_the_title($postId);
+        $description = $language === 'fr' && trim(wp_strip_all_tags($descriptionFr)) !== '' ? $descriptionFr : (string) get_post_field('post_content', $postId);
 
         return array(
             'id' => $postId,
-            'title' => get_the_title($postId),
-            'summary' => wp_strip_all_tags((string) get_the_excerpt($postId)),
-            'description' => wp_strip_all_tags((string) get_post_field('post_content', $postId)),
+            'title' => html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'summary' => html_entity_decode(wp_strip_all_tags($language === 'fr' && trim(wp_strip_all_tags($descriptionFr)) !== '' ? wp_trim_words($descriptionFr,35) : (string) get_the_excerpt($postId)), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'description' => html_entity_decode(wp_strip_all_tags($description), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($description)),
             'startAt' => $startAt,
             'endAt' => (string) get_post_meta($postId, 'strc_end_at', true),
             'location' => (string) get_post_meta($postId, 'strc_location', true),
@@ -88,9 +144,13 @@ final class EventPublicEndpoint
             'scope' => $this->term($postId, 'strc_event_scope'),
             'region' => $this->term($postId, 'strc_region'),
             'registrationRequired' => $registrationRequired,
-            'registrationStatus' => $this->registrationStatus($registrationRequired, $registrationOpenAt, $registrationCloseAt),
+            'externalRegistrationUrl'=>\SwissTRClub\Core\Forms\EventRegistration::settings($postId)['externalUrl'],
+            'registrationStatus' => $this->eventRegistrationStatus($postId,$registrationRequired,$registrationOpenAt,$registrationCloseAt),
             'registrationOpenAt' => $registrationOpenAt,
             'registrationCloseAt' => $registrationCloseAt,
+            'participantCount'=>\SwissTRClub\Core\Forms\EventRegistration::headcount($postId),
+            'occupiedCount'=>\SwissTRClub\Core\Forms\EventRegistration::occupied($postId),
+            'capacityUnit'=>'Personen',
             'capacity' => (int) get_post_meta($postId, 'strc_capacity', true),
             'image' => get_the_post_thumbnail_url($postId, 'large') ?: '',
         );
@@ -107,13 +167,24 @@ final class EventPublicEndpoint
         return array('name' => $terms[0]->name, 'slug' => $terms[0]->slug);
     }
 
+    private function eventRegistrationStatus(int $id,bool $required,string $opens,string $closes): string
+    {
+        $status=$this->registrationStatus($required,$opens,$closes);
+        if($status!=='open')return $status;
+        $start=strtotime((string)get_post_meta($id,'strc_start_at',true));
+        if($start&&time()>=$start)return 'closed';
+        $capacity=(int)get_post_meta($id,'strc_capacity',true);
+        if($capacity>0&&\SwissTRClub\Core\Forms\EventRegistration::occupied($id)>=$capacity)return \SwissTRClub\Core\Forms\EventRegistration::settings($id)['waitlist']?'waiting':'full';
+        return $status;
+    }
+
     private function registrationStatus(bool $required, string $opensAt, string $closesAt): string
     {
         if (! $required) {
             return 'information';
         }
 
-        $now = current_time('timestamp');
+        $now = time();
         $opens = '' !== $opensAt ? strtotime($opensAt) : false;
         $closes = '' !== $closesAt ? strtotime($closesAt) : false;
         if (false !== $opens && $now < $opens) {

@@ -26,7 +26,12 @@ final class FairgateConfiguration
 
     public function isConfigured(): bool
     {
-        return '' !== $this->organisationId && '' !== $this->accessKey;
+        return '' !== trim($this->organisationId) && '' !== trim($this->accessKey) && in_array(rtrim($this->apiBaseUrl, '/'), array('https://fsa.fairgate.ch', 'https://fsa-test.fairgate.ch'), true);
+    }
+
+    public function cacheKey(): string
+    {
+        return 'strc_fg_'.hash('sha256', $this->apiBaseUrl.'|'.$this->organisationId.'|'.$this->accessKey);
     }
 
     public function organisationId(): string

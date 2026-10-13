@@ -8,6 +8,8 @@ use SwissTRClub\Core\Infrastructure\Schema;
 
 final class RoleManager
 {
+    private const ROLE_VERSION = '20261011-1';
+
     public function registerHooks(): void
     {
         add_action('admin_init', array($this, 'upgradeIfRequired'));
@@ -15,13 +17,18 @@ final class RoleManager
 
     public function upgradeIfRequired(): void
     {
-        if (get_option('strc_core_version') === STRC_CORE_VERSION) {
+        $schemaRequired = get_option('strc_core_version') !== STRC_CORE_VERSION;
+        $rolesRequired = get_option('strc_roles_version') !== self::ROLE_VERSION;
+        if (! $schemaRequired && ! $rolesRequired) {
             return;
         }
 
         self::install();
-        Schema::install();
-        update_option('strc_core_version', STRC_CORE_VERSION, false);
+        if ($schemaRequired) {
+            Schema::install();
+            update_option('strc_core_version', STRC_CORE_VERSION, false);
+        }
+        if ($rolesRequired) update_option('strc_roles_version', self::ROLE_VERSION, false);
     }
 
     public static function install(): void
@@ -41,6 +48,12 @@ final class RoleManager
             }
         }
 
+        // Content administrators cannot turn themselves into technical administrators.
+        $contentAdmin = get_role('strc_administrator');
+        if ($contentAdmin) {
+            foreach (array('create_users','promote_users','delete_users','remove_users') as $capability) $contentAdmin->remove_cap($capability);
+        }
+
         $administrator = get_role('administrator');
         if (! $administrator) {
             return;
@@ -57,7 +70,9 @@ final class RoleManager
             return;
         }
 
+        $developer->remove_cap('strc_access_board_documents');
         foreach ($administrator->capabilities as $capability => $granted) {
+            if($capability==='strc_access_board_documents')continue;
             if ($granted) {
                 $developer->add_cap($capability);
             }

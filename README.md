@@ -31,6 +31,10 @@ WordPress-Website und Clubplattform des Swiss TR-Clubs mit Fairgate-Integration.
 - Inaktive Mitgliedschaften verlieren geschützte Berechtigungen
 - Fairgate Contact IDs verknüpfen beide Systeme dauerhaft
 
+Mitgliedsanfragen und der manuelle Abgleich bestehender Mitglieder sind vorbereitet.
+Online-Anträge bleiben bis zur Prüfung der Zugangsdaten und Club-Feldzuordnungen deaktiviert.
+Konfiguration und Abnahme bleiben im geschützten Serverbetrieb.
+
 ## Frontend starten
 
 ```bash
@@ -67,10 +71,17 @@ STRC_FAIRGATE_ADMIN_URL=
 
 ## Qualität
 
+Isolierte Fairgate-Vertragstests ohne echte API-Aufrufe:
+
+```bash
+php scripts/verify-fairgate.php
+```
+
 ```bash
 cd frontend
 npm run lint
 npm run build
+npm run build:wordpress
 ```
 
 ```bash
@@ -81,8 +92,12 @@ composer lint
 ```
 
 ```bash
-docker-compose --profile tools run --rm wpcli wp eval-file scripts/verify-backend.php
+node scripts/verify-staging-snapshot.mjs
 ```
+
+## Gesicherter Staging-Stand
+
+Der laufende Programmstand vom 13. Oktober 2026 ist mit allen STRC-Programmdateien, ausgelieferten Frontend-Dateien und Prüfsummen enthalten. [Dateiabgleich, reproduzierbarer Build und Veröffentlichung](docs/deployment/staging-snapshot.md) beschreiben den gesicherten Stand und seine externe Serverkonfiguration.
 
 ## Dokumentation
 

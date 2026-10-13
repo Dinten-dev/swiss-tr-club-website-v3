@@ -1,0 +1,93 @@
+[
+  {
+    "key": "contactName",
+    "label": "Kontakt: Name",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "key": "contactRole",
+    "label": "Kontakt: Funktion",
+    "type": "text",
+    "default": "Regionalleitung"
+  },
+  {
+    "key": "contactImage",
+    "label": "Kontakt: Portrait",
+    "type": "image",
+    "default": ""
+  },
+  {
+    "key": "contactPhone",
+    "label": "Kontakt: Telefon",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "key": "contactEmail",
+    "label": "Kontakt: E-Mail",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "key": "meetName",
+    "label": "Treffpunkt: Name",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "key": "meetAddress",
+    "label": "Treffpunkt: Adresse",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "key": "meetSchedule",
+    "label": "Treffpunkt: Rhythmus und Uhrzeit (zwei Zeilen möglich)",
+    "type": "textarea",
+    "default": ""
+  },
+  {
+    "key": "meetDates",
+    "label": "Nächste Treffen / Stammtische",
+    "type": "rich",
+    "default": ""
+  },
+  {
+    "key": "whatsappUrl",
+    "label": "WhatsApp: Beitrittslink",
+    "type": "url",
+    "default": ""
+  },
+  {
+    "key": "whatsappQr",
+    "label": "WhatsApp: QR-Code als Bild",
+    "type": "image",
+    "default": ""
+  },
+  {
+    "key": "news",
+    "label": "Regionale Neuigkeiten",
+    "type": "rich",
+    "default": ""
+  },
+  {
+    "key": "eventBody",
+    "label": "Regionale Veranstaltung: Zusatzinformationen",
+    "type": "rich",
+    "default": ""
+  },
+  {
+    "key": "toolbarText",
+    "label": "Text oberhalb der Kontaktkachel",
+    "type": "text",
+    "default": "Gemeinsam in der Region"
+  },
+  {
+    "key": "contactImageFrame",
+    "label": "Kontakt: Bild einpassen",
+    "type": "imageFrame",
+    "default": "cover|50|50",
+    "imageKey": "contactImage"
+  }
+]
