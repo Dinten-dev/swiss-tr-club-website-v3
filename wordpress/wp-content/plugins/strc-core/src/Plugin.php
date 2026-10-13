@@ -30,6 +30,7 @@ final class Plugin
         }
 
         self::$booted = true;
+        \SwissTRClub\Core\Infrastructure\StagingAccessLoopback::registerHooks();
         add_filter('determine_locale',static function(string $locale):string{if(!is_admin()||wp_doing_ajax())return ($_COOKIE['strc_language']??'')==='fr'?'fr_FR':'de_CH';return $locale;});
         add_action('init', array(\SwissTRClub\Core\Http\UserLanguage::class, 'rememberSelection'));
 

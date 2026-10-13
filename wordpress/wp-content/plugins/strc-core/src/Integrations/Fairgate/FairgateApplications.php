@@ -59,12 +59,12 @@ final class FairgateApplications
                 // Approval and a verified Fairgate mapping are required before any external write.
                 // Intake never provisions a WordPress account or changes membership access.
             }
-        } catch (\Throwable $error) { $failure='Ihre Anfrage konnte nicht abschliessend bestätigt werden. Bitte kontaktieren Sie den Club, bevor Sie erneut senden.'; }
+        } catch (\Throwable $error) { $failure='Deine Anfrage konnte nicht abschliessend bestätigt werden. Bitte kontaktiere den Club, bevor du erneut sendest.'; }
         finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$lock)); }
         if ($failure) AjaxRequest::fail($failure,503);
         if ($postId > 0) do_action('strc_application_received', (int)$postId);
         // Same response for duplicates prevents disclosure of a previous applicant's delivery state.
-        wp_send_json_success(array('received'=>true,'message'=>'Ihre Anfrage wurde erfasst. Der Club prüft die Angaben und die weitere Aufnahme. Eine Mitgliedschaft oder Zahlung ist damit noch nicht bestätigt.'));
+        wp_send_json_success(array('received'=>true,'message'=>'Deine Anfrage wurde erfasst. Der Club prüft die Angaben und die weitere Aufnahme. Eine Mitgliedschaft oder Zahlung ist damit noch nicht bestätigt.'));
     }
 
     private function regions(): array

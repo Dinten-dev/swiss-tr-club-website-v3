@@ -29,7 +29,7 @@ final class EditorialAccess
         );
         if (isset($roleCapabilities[$area]) && current_user_can($roleCapabilities[$area])) return true;
         return current_user_can('strc_moderate')
-            && in_array($area, (array) get_user_meta(get_current_user_id(), 'strc_moderation_areas', true), true);
+            && in_array($area, \SwissTRClub\Core\Roles\RoleAssignments::areas(get_current_user_id()), true);
     }
 
     public static function region(int $id): bool
@@ -58,7 +58,7 @@ final class EditorialAccess
     public static function html(string $html): string
     {
         return wp_kses($html, array(
-            'p'=>array(), 'br'=>array(), 'strong'=>array(), 'b'=>array(), 'em'=>array(), 'i'=>array(),
+            'span'=>array('class'=>true), 'p'=>array(), 'br'=>array(), 'strong'=>array(), 'b'=>array(), 'em'=>array(), 'i'=>array(),
             'u'=>array(), 's'=>array(), 'h2'=>array(), 'h3'=>array(), 'h4'=>array(),
             'ul'=>array(), 'ol'=>array(), 'li'=>array(), 'blockquote'=>array(),
             'a'=>array('href'=>true,'title'=>true),

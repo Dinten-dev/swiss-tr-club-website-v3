@@ -14,6 +14,7 @@ final class MarketplaceEndpoint
 
     public function registerHooks(): void
     {
+        add_action('before_delete_post',static function(int $id):void{if(get_post_type($id)==='strc_ad'){ $files=get_post_meta($id,'strc_ad_documents',true);AdDocuments::remove(is_array($files)?$files:[]); }});
         add_action('wp_ajax_strc_marketplace', array($this, 'respond'));
         add_action('wp_ajax_nopriv_strc_marketplace', array($this, 'respond'));
     }
@@ -42,6 +43,7 @@ final class MarketplaceEndpoint
                 wp_send_json_error(array('message' => 'Sitzung abgelaufen. Bitte die Seite neu laden und erneut anmelden.'), 403);
             }
         }
+        if ($operation==='file') { if(!is_string($input['key']??null))wp_send_json_error(['message'=>'Ungültige Datei.'],400);AdDocuments::download(absint($input['id']??0),$input['key']); }
         $result = match ($operation) {
             'config'=>['nonce'=>wp_create_nonce('strc_marketplace'),'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area('market'),'partCategories'=>\SwissTRClub\Core\Community\CatalogSettings::parts()],
             'list' => $this->listAds($input),
@@ -113,7 +115,7 @@ final class MarketplaceEndpoint
 
     private function validateFields(array $input): array|WP_Error
     {
-        foreach (array('title', 'description', 'price', 'category','offerType','priceMode','partCategory','model','condition','location','year','colour','exteriorColour','interiorColour','restoration','parts','models') as $key) {
+        foreach (array('title', 'description', 'price', 'category','offerType','priceMode','partCategory','model','condition','location','year','colour','exteriorColour','interiorColour','restoration','parts','models','mileage') as $key) {
             if (isset($input[$key]) && ! is_string($input[$key])) {
                 return new WP_Error('invalid_fields', 'Bitte alle Felder prüfen.');
             }
@@ -136,7 +138,8 @@ final class MarketplaceEndpoint
         }
         try {
             $details=['offerType'=>$offerType,'priceMode'=>$priceMode];
-            foreach(['partCategory','model','condition','location','year','colour','exteriorColour','interiorColour','restoration']as$key)$details[$key]=\SwissTRClub\Core\Forms\FormFields::text($input,$key,$key==='restoration'?2000:160,in_array($key,['condition','location'],true));
+            foreach(['partCategory','model','condition','location','year','colour','exteriorColour','interiorColour','restoration','mileage']as$key)$details[$key]=\SwissTRClub\Core\Forms\FormFields::text($input,$key,$key==='restoration'?2000:160,in_array($key,['condition','location'],true));
+            if ($details['mileage']!=='' && !preg_match('/^[0-9]{1,9}$/D',$details['mileage'])) throw new \InvalidArgumentException('Bitte einen gültigen Kilometerstand angeben.');
             $parts = [];
             if ($category === 'Teile') {
                 $partsText = \SwissTRClub\Core\Forms\FormFields::text($input, 'parts', 2000);
@@ -192,6 +195,7 @@ final class MarketplaceEndpoint
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/media.php';
         require_once ABSPATH . 'wp-admin/includes/image.php';
+        $documents=AdDocuments::save($files['documents']??[]);if(is_wp_error($documents))return $documents;
         // Publish only once every upload has succeeded; failed uploads leave no partial ad.
         $postId = wp_insert_post(wp_slash(array(
             'post_type' => 'strc_ad', 'post_status' => 'draft',
@@ -199,8 +203,10 @@ final class MarketplaceEndpoint
             'post_excerpt' => implode(', ', $parts),
         )), true);
         if (is_wp_error($postId)) {
+            AdDocuments::remove($documents);
             return new WP_Error('save_failed', 'Das Inserat konnte nicht gespeichert werden. Bitte erneut versuchen.');
         }
+        update_post_meta($postId,'strc_ad_documents',$documents);
         $attachments = array();
         foreach ($uploads as $upload) {
             $_FILES['strc_ad_image'] = $upload;
@@ -303,11 +309,19 @@ final class MarketplaceEndpoint
                     if((int)$upload['error']!==UPLOAD_ERR_OK||(int)$upload['size']<1||(int)$upload['size']>20*MB_IN_BYTES||!$size||$size[0]*$size[1]>40000000||!in_array($checked['type'],self::MIMES,true))return new WP_Error('invalid_image','Bitte JPG, PNG oder WebP bis 20 MB und 40 Megapixeln verwenden.');
                     $uploads[]=$upload;
                 }
+                $oldDocuments=get_post_meta($id,'strc_ad_documents',true);$oldDocuments=is_array($oldDocuments)?$oldDocuments:[];
+                if(isset($input['retainedDocumentKeys'])&&!is_string($input['retainedDocumentKeys']))return new WP_Error('pdf_keys','Ungültige PDF-Auswahl.');
+                $documentKeys=json_decode($input['retainedDocumentKeys']??wp_json_encode(array_column($oldDocuments,'key')),true);
+                if(!is_array($documentKeys)||!array_is_list($documentKeys)||array_filter($documentKeys,static fn($key)=>!is_string($key))||array_diff($documentKeys,array_column($oldDocuments,'key')))return new WP_Error('pdf_keys','Ungültige PDF-Auswahl.');
+                $keptDocuments=array_values(array_filter($oldDocuments,static fn($file)=>in_array($file['key'],$documentKeys,true)));
+                $newDocuments=AdDocuments::save($_FILES['documents']??[],count($keptDocuments));if(is_wp_error($newDocuments))return $newDocuments;
                 require_once ABSPATH.'wp-admin/includes/file.php';require_once ABSPATH.'wp-admin/includes/media.php';require_once ABSPATH.'wp-admin/includes/image.php';
                 $newImages=[];
-                foreach($uploads as $upload){$_FILES['strc_ad_image']=$upload;$attachment=media_handle_upload('strc_ad_image',$id,[],['test_form'=>false,'mimes'=>self::MIMES]);unset($_FILES['strc_ad_image']);if(is_wp_error($attachment)){foreach($newImages as $newId)wp_delete_attachment($newId,true);return new WP_Error('upload_failed','Bilder konnten nicht gespeichert werden. Bestehendes Inserat bleibt erhalten.');}$newImages[]=$attachment;}
+                foreach($uploads as $upload){$_FILES['strc_ad_image']=$upload;$attachment=media_handle_upload('strc_ad_image',$id,[],['test_form'=>false,'mimes'=>self::MIMES]);unset($_FILES['strc_ad_image']);if(is_wp_error($attachment)){AdDocuments::remove($newDocuments);foreach($newImages as $newId)wp_delete_attachment($newId,true);return new WP_Error('upload_failed','Bilder konnten nicht gespeichert werden. Bestehendes Inserat bleibt erhalten.');}$newImages[]=$attachment;}
                 $result=wp_update_post(wp_slash(['ID'=>$id,'post_title'=>$title,'post_content'=>$description,'post_excerpt'=>implode(', ',$parts),'post_status'=>'pending']),true);
-                if(is_wp_error($result)){foreach($newImages as $newId)wp_delete_attachment($newId,true);return $result;}
+                if(is_wp_error($result)){AdDocuments::remove($newDocuments);foreach($newImages as $newId)wp_delete_attachment($newId,true);return $result;}
+                update_post_meta($id,'strc_ad_documents',array_merge($keptDocuments,$newDocuments));
+                AdDocuments::remove(array_values(array_filter($oldDocuments,static fn($file)=>!in_array($file['key'],$documentKeys,true))));
                 $images=array_merge($retained,$newImages);
                 update_post_meta($id,'strc_ad_price',number_format((float)$price,2,'.',''));update_post_meta($id,'strc_ad_category',$category);update_post_meta($id,'strc_ad_details',$details);update_post_meta($id,'strc_ad_models','|'.implode('|',$details['models']??[]).'|');update_post_meta($id,'strc_ad_images',$images);
                 if($images)set_post_thumbnail($id,$images[0]);else delete_post_thumbnail($id);
@@ -331,6 +345,7 @@ final class MarketplaceEndpoint
             'details'=>get_post_meta($id,'strc_ad_details',true)?:[],
             'price' => (string) get_post_meta($id, 'strc_ad_price', true),
             'category' => get_post_meta($id, 'strc_ad_category', true) ?: 'Sonstiges',
+            'documents'=>AdDocuments::present($id),
             'imageIds'=>array_values(array_map('intval',is_array($imageIds)?$imageIds:[])),
             'images' => array_values(array_filter(array_map(static fn ($imageId) => wp_get_attachment_image_url((int) $imageId, 'large'), is_array($imageIds) ? $imageIds : array()))),
             'seller' => $seller ? $seller->display_name : 'Clubmitglied',

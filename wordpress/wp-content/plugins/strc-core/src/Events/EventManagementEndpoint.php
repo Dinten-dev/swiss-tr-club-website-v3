@@ -180,6 +180,7 @@ final class EventManagementEndpoint
         if (! RegionalEventAccess::isGlobal() && ! RegionalEventAccess::isOrganiser() && ('region' !== $scope || ! in_array($regionId, RegionalEventAccess::regions(), true))) {
             AjaxRequest::fail('Sie können nur Termine Ihrer zugewiesenen Regionen verwalten.', 403);
         }
+        if (!RegionalEventAccess::isGlobal() && RegionalEventAccess::isOrganiser() && \SwissTRClub\Core\Roles\RoleAssignments::scoped(get_current_user_id()) && RegionalEventAccess::regions() && !($id && in_array($id,RegionalEventAccess::assignedEvents(),true)) && ('region' !== $scope || !in_array($regionId,RegionalEventAccess::regions(),true))) AjaxRequest::fail('Bitte einen Termin der zugewiesenen Regionen wählen.',403);
         $start = $this->date($input['startAt'] ?? '', true);
         $end = $this->date($input['endAt'] ?? '');
         if ('' !== $end && strtotime($end) < strtotime($start)) {
@@ -210,7 +211,7 @@ final class EventManagementEndpoint
             AjaxRequest::fail('Termin konnte nicht gespeichert werden.', 500);
         }
         if (! $id && RegionalEventAccess::isOrganiser() && ! RegionalEventAccess::isGlobal()) {
-            update_user_meta(get_current_user_id(), 'strc_assigned_events', array_values(array_unique(array_merge(RegionalEventAccess::assignedEvents(), array((int) $saved)))));
+            if(!\SwissTRClub\Core\Roles\RoleAssignments::createdEvent(get_current_user_id(),(int)$saved)){wp_delete_post((int)$saved,true);AjaxRequest::fail('Die Funktionszuweisung wurde inzwischen geändert. Bitte neu laden.',409);}
         }
         update_post_meta($saved, 'strc_event_editor_id', get_current_user_id());
         update_post_meta($saved, 'strc_title_fr', $titleFr);
@@ -260,6 +261,7 @@ final class EventManagementEndpoint
         if (! get_user_by('id', $id)) {
             AjaxRequest::fail('Person nicht gefunden.', 404);
         }
+        if(\SwissTRClub\Core\Roles\RoleAssignments::scoped($id))AjaxRequest::fail('Zuständigkeiten bitte über die Rollenverwaltung ändern.',409);
         $ids = '' === ($input['regions'] ?? '') ? array() : array_values(array_unique(array_map('absint', explode(',', $input['regions']))));
         foreach ($ids as $regionId) {
             $term = get_term($regionId, 'strc_region');

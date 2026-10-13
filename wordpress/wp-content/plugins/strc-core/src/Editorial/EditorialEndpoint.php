@@ -354,50 +354,16 @@ final class EditorialEndpoint
         $webmaster=current_user_can('manage_options');
         $users=array_filter($users,static fn ($user)=>$user->ID!==get_current_user_id() && ! in_array('administrator',$user->roles,true) && ($webmaster || ! in_array('strc_developer',$user->roles,true)));
         $regions=\SwissTRClub\Core\Events\RegionDirectory::terms();
-        $roleOptions=array_map(static fn ($definition)=>$definition['name'], \SwissTRClub\Core\Roles\RoleDefinitions::assignableFor(current_user_can('manage_options')));
+        $roleOptions=array_map(static fn ($definition)=>$definition['name'], \SwissTRClub\Core\Roles\RoleAssignments::options(current_user_can('manage_options')));
         $events=$roleOptions ? get_posts(array('post_type'=>'strc_event','post_status'=>array('publish','draft','pending','private'),'posts_per_page'=>500,'orderby'=>'title','order'=>'ASC')) : array();
-        return array('users'=>array_values(array_map(static fn ($user)=>array('id'=>$user->ID,'name'=>$user->display_name,'isMember'=>user_can($user,'strc_access_member_area'),'regions'=>RegionalEventAccess::regions($user->ID),'areas'=>(array)get_user_meta($user->ID,'strc_moderation_areas',true),'libraryOnly'=>(bool)array_intersect(['strc_administrator','strc_editor'],$user->roles),'libraryAccess'=>get_user_meta($user->ID,'strc_library_access',true)?:'open','roles'=>array_values(array_intersect($user->roles,array_keys(\SwissTRClub\Core\Roles\RoleDefinitions::assignable()))),'assignedEvents'=>RegionalEventAccess::assignedEvents($user->ID)), $users)),
+        return array('users'=>array_values(array_map(static fn ($user)=>array('id'=>$user->ID,'name'=>$user->display_name,'city'=>(string)get_user_meta($user->ID,'strc_city',true),'revision'=>\SwissTRClub\Core\Roles\RoleAssignments::revision($user->ID),'assignments'=>\SwissTRClub\Core\Roles\RoleAssignments::rows($user->ID),'isMember'=>user_can($user,'strc_access_member_area'),'regions'=>RegionalEventAccess::regions($user->ID),'areas'=>(array)get_user_meta($user->ID,'strc_moderation_areas',true),'libraryOnly'=>(bool)array_intersect(['strc_administrator','strc_editor'],$user->roles),'libraryAccess'=>get_user_meta($user->ID,'strc_library_access',true)?:'open','roles'=>array_values(array_intersect($user->roles,array_keys(\SwissTRClub\Core\Roles\RoleDefinitions::assignable()))),'assignedEvents'=>RegionalEventAccess::assignedEvents($user->ID)), $users)),
             'regions'=>array_values(array_map(static fn ($term)=>array('id'=>$term->term_id,'name'=>$term->name),$regions)), 'areas'=>EditorialAccess::AREAS,'roleOptions'=>$roleOptions,
             'events'=>array_values(array_map(static fn ($post)=>array('id'=>(int)$post->ID,'title'=>$post->post_title),$events)));
     }
 
     private function assign(array $input): array
     {
-        $this->people(); $id=absint($input['userId'] ?? 0); $user=get_user_by('id',$id);
-        if (! $user || $id===get_current_user_id() || in_array('administrator',$user->roles,true) || (! current_user_can('manage_options') && in_array('strc_developer',$user->roles,true))) AjaxRequest::fail('Dieses Konto kann hier nicht geändert werden.',403);
-        $libraryOnly=(bool)array_intersect(['strc_administrator','strc_editor'],$user->roles);
-        $regions=json_decode($input['regions'] ?? '[]',true); $areas=json_decode($input['areas'] ?? '[]',true);
-        if (! is_array($regions) || ! is_array($areas) || array_filter($regions,static fn ($v)=>! is_int($v)) || array_filter($areas,static fn ($v)=>! is_string($v) || ! isset(EditorialAccess::AREAS[$v]))) AjaxRequest::fail('Ungültige Zuständigkeit.');
-        foreach ($regions as $idRegion) { if (! \SwissTRClub\Core\Events\RegionDirectory::visibleTerm($idRegion)) AjaxRequest::fail('Ungültige Region.'); }
-        $currentLibraryAccess=get_user_meta($id,'strc_library_access',true)?:'open';
-        $libraryAccess=$input['libraryAccess']??$currentLibraryAccess;
-        if(!in_array($libraryAccess,['open','limited','restricted'],true))AjaxRequest::fail('Ungültige Bibliotheksberechtigung.');
-        if (array_key_exists('roles',$input)) {
-            if (! current_user_can('strc_manage_content_roles') || ! current_user_can('edit_user',$id)) AjaxRequest::fail('Keine Berechtigung, Funktionsrollen zuzuweisen.',403);
-            $roles=json_decode($input['roles'],true);
-            $assignedEvents=json_decode($input['assignedEvents']??'[]',true);
-            $platformManager=current_user_can('manage_options');
-            $allowed=array_keys(\SwissTRClub\Core\Roles\RoleDefinitions::assignableFor($platformManager));
-            $protectedRoles=$platformManager?[]:array_values(array_intersect($user->roles,['strc_developer','strc_board_member']));
-            $validRoles=array_values(array_unique(array_merge($allowed,$protectedRoles)));
-            if (! is_array($roles) || ! is_array($assignedEvents) || array_filter($roles,static fn ($v)=>! is_string($v) || ! in_array($v,$validRoles,true)) || array_filter($assignedEvents,static fn ($v)=>! is_int($v) || 'strc_event'!==get_post_type($v))) AjaxRequest::fail('Ungültige Funktionsrolle oder Veranstaltung.');
-            if (! $platformManager) $roles=array_values(array_unique(array_merge($roles,$protectedRoles)));
-            if ($roles && ! in_array('strc_member',$user->roles,true)) AjaxRequest::fail('Funktionsrollen benötigen ein Mitgliedskonto.',403);
-            if (! in_array('strc_event_organiser',$roles,true)) $assignedEvents=array();
-        }
-        if($libraryAccess==='restricted'&&!in_array('strc_board_member',$roles??$user->roles,true))AjaxRequest::fail('Vertrauliche Unterlagen benötigen die Vorstandsrolle.',422);
-        if(!current_user_can('manage_options')&&($libraryAccess==='restricted'||$currentLibraryAccess==='restricted')&&$libraryAccess!==$currentLibraryAccess)AjaxRequest::fail('Vorstandszugriff wird vom Webmaster zugeordnet.',403);
-        update_user_meta($id,'strc_library_access',$libraryAccess);
-        if (isset($roles)) {
-            foreach ($allowed as $slug) {
-                if (in_array($slug,$roles,true)) $user->add_role($slug);
-                else $user->remove_role($slug);
-            }
-            update_user_meta($id,'strc_assigned_events',array_values(array_unique($assignedEvents)));
-        }
-        if($libraryOnly)return ['saved'=>true];
-        update_user_meta($id,'strc_managed_regions',array_values(array_unique($regions))); update_user_meta($id,'strc_moderation_areas',array_values(array_unique($areas)));
-        if ($regions || $areas) $user->add_role('strc_moderator'); else $user->remove_role('strc_moderator');
-        return array('saved'=>true);
+        $this->people();
+        return \SwissTRClub\Core\Roles\RoleAssignments::save(absint($input['userId']??0),$input);
     }
 }

@@ -1200,6 +1200,12 @@
         "label": "Infobox – Mitgliedschaft und Beiträge",
         "type": "rich",
         "default": ""
+      },
+      {
+        "key": "fees",
+        "label": "Mitgliederbeiträge ab 2027",
+        "type": "rich",
+        "default": "<p>Ab 2027 gelten folgende Mitgliederbeiträge pro Kalenderjahr:</p><ul><li>Einzelmitgliedschaft: CHF 120.–</li><li>Paarmitgliedschaft: CHF 160.–</li><li>Jungmitglieder bis Alter 35: CHF 50.–</li></ul>"
       }
     ]
   },

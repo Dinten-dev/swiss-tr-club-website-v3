@@ -19,7 +19,7 @@ final class RegionalEventAccess
     /** @return list<int> */
     public static function assignedEvents(?int $userId = null): array
     {
-        $stored = get_user_meta($userId ?? get_current_user_id(), 'strc_assigned_events', true);
+        $stored = \SwissTRClub\Core\Roles\RoleAssignments::events($userId ?? get_current_user_id());
         if (! is_array($stored)) return array();
         return array_values(array_filter(array_unique(array_map('absint', $stored)), static fn (int $id): bool => 'strc_event' === get_post_type($id)));
     }
@@ -27,7 +27,7 @@ final class RegionalEventAccess
     /** @return list<int> */
     public static function regions(?int $userId = null): array
     {
-        $stored = get_user_meta($userId ?? get_current_user_id(), 'strc_managed_regions', true);
+        $stored = \SwissTRClub\Core\Roles\RoleAssignments::regions($userId ?? get_current_user_id());
         if (! is_array($stored)) {
             return array();
         }
@@ -73,6 +73,7 @@ final class RegionalEventAccess
         if (! self::isGlobal() || ! current_user_can('edit_user', $user->ID)) {
             return;
         }
+        if(\SwissTRClub\Core\Roles\RoleAssignments::scoped((int)$user->ID)){echo '<h2>Regionale Agenda-Verwaltung</h2><p>Funktionszuständigkeiten verwaltest du unter Rollen und Zuständigkeiten in der Redaktion.</p>';return;}
         echo '<h2>Regionale Agenda-Verwaltung</h2><p>Mit aktivem Mitgliederzugang darf diese Person die Termine der gewählten Regionen verwalten.</p>';
         wp_nonce_field('strc_regions_' . $user->ID, 'strc_regions_nonce');
         $regions = RegionDirectory::terms();
@@ -86,6 +87,7 @@ final class RegionalEventAccess
         if (! self::isGlobal() || ! current_user_can('edit_user', $userId)) {
             return;
         }
+        if(\SwissTRClub\Core\Roles\RoleAssignments::scoped($userId)){if(isset($_POST['strc_regions_nonce']))wp_die('Zuständigkeiten bitte über die Rollenverwaltung ändern.','Zuweisung geändert',['response'=>409]);return;}
         $nonce = $_POST['strc_regions_nonce'] ?? '';
         if (! is_string($nonce) || ! wp_verify_nonce(wp_unslash($nonce), 'strc_regions_' . $userId)) {
             return;

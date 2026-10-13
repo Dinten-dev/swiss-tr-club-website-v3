@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const manifest = JSON.parse(readFileSync(resolve(root, 'deployment/staging/manifest.json'), 'utf8'));
+const selected=process.argv.find(value=>value.startsWith('--manifest='))?.slice('--manifest='.length)||'deployment/staging/manifest.json';
+const manifest = JSON.parse(readFileSync(resolve(root, selected), 'utf8'));
 const sha256 = data => createHash('sha256').update(data).digest('hex');
 
 for (const file of manifest.files) {

@@ -181,6 +181,7 @@ final class ApplicationAdmission
             }
             if(strcasecmp($user->user_email,$p['email'])!==0)throw new \RuntimeException('Die Konto-E-Mail stimmt nicht mehr mit dem Antrag überein.');
             foreach(['phone','street','postcode','city','country'] as $field)update_user_meta($user->ID,'strc_'.$field,$official['profile'][$field]);
+            foreach (['gender','birth_date'] as $field) if (isset($p[$field])) update_user_meta($user->ID,'strc_'.$field,$p[$field]);
             $r['userId']=(int)$user->ID;$this->save($id,$d);
             $existing=$wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE user_id=%d OR fairgate_contact_id=%s OR member_number=%s",$user->ID,$r['contactId'],$official['member_number']),ARRAY_A);
             if($existing&&((int)$existing['user_id']!==(int)$user->ID||$existing['fairgate_contact_id']!==$r['contactId']||$existing['member_number']!==$official['member_number']))throw new \RuntimeException('Die offizielle Mitgliedsnummer oder Contact ID ist bereits zugeordnet.');

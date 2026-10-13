@@ -129,5 +129,15 @@
       "year",
       "version"
     ]
+  },
+  {
+    "key": "travel-report",
+    "label": "Reiseberichte",
+    "group": "travel",
+    "access": "open",
+    "fields": [
+      "region",
+      "year"
+    ]
   }
 ]

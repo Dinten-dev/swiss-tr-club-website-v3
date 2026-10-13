@@ -8,6 +8,15 @@ final class LibraryPolicy
 {
     public static function registerHooks(): void
     {
+        add_action('init', static function(): void {
+            if (get_option('strc_travel_report_v1')) return;
+            $types = get_option('strc_library_types');
+            if (is_array($types) && !in_array('travel-report', array_column($types,'key'),true)) {
+                $types[] = ['key'=>'travel-report','label'=>'Reiseberichte','group'=>'travel','access'=>'open','fields'=>['region','year']];
+                update_option('strc_library_types',$types,false);
+            }
+            update_option('strc_travel_report_v1',1,false);
+        });
         // The native WordPress editor must enforce the same document boundaries.
         add_filter('map_meta_cap',static function(array $caps,string $cap,int $userId,array $args):array{
             if(in_array($cap,['read_post','edit_post','delete_post'],true)&&!empty($args[0])&&get_post_type((int)$args[0])==='strc_document'&&!in_array(self::classification((int)$args[0]),self::classesForUser($userId),true))return ['do_not_allow'];
@@ -50,9 +59,9 @@ final class LibraryPolicy
     private static function classesForUser(int $userId): array
     {
         if(!user_can($userId,'strc_access_member_area'))return [];
-        $level=get_user_meta($userId,'strc_library_access',true);
+        $level=\SwissTRClub\Core\Roles\RoleAssignments::scoped($userId)?'open':get_user_meta($userId,'strc_library_access',true);
         if(user_can($userId,'strc_access_board_documents'))return ['open','limited','restricted'];
-        return $level==='limited'||user_can($userId,'strc_manage_library')?['open','limited']:['open'];
+        return $level==='limited'||\SwissTRClub\Core\Roles\RoleAssignments::limited($userId)||(!\SwissTRClub\Core\Roles\RoleAssignments::scoped($userId)&&user_can($userId,'strc_manage_library'))?['open','limited']:['open'];
     }
     public static function classification(int $id): string
     {

@@ -30,6 +30,7 @@ if (file_exists(STRC_CORE_PATH . 'vendor/autoload.php')) {
 
 require_once STRC_CORE_PATH . 'src/Roles/RoleDefinitions.php';
 require_once STRC_CORE_PATH . 'src/Roles/RoleManager.php';
+require_once STRC_CORE_PATH . 'src/Roles/RoleAssignments.php';
 require_once STRC_CORE_PATH . 'src/Events/EventPostType.php';
 require_once STRC_CORE_PATH . 'src/Events/EventArchiveRetention.php';
 require_once STRC_CORE_PATH . 'src/Events/RegionDirectory.php';
@@ -45,6 +46,7 @@ require_once STRC_CORE_PATH . 'src/Community/LibraryImportCommand.php';
 require_once STRC_CORE_PATH . 'src/Community/CommunityEndpoint.php';
 require_once STRC_CORE_PATH . 'src/Content/ContentPostTypes.php';
 require_once STRC_CORE_PATH . 'src/Content/HomepageEndpoint.php';
+require_once STRC_CORE_PATH . 'src/Marketplace/AdDocuments.php';
 require_once STRC_CORE_PATH . 'src/Marketplace/MarketplaceEndpoint.php';
 require_once STRC_CORE_PATH . 'src/Shop/ShopAccessPolicy.php';
 require_once STRC_CORE_PATH . 'src/Shop/ShopEndpoint.php';
@@ -67,6 +69,7 @@ require_once STRC_CORE_PATH . 'src/Dashboard/DashboardShortcode.php';
 require_once STRC_CORE_PATH . 'src/Admin/SystemStatusPage.php';
 require_once STRC_CORE_PATH . 'src/Admin/FairgateAdministrationPage.php';
 require_once STRC_CORE_PATH . 'src/Infrastructure/Activator.php';
+require_once STRC_CORE_PATH . 'src/Infrastructure/StagingAccessLoopback.php';
 require_once STRC_CORE_PATH . 'src/Plugin.php';
 
 register_activation_hook(__FILE__, array(Activator::class, 'activate'));

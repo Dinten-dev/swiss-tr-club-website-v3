@@ -39,7 +39,7 @@ export default function Community({kind,nonce,selectedId,initialGroup='',title}:
   const [readingPdf,setReadingPdf]=useState<FileItem|null>(null);
   const [libraryQuery,setLibraryQuery]=useState('');const [libraryModel,setLibraryModel]=useState('');const [libraryMine,setLibraryMine]=useState(false);
   // Bibliothek: Filter je Bereich; Technik zeigt Treffer erst nach Dokumentart und Fahrzeug.
-  const libraryUsesType=['technical','club','travel','board'].includes(group),libraryUsesSearch=!libraryUsesType;
+  const libraryUsesSearch=['magazine','newsletter'].includes(group),libraryUsesType=!libraryUsesSearch;
   const libraryReady=kind!=='library'||(!!group&&(group!=='technical'||!!(documentType&&libraryModel)));
   useEffect(()=>{const controller=new AbortController();const timer=setTimeout(()=>{setLoading(true);setError('');query<typeof collection>(action,{operation:'list',kind,group,search:kind==='library'?libraryQuery:'',model:kind==='library'?libraryModel:'',mine:kind==='library'&&libraryMine?'1':'0',documentType,area,galleryCategory,trash:trash?'1':'0',page:String(page)},controller.signal).then(setCollection).catch(reason=>{if(!controller.signal.aborted)setError(reason.message);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});},180);return()=>{clearTimeout(timer);controller.abort();};},[kind,group,documentType,area,galleryCategory,trash,page,revision,libraryQuery,libraryModel,libraryMine]);
   function refresh(message=''){setNotice(message);setLoading(true);setRevision(value=>value+1);}

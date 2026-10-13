@@ -18,19 +18,21 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
   const [images,setImages]=useState<Record<string,string>>({});
   const [page,setPage]=useState(1);
   const [anim,setAnim]=useState<Turn|null>(null);
-  const [narrow,setNarrow]=useState(()=>window.innerWidth<760);
+  const [narrow,setNarrow]=useState(()=>typeof window!=='undefined'&&window.innerWidth<760);
   const [userSingle,setUserSingle]=useState<boolean|null>(null);
   const store=useRef<Record<string,string>>({});
   const busy=useRef(new Set<number>());
   const touch=useRef<number|'swiped'|null>(null);
-  const layoutRef=useRef<Entry[]|null>(null);
+  const layoutRef=useRef<Entry[]|null>(null);const timers=useRef<ReturnType<typeof setTimeout>[]>([]);const generation=useRef(0);
+  useEffect(()=>()=>{timers.current.forEach(clearTimeout);generation.current++;},[]);
 
   useEffect(()=>{
-    let disposed=false;
+    let disposed=false;timers.current.forEach(clearTimeout);timers.current=[];generation.current++;store.current={};busy.current.clear();layoutRef.current=null;
     let task:ReturnType<typeof import('pdfjs-dist')['getDocument']>|undefined;
     (async()=>{
       const pdf=await import('pdfjs-dist/legacy/build/pdf.mjs');
       if(disposed)return;
+      setDoc(null);setLayout(null);setImages({});setPage(1);setError('');setAnim(null);
       pdf.GlobalWorkerOptions.workerSrc=`${assetBase}/pdfjs/pdf.worker.min.js`;
       task=pdf.getDocument({url,withCredentials:true,rangeChunkSize:65536,cMapUrl:`${assetBase}/pdfjs/cmaps/`,cMapPacked:true,standardFontDataUrl:`${assetBase}/pdfjs/standard_fonts/`,wasmUrl:`${assetBase}/pdfjs/wasm/`});
       const loaded=await task.promise;
@@ -81,11 +83,12 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
   async function draw(v:number){
     const entries=layoutRef.current,x=entries?.[v-1];
     if(!doc||!x||store.current[`${x.p}:${x.part}`]||busy.current.has(x.p))return;
-    busy.current.add(x.p);
+    busy.current.add(x.p);const active=generation.current;
     try{
       const pdfPage=await doc.getPage(x.p),v1=pdfPage.getViewport({scale:1}),vp=pdfPage.getViewport({scale:Math.min(2.2,1300/v1.height)});
       const c=document.createElement('canvas');c.width=Math.floor(vp.width);c.height=Math.floor(vp.height);
       await pdfPage.render({canvas:c,viewport:vp}).promise;
+      if(active!==generation.current)return;
       const add:Record<string,string>={};
       if(x.part==='full')add[`${x.p}:full`]=c.toDataURL('image/jpeg',.86);
       else{
@@ -96,7 +99,7 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
         }
       }
       store.current={...store.current,...add};setImages(store.current);pdfPage.cleanup();c.width=0;
-    }catch{/* Seite bleibt „wird geladen“ */}finally{busy.current.delete(x.p);}
+    }catch{if(active===generation.current)setError(t('Die Seite konnte nicht geladen werden. Öffne Suche, Text & Download.'));}finally{busy.current.delete(x.p);}
   }
   useEffect(()=>{
     if(!doc||!layout)return;
@@ -114,14 +117,10 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
       ?dir>0?{under:[to[0]],front:current[0],back:-1,side:'right'}:{under:[current[0]],front:to[0],back:-1,side:'right',reverse:true}
       :dir>0?{under:[current[0],to[1]],front:current[1],back:to[0],side:'right'}:{under:[to[0],current[1]],front:current[0],back:to[1],side:'left'};
     setAnim({...next,go:false});
-    setTimeout(()=>setAnim(x=>x&&{...x,go:true}),30);
-    setTimeout(()=>{setPage(target);setAnim(null);},680);
+    timers.current.push(setTimeout(()=>setAnim(x=>x&&{...x,go:true}),30));
+    timers.current.push(setTimeout(()=>{setPage(target);setAnim(null);},window.matchMedia('(prefers-reduced-motion: reduce)').matches?40:680));
   }
-  useEffect(()=>{
-    const key=(e:KeyboardEvent)=>{if(e.key==='ArrowRight'){e.preventDefault();turn(1);}else if(e.key==='ArrowLeft'){e.preventDefault();turn(-1);}};
-    window.addEventListener('keydown',key);
-    return()=>window.removeEventListener('keydown',key);
-  });
+
 
   const face=(v:number,className:string)=>{
     if(v===-1)return <div className={`fb-face fb-paper ${className}`}/>;
@@ -142,6 +141,7 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
       <button type="button" className="club-secondary fb-mode" onClick={classic}>{t('Suche, Text & Download')}</button>
     </div>
     {error?<p role="alert">{error}</p>:<div className="fb-book" style={{aspectRatio:String((one?1:2)*ratio),['--fb-ratio' as string]:(one?1:2)*ratio}} tabIndex={0} role="group" aria-label={`${title} – ${t('Blättern mit Pfeiltasten, Klick oder Wischen')}`}
+      onKeyDown={e=>{if(e.key==='ArrowRight'){e.preventDefault();turn(1);}else if(e.key==='ArrowLeft'){e.preventDefault();turn(-1);}}}
       onClick={e=>{if(touch.current==='swiped'){touch.current=null;return;}const r=e.currentTarget.getBoundingClientRect();turn(e.clientX-r.left>r.width/2?1:-1);}}
       onPointerDown={e=>{touch.current=e.clientX;}}
       onPointerUp={e=>{const s=touch.current;touch.current=null;if(typeof s==='number'&&Math.abs(e.clientX-s)>50){touch.current='swiped';turn(e.clientX<s?1:-1);}}}>

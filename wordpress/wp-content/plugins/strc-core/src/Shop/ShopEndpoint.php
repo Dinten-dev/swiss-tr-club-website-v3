@@ -64,7 +64,7 @@ final class ShopEndpoint
             ! empty($allcaps['strc_manage_content_roles']) || (! empty($allcaps['strc_access_member_area']) && ! empty($allcaps['strc_manage_shop'])),
             ! empty($allcaps['strc_access_member_area']),
             ! empty($allcaps['strc_moderate']),
-            (array) get_user_meta($user->ID, 'strc_moderation_areas', true)
+            \SwissTRClub\Core\Roles\RoleAssignments::areas((int)$user->ID)
         );
         if(!empty($allcaps['strc_access_member_area'])&&!empty($allcaps['strc_manage_finance']))$allcaps['view_woocommerce_reports']=true;
         return ShopAccessPolicy::withProductCapabilities($allcaps, $canManage);
@@ -243,7 +243,7 @@ final class ShopEndpoint
             current_user_can('strc_manage_content_roles') || (current_user_can('strc_access_member_area') && current_user_can('strc_manage_shop')),
             current_user_can('strc_access_member_area'),
             current_user_can('strc_moderate'),
-            (array) get_user_meta(get_current_user_id(), 'strc_moderation_areas', true)
+            \SwissTRClub\Core\Roles\RoleAssignments::areas(get_current_user_id())
         );
     }
 }

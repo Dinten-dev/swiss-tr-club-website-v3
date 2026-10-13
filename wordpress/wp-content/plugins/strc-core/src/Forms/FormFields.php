@@ -28,18 +28,24 @@ final class FormFields
         foreach (['email','phone','street','postcode','city','country'] as $key) $result[$key] = self::text($input, $prefix.$key, 200, $key !== 'phone');
         if (!is_email($result['email'])) throw new \InvalidArgumentException('Bitte eine gültige E-Mail-Adresse eingeben.');
         if ($result['phone'] !== '' && !preg_match('/^[+0-9() .\/-]{5,40}$/D', $result['phone'])) throw new \InvalidArgumentException('Bitte eine gültige Telefonnummer eingeben.');
-        if ($mobileRequired && ($result['phone'] === '' || strlen(preg_replace('/\D/', '', $result['phone'])) < 5)) throw new \InvalidArgumentException($prefix === '' ? 'Bitte Ihre Mobilnummer angeben.' : 'Bitte die Mobilnummer des Co-Piloten angeben.');
+        if ($mobileRequired && ($result['phone'] === '' || strlen(preg_replace('/\D/', '', $result['phone'])) < 5)) throw new \InvalidArgumentException($prefix === '' ? 'Bitte deine Mobilnummer angeben.' : 'Bitte die Mobilnummer des Co-Piloten angeben.');
         if ($names) {
             foreach (['first_name','last_name'] as $key) $result[$key] = self::text($input, $prefix.$key, 160, true);
             $result['salutation'] = self::choice($input, $prefix.'salutation', ['', 'Frau','Herr','Ohne Anrede']);
             $result['language'] = self::choice($input, $prefix.'language', ['de','fr'], 'de');
+            $result['gender'] = self::choice($input, $prefix.'gender', ['', 'female', 'male', 'other']);
+            $result['birth_date'] = self::text($input, $prefix.'birth_date', 10);
+            if ($result['birth_date'] !== '') {
+                $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $result['birth_date']);
+                if (!$date || $date->format('Y-m-d') !== $result['birth_date'] || $result['birth_date'] > gmdate('Y-m-d')) throw new \InvalidArgumentException('Bitte ein gültiges Geburtsdatum angeben.');
+            }
         }
         return $result;
     }
     public static function vehicle(array $input): array
     {
         $result = ['model'=>self::choice($input, 'model', self::MODELS), 'status'=>self::choice($input, 'status', ['roadworthy','restoration'], 'roadworthy')];
-        foreach (['details','year','colour','registration','notes'] as $key) $result[$key] = self::text($input, $key, $key === 'notes' ? 1000 : 160);
+        foreach (['details','year','colour','exteriorColour','interiorColour','chassisNumber','registration','notes'] as $key) $result[$key] = self::text($input, $key, $key === 'notes' ? 1000 : 160);
         if ($result['year'] !== '' && (!preg_match('/^\d{4}$/D', $result['year']) || (int)$result['year'] < 1900 || (int)$result['year'] > (int)gmdate('Y')+1)) throw new \InvalidArgumentException('Bitte ein gültiges Baujahr eingeben.');
         return $result;
     }
@@ -57,9 +63,11 @@ final class FormFields
         if (!$vehicles) throw new \InvalidArgumentException('Bitte mindestens einen Triumph TR angeben.');
         foreach ($vehicles as $vehicle) {
             if (!is_array($vehicle)) throw new \InvalidArgumentException('Bitte die Fahrzeugangaben prüfen.');
-            $result['vehicles'][] = self::vehicle($vehicle);
+            $parsed = self::vehicle($vehicle);
+            if ($parsed['year'] === '') throw new \InvalidArgumentException('Bitte das Baujahr angeben.');
+            $result['vehicles'][] = $parsed;
         }
-        if (!array_intersect(array_column($result['vehicles'], 'model'), self::TR_MODELS)) throw new \InvalidArgumentException('Bitte mindestens einen Triumph TR angeben. Weitere Triumph-Modelle können Sie zusätzlich erfassen.');
+        if (!array_intersect(array_column($result['vehicles'], 'model'), self::TR_MODELS)) throw new \InvalidArgumentException('Bitte mindestens einen Triumph TR angeben. Weitere Triumph-Modelle kannst du zusätzlich erfassen.');
         if (($input['statutes'] ?? '') !== '1' || ($input['privacy'] ?? '') !== '1') throw new \InvalidArgumentException('Bitte Statuten und Datenschutzhinweise bestätigen.');
         if ($type === 'couple' && ($input['copilot_confirm'] ?? '') !== '1') throw new \InvalidArgumentException('Bitte die Zustimmung der zweiten Person bestätigen.');
         $result['declarations'] = ['statutes'=>true, 'privacy'=>true, 'copilot'=>$type === 'couple', 'version'=>'2026-09-21'];
