@@ -125,7 +125,7 @@ function ClubApp() {
         <button className={page==='agenda'?'active':''} onClick={() => navigate('agenda')}>{c('global.navAgenda')}</button>
         <button className={page==='regions'?'active':''} onClick={() => navigate('regions')}>{c('global.navRegions')}</button>
         <button className={['market','shop'].includes(page)?'active':''} onClick={() => navigate('market')}>{c('global.navMarket')}</button>
-        {memberSession?.memberAccess&&<button className={page==='members'?'active':''} onClick={() => navigate('members')}>{t('Mitgliederbereich')}</button>}
+        <button className={['members','profile','applications','forum','gallery','library','clubdocs','directory','editorial','event-admin'].includes(page)?'active':''} onClick={() => navigate('members')}>{t(memberSession?.memberAccess?'Mitgliederbereich':'Mitglieder-Login')}</button>
         </div>
         <LanguageSwitcher/>
       </nav>
@@ -139,7 +139,7 @@ function ClubApp() {
     {page==='mission' && <MissionPage/>}
     {page==='models'&&<VehicleGallery key={subroute} selected={subroute} canEdit={!!memberSession?.canEditContent}/>}
     {['organisation','membership','shop','triungsters','history'].includes(page)&&<StaticPage key={editorialKey} documentKey={editorialKey} canEdit={memberSession?.editableDocuments?.includes(editorialKey)}/>}
-    {page==='agenda' && <><div className="agenda-admin-link">{memberSession?.canManageEvents?<button className="market-primary" onClick={()=>navigate('event-admin')}>{t('Agenda verwalten')}</button>:<a className="club-secondary" href="#agenda-verwalten">{t('Moderator-Login')}</a>}</div><AgendaPage memberAccess={!!memberSession?.memberAccess} events={events} eventsState={eventsState} retryEvents={retryEvents} openEvent={setSelectedEvent}/></>}
+    {page==='agenda' && <><AgendaPage memberAccess={!!memberSession?.memberAccess} events={events} eventsState={eventsState} retryEvents={retryEvents} openEvent={setSelectedEvent}/></>}
     {page==='regions' && <RegionsPage editableDocuments={memberSession?.editableDocuments||[]} events={events} eventsState={eventsState} retryEvents={retryEvents} openEvent={setSelectedEvent}/>}
     {page==='market' && <Marketplace key={subroute} section={subroute} session={memberSession} notify={notify}/>}
     {page==='profile' && (memberSession?.memberAccess?<MemberForms/>:<MembersPage session={memberSession} navigate={navigate}/>)}

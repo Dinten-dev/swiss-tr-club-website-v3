@@ -89,6 +89,8 @@ final class MarketplaceEndpoint
             // Existing advertisements keep their model inside the serialized details array.
             $meta[]=['relation'=>'OR',['key'=>'strc_ad_details','value'=>'s:5:"model";s:'.strlen($model).':"'.$model.'";','compare'=>'LIKE'],['key'=>'strc_ad_models','value'=>'|'.$model.'|','compare'=>'LIKE']];
         }
+        $partCategory=is_string($input['partCategory']??null)?sanitize_text_field($input['partCategory']):'';
+        if($partCategory!=='')$meta[]=['key'=>'strc_ad_details','value'=>'s:12:"partCategory";s:'.strlen($partCategory).':"'.$partCategory.'";','compare'=>'LIKE'];
         $search=sanitize_text_field(is_string($input['search']??null)?$input['search']:'');
         global $wpdb;
         $searchFilter=static function(string $where,WP_Query $query)use($search,$wpdb):string{
@@ -331,6 +333,7 @@ final class MarketplaceEndpoint
         $result=wp_update_post(['ID'=>$id,'post_status'=>$status],true);if(is_wp_error($result))return $result;
         if($status!=='publish')delete_post_meta($id,'strc_ad_public_approved');
         if($status==='pending')\SwissTRClub\Core\Community\SubmissionNotifications::send($id,'market');
+        if(in_array($operation,['approve','reject'],true))\SwissTRClub\Core\Community\SubmissionNotifications::decided($id,'market',$operation==='approve');
         return $this->present($id);
     }
 

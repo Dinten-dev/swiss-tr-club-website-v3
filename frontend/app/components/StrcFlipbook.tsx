@@ -11,7 +11,9 @@ type Part='full'|'left'|'right'|'center';
 type Entry={p:number;part:Part;r:number;edge?:boolean};
 type Turn={under:number[];front:number;back:number;side:'left'|'right';reverse?:boolean;go:boolean};
 
-export default function StrcFlipbook({url,title,classic}:{url:string;title:string;classic:()=>void}){
+// `pages`: optionale Auswahl von Magazinseiten (Nummerierung wie in der vollen Blätter-Ansicht), z. B. für die Vorschau auf der Startseite.
+export default function StrcFlipbook({url,title,classic,pages}:{url:string;title:string;classic?:()=>void;pages?:number[]}){
+  const selection=(pages||[]).join(',');
   const [doc,setDoc]=useState<PDFDocumentProxy|null>(null);
   const [error,setError]=useState('');
   const [layout,setLayout]=useState<Entry[]|null>(null);
@@ -47,10 +49,11 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
           else entries.push({p,part:'left',r},{p,part:'right',r});
         }else entries.push({p,part:'full',r:v.width/v.height});
       }
-      layoutRef.current=entries;setLayout(entries);setDoc(loaded);
+      const chosen=selection?selection.split(',').map(Number).map(n=>entries[n-1]).filter((entry):entry is Entry=>!!entry):entries;
+      layoutRef.current=chosen;setLayout(chosen);setDoc(loaded);
     })().catch(()=>{if(!disposed)setError(t('Das PDF konnte nicht geöffnet werden. Bitte erneut versuchen.'));});
     return()=>{disposed=true;task?.destroy().catch(()=>{});};
-  },[url]);
+  },[url,selection]);
 
   useEffect(()=>{
     const resize=()=>setNarrow(window.innerWidth<760);
@@ -94,7 +97,7 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
       else{
         add[`${x.p}:left`]=crop(c,0,c.width/2);add[`${x.p}:right`]=crop(c,c.width/2,c.width/2);
         if(x.edge){
-          if(blankSides(c))add[`${x.p}:center`]=crop(c,c.width/4,c.width/2);
+          if(selection||blankSides(c))add[`${x.p}:center`]=crop(c,c.width/4,c.width/2);
           else{const split=entries!.flatMap(y=>y===x?[{p:y.p,part:'left' as Part,r:y.r},{p:y.p,part:'right' as Part,r:y.r}]:[y]);layoutRef.current=split;setLayout(split);}
         }
       }
@@ -125,12 +128,13 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
   const face=(v:number,className:string)=>{
     if(v===-1)return <div className={`fb-face fb-paper ${className}`}/>;
     if(!v)return <div className={`fb-face fb-empty ${className}`}/>;
-    const src=images[keyOf(v)];
+    const src=images[keyOf(v)];const shownNumber=number(v);
     // eslint-disable-next-line @next/next/no-img-element -- lokal gerenderte PDF-Seite als Data-URL.
-    return <div className={`fb-face ${className}`}>{src?<img src={src} alt={`${t('Seite')} ${v}`} draggable={false}/>:<span className="fb-loading">{t('Seite wird geladen …')}</span>}</div>;
+    return <div className={`fb-face ${className}`}>{src?<img src={src} alt={`${t('Seite')} ${shownNumber}`} draggable={false}/>:<span className="fb-loading">{t('Seite wird geladen …')}</span>}</div>;
   };
   const under=anim?anim.under:current,shown=current.filter(Boolean);
-  const label=total?`${shown.length>1?shown.join('–'):String(shown[0]||1)} ${t('von')} ${total}`:'';
+  const numbers=selection?selection.split(',').map(Number):null,number=(v:number)=>numbers?.[v-1]??v;
+  const label=total?numbers?shown.map(number).join('–'):`${shown.length>1?shown.join('–'):String(shown[0]||1)} ${t('von')} ${total}`:'';
 
   return <div className={'strc-flipbook'+(one?' is-single':'')}>
     <div className="fb-toolbar">
@@ -138,7 +142,7 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
       <span aria-live="polite">{total?`${t('Seite')} ${label}`:t('Magazin wird geladen …')}</span>
       <button type="button" className="club-secondary" onClick={()=>turn(1)} disabled={!hasNext||!!anim}>{t('Weiter')} →</button>
       <button type="button" className="club-secondary fb-mode" onClick={()=>setUserSingle(!one)}>{one?t('Doppelseite'):t('Einzelseite')}</button>
-      <button type="button" className="club-secondary fb-mode" onClick={classic}>{t('Suche, Text & Download')}</button>
+      {classic&&<button type="button" className="club-secondary fb-mode" onClick={classic}>{t('Suche, Text & Download')}</button>}
     </div>
     {error?<p role="alert">{error}</p>:<div className="fb-book" style={{aspectRatio:String((one?1:2)*ratio),['--fb-ratio' as string]:(one?1:2)*ratio}} tabIndex={0} role="group" aria-label={`${title} – ${t('Blättern mit Pfeiltasten, Klick oder Wischen')}`}
       onKeyDown={e=>{if(e.key==='ArrowRight'){e.preventDefault();turn(1);}else if(e.key==='ArrowLeft'){e.preventDefault();turn(-1);}}}

@@ -2499,3 +2499,39 @@ footer{background:var(--strc-hero)}
 
 .role-assignment-panel>label{display:block;margin:18px 0}.role-assignment-panel input,.role-assignment-panel select{width:100%}.role-assignment-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:24px;margin-top:24px}.role-assignment-columns fieldset{border:1px solid #cfdfec;padding:18px;background:#e7f0f8}.role-assignment-row,.role-assignment-result{padding:16px;margin-bottom:16px;border:1px solid #cfdfec;background:#fff;border-radius:8px}.role-assignment-row label{display:block;margin-top:12px}.role-assignment-columns button{margin:12px 6px 0 0}.role-assignment-result p{margin:8px 0;font-size:14px}.role-assignment-row select[multiple]{min-height:100px}.role-assignment-panel h3{color:#114973}@media(width<=800px){.role-assignment-columns{grid-template-columns:1fr}}
 .rich-content .strc-tab{white-space:pre-wrap;tab-size:8}
+
+/* Runde 2 (14.10.2026): Navigation, Agenda, Regionen, Marktplatz, Shop */
+.site-header nav .language-switcher{margin-left:28px;padding-left:20px;border-left:1px solid #ffffff55;gap:6px}
+.site-header nav .language-switcher button{min-width:0;min-height:50px;padding:12px 10px;border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;color:#fff;font:700 18px/1 Arial,Helvetica,sans-serif}
+.site-header nav .language-switcher button[aria-pressed=true]{color:#fff;background:#971a20;border-bottom-color:#fff}
+.site-header nav .language-switcher button:hover{border-bottom-color:#ffffff99}
+@media(max-width:760px){.site-header nav .language-switcher{margin-left:0;padding-left:0;border-left:0}}
+.agenda-table td.agenda-seats{white-space:nowrap}
+.agenda-table td.agenda-seats>span{display:inline}
+.agenda-table td.agenda-seats meter{display:inline-block;width:52px;height:8px;margin-left:8px;vertical-align:middle}
+.agenda-place{position:relative;display:inline-block}
+.agenda-place-trigger{padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.agenda-place-popover{position:absolute;z-index:20;top:calc(100% + 6px);left:0;min-width:220px;padding:10px 12px;border:1px solid #c9d7e0;border-radius:6px;background:#fff;box-shadow:0 6px 18px #0b2a4022;white-space:pre-line;font-size:13px;line-height:1.5;color:var(--navy)}
+.event-roster{width:100%;border-collapse:collapse;font-size:14px}
+.event-roster th{text-align:left;background:#e7f0f8;padding:8px 10px;font-weight:700;color:var(--navy)}
+.event-roster td{padding:8px 10px;border-bottom:1px solid #e1e8ed;vertical-align:top}
+.event-roster td small{display:block;color:#526775;font-size:12px}
+.event-roster tr.is-cancelled td{opacity:.55;text-decoration:line-through}
+.regional-panel{--rp-bg:#e7f0f8;--rp-line:#c9dcec;background:var(--rp-bg);border-color:var(--rp-line)}
+.regional-grid .regional-panel:nth-child(2){--rp-bg:#e9f4ec;--rp-line:#c7e2cf}
+.regional-grid .regional-panel:nth-child(3){--rp-bg:#fbf1e4;--rp-line:#eed9b8}
+.regional-grid .regional-panel:nth-child(4){--rp-bg:#f6e8ea;--rp-line:#e8cdd2}
+.regional-content>.regional-panel{--rp-bg:#f1edf7;--rp-line:#dcd3ea;margin-top:22px}
+.regional-content>.regional-panel.regional-events-panel{--rp-bg:#eef3f6;--rp-line:#d5e0e7}
+.market-form input:not([type=file]),.market-form textarea,.market-form select{font-weight:400;font-size:16px;line-height:1.45}
+.market-description,.profile-facts dd{white-space:pre-line}
+.market-description{margin-top:18px;line-height:1.6}
+.profile-facts>div{padding:6px 0;border-bottom:1px solid #e6edf1}
+.market-hint{margin-top:18px}
+.market-confirmation{text-align:center}
+.market-confirmation-icon{width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:#e9f4ec;color:#2f7a45;font-size:30px;line-height:56px}
+.shop-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 22px;padding-bottom:10px;border-bottom:1px solid #dde7ed}
+.shop-tabs a{padding:9px 14px;border-radius:6px;text-decoration:none;font-weight:700;color:var(--navy);background:#eef3f6}
+.shop-tabs a[aria-current=page]{background:var(--navy);color:#fff}
+.shop-admin-view{display:grid;gap:18px}
+.home-magazine-flip{display:grid;gap:14px}
