@@ -15,10 +15,10 @@ final class ForumSettings
     {
         return (array)get_user_meta($id,'strc_forum_preferences',true)+['interests'=>[],'email'=>true,'website'=>true,'whatsapp'=>false,'whatsappConsentAt'=>'','whatsappConsentVersion'=>'','expertNotifications'=>false];
     }
-    private static function combinations(string $raw): array
+    private static function combinations(string $raw,int $max=30): array
     {
         $rows=json_decode($raw,true);
-        if(!is_array($rows)||!array_is_list($rows)||count($rows)>30)AjaxRequest::fail('Bitte gültige Interessen wählen.',422);
+        if(!is_array($rows)||!array_is_list($rows)||count($rows)>$max)AjaxRequest::fail('Bitte gültige Interessen wählen.',422);
         $result=[];
         foreach($rows as $row){
             if(!is_array($row))AjaxRequest::fail('Ungültige Zuordnung.',422);
@@ -38,7 +38,7 @@ final class ForumSettings
             $consentAt=$whatsapp?(!empty($previous['whatsapp'])?(string)($previous['whatsappConsentAt']??''):gmdate(DATE_ATOM)):'';
             $consentVersion=$whatsapp?(!empty($previous['whatsapp'])?(string)($previous['whatsappConsentVersion']??''):self::WHATSAPP_CONSENT_VERSION):'';
             update_user_meta($id,'strc_forum_preferences',[
-                'interests'=>self::combinations($input['interests']??'[]'),
+                'interests'=>self::combinations($input['interests']??'[]',60),
                 'email'=>($input['email']??'')==='1','website'=>($input['website']??'')==='1','whatsapp'=>$whatsapp,
                 'whatsappConsentAt'=>$consentAt,'whatsappConsentVersion'=>$consentVersion,
                 'expertNotifications'=>($input['expertNotifications']??'')==='1',
@@ -48,7 +48,7 @@ final class ForumSettings
             if(!$manage)AjaxRequest::fail('Keine Forumsmoderation.',403);
             $target=absint($input['id']??0);$member=(new MembershipRepository())->findForUser($target);
             if(!$member||!in_array($member['status'],['active','grace'],true)||!user_can($target,'strc_access_member_area'))AjaxRequest::fail('Aktives Mitglied nicht gefunden.',404);
-            update_user_meta($target,'strc_forum_expertise',self::combinations($input['expertise']??'[]'));
+            update_user_meta($target,'strc_forum_expertise',self::combinations($input['expertise']??'[]',200));
         }elseif($op!=='list')AjaxRequest::fail('Unbekannte Anfrage.',400);
         $members=[];
         if($manage){$search=mb_strtolower(sanitize_text_field($input['search']??''));foreach((new MembershipRepository())->all() as $member){$target=(int)$member['user_id'];if(!in_array($member['status'],['active','grace'],true)||!user_can($target,'strc_access_member_area'))continue;$user=get_userdata($target);$expertise=(array)get_user_meta($target,'strc_forum_expertise',true);if(($search&&str_contains(mb_strtolower($user->display_name),$search))||(!$search&&$expertise))$members[]=['id'=>$target,'name'=>$user->display_name,'expertise'=>$expertise];} $members=array_slice($members,0,50);}

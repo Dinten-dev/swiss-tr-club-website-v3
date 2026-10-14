@@ -101,7 +101,7 @@ final class CommunityEndpoint
 
     public function respond(): void
     {
-        list($operation, $input) = AjaxRequest::read('strc_community', array('create', 'reply', 'trash', 'restore', 'edit', 'append', 'captions', 'approve', 'reject', 'subscribe', 'close', 'pin', 'merge', 'reply-edit', 'reply-hide', 'photos-review', 'cover', 'photos-move', 'image-policy'));
+        list($operation, $input) = AjaxRequest::read('strc_community', array('create', 'reply', 'trash', 'restore', 'edit', 'append', 'captions', 'approve', 'reject', 'subscribe', 'close', 'pin', 'merge', 'reply-edit', 'reply-hide', 'photos-review', 'cover', 'photos-move', 'image-policy', 'delete'));
         if($operation==='teasers')wp_send_json_success($this->teasers());
         if($operation==='teaser-file')$this->teaserFile(absint($input['id']??0),$input['key']??'');
         if (! current_user_can('strc_access_member_area')) {
@@ -118,6 +118,7 @@ final class CommunityEndpoint
             'edit' => $this->edit($input),
             'captions' => $this->captions($input),
             'trash', 'restore', 'approve', 'reject' => $this->status($operation, absint($input['id'] ?? 0)),
+            'delete' => $this->deleteTopic(absint($input['id'] ?? 0)),
             'photos-review','cover','photos-move'=>$this->reviewPhotos($operation,$input),
             'gallery-events'=>array_map(static fn($event)=>['id'=>(int)$event->ID,'title'=>$event->post_title],get_posts(['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>-1,'orderby'=>'date','order'=>'DESC'])),
             'image-policy'=>$this->imagePolicy($input),
@@ -127,6 +128,16 @@ final class CommunityEndpoint
             default => AjaxRequest::fail('Unbekannte Anfrage.'),
         };
         wp_send_json_success($result);
+    }
+
+    /** Forumsthema endgültig löschen: durch den Verfasser oder die Forumsmoderation (Dateien werden mitgelöscht). */
+    private function deleteTopic(int $id): array
+    {
+        $post=$this->post($id,true);
+        if($post->post_type!=='strc_topic')AjaxRequest::fail('Nur Forumsthemen können gelöscht werden.',422);
+        if((int)$post->post_author!==get_current_user_id()&&!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+        if(!wp_delete_post($id,true))AjaxRequest::fail('Thema konnte nicht gelöscht werden.',503);
+        return ['id'=>$id,'deleted'=>true];
     }
 
     private function post(int $id, bool $allowTrash = false): \WP_Post
@@ -295,16 +306,20 @@ final class CommunityEndpoint
             return $type==='strc_topic'&&$query->get('post_type')===$type?"COALESCE((SELECT CAST(pin.meta_value AS UNSIGNED) FROM {$wpdb->postmeta} pin WHERE pin.post_id={$wpdb->posts}.ID AND pin.meta_key='strc_topic_pinned' LIMIT 1),0) DESC, ".$order:$order;};
         add_filter('posts_orderby',$pinnedOrder,10,2);
         $query=new WP_Query($args);
+        $areaCounts=[];
+        if($type==='strc_topic'&&empty($input['area'])&&!$trash){
+            foreach(CatalogSettings::areas() as $areaName){$countQuery=new WP_Query(['post_type'=>'strc_topic','post_status'=>'publish','posts_per_page'=>1,'fields'=>'ids','no_found_rows'=>false,'meta_query'=>[['key'=>'strc_form_classification','value'=>'"area";s:'.strlen($areaName).':"'.$areaName.'";','compare'=>'LIKE']]]);$areaCounts[$areaName]=(int)$countQuery->found_posts;}
+        }
         remove_filter('posts_orderby',$pinnedOrder,10);
         remove_filter('posts_where',$visibility,10);
         if($searchFilter)remove_filter('posts_where',$searchFilter,10);
         $posts=$type==='strc_document'?array_filter($query->posts,static fn($p)=>LibraryPolicy::canRead((int)$p->ID)):$query->posts;
-        return ['items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
+        return ['areaCounts'=>$areaCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
     }
 
     private function detail(int $id, int $page): array
     {
-        $post = $this->post($id);
+        $post = $this->post($id, true);
         $result = $this->present($post);
         $result['replies'] = array();
         $result['replyPages'] = 0;
