@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-BwCkjqgX.js";
+import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-XWG8yXrM.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var l = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -19449,7 +19449,7 @@ function bn({ open: e }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var xn = (0, h.lazy)(() => import("./MagazineReader-Bbpv3j3x.js")), Sn = "strc_community", Cn = {
+var xn = (0, h.lazy)(() => import("./MagazineReader-DYdiJlXm.js")), Sn = "strc_community", Cn = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliederporträts",
 	restorations: "Fahrzeugrestaurationen",
@@ -22074,7 +22074,7 @@ function Yn() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var Xn = (0, h.lazy)(() => import("./MagazineReader-Bbpv3j3x.js"));
+var Xn = (0, h.lazy)(() => import("./MagazineReader-DYdiJlXm.js"));
 function Zn({ issue: e, loading: t, error: r, retry: i }) {
 	let { text: a } = fe(), s = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: c } = n(), l = (e, t) => c === "fr" ? t : e, [u, d] = (0, h.useState)(!1), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(0), [y, b] = (0, h.useState)(!1), x = (0, h.useRef)(null), S = (0, h.useRef)(!1), C = (e?.previewPages || []).slice(0, 6), w = Math.min(m, Math.max(0, C.length - 1)), T = e?.previewCaptions?.[w] || `${l("Vorschau", "Aperçu")} ${w + 1} · ${e?.title || ""}`;
 	(0, h.useEffect)(() => {
