@@ -2073,7 +2073,9 @@
       "sha256": "1b081d89f7b036644229ac0c5b6ca61209522dd52b2a10961a75ecbb91ebb535"
     }
   ],
-  "status": "candidate",
+  "status": "published",
   "builtOn": "2026-10-14T12:57:58.943Z",
-  "baselineCapturedOn": "2026-10-13"
+  "baselineCapturedOn": "2026-10-13",
+  "publishedOn": "2026-10-14T13:00:31.650229+00:00",
+  "publishedFiles": 26
 }
