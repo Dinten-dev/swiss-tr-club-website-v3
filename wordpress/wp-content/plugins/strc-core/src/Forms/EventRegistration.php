@@ -13,13 +13,24 @@ final class EventRegistration
     public static function settings(int $id): array
     {
         $saved=get_post_meta($id,'strc_registration_form',true);
-        return (is_array($saved)?$saved:[])+['guests'=>2,'copilot'=>true,'vehicle'=>true,'waitlist'=>false,'fee'=>0,'guestFee'=>0,'copilotFee'=>0,'meals'=>'','rooms'=>'','conditions'=>'Kostenfreie Abmeldung bis vier Tage vor Veranstaltungsbeginn. Danach bleibt der Teilnahmebeitrag grundsätzlich geschuldet.','cancelAt'=>'','externalUrl'=>'','organiser'=>'','organiserEmail'=>'','organiserMobile'=>'','organiserUserId'=>0,'organiserMemberNumber'=>'','organiserFree'=>false,'program'=>'','agenda'=>'','programImage'=>'','agendaImage'=>''];
+        $settings=(is_array($saved)?$saved:[])+['guests'=>2,'copilot'=>true,'vehicle'=>true,'waitlist'=>false,'fee'=>0,'guestFee'=>0,'copilotFee'=>0,'guestCopilotFee'=>null,'feeDouble'=>0,'copilotFeeDouble'=>0,'guestFeeDouble'=>0,'guestCopilotFeeDouble'=>0,'weekend'=>false,'meals'=>'','rooms'=>'','conditions'=>'Kostenfreie Abmeldung bis vier Tage vor Veranstaltungsbeginn. Danach bleibt der Teilnahmebeitrag grundsätzlich geschuldet.','cancelAt'=>'','externalUrl'=>'','organiser'=>'','organiserEmail'=>'','organiserMobile'=>'','organiserUserId'=>0,'organiserMemberNumber'=>'','organiserFree'=>false,'program'=>'','agenda'=>'','programImage'=>'','agendaImage'=>''];
+        // Ältere Termine kannten nur einen Gästepreis; er gilt dann auch für den Co-Piloten (Gast).
+        if($settings['guestCopilotFee']===null)$settings['guestCopilotFee']=(int)$settings['guestFee'];
+        return $settings;
+    }
+    /** Preis pro Person je Buchungsart; bei Weekend-Anlässen je nach Zimmer (single = Einzelzimmer, double = Doppelzimmer). */
+    public const ROLE_FEES=['member'=>'fee','copilot'=>'copilotFee','guest'=>'guestFee','guest-copilot'=>'guestCopilotFee'];
+    public static function roleFee(array $settings,string $role,string $room): int
+    {
+        $key=self::ROLE_FEES[$role]??'guestFee';
+        return (int)($settings[!empty($settings['weekend'])&&$room==='double'?$key.'Double':$key]??0);
     }
     public static function validateSettings(array $input): array
     {
         $data=[];
+        // Nominierte Veranstaltungsleitung (Mitglied): ihr wird ein allfälliger Erlass des Grundbeitrags automatisch gutgeschrieben.
         $data['organiserUserId']=absint($input['reg_organiserUserId']??0);
-        if($data['organiserUserId']&&!user_can($data['organiserUserId'],'strc_access_member_area'))throw new \InvalidArgumentException('Bitte ein aktives Mitgliederkonto als Organisator wählen.');
+        if($data['organiserUserId']&&!user_can($data['organiserUserId'],'strc_access_member_area'))throw new \InvalidArgumentException('Bitte ein aktives Mitglied als Veranstaltungsleitung wählen.');
         foreach(['organiser','organiserEmail','organiserMobile','organiserMemberNumber','externalUrl','cancelAt','meals','rooms','conditions','program','agenda','programImage','agendaImage']as$key)$data[$key]=FormFields::text($input,'reg_'.$key,in_array($key,['meals','rooms','conditions','program','agenda'],true)?5000:($key==='organiserMobile'?40:2000),in_array($key,['organiser','organiserEmail','organiserMobile'],true));
         foreach(['programImage','agendaImage'] as $key)if($data[$key]&&!preg_match('~^https?://~i',$data[$key]))throw new \InvalidArgumentException('Bitte eine gültige Bildadresse wählen.');
         if(!is_email($data['organiserEmail']))throw new \InvalidArgumentException('Bitte eine gültige Kontaktadresse der Veranstaltungsleitung angeben.');
@@ -27,8 +38,10 @@ final class EventRegistration
         if($data['externalUrl']&&(!filter_var($data['externalUrl'],FILTER_VALIDATE_URL)||!in_array(strtolower(parse_url($data['externalUrl'],PHP_URL_SCHEME)?:''),['https','http'],true)))throw new \InvalidArgumentException('Bitte eine gültige externe Anmelde-Adresse angeben.');
         if($data['cancelAt']&&!self::validDate($data['cancelAt']))throw new \InvalidArgumentException('Bitte eine gültige Abmeldefrist angeben.');
         foreach(['vehicle','copilot','waitlist','organiserFree']as$key)$data[$key]=($input['reg_'.$key]??'')==='1';
-        $guests=$input['reg_guests']??'2';if(!ctype_digit($guests)||(int)$guests>2)throw new \InvalidArgumentException('Gästeanzahl muss zwischen 0 und 2 liegen.');$data['guests']=(int)$guests;
-        foreach(['fee','guestFee','copilotFee']as$key){$value=str_replace(',','.',trim($input['reg_'.$key]??'0'));if(!preg_match('/^\d{1,5}(\.\d{1,2})?$/D',$value))throw new \InvalidArgumentException('Bitte Gebühren als CHF-Betrag mit höchstens zwei Nachkommastellen eingeben.');$data[$key]=(int)round((float)$value*100);}
+        $guests=$input['reg_guests']??'2';if(!ctype_digit($guests)||(int)$guests>2)throw new \InvalidArgumentException('Zusätzliche Gast-Buchungen: 0 bis 2.');$data['guests']=(int)$guests;
+        $data['weekend']=in_array($input['eventType']??'',['weekend','weekend-meeting'],true);
+        if($data['organiserFree']&&!$data['organiserUserId']&&!$data['organiserMemberNumber'])throw new \InvalidArgumentException('Für den Beitragserlass bitte die Veranstaltungsleitung als Mitglied auswählen.');
+        foreach(['fee','copilotFee','guestFee','guestCopilotFee','feeDouble','copilotFeeDouble','guestFeeDouble','guestCopilotFeeDouble']as$key){$value=str_replace(',','.',trim($input['reg_'.$key]??'0'));if(!preg_match('/^\d{1,5}(\.\d{1,2})?$/D',$value))throw new \InvalidArgumentException('Bitte Gebühren als CHF-Betrag mit höchstens zwei Nachkommastellen eingeben.');$data[$key]=(int)round((float)$value*100);}
         foreach(['meals','rooms']as$key)self::options($data[$key]);
         return $data;
     }
@@ -130,24 +143,48 @@ final class EventRegistration
     private function submission(object $event,array $settings,array $input): array
     {
         if(!$this->open($event)||$settings['externalUrl'])throw new \RuntimeException('Die Online-Anmeldung ist für diese Veranstaltung geschlossen.',409);
-        $guestNames=json_decode($input['guests']??'[]',true);if(!is_array($guestNames)||!array_is_list($guestNames)||count($guestNames)>min(2,(int)$settings['guests']))throw new \InvalidArgumentException('Bitte die zugelassene Gästeanzahl beachten.');
-        $participants=[['name'=>wp_get_current_user()->display_name,'kind'=>'member','userId'=>get_current_user_id()]];$total=$this->participantFee(get_current_user_id(),$settings,(int)$settings['fee']);
-        if(($input['copilot']??'')==='1'){$copilot=$this->copilot();if(!$settings['copilot']||!$copilot)throw new \InvalidArgumentException('Kein berechtigter Co-Pilot verknüpft.');$participants[]=['name'=>get_userdata($copilot)->display_name,'kind'=>'copilot','userId'=>$copilot];$total+=$this->participantFee($copilot,$settings,(int)$settings['copilotFee']);}
-        foreach($guestNames as$guest){
-            $legacy=is_string($guest);if($legacy)$guest=['firstName'=>$guest,'lastName'=>'','memberNumber'=>''];
-            if(!is_array($guest))throw new \InvalidArgumentException('Bitte die Gästeangaben prüfen.');
-            $first=FormFields::text($guest,'firstName',80,true);$last=FormFields::text($guest,'lastName',80,!$legacy);
-            $name=trim($first.' '.$last);$number=FormFields::text($guest,'memberNumber',32);
-            $person=['name'=>$name,'firstName'=>$first,'lastName'=>$last,'kind'=>'guest'];$fee=$settings['guestFee'];
-            if($number){
+        // Buchungen (Fahrzeugbesatzungen): 1. die eigene (Mitglied als Pilot), danach bis zu `guests` Zusatzbuchungen für Gäste.
+        // Konstellationen: Mitglied allein · Mitglied + Co-Pilot Mitglied · Mitglied + Co-Pilot Gast · Gast allein · Gast + Co-Pilot Gast.
+        $crews=json_decode($input['crews']??'',true);
+        if(!is_array($crews)||!array_is_list($crews)||!$crews||count($crews)>1+min(2,(int)$settings['guests']))throw new \InvalidArgumentException('Bitte die zugelassene Anzahl Buchungen beachten.');
+        $participants=[];$total=0;$rooms=[];
+        foreach($crews as $index=>$crew){
+            if(!is_array($crew))throw new \InvalidArgumentException('Bitte die Buchungsangaben prüfen.');
+            $own=$index===0;$copilot=is_array($crew['copilot']??null)?$crew['copilot']:null;
+            $room=empty($settings['weekend'])?'':($copilot?FormFields::choice($crew,'room',['double','single']):'single');
+            $rooms[]=$room;
+            if($own){
+                $person=['name'=>wp_get_current_user()->display_name,'kind'=>'member','role'=>'Mitglied','userId'=>get_current_user_id(),'crew'=>1,'room'=>$room];
+                $person['fee']=$this->participantFee(get_current_user_id(),$settings,self::roleFee($settings,'member',$room));
+            }else{
+                $person=$this->guestPerson($crew['pilot']??null)+['kind'=>'guest','role'=>'Gast','crew'=>$index+1,'room'=>$room];
+                $model=FormFields::text(is_array($crew['pilot']??null)?$crew['pilot']:[],'vehicle',80);
+                if($model)$person['vehicle']=$model;
+                $person['fee']=self::roleFee($settings,'guest',$room);
+            }
+            $participants[]=$person;$total+=$person['fee'];
+            if(!$copilot)continue;
+            if(empty($settings['copilot']))throw new \InvalidArgumentException('Für diese Veranstaltung sind keine Co-Piloten vorgesehen.');
+            $type=$copilot['type']??'';
+            if($own&&$type==='partner'){
+                $partner=$this->copilot();if(!$settings['copilot']||!$partner)throw new \InvalidArgumentException('Kein berechtigter Co-Pilot verknüpft.');
+                $person=['name'=>get_userdata($partner)->display_name,'kind'=>'copilot','role'=>'Co-Pilot Mitglied','userId'=>$partner,'isMember'=>true];
+                $person['fee']=$this->participantFee($partner,$settings,self::roleFee($settings,'copilot',$room));
+            }elseif($own&&$type==='member'){
+                $person=$this->guestPerson($copilot);$number=FormFields::text($copilot,'memberNumber',32,true);
                 global $wpdb;
                 $member=$wpdb->get_row($wpdb->prepare("SELECT user_id FROM {$wpdb->prefix}strc_memberships WHERE member_number=%s AND status IN ('active','grace')",$number),ARRAY_A);
                 $user=$member?get_userdata((int)$member['user_id']):false;
                 $match=$user?trim((string)get_user_meta($user->ID,'first_name',true).' '.(string)get_user_meta($user->ID,'last_name',true)):'';
-                if(!$user||mb_strtolower($name)!==mb_strtolower($match?:$user->display_name))throw new \InvalidArgumentException('Mitgliedsnummer und Name des zusätzlichen Mitglieds stimmen nicht überein.');
-                $person+=['userId'=>$user->ID,'memberNumber'=>$number,'isMember'=>true];$fee=$this->participantFee((int)$user->ID,$settings,(int)$settings['fee']);
-            }
-            $participants[]=$person;$total+=$fee;
+                if(!$user||mb_strtolower($person['name'])!==mb_strtolower($match?:$user->display_name))throw new \InvalidArgumentException('Mitgliedsnummer und Name des Co-Piloten stimmen nicht überein.');
+                $person+=['kind'=>'copilot','role'=>'Co-Pilot Mitglied','userId'=>(int)$user->ID,'memberNumber'=>$number,'isMember'=>true];
+                $person['fee']=$this->participantFee((int)$user->ID,$settings,self::roleFee($settings,'copilot',$room));
+            }elseif($type==='guest'){
+                $person=$this->guestPerson($copilot)+['kind'=>$own?'copilot-guest':'guest-copilot','role'=>'Co-Pilot Gast'];
+                $person['fee']=self::roleFee($settings,'guest-copilot',$room);
+            }else throw new \InvalidArgumentException('Bitte die Art des Co-Piloten wählen.');
+            $person+=['crew'=>$index+1,'room'=>$room];
+            $participants[]=$person;$total+=$person['fee'];
         }
         $selectedIds=array_filter(array_column($participants,'userId'));
         if(count($selectedIds)!==count(array_unique($selectedIds)))throw new \InvalidArgumentException('Eine Person darf nur einmal angemeldet werden.');
@@ -155,11 +192,19 @@ final class EventRegistration
         $ids=array_filter(array_column($participants,'userId'));
         foreach(FormStore::find('strc_registration',0,$event->ID)as$post){$row=FormStore::data($post);if((int)$post->post_author===get_current_user_id()||in_array($row['state']??'',['cancelled','expired','payment_review'],true)||(($row['state']??'')==='pending_payment'&&!EventPayments::occupies($row)))continue;if(array_intersect($ids,array_column($row['participants']??[],'userId')))throw new \RuntimeException('Eine ausgewählte Person ist bereits für diese Veranstaltung angemeldet.',409);}
         $selections=json_decode($input['selections']??'[]',true);if(!is_array($selections))throw new \InvalidArgumentException('Bitte die Auswahl prüfen.');
-        $meals=self::options($settings['meals']);$rooms=self::options($settings['rooms']);
+        $meals=self::options($settings['meals']);$roomOptions=!empty($settings['weekend'])?[]:self::options($settings['rooms']);
         foreach($participants as$i=>&$person){if($meals){$meal=FormFields::choice(is_array($selections[$i]??null)?$selections[$i]:[],'meal',array_keys($meals));$person['meal']=$meal;$total+=$meals[$meal];}}unset($person);
-        $room='';if($rooms){$room=FormFields::choice($input,'room',array_keys($rooms));$total+=$rooms[$room];}
+        $room='';
+        if(!empty($settings['weekend'])){$labels=[];foreach($rooms as$i=>$type){$size=count(array_filter($participants,static fn($p)=>($p['crew']??0)===$i+1));$labels[]=($size>1&&$type==='single'?'2 × Einzelzimmer':($type==='double'?'Doppelzimmer':'Einzelzimmer')).(count($rooms)>1?' (Buchung '.($i+1).')':'');}$room=implode(' · ',$labels);}
+        elseif($roomOptions){$room=FormFields::choice($input,'room',array_keys($roomOptions));$total+=$roomOptions[$room];}
         $vehicle=null;if($settings['vehicle']){$selection=$input['vehicle']??'';if(in_array($selection,['other','modern','none'],true))$vehicle=['model'=>['other'=>'Anderes Fahrzeug','modern'=>'Modernes Fahrzeug','none'=>'Ohne Fahrzeug'][$selection]];elseif(str_starts_with($selection,'model:')){$model=substr($selection,6);if(!in_array($model,FormFields::MODELS,true))throw new \InvalidArgumentException('Bitte ein gültiges Triumph-Modell wählen.');$vehicle=['model'=>$model];}else{foreach(FormsEndpoint::vehicles()as$v)if((string)$v['id']===$selection&&$v['status']==='roadworthy'){$vehicle=array_intersect_key($v,array_flip(['id','model','details','year','registration','color']));break;}if(!$vehicle)throw new \InvalidArgumentException('Bitte ein fahrbereites Fahrzeug oder eine Alternative wählen.');}}
         return ['eventTitle'=>get_the_title($event->ID),'eventStart'=>get_post_meta($event->ID,'strc_start_at',true),'participants'=>$participants,'headcount'=>count($participants),'vehicle'=>$vehicle,'room'=>$room,'total'=>$total,'notes'=>FormFields::text($input,'notes',1000)];
+    }
+    private function guestPerson(mixed $data): array
+    {
+        if(!is_array($data))throw new \InvalidArgumentException('Bitte Vor- und Nachname angeben.');
+        $first=FormFields::text($data,'firstName',80,true);$last=FormFields::text($data,'lastName',80,true);
+        return ['name'=>trim($first.' '.$last),'firstName'=>$first,'lastName'=>$last];
     }
     private function participantFee(int $userId,array $settings,int $fee): int
     {

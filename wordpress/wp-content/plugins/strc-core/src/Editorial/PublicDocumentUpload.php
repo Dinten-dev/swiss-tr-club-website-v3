@@ -27,6 +27,34 @@ final class PublicDocumentUpload
         $id=media_handle_upload('file',0,[],['test_form'=>false,'mimes'=>$mimes]);
         if(is_wp_error($id))AjaxRequest::fail('Das PDF konnte nicht hochgeladen werden. Bitte erneut versuchen.');
         if(!add_post_meta($id,'strc_public_document_page',$key,true)){wp_delete_attachment($id,true);AjaxRequest::fail('Das PDF konnte nicht zugeordnet werden.');}
+        $title=self::title($_POST['title']??'');
+        if($title!=='')wp_update_post(['ID'=>$id,'post_title'=>$title]);
         return ['id'=>$id,'title'=>get_the_title($id),'url'=>wp_get_attachment_url($id)];
+    }
+
+    /** Nur PDFs dieser Seite; das Dokument wird endgültig aus der Mediathek entfernt. */
+    public static function delete(string $key, int $id): array
+    {
+        $file = get_post($id);
+        if (! $file || 'attachment' !== $file->post_type || 'application/pdf' !== $file->post_mime_type || get_post_meta($id,'strc_public_document_page',true) !== $key) AjaxRequest::fail('Dokument nicht gefunden.',404);
+        if (! wp_delete_attachment($id,true)) AjaxRequest::fail('Das PDF konnte nicht gelöscht werden. Bitte erneut versuchen.');
+        return self::listing($key);
+    }
+
+    /** Lesbarer Titel, z. B. «Leitfaden für die Organisation von Veranstaltungen». */
+    public static function rename(string $key, int $id, string $title): array
+    {
+        $file=get_post($id);$title=self::title($title);
+        if(!$file||'attachment'!==$file->post_type||get_post_meta($id,'strc_public_document_page',true)!==$key)AjaxRequest::fail('Dokument nicht gefunden.',404);
+        if($title==='')AjaxRequest::fail('Bitte einen Titel eingeben.');
+        wp_update_post(['ID'=>$id,'post_title'=>$title]);
+        return self::listing($key);
+    }
+
+    private static function title(mixed $value): string
+    {
+        $title=is_string($value)?trim(sanitize_text_field(wp_unslash($value))):'';
+        if(mb_strlen($title)>160)AjaxRequest::fail('Der Titel ist zu lang (höchstens 160 Zeichen).');
+        return $title;
     }
 }
