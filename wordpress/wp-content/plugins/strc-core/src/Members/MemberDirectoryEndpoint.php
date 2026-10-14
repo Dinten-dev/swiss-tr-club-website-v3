@@ -37,7 +37,9 @@ final class MemberDirectoryEndpoint
             $data=FormStore::data($post);
             return array_intersect_key($data,array_flip(['model','details','year','colour','registration','status']))+['id'=>(int)$post->ID,'photo'=>!empty($data['file'])?add_query_arg(['action'=>'strc_directory','operation'=>'vehicle-photo','id'=>$id,'vehicle'=>$post->ID],admin_url('admin-ajax.php')):''];
         },FormStore::find('strc_vehicle',$owner)):[];
-        $result=['id'=>$id,'name'=>$user->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'lastName'=>(string)get_user_meta($id,'last_name',true),'city'=>(string)get_user_meta($id,'strc_city',true),'postcode'=>(string)get_user_meta($id,'strc_postcode',true),'country'=>(string)get_user_meta($id,'strc_country',true),'region'=>(string)($membership['region']??''),'photo'=>$photo?add_query_arg(['action'=>'strc_directory','operation'=>'photo','id'=>$id],admin_url('admin-ajax.php')):'','vehicles'=>$vehicles];
+        $youth=($membership['membership_type']??'')==='youth';
+        $region=$youth?'TRiungsters':(\SwissTRClub\Core\Events\RegionDirectory::canonicalName((string)($membership['region']??''))??'');
+        $result=['id'=>$id,'name'=>$user->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'lastName'=>(string)get_user_meta($id,'last_name',true),'city'=>(string)get_user_meta($id,'strc_city',true),'postcode'=>(string)get_user_meta($id,'strc_postcode',true),'country'=>(string)get_user_meta($id,'strc_country',true),'region'=>$region,'photo'=>$photo?add_query_arg(['action'=>'strc_directory','operation'=>'photo','id'=>$id],admin_url('admin-ajax.php')):'','vehicles'=>$vehicles];
         if($detail){$result['email']=$user->user_email;$result['phone']=(string)get_user_meta($id,'strc_phone',true);}
         return $result;
     }
@@ -77,22 +79,55 @@ final class MemberDirectoryEndpoint
             $store=new PrivateUploadStore();$copy=$store->webCopy($file);if(is_wp_error($copy))AjaxRequest::fail($copy->get_error_message(),503);$store->stream($copy);
         }
         if($operation!=='list')AjaxRequest::fail('Unbekannte Anfrage.');
+        $regionNames=array_merge(array_map(static fn($term)=>$term->name,\SwissTRClub\Core\Events\RegionDirectory::terms()),['TRiungsters']);
+        $geocoded=0;
         $search=mb_strtolower(sanitize_text_field($input['search']??''));$region=sanitize_text_field($input['region']??'');$model=sanitize_text_field($input['model']??'');
-        $members=[];$regions=[];$vehicleStatus=sanitize_text_field($input['vehicleStatus']??'');
+        $members=[];$vehicleStatus=sanitize_text_field($input['vehicleStatus']??'');
         foreach((new MembershipRepository())->all() as $membership){
             $id=(int)$membership['user_id'];if(!self::visible($id))continue;
-            $member=$this->member($id);if($member['region'])$regions[]=$member['region'];
+            $member=$this->member($id);
             if($vehicleStatus&&!in_array($vehicleStatus,array_column($member['vehicles'],'status'),true))continue;
             if($region&&$member['region']!==$region)continue;
             if($model&&!in_array($model,array_column($member['vehicles'],'model'),true))continue;
-            $terms=implode(' ',[$member['name'],$member['firstName'],$member['lastName'],$member['city'],$member['postcode'],$member['region']]);
-            foreach($member['vehicles'] as $vehicle)$terms.=' '.implode(' ',array_filter([$vehicle['model']??'',$vehicle['details']??'',$vehicle['registration']??'']));
+            // Freie Suche nur im Namen (Vor- und Nachname).
+            $terms=implode(' ',[$member['name'],$member['firstName'],$member['lastName']]);
             if($search&&!str_contains(mb_strtolower($terms),$search))continue;
             $members[]=$member;
         }
-        $sort=in_array($input['sort']??'',['lastName','city','region'],true)?$input['sort']:'lastName';
-        usort($members,static fn($a,$b)=>strnatcasecmp(($a[$sort]?:$a['name']).' '.$a['name'],($b[$sort]?:$b['name']).' '.$b['name']));
+        $sort=in_array($input['sort']??'',['lastName','firstName','postcode','city','region','vehicle'],true)?$input['sort']:'lastName';
+        $value=static fn(array $member):string=>$sort==='vehicle'?(string)($member['vehicles'][0]['model']??'~'):(string)($member[$sort]?:'~');
+        usort($members,static fn($a,$b)=>strnatcasecmp($value($a).' '.$a['lastName'].' '.$a['firstName'],$value($b).' '.$b['lastName'].' '.$b['firstName']));
         $total=count($members);$page=max(1,absint($input['page']??1));
-        wp_send_json_success(['mapMembers'=>array_map(static fn($member)=>array_intersect_key($member,array_flip(['id','name','postcode','city','country'])),$members),'members'=>array_slice($members,($page-1)*50,50),'total'=>$total,'pages'=>(int)ceil($total/50),'regions'=>array_values(array_unique($regions))]);
+        $map=($input['map']??'')==='1';
+        $mapMembers=$map?array_map(function(array $member)use(&$geocoded):array{
+            return ['id'=>$member['id'],'firstName'=>$member['firstName']?:$member['name'],'postcode'=>$member['postcode'],'city'=>$member['city'],'country'=>$member['country'],'vehicle'=>(string)($member['vehicles'][0]['model']??''),'position'=>$this->streetPosition((int)$member['id'],$geocoded)];
+        },$members):[];
+        wp_send_json_success(['mapMembers'=>$mapMembers,'members'=>array_slice($members,($page-1)*50,50),'total'=>$total,'pages'=>(int)ceil($total/50),'regions'=>$regionNames]);
+    }
+
+    /**
+     * Strassengenaue Position (ohne Hausnummer), nur wenn das Mitglied dies im Profil freigegeben hat.
+     * Sonst null: die Karte zeigt dann den Ort (Postleitzahl). Pro Anfrage werden höchstens zehn neue Adressen abgefragt.
+     */
+    private function streetPosition(int $id,int &$geocoded): ?array
+    {
+        $preferences=get_user_meta($id,'strc_website_preferences',true);
+        if(!is_array($preferences)||empty($preferences['mapStreet']))return null;
+        $street=trim((string)preg_replace('/\s+\d+\s*[a-zA-Z]?(\s*[-\/]\s*\d+\s*[a-zA-Z]?)?$/u','',(string)get_user_meta($id,'strc_street',true)));
+        $postcode=(string)get_user_meta($id,'strc_postcode',true);
+        if($street===''||!preg_match('/^[1-9][0-9]{3}$/D',$postcode))return null;
+        $key=md5(mb_strtolower($street).'|'.$postcode);$cached=get_user_meta($id,'strc_map_street_position',true);
+        if(is_array($cached)&&($cached['key']??'')===$key)return $cached['position']?:null;
+        if($geocoded>=10)return null;
+        $geocoded++;$position=null;
+        $response=wp_remote_get('https://api3.geo.admin.ch/rest/services/ech/SearchServer?'.http_build_query(['type'=>'locations','origins'=>'address','searchText'=>$street.' '.$postcode,'sr'=>4326,'limit'=>5]),['timeout'=>6]);
+        if(!is_wp_error($response)&&wp_remote_retrieve_response_code($response)===200){
+            $body=json_decode(wp_remote_retrieve_body($response),true);
+            foreach($body['results']??[] as $item){$attrs=$item['attrs']??[];
+                if(str_contains(wp_strip_all_tags((string)($attrs['label']??'')),$postcode)&&isset($attrs['lat'],$attrs['lon'])){$position=[round((float)$attrs['lat'],3),round((float)$attrs['lon'],3)];break;}
+            }
+        }
+        update_user_meta($id,'strc_map_street_position',['key'=>$key,'position'=>$position?:[]]);
+        return $position;
     }
 }

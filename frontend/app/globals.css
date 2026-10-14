@@ -2567,3 +2567,39 @@ dialog .application-consent{background:#fbf1e4;border:1px solid #eed9b8;border-r
 dialog .club-hint{color:#526775}
 dialog .library-form-type{display:inline-block;padding:4px 10px;border-radius:12px;background:#e7f0f8;color:var(--navy);font-weight:700;font-size:13px}
 dialog .club-actions .market-primary{min-width:140px}
+
+/* Runde 3 (14.10.2026): Mitgliederverzeichnis nach Mockup 3 */
+.dir-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;margin-bottom:12px;background:#e3eaef;border-radius:8px}
+.dir-toolbar select,.dir-toolbar input{min-height:40px;padding:8px 12px;border:1px solid #c5d4de;border-radius:6px;background:#fff;font:inherit;font-size:15px;color:var(--navy)}
+.dir-search{flex:1 1 220px}.dir-search input{width:100%}
+.dir-switch{display:inline-flex;border:1px solid #c5d4de;border-radius:6px;overflow:hidden;background:#fff}
+.dir-switch button{min-height:40px;padding:8px 14px;border:0;background:#fff;color:var(--navy);font:inherit;font-size:14px;cursor:pointer}
+.dir-switch button[aria-pressed=true]{background:var(--navy);color:#fff}
+.dir-privacy{padding:8px 12px;border-radius:6px;background:#e8f2fb;color:#1e5f99;font-size:13px}
+.dir-count{font-size:13px;color:#526775;margin:6px 0}
+.dir-table{width:100%;border-collapse:collapse;font-size:15px}
+.dir-table th{background:var(--navy);text-align:left;padding:0}
+.dir-table th button{width:100%;padding:12px 10px;border:0;background:none;color:#fff;font:700 14px Arial,sans-serif;text-align:left;cursor:pointer}
+.dir-table td{padding:9px 10px;border-bottom:1px solid #e6edf1;vertical-align:middle}
+.dir-table tbody tr{cursor:pointer}
+.dir-table tbody tr:nth-child(even){background:#f6f9fb}
+.dir-table tbody tr:hover{background:#e8f2fb}
+.dir-name{padding:0;border:0;background:none;font:700 15px Arial,sans-serif;color:var(--navy);cursor:pointer;text-align:left}
+.dir-region{display:inline-block;padding:2px 8px;border-radius:10px;background:#e8f2fb;color:#1e5f99;font-size:12px}
+.dir-vehicle{display:inline-flex;align-items:center;gap:5px;margin:2px 6px 2px 0;padding:2px 9px;border-radius:12px;background:#eef1f3;font-size:12px;font-weight:700;color:var(--navy)}
+.dir-dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle}
+.dir-dot.is-ready{background:#2e9e4f}
+.dir-dot.is-restoration{background:#c8262e}
+.dir-arrow{color:#1e5f99;text-align:right}
+.dir-legend{font-size:12px;color:#526775;display:flex;gap:6px;align-items:center;margin-top:10px}
+.dir-legend .dir-dot{margin-left:10px}
+.dir-detail-head{display:flex;gap:16px;align-items:center}.dir-detail-head img{border-radius:50%;object-fit:cover}
+.dir-vehicle-card{margin:12px 0;padding:12px;border:1px solid #e1ebf2;border-radius:10px;background:#f5f9fc}
+.dir-map-wrap{position:relative}
+.member-directory .directory-map{height:min(70vh,640px);border-radius:10px;border:1px solid #c9d7e0}
+.dir-pin{background:none;border:0}
+.dir-pin-popup{display:grid;gap:2px;padding:0;border:0;background:none;font:inherit;text-align:left;cursor:pointer;color:var(--navy)}
+.dir-pin-popup span{font-size:12px;color:#526775}
+.dir-map-legend{font-size:12px;color:#526775;margin-top:8px}
+.dir-pin-mini{display:inline-block;width:10px;height:10px;border-radius:50% 50% 50% 0;background:#114973;border:2px solid #bd2028;transform:rotate(-45deg);vertical-align:middle}
+.dir-map-status{position:absolute;z-index:500;top:10px;left:50%;transform:translateX(-50%);padding:4px 12px;border-radius:12px;background:#fff;box-shadow:0 2px 8px #0002;font-size:13px}

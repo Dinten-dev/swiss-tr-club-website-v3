@@ -844,6 +844,30 @@
       }
     ]
   },
+  "directory": {
+    "title": "Mitgliederverzeichnis – Einleitung",
+    "route": "#mitgliederliste",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Mitgliederverzeichnis"
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Mitglieder und ihre Triumphs finden."
+      },
+      {
+        "key": "privacy",
+        "label": "Datenschutz-Hinweis",
+        "type": "text",
+        "default": "Diese Liste ist ausschliesslich für Mitglieder. Bitte keine Kontaktdaten ohne Zustimmung weitergeben."
+      }
+    ]
+  },
   "contact": {
     "title": "Kontakt & Impressum",
     "route": "#kontakt",
