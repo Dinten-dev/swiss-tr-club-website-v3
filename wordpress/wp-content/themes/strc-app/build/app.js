@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-BjrP63Nt.js";
+import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-BwCkjqgX.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var l = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -19448,7 +19448,7 @@ function vn({ open: e }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var yn = (0, h.lazy)(() => import("./MagazineReader-BDYVY9ti.js")), bn = "strc_community", xn = {
+var yn = (0, h.lazy)(() => import("./MagazineReader-Bbpv3j3x.js")), bn = "strc_community", xn = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliederporträts",
 	restorations: "Fahrzeugrestaurationen",
@@ -20340,7 +20340,7 @@ function On({ kind: e, item: t, nonce: n, close: r, saved: i, accessClasses: a, 
 								e.preventDefault(), ce(!1), W || ue(Array.from(e.dataTransfer.files));
 							},
 							children: [
-								/* @__PURE__ */ (0, _.jsx)("strong", { children: x ? "PDF hier hineinziehen" : e === "gallery" ? "Fotos hier hineinziehen" : "Dateien hier hineinziehen" }),
+								/* @__PURE__ */ (0, _.jsx)("strong", { children: o(x ? "PDF hier hineinziehen" : e === "gallery" ? "Fotos hier hineinziehen" : "Dateien hier hineinziehen") }),
 								e === "gallery" && /* @__PURE__ */ (0, _.jsx)("span", {
 									className: "gallery-hint",
 									children: o("Bitte das Originalfoto der Kamera oder des Smartphones hochladen – Fotos aus WhatsApp sind meist zu klein für das TR-Magazin.")
@@ -20350,13 +20350,13 @@ function On({ kind: e, item: t, nonce: n, close: r, saved: i, accessClasses: a, 
 									type: "file",
 									multiple: !x,
 									accept: x ? "application/pdf" : e === "gallery" ? "image/jpeg,image/png,image/webp" : "image/jpeg,image/png,image/webp,application/pdf",
-									"aria-label": "Dateien auswählen",
+									"aria-label": o("Dateien auswählen"),
 									onChange: (e) => {
 										ue(Array.from(e.target.files || [])), e.target.value = "";
 									}
 								}),
-								/* @__PURE__ */ (0, _.jsx)("small", { children: x ? "Ein PDF-Dokument · bis 25 MB" : /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
-									e === "gallery" ? "Bis zu 20 Bilder · je 2 bis 10 MB" : "Bis zu 6 Dateien · Bilder bis 20 MB",
+								/* @__PURE__ */ (0, _.jsx)("small", { children: x ? o("Ein PDF-Dokument · bis 25 MB") : /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
+									o(e === "gallery" ? "Bis zu 20 Bilder · je 2 bis 10 MB" : "Bis zu 6 Dateien · Bilder bis 20 MB"),
 									e === "library" ? " · PDFs bis 100 MB" : "",
 									e === "gallery" ? "" : " · insgesamt 120 MB",
 									" · JPG, PNG, WebP",
@@ -20416,7 +20416,7 @@ function On({ kind: e, item: t, nonce: n, close: r, saved: i, accessClasses: a, 
 				!S && /* @__PURE__ */ (0, _.jsxs)("p", {
 					className: "club-hint",
 					children: [
-						e === "library" ? "Sichtbarkeit gemäss gewählter Zugriffsklasse." : "Sichtbar für Clubmitglieder.",
+						o(e === "library" ? "Sichtbarkeit gemäss gewählter Zugriffsklasse." : "Sichtbar für Clubmitglieder."),
 						" ",
 						o("Laden Sie nur Material hoch, das Sie teilen dürfen.")
 					]
@@ -20437,7 +20437,7 @@ function On({ kind: e, item: t, nonce: n, close: r, saved: i, accessClasses: a, 
 					}), /* @__PURE__ */ (0, _.jsx)("button", {
 						className: "market-primary",
 						disabled: W,
-						children: W ? "Wird gespeichert …" : t ? "Änderungen speichern" : e === "forum" ? "Zur Prüfung einreichen" : "Hochladen"
+						children: o(W ? "Wird gespeichert …" : t ? "Änderungen speichern" : e === "forum" ? "Zur Prüfung einreichen" : "Hochladen")
 					})]
 				})
 			]
@@ -22073,7 +22073,7 @@ function qn() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var Jn = (0, h.lazy)(() => import("./MagazineReader-BDYVY9ti.js"));
+var Jn = (0, h.lazy)(() => import("./MagazineReader-Bbpv3j3x.js"));
 function Yn({ issue: e, loading: t, error: r, retry: i }) {
 	let { text: a } = de(), s = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: c } = n(), l = (e, t) => c === "fr" ? t : e, [u, d] = (0, h.useState)(!1), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(0), [y, b] = (0, h.useState)(!1), x = (0, h.useRef)(null), S = (0, h.useRef)(!1), C = (e?.previewPages || []).slice(0, 6), w = Math.min(m, Math.max(0, C.length - 1)), T = e?.previewCaptions?.[w] || `${l("Vorschau", "Aperçu")} ${w + 1} · ${e?.title || ""}`;
 	(0, h.useEffect)(() => {
