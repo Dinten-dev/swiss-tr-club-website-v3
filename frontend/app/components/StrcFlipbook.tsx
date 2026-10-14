@@ -33,12 +33,12 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
   useEffect(()=>()=>{timers.current.forEach(clearTimeout);generation.current++;},[]);
 
   useEffect(()=>{
-    let disposed=false;timers.current.forEach(clearTimeout);timers.current=[];generation.current++;store.current={};busy.current.clear();layoutRef.current=null;texts.current={};pageWidth.current={};setHits(null);
+    let disposed=false;timers.current.forEach(clearTimeout);timers.current=[];generation.current++;store.current={};busy.current.clear();layoutRef.current=null;texts.current={};pageWidth.current={};
     let task:ReturnType<typeof import('pdfjs-dist')['getDocument']>|undefined;
     (async()=>{
       const pdf=await import('pdfjs-dist/legacy/build/pdf.mjs');
       if(disposed)return;
-      setDoc(null);setLayout(null);setImages({});setPage(1);setError('');setAnim(null);
+      setDoc(null);setLayout(null);setImages({});setPage(1);setError('');setAnim(null);setHits(null);
       pdf.GlobalWorkerOptions.workerSrc=`${assetBase}/pdfjs/pdf.worker.min.js`;
       task=pdf.getDocument({url,withCredentials:true,rangeChunkSize:65536,cMapUrl:`${assetBase}/pdfjs/cmaps/`,cMapPacked:true,standardFontDataUrl:`${assetBase}/pdfjs/standard_fonts/`,wasmUrl:`${assetBase}/pdfjs/wasm/`});
       const loaded=await task.promise;
