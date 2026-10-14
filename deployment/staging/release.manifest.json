@@ -564,13 +564,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 238687,
-      "sha256": "9ac674e468241547069caa39ea52377199de73d7fcc36062f76c186a7e9bc270"
+      "bytes": 238680,
+      "sha256": "9f440ed9fa4fad00c2c1d9a8f84a5d930c71d307937985839aab04cda1eccc30"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 784944,
-      "sha256": "0b164c79390c0cb0a49b3f807104b4362120ccffc22aa3c9ac112f51dca2ae47"
+      "bytes": 785400,
+      "sha256": "4eb9c695baf30faf3b4850cd26410697675f2a68363e0684989ba6e1ce0315dd"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -696,6 +696,31 @@
       "path": "wordpress/wp-content/themes/strc-app/build/club/triumph-details.jpg",
       "bytes": 81470,
       "sha256": "e90733da917cf128aa1c4a285b4c7c3228bc8767a6a0269d09eb8652713bc017"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/LICENSE-Carlito-OFL.txt",
+      "bytes": 5484,
+      "sha256": "207ec1cf5426235729d4a5b869377e41b6aacf17abd181480096a1a05ef80b65"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/StrcSans-Bold.ttf",
+      "bytes": 68364,
+      "sha256": "c2318895bc2a16082f15026f7aaade484900e05c410e6819e843a4592fb6b5e2"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/StrcSans-BoldItalic.ttf",
+      "bytes": 87284,
+      "sha256": "dd206f3b996de903653ed1a8a194bf1f92ec2541bbff05f5b760ea7aef833310"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/StrcSans-Italic.ttf",
+      "bytes": 63064,
+      "sha256": "4c3acaf9171f6928253fe6e441ed036a9eebfec196ebb9819d81986c22613048"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/StrcSans-Regular.ttf",
+      "bytes": 65472,
+      "sha256": "86c83ece9a91d7885db49a6c9f5e6b579b0a3260fbc0a4a1263493fa1d46f74c"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/jsx-runtime-CdS6qnrt.js",
@@ -2014,8 +2039,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/functions.php",
-      "bytes": 1205,
-      "sha256": "2c481c6ba5d2b4bc9fc08bce2b538d49fef946d2070c1d3962ddb96bd9ddc30b"
+      "bytes": 2787,
+      "sha256": "834fdc70793184c5fee0dc786d45362dce1c6fea7521ae95c6ac7cb52eeb5576"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/header.php",
@@ -2039,6 +2064,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-10-14T12:31:04.453Z",
+  "builtOn": "2026-10-14T12:54:54.088Z",
   "baselineCapturedOn": "2026-10-13"
 }
