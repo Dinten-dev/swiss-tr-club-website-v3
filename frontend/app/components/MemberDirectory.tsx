@@ -52,7 +52,7 @@ export default function MemberDirectory(){
  </div></Dialog>}</>;
 }
 
-// Clubfarben: blaue Nadel mit rotem Kern. Position strassengenau (Opt-out im Profil), sonst nach Postleitzahl.
+// Clubfarben: blaue Nadel mit rotem Kern. Position ca. 150 m versetzt auf einem Nachbargebäude (Opt-out im Profil), sonst nach Postleitzahl.
 const pinSvg='<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38"><path d="M14 1C7 1 1.5 6.5 1.5 13.5 1.5 23 14 37 14 37s12.5-14 12.5-23.5C26.5 6.5 21 1 14 1Z" fill="#114973" stroke="#fff" stroke-width="2"/><circle cx="14" cy="13.5" r="5" fill="#bd2028"/></svg>';
 function DirectoryMap({members,detail,loading}:{members:MapMember[];detail:(id:number)=>void;loading:boolean}){
  const container=useRef<HTMLDivElement>(null);const [error,setError]=useState('');const [progress,setProgress]=useState({done:0,total:0});
@@ -73,5 +73,5 @@ function DirectoryMap({members,detail,loading}:{members:MapMember[];detail:(id:n
    if(!disposed&&bounds.length)map.fitBounds(bounds,{padding:[30,30],maxZoom:12});
   })().catch(()=>{if(!disposed)setError(t('Die Karte konnte nicht geladen werden.'));});return()=>{disposed=true;controller.abort();map?.remove();};
  },[members,detail]);
- return <div className="dir-map-wrap">{(loading||progress.done<progress.total)&&<p role="status" className="dir-map-status">{t('Standorte werden geladen …')} {progress.total?`${progress.done}/${progress.total}`:''}</p>}<div ref={container} className="directory-map" aria-label={t('Mitgliederkarte')}/><p className="dir-map-legend"><span className="dir-pin-mini" aria-hidden="true"/> {t('Mitglied · Standort auf Strassenebene ohne Hausnummer; wer das nicht möchte, wählt es im Profil ab (dann nur Ort)')}</p>{error&&<p role="status">{error}</p>}</div>;
+ return <div className="dir-map-wrap">{(loading||progress.done<progress.total)&&<p role="status" className="dir-map-status">{t('Standorte werden geladen …')} {progress.total?`${progress.done}/${progress.total}`:''}</p>}<div ref={container} className="directory-map" aria-label={t('Mitgliederkarte')}/><p className="dir-map-legend"><span className="dir-pin-mini" aria-hidden="true"/> {t('Mitglied · Standort ca. 150 m versetzt zur Adresse, nie die genaue Adresse; abwählbar im Profil (dann nur Ort)')}</p>{error&&<p role="status">{error}</p>}</div>;
 }
