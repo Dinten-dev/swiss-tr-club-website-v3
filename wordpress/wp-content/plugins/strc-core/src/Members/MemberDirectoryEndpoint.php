@@ -106,25 +106,42 @@ final class MemberDirectoryEndpoint
     }
 
     /**
-     * Strassengenaue Position (ohne Hausnummer). B-Test: Opt-out – gilt, solange das Mitglied es im Profil nicht abgewählt hat.
-     * Sonst null: die Karte zeigt dann den Ort (Postleitzahl). Pro Anfrage werden höchstens zehn neue Adressen abgefragt.
+     * Ungefähre Position für die Mitgliederkarte (B-Test: Opt-out im Profil).
+     * Die Wohnadresse wird nur serverseitig geokodiert und nie ausgeliefert. Der Pin steht auf einem anderen,
+     * real existierenden Gebäude (GWR) 100–250 m entfernt mit derselben Postleitzahl – also nie im See oder Wald.
+     * Die Wahl ist pro Mitglied fest (kein Springen bei jedem Laden). Ohne passendes Gebäude: null (Pin nach PLZ).
      */
     private function streetPosition(int $id,int &$geocoded): ?array
     {
         $preferences=get_user_meta($id,'strc_website_preferences',true);
         if(is_array($preferences)&&array_key_exists('mapStreet',$preferences)&&!$preferences['mapStreet'])return null;
-        $street=trim((string)preg_replace('/\s+\d+\s*[a-zA-Z]?(\s*[-\/]\s*\d+\s*[a-zA-Z]?)?$/u','',(string)get_user_meta($id,'strc_street',true)));
+        $street=trim((string)get_user_meta($id,'strc_street',true));
         $postcode=(string)get_user_meta($id,'strc_postcode',true);
         if($street===''||!preg_match('/^[1-9][0-9]{3}$/D',$postcode))return null;
-        $key=md5(mb_strtolower($street).'|'.$postcode);$cached=get_user_meta($id,'strc_map_street_position',true);
+        $key='v2:'.md5(mb_strtolower($street).'|'.$postcode);$cached=get_user_meta($id,'strc_map_street_position',true);
         if(is_array($cached)&&($cached['key']??'')===$key)return $cached['position']?:null;
         if($geocoded>=10)return null;
-        $geocoded++;$position=null;
+        $geocoded++;$position=null;$home=null;
         $response=wp_remote_get('https://api3.geo.admin.ch/rest/services/ech/SearchServer?'.http_build_query(['type'=>'locations','origins'=>'address','searchText'=>$street.' '.$postcode,'sr'=>4326,'limit'=>5]),['timeout'=>6]);
         if(!is_wp_error($response)&&wp_remote_retrieve_response_code($response)===200){
             $body=json_decode(wp_remote_retrieve_body($response),true);
             foreach($body['results']??[] as $item){$attrs=$item['attrs']??[];
-                if(str_contains(wp_strip_all_tags((string)($attrs['label']??'')),$postcode)&&isset($attrs['lat'],$attrs['lon'])){$position=[round((float)$attrs['lat'],3),round((float)$attrs['lon'],3)];break;}
+                if(str_contains(wp_strip_all_tags((string)($attrs['label']??'')),$postcode)&&isset($attrs['lat'],$attrs['lon'])){$home=[(float)$attrs['lat'],(float)$attrs['lon']];break;}
+            }
+        }
+        if($home){
+            $d=0.0035;$envelope=implode(',',[$home[1]-$d,$home[0]-$d,$home[1]+$d,$home[0]+$d]);
+            $buildings=wp_remote_get('https://api3.geo.admin.ch/rest/services/api/MapServer/identify?'.http_build_query(['geometryType'=>'esriGeometryEnvelope','geometry'=>$envelope,'imageDisplay'=>'1000,1000,96','mapExtent'=>$envelope,'tolerance'=>0,'layers'=>'all:ch.bfs.gebaeude_wohnungs_register','sr'=>4326,'returnGeometry'=>'true','limit'=>200]),['timeout'=>8]);
+            if(!is_wp_error($buildings)&&wp_remote_retrieve_response_code($buildings)===200){
+                $candidates=[];
+                foreach(json_decode(wp_remote_retrieve_body($buildings),true)['results']??[] as $feature){
+                    $x=$feature['geometry']['x']??null;$y=$feature['geometry']['y']??null;
+                    if(!is_numeric($x)||!is_numeric($y)||(string)($feature['attributes']['dplz4']??'')!==$postcode)continue;
+                    $meters=sqrt((((float)$y-$home[0])*111320)**2+(((float)$x-$home[1])*111320*cos(deg2rad($home[0])))**2);
+                    if($meters>=100&&$meters<=250)$candidates[round((float)$y,4).','.round((float)$x,4)]=[round((float)$y,4),round((float)$x,4)];
+                }
+                ksort($candidates);$candidates=array_values($candidates);
+                if($candidates)$position=$candidates[hexdec(substr(hash_hmac('sha256',(string)$id,wp_salt('auth')),0,8))%count($candidates)];
             }
         }
         update_user_meta($id,'strc_map_street_position',['key'=>$key,'position'=>$position?:[]]);
