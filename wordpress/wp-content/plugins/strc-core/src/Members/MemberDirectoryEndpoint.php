@@ -106,13 +106,13 @@ final class MemberDirectoryEndpoint
     }
 
     /**
-     * Strassengenaue Position (ohne Hausnummer), nur wenn das Mitglied dies im Profil freigegeben hat.
+     * Strassengenaue Position (ohne Hausnummer). B-Test: Opt-out – gilt, solange das Mitglied es im Profil nicht abgewählt hat.
      * Sonst null: die Karte zeigt dann den Ort (Postleitzahl). Pro Anfrage werden höchstens zehn neue Adressen abgefragt.
      */
     private function streetPosition(int $id,int &$geocoded): ?array
     {
         $preferences=get_user_meta($id,'strc_website_preferences',true);
-        if(!is_array($preferences)||empty($preferences['mapStreet']))return null;
+        if(is_array($preferences)&&array_key_exists('mapStreet',$preferences)&&!$preferences['mapStreet'])return null;
         $street=trim((string)preg_replace('/\s+\d+\s*[a-zA-Z]?(\s*[-\/]\s*\d+\s*[a-zA-Z]?)?$/u','',(string)get_user_meta($id,'strc_street',true)));
         $postcode=(string)get_user_meta($id,'strc_postcode',true);
         if($street===''||!preg_match('/^[1-9][0-9]{3}$/D',$postcode))return null;
