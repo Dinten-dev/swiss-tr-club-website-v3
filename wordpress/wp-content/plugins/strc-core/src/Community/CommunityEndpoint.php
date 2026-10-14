@@ -120,7 +120,7 @@ final class CommunityEndpoint
             'trash', 'restore', 'approve', 'reject' => $this->status($operation, absint($input['id'] ?? 0)),
             'delete' => $this->deleteTopic(absint($input['id'] ?? 0)),
             'photos-review','cover','photos-move'=>$this->reviewPhotos($operation,$input),
-            'gallery-events'=>array_map(static fn($event)=>['id'=>(int)$event->ID,'title'=>$event->post_title],get_posts(['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>-1,'orderby'=>'date','order'=>'DESC'])),
+            'gallery-events'=>$this->galleryEvents(($input['recent']??'')==='1'),
             'image-policy'=>$this->imagePolicy($input),
             'pin','merge','reply-edit','reply-hide'=>$this->moderateTopic($operation,$input),
             'subscribe', 'close' => $this->topicAction($operation, $input),
@@ -128,6 +128,14 @@ final class CommunityEndpoint
             default => AjaxRequest::fail('Unbekannte Anfrage.'),
         };
         wp_send_json_success($result);
+    }
+
+    /** Veranstaltungen für Galerie-Uploads; `recent`: die letzten fünf bereits begonnenen Veranstaltungen (nach Datum). */
+    private function galleryEvents(bool $recent): array
+    {
+        $args=['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>$recent?5:-1,'meta_key'=>'strc_start_at','orderby'=>'meta_value','order'=>'DESC'];
+        if($recent)$args['meta_query']=[['key'=>'strc_start_at','value'=>gmdate('Y-m-d\\TH:i:s',time()+DAY_IN_SECONDS),'compare'=>'<=']];
+        return array_map(static fn($event)=>['id'=>(int)$event->ID,'title'=>$event->post_title,'date'=>substr((string)get_post_meta($event->ID,'strc_start_at',true),0,10)],get_posts($args));
     }
 
     /** Forumsthema endgültig löschen: durch den Verfasser oder die Forumsmoderation (Dateien werden mitgelöscht). */
@@ -234,7 +242,7 @@ final class CommunityEndpoint
         }
         $query = new WP_Query($args);
         if($filter)remove_filter('posts_where',$filter,10);
-        return array_values(array_map(static fn ($post): array => array('id' => (int) $post->ID, 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8')), $query->posts));
+        return array_values(array_map(static fn ($post): array => array('id' => (int) $post->ID, 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'eventId' => (int) (((array) get_post_meta($post->ID,'strc_form_classification',true))['eventId'] ?? 0)), $query->posts));
     }
 
     private function listing(array $input): array
@@ -353,7 +361,7 @@ final class CommunityEndpoint
             if($kind==='library'&&(!$data['documentType']||!in_array($data['language'],['de','fr','en','multi','other'],true)))throw new \InvalidArgumentException('Bitte Dokumentart und Sprache auswählen.');
             if($kind==='gallery'&&$data['galleryCategory']&&!in_array($data['galleryCategory'],['events','portraits','restorations','history'],true))throw new \InvalidArgumentException('Bitte eine gültige Galerie-Kategorie wählen.');
             if($kind==='gallery'&&$data['eventId']&&(get_post_type((int)$data['eventId'])!=='strc_event'||get_post_status((int)$data['eventId'])!=='publish'))throw new \InvalidArgumentException('Veranstaltung nicht verfügbar.');
-            if($kind==='gallery'&&!$data['photographer'])throw new \InvalidArgumentException('Bitte Fotograf/in angeben.');
+            if($kind==='gallery')$data['photographer']=wp_get_current_user()->display_name;
             if($kind==='library'){
                 $rawModels=$input['models']??'[]';
                 if(is_string($rawModels))$rawModels=json_decode($rawModels,true);
@@ -398,7 +406,7 @@ final class CommunityEndpoint
         if ('forum' === $kind && '' === $description) {
             AjaxRequest::fail('Bitte einen Beitragstext eingeben.');
         }
-        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 'gallery' === $kind ? 2500000 : 0);
+        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 'gallery' === $kind ? 2000000 : 0, 'gallery' === $kind ? 10485760 : 20971520);
         if (is_wp_error($savedFiles)) {
             AjaxRequest::fail($savedFiles->get_error_message());
         }
@@ -463,15 +471,9 @@ final class CommunityEndpoint
         if (($input['rights'] ?? '') !== '1') {
             AjaxRequest::fail('Bitte die Berechtigung zum Teilen des Materials bestätigen.', 422);
         }
-        try {
-            $photographer = \SwissTRClub\Core\Forms\FormFields::text($input, 'photographer', 160);
-        } catch (\InvalidArgumentException $e) {
-            AjaxRequest::fail($e->getMessage(), 422);
-        }
-        if ('' === $photographer) {
-            AjaxRequest::fail('Bitte Fotograf/in angeben.', 422);
-        }
-        $uploads = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), true, false, 20, 2500000);
+        // Fotograf/in ist immer die hochladende Person.
+        $photographer = wp_get_current_user()->display_name;
+        $uploads = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), true, false, 20, 2000000, 10485760);
         if (is_wp_error($uploads)) {
             AjaxRequest::fail($uploads->get_error_message());
         }

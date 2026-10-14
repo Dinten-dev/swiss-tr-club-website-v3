@@ -15,7 +15,7 @@ final class PrivateUploadStore
     }
 
     /** @return array<int,array<string,mixed>>|WP_Error */
-    public function save(array $files, bool $imagesOnly, bool $library = false, int $maxFiles = 6, int $minImageBytes = 0): array|WP_Error
+    public function save(array $files, bool $imagesOnly, bool $library = false, int $maxFiles = 6, int $minImageBytes = 0, int $maxImageBytes = 20971520): array|WP_Error
     {
         if (! $files) {
             return array();
@@ -48,8 +48,8 @@ final class PrivateUploadStore
             if (! isset($allowed[$mime]) || ! in_array($extension, $allowed[$mime], true)) {
                 return new WP_Error('type', $imagesOnly ? 'Nur JPG, PNG oder WebP sind erlaubt.' : 'Nur JPG, PNG, WebP oder PDF sind erlaubt.');
             }
-            if ($imagesOnly && $size < $minImageBytes) {
-                return new WP_Error('size', 'Jedes Galeriebild muss mindestens 2.5 MB gross sein.');
+            if ($imagesOnly && ($size < $minImageBytes || $size > $maxImageBytes)) {
+                return new WP_Error('size', sprintf('Jedes Galeriebild muss zwischen %s und %s MB gross sein (Originalfoto, nicht aus WhatsApp).', number_format_i18n($minImageBytes/1000000,0), number_format_i18n($maxImageBytes/1048576,0)));
             }
             if (str_starts_with($mime, 'image/')) {
                 $dimensions = @getimagesize($tmp);
@@ -149,7 +149,7 @@ final class PrivateUploadStore
                 // Some WP editors append the image extension to a key-only path.
                 $actual=$result['path'];
                 clearstatcache(true,$actual);
-                if(filesize($actual)<=2500000)break;
+                if(filesize($actual)<=2000000)break; // Galerie- und Downloadgrösse höchstens 2 MB
             }
             if($actual!==$destination&&!rename($actual,$destination)){@unlink($actual);return new WP_Error('image','Bildansicht konnte nicht gespeichert werden.');}
             chmod($destination,0600);
