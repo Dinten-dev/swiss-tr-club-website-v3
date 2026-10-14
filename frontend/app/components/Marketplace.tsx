@@ -78,6 +78,9 @@ export default function Marketplace({ section, session, notify }: { section:stri
     return () => { clearTimeout(timer); controller.abort(); };
   }, [area, search, model, partCategory, mine, session?.memberAccess, page, revision]);
 
+  // Direkter Link aus dem Dashboard: #marktplatz/meine/<id> öffnet das Inserat.
+  const opened=useRef(false);
+  useEffect(()=>{if(area!=='mine'||opened.current||loading)return;const id=Number(window.location.hash.split('/')[2]);if(!id)return;const ad=collection.ads.find(item=>item.id===id);if(ad){opened.current=true;setSelected(ad);}},[area,loading,collection]);
   function refresh() { setLoading(true); setRevision(value => value + 1); }
   function changeFilter(change: () => void) { setLoading(true); change(); setPage(1); }
 

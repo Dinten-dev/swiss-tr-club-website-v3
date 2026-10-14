@@ -351,6 +351,10 @@ final class CommunityEndpoint
                 $type=LibraryPolicy::type($data['documentType']);
                 if($type==='legacy'&&empty($input['id']))throw new \InvalidArgumentException('Bitte eine gültige Dokumentart auswählen.');
                 $data['documentType']=$type;
+                // Magazin und Newsletter lädt die Redaktion hoch, Clubdokumente der Vorstand (oder die Bibliotheksverwaltung).
+                $libraryEditor=\SwissTRClub\Core\Editorial\EditorialAccess::area('library');
+                if(empty($input['id'])&&in_array($type,['magazine','newsletter'],true)&&!$libraryEditor)throw new \InvalidArgumentException('TR-Magazin und Newsletter werden von der Redaktion hochgeladen.');
+                if(empty($input['id'])&&in_array($type,['statutes','club','agm'],true)&&!$libraryEditor&&!current_user_can('strc_access_board_documents'))throw new \InvalidArgumentException('Clubdokumente werden vom Vorstand hochgeladen.');
                 if(in_array($type,['magazine','newsletter'],true)&&(!$data['issue']||!$data['year']))throw new \InvalidArgumentException('Bitte Ausgabe und Erscheinungsjahr angeben.');
                 $types=array_column(LibraryPolicy::types(),null,'key');
                 if(isset($types[$type])&&!in_array($types[$type]['access'],LibraryPolicy::classes(),true))throw new \InvalidArgumentException('Für diese Dokumentart fehlt die Berechtigung.');
