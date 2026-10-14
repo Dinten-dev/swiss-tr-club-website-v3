@@ -7,14 +7,15 @@ const assetBase=process.env.NEXT_PUBLIC_ASSET_BASE??'';
 const cache=new Map<string,string>();
 export default function PdfThumb({url,width=120}:{url:string;width?:number}){
   const box=useRef<HTMLSpanElement>(null);
-  const [src,setSrc]=useState(()=>cache.get(url)||'');
+  const [rendered,setRendered]=useState(()=>({url,src:cache.get(url)||''}));
+  const src=rendered.url===url?rendered.src:cache.get(url)||'';
   const [visible,setVisible]=useState(false);
   useEffect(()=>{
     if(src||!box.current)return;
     const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){setVisible(true);observer.disconnect();}},{rootMargin:'200px'});
     observer.observe(box.current);
     return()=>observer.disconnect();
-  },[src]);
+  },[src,url]);
   useEffect(()=>{
     if(!visible||src)return;
     let disposed=false;
@@ -31,7 +32,7 @@ export default function PdfThumb({url,width=120}:{url:string;width?:number}){
       let out=canvas;
       if(landscape){out=document.createElement('canvas');out.width=Math.floor(canvas.width/2);out.height=canvas.height;out.getContext('2d')!.drawImage(canvas,canvas.width/4,0,canvas.width/2,canvas.height,0,0,canvas.width/2,canvas.height);}
       const data=out.toDataURL('image/jpeg',.8);cache.set(url,data);
-      if(!disposed)setSrc(data);
+      if(!disposed)setRendered({url,src:data});
       page.cleanup();
     })().catch(()=>{});
     return()=>{disposed=true;task?.destroy().catch(()=>{});};

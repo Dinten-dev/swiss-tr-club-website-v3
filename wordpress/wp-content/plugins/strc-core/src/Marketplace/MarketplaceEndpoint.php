@@ -67,6 +67,7 @@ final class MarketplaceEndpoint
         }
         $category = is_string($input['category'] ?? null) ? $input['category'] : '';
         $meta = array('relation' => 'AND');
+        $reviewChanged=$post->post_status!==($operation==='approve'?'publish':'draft')||($operation==='approve'&&get_post_meta($id,'strc_ad_public_approved',true)!=='1');
         $review=\SwissTRClub\Core\Editorial\EditorialAccess::area('market');
         if (!$mine&&!$review) {
             $meta[]=['key'=>'strc_ad_public_approved','value'=>'1'];
@@ -285,6 +286,7 @@ final class MarketplaceEndpoint
         if(!current_user_can('strc_access_member_area'))return $this->denied();
         $id=absint($input['id']??0);$post=get_post($id);
         if(!$post||$post->post_type!=='strc_ad'||!in_array($post->post_status,['publish','pending','draft'],true))return new WP_Error('missing','Inserat nicht gefunden.',['status'=>404]);
+        $reviewChanged=$post->post_status!==($operation==='approve'?'publish':'draft')||($operation==='approve'&&get_post_meta($id,'strc_ad_public_approved',true)!=='1');
         $review=\SwissTRClub\Core\Editorial\EditorialAccess::area('market');
         if(in_array($operation,['approve','reject'],true)&&!$review)return $this->denied();
         if(!$review&&(int)$post->post_author!==get_current_user_id())return $this->denied();
@@ -333,7 +335,7 @@ final class MarketplaceEndpoint
         $result=wp_update_post(['ID'=>$id,'post_status'=>$status],true);if(is_wp_error($result))return $result;
         if($status!=='publish')delete_post_meta($id,'strc_ad_public_approved');
         if($status==='pending')\SwissTRClub\Core\Community\SubmissionNotifications::send($id,'market');
-        if(in_array($operation,['approve','reject'],true))\SwissTRClub\Core\Community\SubmissionNotifications::decided($id,'market',$operation==='approve');
+        if($reviewChanged&&in_array($operation,['approve','reject'],true))\SwissTRClub\Core\Community\SubmissionNotifications::decided($id,'market',$operation==='approve');
         return $this->present($id);
     }
 

@@ -79,18 +79,18 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/CommunityEndpoint.php",
-      "bytes": 46459,
-      "sha256": "f76de10bc0c6b209aa04161351a22ab7c583f0072c53b4f9980e0356b68a9a6c"
+      "bytes": 50858,
+      "sha256": "0b24edaf36b8de0a14fdf158bb61f78ae7a5ece6e6dd2d993241df707b8b8c91"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/ForumSettings.php",
-      "bytes": 9006,
-      "sha256": "751882819143cc63f04aac76f846d52d78ef2e42f508cb6587d0ff6df82d85a6"
+      "bytes": 9027,
+      "sha256": "79deda55e5ee9670e1e353b950fb9f56781b23b576879b563f8697ef7a37bbaf"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/GalleryRetention.php",
-      "bytes": 1185,
-      "sha256": "0c27338110547861011cb63d8349fbd21706d0daeaab6cec55b082dc71c7743c"
+      "bytes": 1333,
+      "sha256": "70303900a5c4d39510a5ea5515e12ec4e6130a5928fdef4846c311cfe6443919"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/library-types.json",
@@ -109,13 +109,13 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/PrivateUploadStore.php",
-      "bytes": 11594,
-      "sha256": "174b471a8a1bf8ae914aa909da3c3303ea630998013d3962330ff1717e77f103"
+      "bytes": 12583,
+      "sha256": "8ac3395524b1a71e293b6f04a92eeabdc0061ba67a9d11c0ff79ed3130e99426"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/SubmissionNotifications.php",
-      "bytes": 1591,
-      "sha256": "6e940dd87a6cba758bf3a508dc4cdd3b680098f06c93a24174afe604eaf088c7"
+      "bytes": 3468,
+      "sha256": "8d485d4a4f422735b9aa5d52f977156be858a23bff359ec376cea9b4bc987c15"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Content/ContentPostTypes.php",
@@ -149,8 +149,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Dashboard/MemberDashboardEndpoint.php",
-      "bytes": 6514,
-      "sha256": "a60d1f8db98483a981843fe1fb20b90fc5c476b61b19882cf00102478eb7887c"
+      "bytes": 6523,
+      "sha256": "57ede25741e5e831f1bf92f4d7b0c0c64beb200429aea093683700470cf79fd1"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/EditorialAccess.php",
@@ -179,8 +179,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/site-content.json",
-      "bytes": 75817,
-      "sha256": "39db1c939cc2b4611aa8b13e4d9f3ea39c4bf13dbf4599f68898bd23bdd68e12"
+      "bytes": 76778,
+      "sha256": "fc2b4460f7309e5328a8e094bc275baabc89882cddec931309fb3259b8afcdf7"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventArchiveRetention.php",
@@ -239,8 +239,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Forms/EventFinance.php",
-      "bytes": 6073,
-      "sha256": "c0017b72d0af76f0f572e1c43c1bbd14587792a2ef4963ee4d5e90c058b63daf"
+      "bytes": 6186,
+      "sha256": "e1dbe41c048a273604967caf186b61bca627fada9646ea0942b7b18d6f0d9bf5"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Forms/EventPayments.php",
@@ -384,8 +384,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Marketplace/MarketplaceEndpoint.php",
-      "bytes": 25928,
-      "sha256": "43e76e6afdb8df65598cc8770dd4dca3f4ac78c0f2995d6ad859a5ce93cb017e"
+      "bytes": 26717,
+      "sha256": "2d3e07a8dd792f73aa65eca55ecb6c2b2ccd264aed11b6a771254f6775d32825"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/ApplicationAdmission.php",
@@ -409,8 +409,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberDirectoryEndpoint.php",
-      "bytes": 7078,
-      "sha256": "e617108a1af78883f6755efa9c696e7506f5ea08238cb2ecb38101790bcf1059"
+      "bytes": 7698,
+      "sha256": "cc395b4932b83d175096320a71f4d7eb66414604f22319ce1ee21535cc8e505f"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberProfileFields.php",
@@ -564,13 +564,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 225699,
-      "sha256": "ffec20d0331a7a6d7f1184958f087bd69733807ff677b73bacbbee787a0f8ebf"
+      "bytes": 238687,
+      "sha256": "9ac674e468241547069caa39ea52377199de73d7fcc36062f76c186a7e9bc270"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 748808,
-      "sha256": "dcadb2fd0bc6bf2e680fd71cd8b9b5ade923422d648932b1e2a2f80f9f72130c"
+      "bytes": 784776,
+      "sha256": "573bffb24840b11f7115862d6a361746e35324da43c6ba8a72ffbd66d2366672"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -731,6 +731,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-C4i17Z2c.js",
       "bytes": 8199,
       "sha256": "8f1829eeafced0480ec5b6f1139ac53cb8db7eb716bd49ca9f1e8e7e7fd1f53b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-C5EqHhMj.js",
+      "bytes": 8199,
+      "sha256": "2214b02cce500c8daec939e136b5d08e017532862e78d414522166e3ae0de68b"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CxMz7wG9.js",
@@ -1963,6 +1968,11 @@
       "sha256": "e42d05c5e791cd1b70dc3c6dc91492b16444f9dbc99ce7386412623f9346b81d"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-CzTZeUhr.js",
+      "bytes": 69703,
+      "sha256": "c6daa0a80a763bc99dbed74924d6081a6c973d371a9c7bf42ae5380e6acd85ec"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-D4-CX2f4.js",
       "bytes": 68105,
       "sha256": "4f759c817fb67fafc59dc68dc8167f22bf77cc40391fab4cbf4206353971e8fd"
@@ -2008,9 +2018,7 @@
       "sha256": "1b081d89f7b036644229ac0c5b6ca61209522dd52b2a10961a75ecbb91ebb535"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-10-13T17:42:28.301Z",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-13T17:53:42.499057+00:00",
-  "publishedFiles": 1
+  "status": "candidate",
+  "builtOn": "2026-10-14T11:58:21.292Z",
+  "baselineCapturedOn": "2026-10-13"
 }

@@ -864,7 +864,7 @@
         "key": "privacy",
         "label": "Datenschutz-Hinweis",
         "type": "text",
-        "default": "Diese Liste ist ausschliesslich für Mitglieder. Bitte keine Kontaktdaten ohne Zustimmung weitergeben."
+        "default": "Das Verzeichnis ist nur für aktive Clubmitglieder sichtbar. Die Karte zeigt ungefähre Standorte nach Postleitzahl; Wohnadressen werden nicht zur Standortbestimmung verwendet."
       }
     ]
   },

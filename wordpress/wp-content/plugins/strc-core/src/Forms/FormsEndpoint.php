@@ -110,7 +110,7 @@ final class FormsEndpoint
         $old=get_user_meta($id,'strc_profile_photo',true);$next=$files[0]??(($input['removePhoto']??'')==='1'?[]:$old);
         if($next!==$old&&!update_user_meta($id,'strc_profile_photo',$next)){$store->remove($files);throw new \RuntimeException('Profilbild konnte nicht gespeichert werden.',503);}
         if($old&&$old!==$next)$store->remove([$old]);
-        $preferences=['directory'=>($input['directory']??'')==='1','mapStreet'=>($input['mapStreet']??'')==='1'];
+        $preferences=['directory'=>($input['directory']??'')==='1'];
         if(get_user_meta($id,'strc_website_preferences',true)!==$preferences&&!update_user_meta($id,'strc_website_preferences',$preferences))throw new \RuntimeException('Einstellungen konnten nicht gespeichert werden.',503);
         return ['message'=>'Profileinstellungen gespeichert.'];
     }

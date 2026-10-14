@@ -19,7 +19,7 @@ function Participants({eventId}:{eventId:string}){
 /** Galerie-Hauptseite: die letzten fünf Veranstaltungen mit Album, Kurztext, Teilnehmenden und Vorschaubildern. */
 export default function GalleryRecent({open}:{open:(id:number)=>void}){
   const [albums,setAlbums]=useState<Album[]|null>(null);
-  useEffect(()=>{const controller=new AbortController();query<{items:Album[]}>('strc_community',{operation:'list',kind:'gallery',galleryCategory:'events',page:'1'},controller.signal).then(result=>setAlbums(result.items.filter(item=>text(item.classification.eventId)).slice(0,5))).catch(()=>setAlbums([]));return()=>controller.abort();},[]);
+  useEffect(()=>{const controller=new AbortController();query<{items:Album[]}>('strc_community',{operation:'gallery-recent'},controller.signal).then(result=>setAlbums(result.items)).catch(()=>setAlbums([]));return()=>controller.abort();},[]);
   if(!albums?.length)return null;
   return <section className="gallery-recent" aria-label={t('Letzte Veranstaltungen')}>
     <h2>{t('Letzte Veranstaltungen')}</h2>

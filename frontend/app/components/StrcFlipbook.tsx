@@ -16,7 +16,7 @@ type Turn={under:number[];front:number;back:number;side:'left'|'right';reverse?:
 type Hit={v:number;text:string};
 export default function StrcFlipbook({url,title,classic,pages,download,search=true}:{url:string;title:string;classic?:()=>void;pages?:number[];download?:string|false;search?:boolean}){
   const selection=(pages||[]).join(',');
-  const root=useRef<HTMLDivElement>(null);const [fullscreen,setFullscreen]=useState(false);
+  const root=useRef<HTMLDivElement>(null);const [fullscreen,setFullscreen]=useState(false);const [fullscreenError,setFullscreenError]=useState('');const searchRequest=useRef(0);
   const [query,setQuery]=useState('');const [hits,setHits]=useState<Hit[]|null>(null);const [searching,setSearching]=useState(false);const texts=useRef<Record<number,{str:string;x:number}[]>>({});const pageWidth=useRef<Record<number,number>>({});
   const [doc,setDoc]=useState<PDFDocumentProxy|null>(null);
   const [error,setError]=useState('');
@@ -38,7 +38,7 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
     (async()=>{
       const pdf=await import('pdfjs-dist/legacy/build/pdf.mjs');
       if(disposed)return;
-      setDoc(null);setLayout(null);setImages({});setPage(1);setError('');setAnim(null);setHits(null);
+      setDoc(null);setLayout(null);setImages({});setPage(1);setError('');setAnim(null);setHits(null);setSearching(false);searchRequest.current++;
       pdf.GlobalWorkerOptions.workerSrc=`${assetBase}/pdfjs/pdf.worker.min.js`;
       task=pdf.getDocument({url,withCredentials:true,rangeChunkSize:65536,cMapUrl:`${assetBase}/pdfjs/cmaps/`,cMapPacked:true,standardFontDataUrl:`${assetBase}/pdfjs/standard_fonts/`,wasmUrl:`${assetBase}/pdfjs/wasm/`});
       const loaded=await task.promise;
@@ -66,17 +66,17 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
   },[]);
   function toggleFullscreen(){
     if(document.fullscreenElement)void document.exitFullscreen();
-    else void root.current?.requestFullscreen?.().catch(()=>{});
+    else if(root.current?.requestFullscreen)void root.current.requestFullscreen().catch(()=>setFullscreenError(t('Vollbild ist in diesem Browser nicht verfügbar.')));
   }
   // Volltextsuche: Treffer auf der linken bzw. rechten Hälfte einer Doppelseite werden der passenden Magazinseite zugeordnet.
   async function runSearch(){
     const needle=query.trim().toLocaleLowerCase('de-CH');const entries=layoutRef.current;
     if(!doc||!entries||needle.length<2){setHits(null);return;}
-    setSearching(true);const active=generation.current;const found:Hit[]=[];
+    setSearching(true);const active=generation.current,request=++searchRequest.current;const found:Hit[]=[];
     try{
       for(let p=1;p<=doc.numPages;p++){
-        if(!texts.current[p]){const pdfPage=await doc.getPage(p);const content=await pdfPage.getTextContent();pageWidth.current[p]=pdfPage.getViewport({scale:1}).width;texts.current[p]=content.items.map(item=>'str' in item?{str:item.str,x:item.transform[4]}:{str:'',x:0});}
-        if(active!==generation.current)return;
+        if(!texts.current[p]){const pdfPage=await doc.getPage(p);const content=await pdfPage.getTextContent();if(active!==generation.current||request!==searchRequest.current)return;pageWidth.current[p]=pdfPage.getViewport({scale:1}).width;texts.current[p]=content.items.map(item=>'str' in item?{str:item.str,x:item.transform[4]}:{str:'',x:0});}
+        if(active!==generation.current||request!==searchRequest.current)return;
         const items=texts.current[p],width=pageWidth.current[p];
         for(const half of ['left','right','all'] as const){
           const part=items.filter(item=>half==='all'||(half==='left'?item.x<width/2:item.x>=width/2));const joined=part.map(item=>item.str).join(' ');const at=joined.toLocaleLowerCase('de-CH').indexOf(needle);
@@ -86,9 +86,9 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
         }
       }
       setHits(found);
-    }catch{setHits([]);}finally{if(active===generation.current)setSearching(false);}
+    }catch{if(active===generation.current&&request===searchRequest.current)setHits([]);}finally{if(active===generation.current&&request===searchRequest.current)setSearching(false);}
   }
-  function jump(v:number){setAnim(null);setPage(v);}
+  function jump(v:number){timers.current.forEach(clearTimeout);timers.current=[];setAnim(null);setPage(v);}
 
   useEffect(()=>{
     const resize=()=>setNarrow(window.innerWidth<760);
@@ -137,7 +137,7 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
         }
       }
       store.current={...store.current,...add};setImages(store.current);pdfPage.cleanup();c.width=0;
-    }catch{if(active===generation.current)setError(t('Die Seite konnte nicht geladen werden. Öffne Suche, Text & Download.'));}finally{busy.current.delete(x.p);}
+    }catch{if(active===generation.current)setError(t('Die Seite konnte nicht geladen werden. Bitte lade das Magazin erneut.'));}finally{if(active===generation.current)busy.current.delete(x.p);}
   }
   useEffect(()=>{
     if(!doc||!layout)return;
@@ -182,7 +182,7 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
       {downloadUrl&&<a className="club-secondary fb-mode" href={downloadUrl} download>{t('Download')}</a>}
       {classic&&<button type="button" className="club-secondary fb-mode" onClick={classic}>{t('Textansicht')}</button>}
     </div>
-    {search&&!selection&&<form className="fb-search" role="search" onSubmit={e=>{e.preventDefault();void runSearch();}}><label className="sr-only" htmlFor={title+'-search'}>{t('Im Magazin suchen')}</label><input id={title+'-search'} type="search" placeholder={t('Im Magazin suchen …')} value={query} onChange={e=>{setQuery(e.target.value);if(!e.target.value)setHits(null);}}/><button type="submit" className="club-secondary" disabled={!doc||searching||query.trim().length<2}>{searching?t('Suche läuft …'):t('Suchen')}</button>
+    {search&&!selection&&<form className="fb-search" role="search" onSubmit={e=>{e.preventDefault();void runSearch();}}><label className="sr-only" htmlFor={title+'-search'}>{t('Im Magazin suchen')}</label><input id={title+'-search'} type="search" placeholder={t('Im Magazin suchen …')} value={query} onChange={e=>{searchRequest.current++;setQuery(e.target.value);setHits(null);setSearching(false);}}/><button type="submit" className="club-secondary" disabled={!doc||searching||query.trim().length<2}>{searching?t('Suche läuft …'):t('Suchen')}</button>
       {hits&&<div className="fb-hits" aria-live="polite">{hits.length?<><span>{hits.length} {t(hits.length===1?'Treffer':'Treffer')}:</span>{hits.slice(0,40).map(hit=><button type="button" key={hit.v} className={current.includes(hit.v)?'is-current':''} onClick={()=>jump(hit.v)} title={hit.text}>{t('Seite')} {hit.v}</button>)}</>:<span>{t('Keine Treffer.')}</span>}</div>}
     </form>}
     {error?<p role="alert">{error}</p>:<div className="fb-book" style={{aspectRatio:String((one?1:2)*ratio),['--fb-ratio' as string]:(one?1:2)*ratio}} tabIndex={0} role="group" aria-label={`${title} – ${t('Blättern mit Pfeiltasten, Klick oder Wischen')}`}
@@ -194,6 +194,7 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
       {anim&&<div className={`fb-leaf fb-leaf-${one?'single':anim.side}${anim.reverse?' is-reverse':''}${anim.go?' is-turning':''}`}>{face(anim.front,'fb-front')}{face(anim.back,'fb-back')}</div>}
       {!one&&<span className="fb-spine" aria-hidden="true"/>}
     </div>}
+    {fullscreenError&&<p role="alert">{fullscreenError}</p>}
     <p className="fb-hint">{t('Zum Blättern auf die rechte oder linke Seite klicken, wischen oder die Pfeiltasten benutzen.')}</p>
   </div>;
 }

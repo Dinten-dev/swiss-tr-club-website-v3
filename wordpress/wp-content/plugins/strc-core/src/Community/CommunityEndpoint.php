@@ -120,6 +120,7 @@ final class CommunityEndpoint
             'trash', 'restore', 'approve', 'reject' => $this->status($operation, absint($input['id'] ?? 0)),
             'delete' => $this->deleteTopic(absint($input['id'] ?? 0)),
             'photos-review','cover','photos-move'=>$this->reviewPhotos($operation,$input),
+            'gallery-recent'=>$this->galleryRecent(),
             'gallery-events'=>$this->galleryEvents(($input['recent']??'')==='1'),
             'image-policy'=>$this->imagePolicy($input),
             'pin','merge','reply-edit','reply-hide'=>$this->moderateTopic($operation,$input),
@@ -133,9 +134,23 @@ final class CommunityEndpoint
     /** Veranstaltungen für Galerie-Uploads; `recent`: die letzten fünf bereits begonnenen Veranstaltungen (nach Datum). */
     private function galleryEvents(bool $recent): array
     {
-        $args=['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>$recent?5:-1,'meta_key'=>'strc_start_at','orderby'=>'meta_value','order'=>'DESC'];
-        if($recent)$args['meta_query']=[['key'=>'strc_start_at','value'=>gmdate('Y-m-d\\TH:i:s',time()+DAY_IN_SECONDS),'compare'=>'<=']];
-        return array_map(static fn($event)=>['id'=>(int)$event->ID,'title'=>$event->post_title,'date'=>substr((string)get_post_meta($event->ID,'strc_start_at',true),0,10)],get_posts($args));
+        $events=get_posts(['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>-1,'meta_key'=>'strc_start_at','orderby'=>'meta_value','order'=>'DESC']);
+        if($recent)$events=array_slice(array_values(array_filter($events,static fn($event)=>($start=strtotime((string)get_post_meta($event->ID,'strc_start_at',true)))!==false&&$start<=time())),0,5);
+        return array_map(static fn($event)=>['id'=>(int)$event->ID,'title'=>$event->post_title,'date'=>substr((string)get_post_meta($event->ID,'strc_start_at',true),0,10)],$events);
+    }
+
+    /** Latest five begun events with a published album, including legacy event-linked albums. */
+    private function galleryRecent(): array
+    {
+        $albums=[];
+        foreach(get_posts(['post_type'=>'strc_album','post_status'=>'publish','posts_per_page'=>-1,'orderby'=>'ID','order'=>'DESC'])as$post){
+            $classification=get_post_meta($post->ID,'strc_form_classification',true);$id=(int)($classification['eventId']??0);
+            if(!$id||get_post_type($id)!=='strc_event'||get_post_status($id)!=='publish'||isset($albums[$id]))continue;
+            $start=strtotime((string)get_post_meta($id,'strc_start_at',true));if($start===false||$start>time())continue;
+            $albums[$id]=['post'=>$post,'start'=>$start];
+        }
+        uasort($albums,static fn($a,$b)=>$b['start']<=>$a['start']);
+        return ['items'=>array_map(function($row){$item=$this->present($row['post']);$item['classification']['date']=substr((string)get_post_meta((int)$item['classification']['eventId'],'strc_start_at',true),0,10);return $item;},array_slice(array_values($albums),0,5))];
     }
 
     /** Forumsthema endgültig löschen: durch den Verfasser oder die Forumsmoderation (Dateien werden mitgelöscht). */
@@ -352,7 +367,7 @@ final class CommunityEndpoint
         return array($title, $description);
     }
 
-    private function classification(array $input, string $kind): array
+    private function classification(array $input, string $kind, ?\WP_Post $existing = null): array
     {
         $data=[];
         try {
@@ -361,7 +376,7 @@ final class CommunityEndpoint
             if($kind==='library'&&(!$data['documentType']||!in_array($data['language'],['de','fr','en','multi','other'],true)))throw new \InvalidArgumentException('Bitte Dokumentart und Sprache auswählen.');
             if($kind==='gallery'&&$data['galleryCategory']&&!in_array($data['galleryCategory'],['events','portraits','restorations','history'],true))throw new \InvalidArgumentException('Bitte eine gültige Galerie-Kategorie wählen.');
             if($kind==='gallery'&&$data['eventId']&&(get_post_type((int)$data['eventId'])!=='strc_event'||get_post_status((int)$data['eventId'])!=='publish'))throw new \InvalidArgumentException('Veranstaltung nicht verfügbar.');
-            if($kind==='gallery')$data['photographer']=wp_get_current_user()->display_name;
+            if($kind==='gallery')$data['photographer']=$existing?((get_post_meta($existing->ID,'strc_form_classification',true)['photographer']??'')?:get_the_author_meta('display_name',$existing->post_author)):wp_get_current_user()->display_name;
             if($kind==='library'){
                 $rawModels=$input['models']??'[]';
                 if(is_string($rawModels))$rawModels=json_decode($rawModels,true);
@@ -376,8 +391,8 @@ final class CommunityEndpoint
                 $data['documentType']=$type;
                 // Magazin und Newsletter lädt die Redaktion hoch, Clubdokumente der Vorstand (oder die Bibliotheksverwaltung).
                 $libraryEditor=\SwissTRClub\Core\Editorial\EditorialAccess::area('library');
-                if(empty($input['id'])&&in_array($type,['magazine','newsletter'],true)&&!$libraryEditor)throw new \InvalidArgumentException('TR-Magazin und Newsletter werden von der Redaktion hochgeladen.');
-                if(empty($input['id'])&&in_array($type,['statutes','club','agm'],true)&&!$libraryEditor&&!current_user_can('strc_access_board_documents'))throw new \InvalidArgumentException('Clubdokumente werden vom Vorstand hochgeladen.');
+                if((!$existing||LibraryPolicy::type((string)(get_post_meta($existing->ID,'strc_form_classification',true)['documentType']??''))!==$type)&&in_array($type,['magazine','newsletter'],true)&&!$libraryEditor)throw new \InvalidArgumentException('TR-Magazin und Newsletter werden von der Redaktion hochgeladen.');
+                if((!$existing||LibraryPolicy::type((string)(get_post_meta($existing->ID,'strc_form_classification',true)['documentType']??''))!==$type)&&in_array($type,['statutes','club','agm'],true)&&!$libraryEditor&&!current_user_can('strc_access_board_documents'))throw new \InvalidArgumentException('Clubdokumente werden vom Vorstand hochgeladen.');
                 if(in_array($type,['magazine','newsletter'],true)&&(!$data['issue']||!$data['year']))throw new \InvalidArgumentException('Bitte Ausgabe und Erscheinungsjahr angeben.');
                 $types=array_column(LibraryPolicy::types(),null,'key');
                 if(isset($types[$type])&&!in_array($types[$type]['access'],LibraryPolicy::classes(),true))throw new \InvalidArgumentException('Für diese Dokumentart fehlt die Berechtigung.');
@@ -406,7 +421,9 @@ final class CommunityEndpoint
         if ('forum' === $kind && '' === $description) {
             AjaxRequest::fail('Bitte einen Beitragstext eingeben.');
         }
-        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 'gallery' === $kind ? 2000000 : 0, 'gallery' === $kind ? 10485760 : 20971520);
+        $magazine=$kind==='library'&&$classification['documentType']==='magazine';
+        if($magazine&&(!is_array($_FILES['files']['name']??null)||count($_FILES['files']['name'])!==1||!is_uploaded_file($_FILES['files']['tmp_name'][0]??'')||(new \finfo(FILEINFO_MIME_TYPE))->file($_FILES['files']['tmp_name'][0])!=='application/pdf'))AjaxRequest::fail('Bitte ein PDF-Dokument bis 25 MB auswählen.',422);
+        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 'gallery' === $kind ? 2000000 : 0, 'gallery' === $kind ? 10485760 : 20971520, $magazine ? 25*1024*1024 : 100*1024*1024);
         if (is_wp_error($savedFiles)) {
             AjaxRequest::fail($savedFiles->get_error_message());
         }
@@ -444,7 +461,7 @@ final class CommunityEndpoint
             AjaxRequest::fail('Sie können nur eigene Beiträge bearbeiten.', 403);
         }
         list($title, $description) = $this->texts($input);
-        $classification=$this->classification($input,(string)array_search($post->post_type,self::TYPES,true));
+        $classification=$this->classification($input,(string)array_search($post->post_type,self::TYPES,true),$post);
         if ('strc_topic' === $post->post_type && '' === $description) {
             AjaxRequest::fail('Bitte einen Beitragstext eingeben.');
         }
