@@ -71,7 +71,7 @@ export default function Marketplace({ section, session, notify }: { section:stri
     const timer = window.setTimeout(() => {
       setLoading(true); setError('');
       query<Collection>({ operation: 'list', mine:mine?'1':'0', search:area==='parts'?'':search, category:area==='parts'?'parts':area==='cars'?'Fahrzeuge':'', model:area==='parts'?model:'', partCategory:area==='parts'?partCategory:'', page: String(page) }, controller.signal)
-        .then(result => { if (!controller.signal.aborted) setCollection(result); })
+        .then(result => { if (controller.signal.aborted) return; setCollection(result); const id=area==='mine'&&!opened.current?Number(window.location.hash.split('/')[2]):0; const ad=id?result.ads.find(item=>item.id===id):undefined; if(ad){opened.current=true;setSelected(ad);} })
         .catch(reason => { if (!controller.signal.aborted) setError(reason.message); })
         .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     }, 200);
@@ -80,7 +80,6 @@ export default function Marketplace({ section, session, notify }: { section:stri
 
   // Direkter Link aus dem Dashboard: #marktplatz/meine/<id> öffnet das Inserat.
   const opened=useRef(false);
-  useEffect(()=>{if(area!=='mine'||opened.current||loading)return;const id=Number(window.location.hash.split('/')[2]);if(!id)return;const ad=collection.ads.find(item=>item.id===id);if(ad){opened.current=true;setSelected(ad);}},[area,loading,collection]);
   function refresh() { setLoading(true); setRevision(value => value + 1); }
   function changeFilter(change: () => void) { setLoading(true); change(); setPage(1); }
 
