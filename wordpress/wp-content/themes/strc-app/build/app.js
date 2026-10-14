@@ -20078,8 +20078,8 @@ function On({ kind: e, item: t, nonce: n, close: r, saved: i, accessClasses: a, 
 			"image/webp",
 			...e === "gallery" ? [] : ["application/pdf"]
 		];
-		if (t.some((t) => !r.includes(t.type) || t.size < (e === "gallery" ? 25e5 : 1) || t.size > (e === "library" && t.type === "application/pdf" ? 100 : 20) * 1024 * 1024)) {
-			U(e === "gallery" ? "Galeriebilder: mindestens 2,5 MB und höchstens 20 MB." : "Bilder: maximal 20 MB. Bibliotheks-PDFs: maximal 100 MB; sonst 20 MB.");
+		if (t.some((t) => !r.includes(t.type) || t.size < (e === "gallery" ? 2e6 : 1) || t.size > (e === "gallery" ? 10 : e === "library" && t.type === "application/pdf" ? 100 : 20) * 1024 * 1024)) {
+			U(e === "gallery" ? "Galeriebilder: je 2 bis 10 MB. Bitte das Originalfoto der Kamera oder des Smartphones verwenden (nicht aus WhatsApp)." : "Bilder: maximal 20 MB. Bibliotheks-PDFs: maximal 100 MB; sonst 20 MB.");
 			return;
 		}
 		if (e !== "gallery" && [...H, ...t].reduce((e, t) => e + t.size, 0) > 120 * 1024 * 1024) {
