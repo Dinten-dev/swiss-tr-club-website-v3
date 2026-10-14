@@ -65,8 +65,10 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
     return()=>document.removeEventListener('fullscreenchange',change);
   },[]);
   function toggleFullscreen(){
+    setFullscreenError('');
     if(document.fullscreenElement)void document.exitFullscreen();
     else if(root.current?.requestFullscreen)void root.current.requestFullscreen().catch(()=>setFullscreenError(t('Vollbild ist in diesem Browser nicht verfügbar.')));
+    else setFullscreenError(t('Vollbild ist in diesem Browser nicht verfügbar.'));
   }
   // Volltextsuche: Treffer auf der linken bzw. rechten Hälfte einer Doppelseite werden der passenden Magazinseite zugeordnet.
   async function runSearch(){

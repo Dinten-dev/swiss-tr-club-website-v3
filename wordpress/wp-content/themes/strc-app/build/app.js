@@ -18386,7 +18386,7 @@ function Xt({ url: e, title: t, classic: n, pages: r, download: i, search: a = !
 		return document.addEventListener("fullscreenchange", e), () => document.removeEventListener("fullscreenchange", e);
 	}, []);
 	function H() {
-		document.fullscreenElement ? document.exitFullscreen() : c.current?.requestFullscreen && c.current.requestFullscreen().catch(() => f(o("Vollbild ist in diesem Browser nicht verfügbar.")));
+		f(""), document.fullscreenElement ? document.exitFullscreen() : c.current?.requestFullscreen ? c.current.requestFullscreen().catch(() => f(o("Vollbild ist in diesem Browser nicht verfügbar."))) : f(o("Vollbild ist in diesem Browser nicht verfügbar."));
 	}
 	async function ie() {
 		let e = m.trim().toLocaleLowerCase("de-CH"), t = B.current;

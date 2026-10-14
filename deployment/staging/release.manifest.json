@@ -569,8 +569,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 784776,
-      "sha256": "573bffb24840b11f7115862d6a361746e35324da43c6ba8a72ffbd66d2366672"
+      "bytes": 784841,
+      "sha256": "e9ee4f49b8c54ab123e5420dfac74f52f60e72aa3f9055eda26db0a0c799f568"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -2019,6 +2019,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-10-14T11:58:21.292Z",
+  "builtOn": "2026-10-14T12:23:37.302Z",
   "baselineCapturedOn": "2026-10-13"
 }
