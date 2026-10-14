@@ -51,7 +51,7 @@ final class MemberDashboardEndpoint
         foreach($mineQuery->posts as $post){
             if($post->post_type==='strc_document'&&!LibraryPolicy::canRead((int)$post->ID))continue;
             $route=['strc_topic'=>'forum','strc_album'=>'galerie','strc_document'=>'bibliothek','strc_ad'=>'marktplatz'][$post->post_type];
-            $uploads[]=['id'=>(int)$post->ID,'title'=>$post->post_title,'status'=>$post->post_status,'url'=>'#'.$route.'/'.($route==='marktplatz'?'':$post->ID)];
+            $uploads[]=['id'=>(int)$post->ID,'title'=>$post->post_title,'status'=>$post->post_status,'url'=>'#'.$route.'/'.($route==='marktplatz'?'meine/':'').$post->ID];
         }
         $queues=[];
         foreach(['forum'=>'strc_topic','gallery'=>'strc_album','library'=>'strc_document','market'=>'strc_ad'] as $area=>$type){

@@ -15,7 +15,7 @@ final class PrivateUploadStore
     }
 
     /** @return array<int,array<string,mixed>>|WP_Error */
-    public function save(array $files, bool $imagesOnly, bool $library = false, int $maxFiles = 6, int $minImageBytes = 0): array|WP_Error
+    public function save(array $files, bool $imagesOnly, bool $library = false, int $maxFiles = 6, int $minImageBytes = 0, int $maxImageBytes = 20971520, int $maxPdfBytes = 104857600): array|WP_Error
     {
         if (! $files) {
             return array();
@@ -34,7 +34,7 @@ final class PrivateUploadStore
                 return new WP_Error('upload', 'Datei konnte nicht hochgeladen werden. Bitte Dateigrösse prüfen.');
             }
             $size = filesize($tmp);
-            if (false === $size || $size < 1 || $size > ($library ? 100 : 20) * 1024 * 1024) {
+            if (false === $size || $size < 1 || $size > ($library ? $maxPdfBytes : 20 * 1024 * 1024)) {
                 return new WP_Error('size', 'Bilder dürfen höchstens 20 MB, Bibliotheks-PDFs höchstens 100 MB gross sein.');
             }
             $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($tmp);
@@ -48,8 +48,8 @@ final class PrivateUploadStore
             if (! isset($allowed[$mime]) || ! in_array($extension, $allowed[$mime], true)) {
                 return new WP_Error('type', $imagesOnly ? 'Nur JPG, PNG oder WebP sind erlaubt.' : 'Nur JPG, PNG, WebP oder PDF sind erlaubt.');
             }
-            if ($imagesOnly && $size < $minImageBytes) {
-                return new WP_Error('size', 'Jedes Galeriebild muss mindestens 2.5 MB gross sein.');
+            if ($imagesOnly && ($size < $minImageBytes || $size > $maxImageBytes)) {
+                return new WP_Error('size', sprintf('Jedes Galeriebild muss zwischen %s und %s MB gross sein (Originalfoto, nicht aus WhatsApp).', number_format_i18n($minImageBytes/1000000,0), number_format_i18n($maxImageBytes/1048576,0)));
             }
             if (str_starts_with($mime, 'image/')) {
                 $dimensions = @getimagesize($tmp);
@@ -134,8 +134,8 @@ final class PrivateUploadStore
         if(!is_string($key)||!preg_match('/^[a-f0-9]{40}$/D',$key))return new WP_Error('image','Bild nicht gefunden.');
         return \SwissTRClub\Core\Forms\FormStore::locked('gallery-copy-'.$key,function()use($key,$original){
             $saved=get_option('strc_web_image_'.$key);
-            if(is_array($saved)&&is_file($this->directory().'/'.$saved['key']))return $saved;
-            $source=$this->directory().'/'.$key;
+            if(is_array($saved)&&is_file($this->directory().'/'.$saved['key'])&&filesize($this->directory().'/'.$saved['key'])<=2000000)return $saved;
+            $source=$this->directory().'/'.$key;if(!is_file($source)&&is_array($saved)&&is_file($this->directory().'/'.$saved['key']))$source=$this->directory().'/'.$saved['key'];
             if(!is_file($source)||is_link($source))return new WP_Error('image','Originalbild nicht verfügbar.');
             $editor=wp_get_image_editor($source);
             if(is_wp_error($editor))return new WP_Error('image','Bildansicht konnte nicht erstellt werden.');
@@ -149,8 +149,13 @@ final class PrivateUploadStore
                 // Some WP editors append the image extension to a key-only path.
                 $actual=$result['path'];
                 clearstatcache(true,$actual);
-                if(filesize($actual)<=2500000)break;
+                if(filesize($actual)<=2000000)break; // Galerie- und Downloadgrösse höchstens 2 MB
             }
+            for($edge=1600;filesize($actual)>2000000&&$edge>=400;$edge-=200){
+                $resized=$editor->resize($edge,$edge,false);if(is_wp_error($resized)){@unlink($actual);return $resized;}
+                $result=$editor->save($destination,'image/jpeg');if(is_wp_error($result)){@unlink($actual);return $result;}$actual=$result['path'];clearstatcache(true,$actual);
+            }
+            if(filesize($actual)>2000000){@unlink($actual);return new WP_Error('image','Bildansicht überschreitet 2 MB.');}
             if($actual!==$destination&&!rename($actual,$destination)){@unlink($actual);return new WP_Error('image','Bildansicht konnte nicht gespeichert werden.');}
             chmod($destination,0600);
             $copy=['key'=>$copyKey,'name'=>pathinfo($original['name'],PATHINFO_FILENAME).'.jpg','mime'=>'image/jpeg','size'=>filesize($destination)];

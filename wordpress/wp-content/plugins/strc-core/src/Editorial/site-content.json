@@ -302,6 +302,12 @@
         "label": "Dashboard-Verweis – Kurztext",
         "type": "text",
         "default": "Termine planen, Erfahrungen teilen und mit anderen Mitgliedern in Verbindung bleiben."
+      },
+      {
+        "key": "magazinePreviewPages",
+        "label": "TR-Magazin-Vorschau: Seiten zum Blättern (Nummern wie im Flipbook, z. B. 1,3,4,12,13,18,19)",
+        "type": "text",
+        "default": "1,3,4,12,13,18,19"
       }
     ]
   },
@@ -835,6 +841,30 @@
         "label": "Dashboard – Infobox-Inhalt",
         "type": "rich",
         "default": "<ul><li>Clubtermine in der Agenda entdecken</li><li>Eigene Inserate im Marktplatz erstellen</li><li>Fotos, Dokumente und Erfahrungen mit Mitgliedern teilen</li></ul>"
+      }
+    ]
+  },
+  "directory": {
+    "title": "Mitgliederverzeichnis – Einleitung",
+    "route": "#mitgliederliste",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Mitgliederverzeichnis"
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Mitglieder und ihre Triumphs finden."
+      },
+      {
+        "key": "privacy",
+        "label": "Datenschutz-Hinweis",
+        "type": "text",
+        "default": "Das Verzeichnis ist nur für aktive Clubmitglieder sichtbar. Die Karte zeigt ungefähre Standorte nach Postleitzahl; Wohnadressen werden nicht zur Standortbestimmung verwendet."
       }
     ]
   },

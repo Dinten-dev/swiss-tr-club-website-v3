@@ -50,12 +50,14 @@ export function Dialog({ title, close, busy = false, children }: { title: string
 
 export default function Marketplace({ section, session, notify }: { section:string; session: MarketplaceSession | null; notify: (message: string) => void }) {
   const {text:c}=useSiteContent();
-  const area=section==='ersatzteile'?'parts':section==='fahrzeuge'?'cars':'landing';
+  const area=section==='ersatzteile'?'parts':section==='fahrzeuge'?'cars':section==='meine'?'mine':'landing';
   const [collection, setCollection] = useState<Collection>({ ads: [], total: 0, pages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [model, setModel] = useState('');
+  const [partCategory,setPartCategory]=useState('');const [submitted,setSubmitted]=useState<'created'|'edited'|null>(null);
+  const catalog=useCatalog();
   const [mine]=useState(section==='meine');
   const [page, setPage] = useState(1);
   const [revision, setRevision] = useState(0);
@@ -68,41 +70,48 @@ export default function Marketplace({ section, session, notify }: { section:stri
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
       setLoading(true); setError('');
-      query<Collection>({ operation: 'list', mine:mine?'1':'0', search, category:area==='parts'?'parts':'Fahrzeuge', model:area==='parts'?model:'', page: String(page) }, controller.signal)
-        .then(result => { if (!controller.signal.aborted) setCollection(result); })
+      query<Collection>({ operation: 'list', mine:mine?'1':'0', search:area==='parts'?'':search, category:area==='parts'?'parts':area==='cars'?'Fahrzeuge':'', model:area==='parts'?model:'', partCategory:area==='parts'?partCategory:'', page: String(page) }, controller.signal)
+        .then(result => { if (controller.signal.aborted) return; setCollection(result); })
         .catch(reason => { if (!controller.signal.aborted) setError(reason.message); })
         .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     }, 200);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [area, search, model, mine, session?.memberAccess, page, revision]);
+  }, [area, search, model, partCategory, mine, session?.memberAccess, page, revision]);
 
+  // Direkter Link aus dem Dashboard: #marktplatz/meine/<id> öffnet das Inserat.
+  useEffect(()=>{
+    if(area!=='mine'||!session?.memberAccess)return;
+    const id=Number(window.location.hash.split('/')[2]);if(!Number.isSafeInteger(id)||id<1)return;
+    const controller=new AbortController();query<Ad>({operation:'get',id:String(id)},controller.signal).then(ad=>{if(ad.mine)setSelected(ad);else setError(t('Dieses Inserat gehört nicht zu deinem Konto.'));}).catch(reason=>{if(!controller.signal.aborted)setError(reason.message);});return()=>controller.abort();
+  },[area,session?.memberAccess]);
   function refresh() { setLoading(true); setRevision(value => value + 1); }
   function changeFilter(change: () => void) { setLoading(true); change(); setPage(1); }
 
   if(area==='landing')return <><section className="page-hero"><p className="eyebrow">{t('Marktplatz')}</p><h1>{c('market.title')}</h1><p>{c('market.intro')}</p></section><LandingIntroduction documentKey="market"/><section className="page-content marketplace market-entry" aria-label="Marktplatzbereiche"><div className="landing-grid landing-grid-three market-landing"><a className="landing-card" href="#tr-shop"><h2>{c('market.shopTitle')}</h2><p>{c('market.shopText')}</p><span className="landing-card-link">TR-Shop öffnen</span></a><a className="landing-card" href="#marktplatz/ersatzteile"><h2>{c('market.partsTitle')}</h2><p>{c('market.partsText')}</p><span className="landing-card-link">Ersatzteile ansehen</span></a><a className="landing-card" href="#marktplatz/fahrzeuge"><h2>{c('market.carsTitle')}</h2><p>{c('market.carsText')}</p><span className="landing-card-link">Fahrzeuge ansehen</span></a></div></section></>;
 
   const parts=area==='parts';
-  const title=parts?c('market.partsTitle'):c('market.carsTitle');
+  const title=mine?t('Meine Inserate'):parts?c('market.partsTitle'):c('market.carsTitle');
 
   return <>
-    <section className="page-hero"><p className="eyebrow">{t('Marktplatz')}</p><h1>{title}</h1><p>{parts?c('market.partsText'):c('market.carsText')}</p></section>
+    <section className="page-hero"><p className="eyebrow">{t('Marktplatz')}</p><h1>{title}</h1><p>{mine?t('Ihre Inserate mit Status – bearbeiten, verlängern oder als verkauft markieren.'):parts?c('market.partsText'):c('market.carsText')}</p></section>
     <section className="page-content marketplace market-section" aria-label={title}>
-      <a className="market-back" href="#marktplatz">Marktplatz-Übersicht</a>
-      <div className="market-toolbar"><div><h2>{parts?'Ersatzteile finden':'Fahrzeuge entdecken'}</h2><p>{parts?c('market.partsGuide'): 'Entdecke Triumphs aus dem Club und öffne ein Inserat für Bilder und Details.'}</p></div>{session?.canCreateAd&&<button ref={createButton} className="market-primary" onClick={() => setCreating(true)}>＋ Inserat erstellen</button>}</div>
-      <a className="page-back" href="#marktplatz">{t("← Zur Marktplatzübersicht")}</a><div className="market-filters market-part-filters">{section==='meine'&&<p>{t('Meine Inserate')}</p>}{parts&&<label className="market-search">Triumph-Modell<select value={model} onChange={event=>changeFilter(()=>setModel(event.target.value))}><option value="">{t('Alle Modelle')}</option>{vehicleModels.map(value=><option key={value} value={value}>{value}</option>)}</select></label>}<label className="market-search">{parts?'Teil oder Stichwort':'Fahrzeug suchen'}<input type="search" placeholder={parts?'z. B. Einspritzung':'z. B. TR6'} value={search} onChange={event => changeFilter(() => setSearch(event.target.value))}/></label></div>
-      {loading ? <p className="collection-state" role="status">{t("Inserate werden geladen …")}</p> : error ? <div className="collection-state error" role="alert">{error}<button className="market-text-button" onClick={refresh}>{t('Erneut versuchen')}</button></div> : <>
-        <p className="market-count" role="status">{collection.total} {collection.total === 1 ? 'Inserat' : 'Inserate'}{parts?' mit verfügbaren Teilen':' mit Fahrzeugen'}</p>
-        {!collection.ads.length ? <div className="market-empty"><span aria-hidden="true">◇</span><h3>Keine passenden Inserate.</h3><p>{search||model?'Versuche ein anderes Modell oder Stichwort.':'Sobald Clubmitglieder etwas anbieten, erscheint es hier.'}</p></div> : parts ? <ul className="market-parts-list" aria-label="Verfügbare Teile">{collection.ads.flatMap(ad=>listedParts(ad).map((part,index)=><li key={`${ad.id}-${index}`}><button type="button" onClick={()=>setSelected(ad)} aria-label={`${part}, Inserat ${ad.title} ansehen`}><span className="market-part-thumb">{ad.images[0]?<Image unoptimized src={ad.images[0]} alt="" width={112} height={80}/>:<span aria-hidden="true">◇</span>}</span><span className="market-part-copy"><strong>{part}</strong><small>{listedParts(ad).length>1?`${listedParts(ad).length} Teile in einem Inserat · `:''}{ad.details?.model||ad.category} · {ad.title}</small></span><span className="market-part-price">{priceLabel(ad)}{listedParts(ad).length>1&&<small>für das Inserat</small>}</span></button></li>))}</ul> : <div className="market-grid">{collection.ads.map(ad => <article className="market-card" key={ad.id}>
+      <div className="market-toolbar"><div><h2>{mine?t('Meine Inserate'):parts?'Ersatzteile finden':'Fahrzeuge entdecken'}</h2><p>{mine?t('Ein Inserat öffnen, um es zu bearbeiten.'):parts?c('market.partsGuide'): 'Entdecke Triumphs aus dem Club und öffne ein Inserat für Bilder und Details.'}</p></div>{session?.canCreateAd&&<button ref={createButton} className="market-primary" onClick={() => setCreating(true)}>＋ Inserat erstellen</button>}</div>
+      <div className="market-filters market-part-filters">{parts&&<label className="market-search">Triumph-Modell<select value={model} onChange={event=>changeFilter(()=>setModel(event.target.value))}><option value="">{t('Alle Modelle')}</option>{vehicleModels.map(value=><option key={value} value={value}>{value}</option>)}</select></label>}{parts?<label className="market-search">{t('Teilebereich')}<select value={partCategory} onChange={event=>changeFilter(()=>setPartCategory(event.target.value))}><option value="">{t('Alle Teilebereiche')}</option>{catalog.parts.map(value=><option key={value} value={value}>{t(value)}</option>)}</select></label>:<label className="market-search">{t('Fahrzeug suchen')}<input type="search" placeholder="z. B. TR6" value={search} onChange={event => changeFilter(() => setSearch(event.target.value))}/></label>}</div>
+      {parts&&!mine&&!model&&!partCategory?<p className="collection-state market-hint">{t('Bitte ein Triumph-Modell oder einen Teilebereich wählen.')}</p>:
+      loading ? <p className="collection-state" role="status">{t("Inserate werden geladen …")}</p> : error ? <div className="collection-state error" role="alert">{error}<button className="market-text-button" onClick={refresh}>{t('Erneut versuchen')}</button></div> : <>
+        <p className="market-count" role="status">{collection.total} {collection.total === 1 ? 'Inserat' : 'Inserate'}{mine?'':parts?' mit verfügbaren Teilen':' mit Fahrzeugen'}</p>
+        {!collection.ads.length ? <div className="market-empty"><span aria-hidden="true">◇</span><h3>Keine passenden Inserate.</h3><p>{search||model||partCategory?'Versuche ein anderes Modell oder einen anderen Teilebereich.':'Sobald Clubmitglieder etwas anbieten, erscheint es hier.'}</p></div> : parts ? <ul className="market-parts-list" aria-label="Verfügbare Teile">{collection.ads.flatMap(ad=>listedParts(ad).map((part,index)=><li key={`${ad.id}-${index}`}><button type="button" onClick={()=>setSelected(ad)} aria-label={`${part}, Inserat ${ad.title} ansehen`}><span className="market-part-thumb">{ad.images[0]?<Image unoptimized src={ad.images[0]} alt="" width={112} height={80}/>:<span aria-hidden="true">◇</span>}</span><span className="market-part-copy"><strong>{part}</strong><small>{listedParts(ad).length>1?`${listedParts(ad).length} Teile in einem Inserat · `:''}{ad.details?.model||ad.category} · {ad.title}</small></span><span className="market-part-price">{priceLabel(ad)}{listedParts(ad).length>1&&<small>für das Inserat</small>}</span></button></li>))}</ul> : <div className="market-grid">{collection.ads.map(ad => <article className="market-card" key={ad.id}>
           <button className="market-card-open" onClick={() => setSelected(ad)} aria-label={`${ad.title}, ${priceLabel(ad)}, Details ansehen`}>
             <div className="market-card-image">{ad.images[0] ? <Image unoptimized src={ad.images[0]} alt={ad.title} width={600} height={420}/> : <span>Ohne Bild</span>}{ad.sold && <b className="market-sold">Verkauft</b>}</div>
-            <div className="market-card-copy"><p className="eyebrow">{ad.category}{ad.mine ? ' · Ihr Inserat' : ''}</p><h3>{ad.title}</h3><strong>{priceLabel(ad)}</strong><p className="market-excerpt">{ad.description}</p></div>
+            <div className="market-card-copy"><h3>{ad.title}</h3><strong>{priceLabel(ad)}</strong><p className="market-excerpt">{ad.description}</p></div>
           </button><div className="market-card-footer">{ad.seller} · {new Date(ad.createdAt).toLocaleDateString('de-CH')}</div>
         </article>)}</div>}
         {collection.pages > 1 && <div className="market-pagination"><button disabled={page === 1} onClick={() => { setLoading(true); setPage(page - 1); }}>{t('Zurück')}</button><span>{t("Seite")} {page} {t("von")} {collection.pages}</span><button disabled={page >= collection.pages} onClick={() => { setLoading(true); setPage(page + 1); }}>{t("Weiter")}</button></div>}
       </>}
     </section>
-    {creating && <CreateDialog session={session} initialCategory={parts?'Teile':'Fahrzeuge'} close={() => setCreating(false)} created={() => { setCreating(false); setSearch(''); setModel(''); setPage(1); refresh(); notify('Ihr Inserat wurde zur Prüfung eingereicht.'); requestAnimationFrame(() => createButton.current?.focus()); }}/>}
-    {editing&&<CreateDialog ad={editing} session={session} initialCategory={editing.category==='Fahrzeuge'?'Fahrzeuge':'Teile'} close={()=>setEditing(null)} created={()=>{setEditing(null);refresh();notify('Änderungen wurden zur Prüfung eingereicht.');}}/>}
+    {creating && <CreateDialog session={session} initialCategory={parts?'Teile':'Fahrzeuge'} close={() => setCreating(false)} created={() => { setCreating(false); setSearch(''); setModel(''); setPage(1); refresh(); setSubmitted('created'); }}/>}
+    {editing&&<CreateDialog ad={editing} session={session} initialCategory={editing.category==='Fahrzeuge'?'Fahrzeuge':'Teile'} close={()=>setEditing(null)} created={()=>{setEditing(null);refresh();setSubmitted('edited');}}/>}
+    {submitted&&<Dialog title={t('Vielen Dank!')} close={()=>{setSubmitted(null);requestAnimationFrame(()=>createButton.current?.focus());}}><div className="club-dialog-body market-confirmation"><p className="market-confirmation-icon" aria-hidden="true">✓</p><p><strong>{t(submitted==='created'?'Ihr Inserat ist bei uns eingegangen.':'Ihre Änderungen sind bei uns eingegangen.')}</strong></p><p>{t('Das Marktplatz-Team prüft das Inserat in der Regel innert ein bis zwei Tagen. Sobald es veröffentlicht ist, erhalten Sie eine Nachricht per E-Mail und im Dashboard.')}</p><p>{t('Ihre Inserate finden Sie jederzeit unter')} <a href="#marktplatz/meine">{t('Meine Inserate')}</a>.</p><div className="club-actions"><button className="market-primary" onClick={()=>{setSubmitted(null);requestAnimationFrame(()=>createButton.current?.focus());}}>{t('Schliessen')}</button></div></div></Dialog>}
     {selected && <AdDialog edit={()=>{setEditing(selected);setSelected(null);}} ad={selected} session={session} close={() => setSelected(null)} sold={() => { setSelected(null); refresh(); notify('Inserat gespeichert.'); requestAnimationFrame(() => createButton.current?.focus()); }}/>}
   </>;
 }
@@ -171,7 +180,7 @@ function CreateDialog({ ad,session, initialCategory, close, created }: {ad?:Ad; 
       </fieldset>
       <p className="market-privacy">Interessenten erreichen Sie über das Kontaktformular im Inserat. Ihre persönlichen Kontaktdaten werden nicht öffentlich angezeigt.</p>
       {error && <p ref={errorRef} tabIndex={-1} className="market-error" role="alert">{error}</p>}
-      {discard ? <div className="market-discard"><p>Ungespeichertes Inserat verwerfen?</p><button type="button" onClick={() => setDiscard(false)}>Weiter bearbeiten</button><button type="button" onClick={close}>Verwerfen</button></div> : <div className="market-form-actions"><button type="button" className="market-cancel" disabled={busy} onClick={requestClose}>{t('Abbrechen')}</button><button className="market-primary" type="submit" disabled={busy}>{busy ? 'Wird eingereicht …' : 'Zur Prüfung einreichen'}</button></div>}
+      {discard ? <div className="market-discard"><p>Ungespeichertes Inserat verwerfen?</p><button type="button" onClick={() => setDiscard(false)}>Weiter bearbeiten</button><button type="button" onClick={close}>Verwerfen</button></div> : <div className="market-form-actions"><button type="button" className="market-cancel" disabled={busy} onClick={requestClose}>{t('Abbrechen')}</button><button className="market-primary" type="submit" disabled={busy}>{busy ? t('Wird gesendet …') : t('Absenden')}</button></div>}
     </form>}
   </Dialog>;
 }

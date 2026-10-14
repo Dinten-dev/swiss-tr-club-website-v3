@@ -11,7 +11,13 @@ type Part='full'|'left'|'right'|'center';
 type Entry={p:number;part:Part;r:number;edge?:boolean};
 type Turn={under:number[];front:number;back:number;side:'left'|'right';reverse?:boolean;go:boolean};
 
-export default function StrcFlipbook({url,title,classic}:{url:string;title:string;classic:()=>void}){
+// `pages`: optionale Auswahl von Magazinseiten (Nummerierung wie in der vollen Blätter-Ansicht), z. B. für die Vorschau auf der Startseite.
+// `download`: Download-Link anzeigen (Standard: PDF-Adresse); `search`: Volltextsuche im Flipbook.
+type Hit={v:number;text:string};
+export default function StrcFlipbook({url,title,classic,pages,download,search=true}:{url:string;title:string;classic?:()=>void;pages?:number[];download?:string|false;search?:boolean}){
+  const selection=(pages||[]).join(',');
+  const root=useRef<HTMLDivElement>(null);const [fullscreen,setFullscreen]=useState(false);const [fullscreenError,setFullscreenError]=useState('');const searchRequest=useRef(0);
+  const [query,setQuery]=useState('');const [hits,setHits]=useState<Hit[]|null>(null);const [searching,setSearching]=useState(false);const texts=useRef<Record<number,{str:string;x:number}[]>>({});const pageWidth=useRef<Record<number,number>>({});
   const [doc,setDoc]=useState<PDFDocumentProxy|null>(null);
   const [error,setError]=useState('');
   const [layout,setLayout]=useState<Entry[]|null>(null);
@@ -27,12 +33,12 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
   useEffect(()=>()=>{timers.current.forEach(clearTimeout);generation.current++;},[]);
 
   useEffect(()=>{
-    let disposed=false;timers.current.forEach(clearTimeout);timers.current=[];generation.current++;store.current={};busy.current.clear();layoutRef.current=null;
+    let disposed=false;timers.current.forEach(clearTimeout);timers.current=[];generation.current++;store.current={};busy.current.clear();layoutRef.current=null;texts.current={};pageWidth.current={};
     let task:ReturnType<typeof import('pdfjs-dist')['getDocument']>|undefined;
     (async()=>{
       const pdf=await import('pdfjs-dist/legacy/build/pdf.mjs');
       if(disposed)return;
-      setDoc(null);setLayout(null);setImages({});setPage(1);setError('');setAnim(null);
+      setDoc(null);setLayout(null);setImages({});setPage(1);setError('');setAnim(null);setHits(null);setSearching(false);searchRequest.current++;
       pdf.GlobalWorkerOptions.workerSrc=`${assetBase}/pdfjs/pdf.worker.min.js`;
       task=pdf.getDocument({url,withCredentials:true,rangeChunkSize:65536,cMapUrl:`${assetBase}/pdfjs/cmaps/`,cMapPacked:true,standardFontDataUrl:`${assetBase}/pdfjs/standard_fonts/`,wasmUrl:`${assetBase}/pdfjs/wasm/`});
       const loaded=await task.promise;
@@ -47,10 +53,44 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
           else entries.push({p,part:'left',r},{p,part:'right',r});
         }else entries.push({p,part:'full',r:v.width/v.height});
       }
-      layoutRef.current=entries;setLayout(entries);setDoc(loaded);
+      const chosen=selection?selection.split(',').map(Number).map(n=>entries[n-1]).filter((entry):entry is Entry=>!!entry):entries;
+      layoutRef.current=chosen;setLayout(chosen);setDoc(loaded);
     })().catch(()=>{if(!disposed)setError(t('Das PDF konnte nicht geöffnet werden. Bitte erneut versuchen.'));});
     return()=>{disposed=true;task?.destroy().catch(()=>{});};
-  },[url]);
+  },[url,selection]);
+
+  useEffect(()=>{
+    const change=()=>setFullscreen(document.fullscreenElement===root.current);
+    document.addEventListener('fullscreenchange',change);
+    return()=>document.removeEventListener('fullscreenchange',change);
+  },[]);
+  function toggleFullscreen(){
+    setFullscreenError('');
+    if(document.fullscreenElement)void document.exitFullscreen();
+    else if(root.current?.requestFullscreen)void root.current.requestFullscreen().catch(()=>setFullscreenError(t('Vollbild ist in diesem Browser nicht verfügbar.')));
+    else setFullscreenError(t('Vollbild ist in diesem Browser nicht verfügbar.'));
+  }
+  // Volltextsuche: Treffer auf der linken bzw. rechten Hälfte einer Doppelseite werden der passenden Magazinseite zugeordnet.
+  async function runSearch(){
+    const needle=query.trim().toLocaleLowerCase('de-CH');const entries=layoutRef.current;
+    if(!doc||!entries||needle.length<2){setHits(null);return;}
+    setSearching(true);const active=generation.current,request=++searchRequest.current;const found:Hit[]=[];
+    try{
+      for(let p=1;p<=doc.numPages;p++){
+        if(!texts.current[p]){const pdfPage=await doc.getPage(p);const content=await pdfPage.getTextContent();if(active!==generation.current||request!==searchRequest.current)return;pageWidth.current[p]=pdfPage.getViewport({scale:1}).width;texts.current[p]=content.items.map(item=>'str' in item?{str:item.str,x:item.transform[4]}:{str:'',x:0});}
+        if(active!==generation.current||request!==searchRequest.current)return;
+        const items=texts.current[p],width=pageWidth.current[p];
+        for(const half of ['left','right','all'] as const){
+          const part=items.filter(item=>half==='all'||(half==='left'?item.x<width/2:item.x>=width/2));const joined=part.map(item=>item.str).join(' ');const at=joined.toLocaleLowerCase('de-CH').indexOf(needle);
+          if(at<0)continue;
+          const v=entries.findIndex(entry=>entry.p===p&&(half==='all'?['full','center'].includes(entry.part):entry.part===half))+1;
+          if(v>0&&!found.some(hit=>hit.v===v))found.push({v,text:joined.slice(Math.max(0,at-40),at+needle.length+40).replace(/\s+/g,' ').trim()});
+        }
+      }
+      setHits(found);
+    }catch{if(active===generation.current&&request===searchRequest.current)setHits([]);}finally{if(active===generation.current&&request===searchRequest.current)setSearching(false);}
+  }
+  function jump(v:number){timers.current.forEach(clearTimeout);timers.current=[];setAnim(null);setPage(v);}
 
   useEffect(()=>{
     const resize=()=>setNarrow(window.innerWidth<760);
@@ -94,12 +134,12 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
       else{
         add[`${x.p}:left`]=crop(c,0,c.width/2);add[`${x.p}:right`]=crop(c,c.width/2,c.width/2);
         if(x.edge){
-          if(blankSides(c))add[`${x.p}:center`]=crop(c,c.width/4,c.width/2);
+          if(selection||blankSides(c))add[`${x.p}:center`]=crop(c,c.width/4,c.width/2);
           else{const split=entries!.flatMap(y=>y===x?[{p:y.p,part:'left' as Part,r:y.r},{p:y.p,part:'right' as Part,r:y.r}]:[y]);layoutRef.current=split;setLayout(split);}
         }
       }
       store.current={...store.current,...add};setImages(store.current);pdfPage.cleanup();c.width=0;
-    }catch{if(active===generation.current)setError(t('Die Seite konnte nicht geladen werden. Öffne Suche, Text & Download.'));}finally{busy.current.delete(x.p);}
+    }catch{if(active===generation.current)setError(t('Die Seite konnte nicht geladen werden. Bitte lade das Magazin erneut.'));}finally{if(active===generation.current)busy.current.delete(x.p);}
   }
   useEffect(()=>{
     if(!doc||!layout)return;
@@ -125,21 +165,28 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
   const face=(v:number,className:string)=>{
     if(v===-1)return <div className={`fb-face fb-paper ${className}`}/>;
     if(!v)return <div className={`fb-face fb-empty ${className}`}/>;
-    const src=images[keyOf(v)];
+    const src=images[keyOf(v)];const shownNumber=number(v);
     // eslint-disable-next-line @next/next/no-img-element -- lokal gerenderte PDF-Seite als Data-URL.
-    return <div className={`fb-face ${className}`}>{src?<img src={src} alt={`${t('Seite')} ${v}`} draggable={false}/>:<span className="fb-loading">{t('Seite wird geladen …')}</span>}</div>;
+    return <div className={`fb-face ${className}`}>{src?<img src={src} alt={`${t('Seite')} ${shownNumber}`} draggable={false}/>:<span className="fb-loading">{t('Seite wird geladen …')}</span>}</div>;
   };
   const under=anim?anim.under:current,shown=current.filter(Boolean);
-  const label=total?`${shown.length>1?shown.join('–'):String(shown[0]||1)} ${t('von')} ${total}`:'';
+  const numbers=selection?selection.split(',').map(Number):null,number=(v:number)=>numbers?.[v-1]??v;
+  const label=total?numbers?shown.map(number).join('–'):`${shown.length>1?shown.join('–'):String(shown[0]||1)} ${t('von')} ${total}`:'';
 
-  return <div className={'strc-flipbook'+(one?' is-single':'')}>
+  const downloadUrl=download===false?'':download||url;
+  return <div ref={root} className={'strc-flipbook'+(one?' is-single':'')+(fullscreen?' is-fullscreen':'')}>
     <div className="fb-toolbar">
       <button type="button" className="club-secondary" onClick={()=>turn(-1)} disabled={!hasPrev||!!anim}>← {t('Zurück')}</button>
       <span aria-live="polite">{total?`${t('Seite')} ${label}`:t('Magazin wird geladen …')}</span>
       <button type="button" className="club-secondary" onClick={()=>turn(1)} disabled={!hasNext||!!anim}>{t('Weiter')} →</button>
       <button type="button" className="club-secondary fb-mode" onClick={()=>setUserSingle(!one)}>{one?t('Doppelseite'):t('Einzelseite')}</button>
-      <button type="button" className="club-secondary fb-mode" onClick={classic}>{t('Suche, Text & Download')}</button>
+      <button type="button" className="club-secondary fb-mode" onClick={toggleFullscreen} aria-pressed={fullscreen}>{fullscreen?t('Vollbild beenden'):'⛶ '+t('Vollbild')}</button>
+      {downloadUrl&&<a className="club-secondary fb-mode" href={downloadUrl} download>{t('Download')}</a>}
+      {classic&&<button type="button" className="club-secondary fb-mode" onClick={classic}>{t('Textansicht')}</button>}
     </div>
+    {search&&!selection&&<form className="fb-search" role="search" onSubmit={e=>{e.preventDefault();void runSearch();}}><label className="sr-only" htmlFor={title+'-search'}>{t('Im Magazin suchen')}</label><input id={title+'-search'} type="search" placeholder={t('Im Magazin suchen …')} value={query} onChange={e=>{searchRequest.current++;setQuery(e.target.value);setHits(null);setSearching(false);}}/><button type="submit" className="club-secondary" disabled={!doc||searching||query.trim().length<2}>{searching?t('Suche läuft …'):t('Suchen')}</button>
+      {hits&&<div className="fb-hits" aria-live="polite">{hits.length?<><span>{hits.length} {t(hits.length===1?'Treffer':'Treffer')}:</span>{hits.slice(0,40).map(hit=><button type="button" key={hit.v} className={current.includes(hit.v)?'is-current':''} onClick={()=>jump(hit.v)} title={hit.text}>{t('Seite')} {hit.v}</button>)}</>:<span>{t('Keine Treffer.')}</span>}</div>}
+    </form>}
     {error?<p role="alert">{error}</p>:<div className="fb-book" style={{aspectRatio:String((one?1:2)*ratio),['--fb-ratio' as string]:(one?1:2)*ratio}} tabIndex={0} role="group" aria-label={`${title} – ${t('Blättern mit Pfeiltasten, Klick oder Wischen')}`}
       onKeyDown={e=>{if(e.key==='ArrowRight'){e.preventDefault();turn(1);}else if(e.key==='ArrowLeft'){e.preventDefault();turn(-1);}}}
       onClick={e=>{if(touch.current==='swiped'){touch.current=null;return;}const r=e.currentTarget.getBoundingClientRect();turn(e.clientX-r.left>r.width/2?1:-1);}}
@@ -149,6 +196,7 @@ export default function StrcFlipbook({url,title,classic}:{url:string;title:strin
       {anim&&<div className={`fb-leaf fb-leaf-${one?'single':anim.side}${anim.reverse?' is-reverse':''}${anim.go?' is-turning':''}`}>{face(anim.front,'fb-front')}{face(anim.back,'fb-back')}</div>}
       {!one&&<span className="fb-spine" aria-hidden="true"/>}
     </div>}
+    {fullscreenError&&<p role="alert">{fullscreenError}</p>}
     <p className="fb-hint">{t('Zum Blättern auf die rechte oder linke Seite klicken, wischen oder die Pfeiltasten benutzen.')}</p>
   </div>;
 }

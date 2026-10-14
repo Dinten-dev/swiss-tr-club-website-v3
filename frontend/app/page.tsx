@@ -125,7 +125,7 @@ function ClubApp() {
         <button className={page==='agenda'?'active':''} onClick={() => navigate('agenda')}>{c('global.navAgenda')}</button>
         <button className={page==='regions'?'active':''} onClick={() => navigate('regions')}>{c('global.navRegions')}</button>
         <button className={['market','shop'].includes(page)?'active':''} onClick={() => navigate('market')}>{c('global.navMarket')}</button>
-        {memberSession?.memberAccess&&<button className={page==='members'?'active':''} onClick={() => navigate('members')}>{t('Mitgliederbereich')}</button>}
+        <button className={['members','profile','applications','forum','gallery','library','clubdocs','directory','editorial','event-admin'].includes(page)?'active':''} onClick={() => navigate('members')}>{t(memberSession?.memberAccess?'Mitgliederbereich':'Mitglieder-Login')}</button>
         </div>
         <LanguageSwitcher/>
       </nav>
@@ -139,13 +139,13 @@ function ClubApp() {
     {page==='mission' && <MissionPage/>}
     {page==='models'&&<VehicleGallery key={subroute} selected={subroute} canEdit={!!memberSession?.canEditContent}/>}
     {['organisation','membership','shop','triungsters','history'].includes(page)&&<StaticPage key={editorialKey} documentKey={editorialKey} canEdit={memberSession?.editableDocuments?.includes(editorialKey)}/>}
-    {page==='agenda' && <><div className="agenda-admin-link">{memberSession?.canManageEvents?<button className="market-primary" onClick={()=>navigate('event-admin')}>{t('Agenda verwalten')}</button>:<a className="club-secondary" href="#agenda-verwalten">{t('Moderator-Login')}</a>}</div><AgendaPage memberAccess={!!memberSession?.memberAccess} events={events} eventsState={eventsState} retryEvents={retryEvents} openEvent={setSelectedEvent}/></>}
+    {page==='agenda' && <><AgendaPage memberAccess={!!memberSession?.memberAccess} events={events} eventsState={eventsState} retryEvents={retryEvents} openEvent={setSelectedEvent}/></>}
     {page==='regions' && <RegionsPage editableDocuments={memberSession?.editableDocuments||[]} events={events} eventsState={eventsState} retryEvents={retryEvents} openEvent={setSelectedEvent}/>}
     {page==='market' && <Marketplace key={subroute} section={subroute} session={memberSession} notify={notify}/>}
     {page==='profile' && (memberSession?.memberAccess?<MemberForms/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='members' && <><MembersPage session={memberSession} navigate={navigate}/></>}
     {page==='registration'&&<section className="page-content"><a href="#mitglieder">{t("← Mitgliederbereich")}</a><RegistrationForm eventId={Number(subroute)} memberAccess={!!memberSession?.memberAccess}/></section>}
-    {(['forum','gallery','library','clubdocs'] as Page[]).includes(page) && (memberSession?.memberAccess?<Community key={`${page}:${subroute}`} kind={page==='clubdocs'?'library':page as 'forum'|'gallery'|'library'} nonce={memberSession.communityNonce||''} selectedId={Number(subroute)||undefined} initialGroup={page==='clubdocs'?'club':''} title={page==='clubdocs'?'Clubdokumente':undefined}/>:page==='gallery'?<PublicGallery/>:<MembersPage session={memberSession} navigate={navigate}/>)}
+    {(['forum','gallery','library','clubdocs'] as Page[]).includes(page) && (memberSession?.memberAccess?<Community key={`${page}:${subroute}`} kind={page==='clubdocs'?'library':page as 'forum'|'gallery'|'library'} nonce={memberSession.communityNonce||''} selectedId={Number(subroute)||undefined} initialGroup={page==='clubdocs'?'club':''} section={subroute} title={page==='clubdocs'?'Clubdokumente':undefined}/>:page==='gallery'?<PublicGallery/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='news' && <HomepageSections navigate={navigate} memberAccess={!!memberSession?.memberAccess} upcomingEvents={[]} eventPreview={{title:'',text:''}} archive/>}
     {page==='applications' && (memberSession?.applicationsNonce?<ApplicationInbox nonce={memberSession.applicationsNonce}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='directory' && (memberSession?.memberAccess?<MemberDirectory/>:<MembersPage session={memberSession} navigate={navigate}/>)}

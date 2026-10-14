@@ -35,9 +35,12 @@ final class MemberDirectoryEndpoint
         }
         $vehicles=$owner?array_map(static function($post)use($id){
             $data=FormStore::data($post);
+            $data['colour']=($data['colour']??'')?:($data['exteriorColour']??'');
             return array_intersect_key($data,array_flip(['model','details','year','colour','registration','status']))+['id'=>(int)$post->ID,'photo'=>!empty($data['file'])?add_query_arg(['action'=>'strc_directory','operation'=>'vehicle-photo','id'=>$id,'vehicle'=>$post->ID],admin_url('admin-ajax.php')):''];
         },FormStore::find('strc_vehicle',$owner)):[];
-        $result=['id'=>$id,'name'=>$user->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'lastName'=>(string)get_user_meta($id,'last_name',true),'city'=>(string)get_user_meta($id,'strc_city',true),'postcode'=>(string)get_user_meta($id,'strc_postcode',true),'country'=>(string)get_user_meta($id,'strc_country',true),'region'=>(string)($membership['region']??''),'photo'=>$photo?add_query_arg(['action'=>'strc_directory','operation'=>'photo','id'=>$id],admin_url('admin-ajax.php')):'','vehicles'=>$vehicles];
+        $youth=($membership['membership_type']??'')==='youth';
+        $region=$youth?'TRiungsters':(\SwissTRClub\Core\Events\RegionDirectory::canonicalName((string)($membership['region']??''))??'');
+        $result=['id'=>$id,'name'=>$user->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'lastName'=>(string)get_user_meta($id,'last_name',true),'city'=>(string)get_user_meta($id,'strc_city',true),'postcode'=>(string)get_user_meta($id,'strc_postcode',true),'country'=>(string)get_user_meta($id,'strc_country',true),'region'=>$region,'photo'=>$photo?add_query_arg(['action'=>'strc_directory','operation'=>'photo','id'=>$id],admin_url('admin-ajax.php')):'','vehicles'=>$vehicles];
         if($detail){$result['email']=$user->user_email;$result['phone']=(string)get_user_meta($id,'strc_phone',true);}
         return $result;
     }
@@ -77,22 +80,29 @@ final class MemberDirectoryEndpoint
             $store=new PrivateUploadStore();$copy=$store->webCopy($file);if(is_wp_error($copy))AjaxRequest::fail($copy->get_error_message(),503);$store->stream($copy);
         }
         if($operation!=='list')AjaxRequest::fail('Unbekannte Anfrage.');
+        $regionNames=array_merge(array_map(static fn($term)=>$term->name,\SwissTRClub\Core\Events\RegionDirectory::terms()),['TRiungsters']);
         $search=mb_strtolower(sanitize_text_field($input['search']??''));$region=sanitize_text_field($input['region']??'');$model=sanitize_text_field($input['model']??'');
-        $members=[];$regions=[];$vehicleStatus=sanitize_text_field($input['vehicleStatus']??'');
+        $members=[];$vehicleStatus=sanitize_text_field($input['vehicleStatus']??'');
         foreach((new MembershipRepository())->all() as $membership){
             $id=(int)$membership['user_id'];if(!self::visible($id))continue;
-            $member=$this->member($id);if($member['region'])$regions[]=$member['region'];
+            $member=$this->member($id);
             if($vehicleStatus&&!in_array($vehicleStatus,array_column($member['vehicles'],'status'),true))continue;
             if($region&&$member['region']!==$region)continue;
             if($model&&!in_array($model,array_column($member['vehicles'],'model'),true))continue;
-            $terms=implode(' ',[$member['name'],$member['firstName'],$member['lastName'],$member['city'],$member['postcode'],$member['region']]);
-            foreach($member['vehicles'] as $vehicle)$terms.=' '.implode(' ',array_filter([$vehicle['model']??'',$vehicle['details']??'',$vehicle['registration']??'']));
+            // Freie Suche nur im Namen (Vor- und Nachname).
+            $terms=implode(' ',[$member['name'],$member['firstName'],$member['lastName']]);
             if($search&&!str_contains(mb_strtolower($terms),$search))continue;
             $members[]=$member;
         }
-        $sort=in_array($input['sort']??'',['lastName','city','region'],true)?$input['sort']:'lastName';
-        usort($members,static fn($a,$b)=>strnatcasecmp(($a[$sort]?:$a['name']).' '.$a['name'],($b[$sort]?:$b['name']).' '.$b['name']));
+        $sort=in_array($input['sort']??'',['lastName','firstName','postcode','city','region','vehicle'],true)?$input['sort']:'lastName';
+        $value=static fn(array $member):string=>$sort==='vehicle'?(string)($member['vehicles'][0]['model']??'~'):(string)($member[$sort]?:'~');
+        usort($members,static fn($a,$b)=>strnatcasecmp($value($a).' '.$a['lastName'].' '.$a['firstName'],$value($b).' '.$b['lastName'].' '.$b['firstName']));
         $total=count($members);$page=max(1,absint($input['page']??1));
-        wp_send_json_success(['mapMembers'=>array_map(static fn($member)=>array_intersect_key($member,array_flip(['id','name','postcode','city','country'])),$members),'members'=>array_slice($members,($page-1)*50,50),'total'=>$total,'pages'=>(int)ceil($total/50),'regions'=>array_values(array_unique($regions))]);
+        $map=($input['map']??'')==='1';
+        $mapMembers=$map?array_map(function(array $member):array{
+            return ['id'=>$member['id'],'firstName'=>$member['firstName']?:$member['name'],'postcode'=>$member['postcode'],'city'=>$member['city'],'country'=>$member['country'],'vehicle'=>(string)($member['vehicles'][0]['model']??''),'position'=>null];
+        },$members):[];
+        wp_send_json_success(['mapMembers'=>$mapMembers,'members'=>array_slice($members,($page-1)*50,50),'total'=>$total,'pages'=>(int)ceil($total/50),'regions'=>$regionNames]);
     }
+
 }

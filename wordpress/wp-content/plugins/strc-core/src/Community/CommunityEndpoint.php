@@ -101,7 +101,7 @@ final class CommunityEndpoint
 
     public function respond(): void
     {
-        list($operation, $input) = AjaxRequest::read('strc_community', array('create', 'reply', 'trash', 'restore', 'edit', 'append', 'captions', 'approve', 'reject', 'subscribe', 'close', 'pin', 'merge', 'reply-edit', 'reply-hide', 'photos-review', 'cover', 'photos-move', 'image-policy'));
+        list($operation, $input) = AjaxRequest::read('strc_community', array('create', 'reply', 'trash', 'restore', 'edit', 'append', 'captions', 'approve', 'reject', 'subscribe', 'close', 'pin', 'merge', 'reply-edit', 'reply-hide', 'photos-review', 'cover', 'photos-move', 'image-policy', 'delete'));
         if($operation==='teasers')wp_send_json_success($this->teasers());
         if($operation==='teaser-file')$this->teaserFile(absint($input['id']??0),$input['key']??'');
         if (! current_user_can('strc_access_member_area')) {
@@ -118,8 +118,10 @@ final class CommunityEndpoint
             'edit' => $this->edit($input),
             'captions' => $this->captions($input),
             'trash', 'restore', 'approve', 'reject' => $this->status($operation, absint($input['id'] ?? 0)),
+            'delete' => $this->deleteTopic(absint($input['id'] ?? 0)),
             'photos-review','cover','photos-move'=>$this->reviewPhotos($operation,$input),
-            'gallery-events'=>array_map(static fn($event)=>['id'=>(int)$event->ID,'title'=>$event->post_title],get_posts(['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>-1,'orderby'=>'date','order'=>'DESC'])),
+            'gallery-recent'=>$this->galleryRecent(),
+            'gallery-events'=>$this->galleryEvents(($input['recent']??'')==='1'),
             'image-policy'=>$this->imagePolicy($input),
             'pin','merge','reply-edit','reply-hide'=>$this->moderateTopic($operation,$input),
             'subscribe', 'close' => $this->topicAction($operation, $input),
@@ -127,6 +129,38 @@ final class CommunityEndpoint
             default => AjaxRequest::fail('Unbekannte Anfrage.'),
         };
         wp_send_json_success($result);
+    }
+
+    /** Veranstaltungen für Galerie-Uploads; `recent`: die letzten fünf bereits begonnenen Veranstaltungen (nach Datum). */
+    private function galleryEvents(bool $recent): array
+    {
+        $events=get_posts(['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>-1,'meta_key'=>'strc_start_at','orderby'=>'meta_value','order'=>'DESC']);
+        if($recent)$events=array_slice(array_values(array_filter($events,static fn($event)=>($start=strtotime((string)get_post_meta($event->ID,'strc_start_at',true)))!==false&&$start<=time())),0,5);
+        return array_map(static fn($event)=>['id'=>(int)$event->ID,'title'=>$event->post_title,'date'=>substr((string)get_post_meta($event->ID,'strc_start_at',true),0,10)],$events);
+    }
+
+    /** Latest five begun events with a published album, including legacy event-linked albums. */
+    private function galleryRecent(): array
+    {
+        $albums=[];
+        foreach(get_posts(['post_type'=>'strc_album','post_status'=>'publish','posts_per_page'=>-1,'orderby'=>'ID','order'=>'DESC'])as$post){
+            $classification=get_post_meta($post->ID,'strc_form_classification',true);$id=(int)($classification['eventId']??0);
+            if(!$id||get_post_type($id)!=='strc_event'||get_post_status($id)!=='publish'||isset($albums[$id]))continue;
+            $start=strtotime((string)get_post_meta($id,'strc_start_at',true));if($start===false||$start>time())continue;
+            $albums[$id]=['post'=>$post,'start'=>$start];
+        }
+        uasort($albums,static fn($a,$b)=>$b['start']<=>$a['start']);
+        return ['items'=>array_map(function($row){$item=$this->present($row['post']);$item['classification']['date']=substr((string)get_post_meta((int)$item['classification']['eventId'],'strc_start_at',true),0,10);return $item;},array_slice(array_values($albums),0,5))];
+    }
+
+    /** Forumsthema endgültig löschen: durch den Verfasser oder die Forumsmoderation (Dateien werden mitgelöscht). */
+    private function deleteTopic(int $id): array
+    {
+        $post=$this->post($id,true);
+        if($post->post_type!=='strc_topic')AjaxRequest::fail('Nur Forumsthemen können gelöscht werden.',422);
+        if((int)$post->post_author!==get_current_user_id()&&!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+        if(!wp_delete_post($id,true))AjaxRequest::fail('Thema konnte nicht gelöscht werden.',503);
+        return ['id'=>$id,'deleted'=>true];
     }
 
     private function post(int $id, bool $allowTrash = false): \WP_Post
@@ -223,7 +257,7 @@ final class CommunityEndpoint
         }
         $query = new WP_Query($args);
         if($filter)remove_filter('posts_where',$filter,10);
-        return array_values(array_map(static fn ($post): array => array('id' => (int) $post->ID, 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8')), $query->posts));
+        return array_values(array_map(static fn ($post): array => array('id' => (int) $post->ID, 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'eventId' => (int) (((array) get_post_meta($post->ID,'strc_form_classification',true))['eventId'] ?? 0)), $query->posts));
     }
 
     private function listing(array $input): array
@@ -295,16 +329,20 @@ final class CommunityEndpoint
             return $type==='strc_topic'&&$query->get('post_type')===$type?"COALESCE((SELECT CAST(pin.meta_value AS UNSIGNED) FROM {$wpdb->postmeta} pin WHERE pin.post_id={$wpdb->posts}.ID AND pin.meta_key='strc_topic_pinned' LIMIT 1),0) DESC, ".$order:$order;};
         add_filter('posts_orderby',$pinnedOrder,10,2);
         $query=new WP_Query($args);
+        $areaCounts=[];
+        if($type==='strc_topic'&&empty($input['area'])&&!$trash){
+            foreach(CatalogSettings::areas() as $areaName){$countQuery=new WP_Query(['post_type'=>'strc_topic','post_status'=>'publish','posts_per_page'=>1,'fields'=>'ids','no_found_rows'=>false,'meta_query'=>[['key'=>'strc_form_classification','value'=>'"area";s:'.strlen($areaName).':"'.$areaName.'";','compare'=>'LIKE']]]);$areaCounts[$areaName]=(int)$countQuery->found_posts;}
+        }
         remove_filter('posts_orderby',$pinnedOrder,10);
         remove_filter('posts_where',$visibility,10);
         if($searchFilter)remove_filter('posts_where',$searchFilter,10);
         $posts=$type==='strc_document'?array_filter($query->posts,static fn($p)=>LibraryPolicy::canRead((int)$p->ID)):$query->posts;
-        return ['items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
+        return ['areaCounts'=>$areaCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
     }
 
     private function detail(int $id, int $page): array
     {
-        $post = $this->post($id);
+        $post = $this->post($id, true);
         $result = $this->present($post);
         $result['replies'] = array();
         $result['replyPages'] = 0;
@@ -329,7 +367,7 @@ final class CommunityEndpoint
         return array($title, $description);
     }
 
-    private function classification(array $input, string $kind): array
+    private function classification(array $input, string $kind, ?\WP_Post $existing = null): array
     {
         $data=[];
         try {
@@ -338,7 +376,7 @@ final class CommunityEndpoint
             if($kind==='library'&&(!$data['documentType']||!in_array($data['language'],['de','fr','en','multi','other'],true)))throw new \InvalidArgumentException('Bitte Dokumentart und Sprache auswählen.');
             if($kind==='gallery'&&$data['galleryCategory']&&!in_array($data['galleryCategory'],['events','portraits','restorations','history'],true))throw new \InvalidArgumentException('Bitte eine gültige Galerie-Kategorie wählen.');
             if($kind==='gallery'&&$data['eventId']&&(get_post_type((int)$data['eventId'])!=='strc_event'||get_post_status((int)$data['eventId'])!=='publish'))throw new \InvalidArgumentException('Veranstaltung nicht verfügbar.');
-            if($kind==='gallery'&&!$data['photographer'])throw new \InvalidArgumentException('Bitte Fotograf/in angeben.');
+            if($kind==='gallery')$data['photographer']=$existing?((get_post_meta($existing->ID,'strc_form_classification',true)['photographer']??'')?:get_the_author_meta('display_name',$existing->post_author)):wp_get_current_user()->display_name;
             if($kind==='library'){
                 $rawModels=$input['models']??'[]';
                 if(is_string($rawModels))$rawModels=json_decode($rawModels,true);
@@ -351,6 +389,10 @@ final class CommunityEndpoint
                 $type=LibraryPolicy::type($data['documentType']);
                 if($type==='legacy'&&empty($input['id']))throw new \InvalidArgumentException('Bitte eine gültige Dokumentart auswählen.');
                 $data['documentType']=$type;
+                // Magazin und Newsletter lädt die Redaktion hoch, Clubdokumente der Vorstand (oder die Bibliotheksverwaltung).
+                $libraryEditor=\SwissTRClub\Core\Editorial\EditorialAccess::area('library');
+                if((!$existing||LibraryPolicy::type((string)(get_post_meta($existing->ID,'strc_form_classification',true)['documentType']??''))!==$type)&&in_array($type,['magazine','newsletter'],true)&&!$libraryEditor)throw new \InvalidArgumentException('TR-Magazin und Newsletter werden von der Redaktion hochgeladen.');
+                if((!$existing||LibraryPolicy::type((string)(get_post_meta($existing->ID,'strc_form_classification',true)['documentType']??''))!==$type)&&in_array($type,['statutes','club','agm'],true)&&!$libraryEditor&&!current_user_can('strc_access_board_documents'))throw new \InvalidArgumentException('Clubdokumente werden vom Vorstand hochgeladen.');
                 if(in_array($type,['magazine','newsletter'],true)&&(!$data['issue']||!$data['year']))throw new \InvalidArgumentException('Bitte Ausgabe und Erscheinungsjahr angeben.');
                 $types=array_column(LibraryPolicy::types(),null,'key');
                 if(isset($types[$type])&&!in_array($types[$type]['access'],LibraryPolicy::classes(),true))throw new \InvalidArgumentException('Für diese Dokumentart fehlt die Berechtigung.');
@@ -379,7 +421,9 @@ final class CommunityEndpoint
         if ('forum' === $kind && '' === $description) {
             AjaxRequest::fail('Bitte einen Beitragstext eingeben.');
         }
-        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 'gallery' === $kind ? 2500000 : 0);
+        $magazine=$kind==='library'&&$classification['documentType']==='magazine';
+        if($magazine&&(!is_array($_FILES['files']['name']??null)||count($_FILES['files']['name'])!==1||!is_uploaded_file($_FILES['files']['tmp_name'][0]??'')||(new \finfo(FILEINFO_MIME_TYPE))->file($_FILES['files']['tmp_name'][0])!=='application/pdf'))AjaxRequest::fail('Bitte ein PDF-Dokument bis 25 MB auswählen.',422);
+        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 'gallery' === $kind ? 2000000 : 0, 'gallery' === $kind ? 10485760 : 20971520, $magazine ? 25*1024*1024 : 100*1024*1024);
         if (is_wp_error($savedFiles)) {
             AjaxRequest::fail($savedFiles->get_error_message());
         }
@@ -417,7 +461,7 @@ final class CommunityEndpoint
             AjaxRequest::fail('Sie können nur eigene Beiträge bearbeiten.', 403);
         }
         list($title, $description) = $this->texts($input);
-        $classification=$this->classification($input,(string)array_search($post->post_type,self::TYPES,true));
+        $classification=$this->classification($input,(string)array_search($post->post_type,self::TYPES,true),$post);
         if ('strc_topic' === $post->post_type && '' === $description) {
             AjaxRequest::fail('Bitte einen Beitragstext eingeben.');
         }
@@ -444,15 +488,9 @@ final class CommunityEndpoint
         if (($input['rights'] ?? '') !== '1') {
             AjaxRequest::fail('Bitte die Berechtigung zum Teilen des Materials bestätigen.', 422);
         }
-        try {
-            $photographer = \SwissTRClub\Core\Forms\FormFields::text($input, 'photographer', 160);
-        } catch (\InvalidArgumentException $e) {
-            AjaxRequest::fail($e->getMessage(), 422);
-        }
-        if ('' === $photographer) {
-            AjaxRequest::fail('Bitte Fotograf/in angeben.', 422);
-        }
-        $uploads = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), true, false, 20, 2500000);
+        // Fotograf/in ist immer die hochladende Person.
+        $photographer = wp_get_current_user()->display_name;
+        $uploads = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), true, false, 20, 2000000, 10485760);
         if (is_wp_error($uploads)) {
             AjaxRequest::fail($uploads->get_error_message());
         }
