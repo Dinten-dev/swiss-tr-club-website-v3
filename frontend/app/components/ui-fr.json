@@ -220,7 +220,7 @@
   "Keine Zahlung erforderlich": "Aucun paiement requis",
   "Veröffentlicht": "Publié",
   "Entwurf / abgelehnt": "Brouillon / refusé",
-  "Standorte werden geladen …": "Chargement des localités…",
+  "Standorte werden geladen …": "Chargement des positions…",
   "Einige Standorte konnten nicht geladen werden. Die Mitgliederliste bleibt verfügbar.": "Certaines localités n’ont pas pu être chargées. La liste des membres reste disponible.",
   "Verbindung unterbrochen. Bitte erneut versuchen.": "Connexion interrompue. Veuillez réessayer.",
   "Anrede (optional)": "Civilité (facultatif)",
@@ -798,5 +798,11 @@
   "Mit dem Hochladen bestätigen Sie, dass die Fotos auf der Website und in Publikationen des Swiss TR-Club verwendet werden dürfen. Im Zweifel einfach hochladen – die Galerie-Moderation prüft jedes Bild vor der Veröffentlichung.": "En important les photos, tu confirmes qu’elles peuvent être utilisées sur le site et dans les publications du Swiss TR-Club. En cas de doute, importe-les : la modération vérifie chaque photo avant sa publication.",
   "Bitte das Originalfoto der Kamera oder des Smartphones hochladen – Fotos aus WhatsApp sind meist zu klein für das TR-Magazin.": "Importe la photo originale de l’appareil ou du smartphone : les photos WhatsApp sont souvent trop petites pour le TR-Magazine.",
   "Hochladen": "Importer",
-  "Sichtbar für Clubmitglieder.": "Visible pour les membres du club."
+  "Sichtbar für Clubmitglieder.": "Visible pour les membres du club.",
+  "Ansicht": "Vue",
+  "Name suchen": "Rechercher un nom",
+  "Name suchen …": "Rechercher un nom…",
+  "Sortierung": "Tri",
+  "PLZ / Ort": "Code postal / localité",
+  "Das Verzeichnis ist nur für aktive Clubmitglieder sichtbar. Die Karte zeigt ungefähre Standorte nach Postleitzahl; Wohnadressen werden nicht zur Standortbestimmung verwendet.": "L’annuaire est réservé aux membres actifs du club. La carte affiche des positions approximatives selon le code postal ; les adresses privées ne sont pas utilisées pour déterminer les positions."
 }
