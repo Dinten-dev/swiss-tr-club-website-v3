@@ -2676,3 +2676,10 @@ dialog .club-actions .market-primary{min-width:140px}
 .crew-room label.application-consent{display:inline-flex;width:auto;margin:0;white-space:nowrap}
 .crew-price{margin:10px 0 0;color:var(--navy)}
 @media(max-width:560px){.event-fee-grid,.event-fee-grid.is-weekend{grid-template-columns:1fr 1fr}.event-fee-grid.is-weekend>span[aria-hidden]{display:none}.event-fee-grid.is-weekend .event-fee-label{grid-column:1/-1;margin-top:6px}}
+.whatsapp-status ul{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}
+.whatsapp-status li{display:flex;gap:8px;align-items:baseline}
+.whatsapp-status li span{font-weight:700}
+.whatsapp-status li.is-ok span{color:#2e7d4f}
+.whatsapp-status li.is-missing span{color:var(--red)}
+.whatsapp-deliveries{border-collapse:collapse;font-size:14px}
+.whatsapp-deliveries td{padding:4px 14px 4px 0;border-bottom:1px solid #dce5eb;font-variant-numeric:tabular-nums}
