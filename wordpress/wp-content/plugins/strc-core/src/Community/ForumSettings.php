@@ -105,7 +105,14 @@ final class ForumSettings
             'event'=>'forum.notification','event_key'=>$eventKey,
             'recipient'=>['phone'=>'+'.$digits],
             'consent'=>['granted'=>true,'recorded_at'=>$preferences['whatsappConsentAt'],'version'=>$preferences['whatsappConsentVersion']],
-            'template'=>['name'=>$template,'language'=>$language,'body'=>$bodyTemplate,'parameters'=>['title'=>$title,'url'=>$url]],
+            // Zusätzliche Angaben für Vorlagen mit Platzhaltern wie «Hallo {{1}}, der Benutzer {{2}} hat …».
+            'kind'=>str_starts_with($key,'reply-')?'reply':(str_starts_with($key,'topic-')?'topic':'test'),
+            'template'=>['name'=>$template,'language'=>$language,'body'=>$bodyTemplate,'parameters'=>[
+                'title'=>$title,'url'=>$url,
+                'recipient_first_name'=>(string)get_user_meta($id,'first_name',true)?:$user->display_name,
+                'author'=>wp_get_current_user()->display_name,
+                'topic'=>preg_replace('/^(Neues Thema|Neue Antwort|Nouveau sujet|Nouvelle réponse) ?: /u','',$title),
+            ]],
         ];
         $response=wp_remote_post($webhook,['timeout'=>8,'redirection'=>0,'sslverify'=>true,'headers'=>['Content-Type'=>'application/json'],'body'=>wp_json_encode($payload)]);
         $state=is_wp_error($response)?'uncertain':((int)wp_remote_retrieve_response_code($response)>=200&&(int)wp_remote_retrieve_response_code($response)<300?'accepted':'failed');
