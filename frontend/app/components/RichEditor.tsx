@@ -4,7 +4,7 @@ import {useEffect,useId,useRef,useState} from 'react';
 
 // Hausschrift auch im Editor-Iframe (sonst fiele der Text dort auf Arial zurück).
 const fontBase=`${process.env.NEXT_PUBLIC_ASSET_BASE??''}/fonts/StrcSans`;
-const editorFonts=`@font-face{font-family:"STRC Sans";src:url(${fontBase}-Regular.woff) format("woff");font-weight:400;size-adjust:109%}@font-face{font-family:"STRC Sans";src:url(${fontBase}-Bold.woff) format("woff");font-weight:700;size-adjust:109%}@font-face{font-family:"STRC Sans";src:url(${fontBase}-Italic.woff) format("woff");font-weight:400;font-style:italic;size-adjust:109%}`;
+const editorFonts=`@font-face{font-family:"STRC Sans";src:url(${fontBase}-Regular.ttf) format("truetype");font-weight:400;size-adjust:109%}@font-face{font-family:"STRC Sans";src:url(${fontBase}-Bold.ttf) format("truetype");font-weight:700;size-adjust:109%}@font-face{font-family:"STRC Sans";src:url(${fontBase}-Italic.ttf) format("truetype");font-weight:400;font-style:italic;size-adjust:109%}`;
 
 type Editor={initialized:boolean;hasFocus:()=>boolean;addButton:(name:string,options:unknown)=>void;execCommand:(command:string,ui:boolean,value?:unknown)=>void;focus:()=>void;selection:{getBookmark:(type?:number,normalized?:boolean)=>unknown;moveToBookmark:(bookmark:unknown)=>void;getRng:()=>Range;getNode:()=>HTMLElement};getContent:()=>string;setContent:(html:string)=>void;on:(events:string,callback:(event:KeyboardEvent)=>void)=>void;setMode?:(mode:string)=>void;mode?:{set:(mode:string)=>void}};
 declare global {interface Window {wp?:{editor?:{initialize:(id:string,options:unknown)=>void;remove:(id:string)=>void}};tinymce?:{get:(id:string)=>Editor|undefined}}}

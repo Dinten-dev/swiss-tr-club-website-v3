@@ -88,3 +88,33 @@ Auf dem Server enthalten folgende private Verzeichnisse die geänderten Original
 Eine Rückkehr erfolgt in umgekehrter Reihenfolge. Vor jeder Wiederherstellung muss die aktuelle Prüfsumme dem jeweiligen `installedSha256` entsprechen; andere Änderungen werden zuerst zusammengeführt. Neue Dateien werden nur bei übereinstimmender Prüfsumme entfernt. Die ursprüngliche `.htaccess` liegt in der lokalen Sicherung. Individuelle Rollenmigrationen sichern ihre bisherigen Metadaten vor dem ersten Speichern.
 
 Vor jedem weiteren Upload prüft `scripts/deploy-staging.py` sämtliche Dateien der angegebenen Ausgangsbasis und unmittelbar vor dem Austausch nochmals die betroffene Datei. Abweichungen stoppen den Upload. Atomare Dateiersetzungen und eine geschützte Rückkehrliste begrenzen einen abgebrochenen Upload. Uploads, redaktionelle Optionen, Mitgliederdaten und WordPress-Konfiguration werden nicht durch dieses Programm ersetzt.
+
+## Peters Pull Requests und Veröffentlichung am 14. Oktober
+
+Die Pull Requests [#5](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/5), [#6](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/6), [#7](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/7), [#8](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/8), [#9](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/9) und der während der Prüfung hinzugekommene [#10](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/10) sind zusammengeführt. Peters Originalcommits bleiben in der Geschichte erhalten. Die beiden abschliessenden Integrationsstände `6c55eec` und `dfeef02` bestanden alle GitHub-Prüfungen; `35792ed` enthält beide Zusammenführungen.
+
+Der Nutzer bestätigte ausdrücklich: Die Mitgliederkarte verwendet weiterhin PLZ-Pins und übermittelt keine Wohnadressen zur Geokodierung. Die viermonatige Aufbewahrung gilt auch für vorhandene Galerieoriginale; ausdrückliche Aufbewahrungsausnahmen bleiben erhalten. Forumsthemen inklusive Antworten und Anhängen können Verfasser und berechtigte Forumsmoderation endgültig löschen. Zum Prüfzeitpunkt waren keine vorhandenen Originale nach der neuen Frist zur Löschung fällig. Es wurde keine manuelle Löschung echter Originale ausgeführt.
+
+| Prüfung und Korrektur | Nachweis |
+|---|---|
+| Bibliotheksrechte | Gefälschte IDs umgehen keine reservierten Dokumentarten; bestehende eigene Dokumente bleiben bearbeitbar |
+| Magazin-Upload | Ein echtes PDF bis 25 MB; mehrere PDFs und übergrosse Dateien werden zurückgewiesen |
+| Galerie-Upload | Formular und Server akzeptieren 2–10 MB; das widersprüchliche alte 2,5-MB-Limit wurde korrigiert |
+| Geschützte Bilder | Webkopien höchstens 2.000.000 Bytes; Originaldownloads nur mit Berechtigung; ungeprüfte Bilder bleiben geschützt |
+| Galerieübersicht | Letzte fünf begonnene Veranstaltungen, bestehende ältere Alben und ursprüngliche Fotografen bleiben erhalten |
+| Benachrichtigungen | Wiederholte Freigabe erzeugt keine zweite Entscheidungsmeldung |
+| Magazinansicht | Originalausgabe mit 60 Magazinseiten, integrierte Suche mit Treffern und Seitensprung, Einzel-/Doppelseite und Vollbild geprüft; Lade- und Vollbildfehler behandeln sichtbare Hinweise |
+| Hausschrift | Vier selbst gehostete STRC-Sans-Schnitte und Lizenzdatei enthalten; tatsächliche TrueType-Dateien korrekt als `.ttf` eingebunden; keine Google-Schriftabfrage |
+| Darstellung | Desktop mit 1280 Pixeln und mobile Ansicht mit 390 Pixeln geprüft; neue Galerie- und Verzeichnisbeschriftungen auf Französisch ergänzt |
+| Automatische Prüfungen | Build, ESLint, TypeScript und Struktur erfolgreich; 51 PHP-Tests mit 159 Assertions; 101 Plugin-Dateien und Theme-Schriftcode syntaktisch geprüft |
+| WordPress-Integration | 18 gezielte Prüfungen erfolgreich, darunter Rechte, Löschen, Aufbewahrung, Fotografen, Zukunftsfilter und fehlende Adressabfragen |
+| HTTP | 17 zusätzliche Prüfungen erfolgreich; Galeriegrössen, Webkopie, Originalberechtigung und Magazin-PDF-Verträge |
+| Datenbestand | 35 redaktionelle Optionen unverändert, SHA-256 `fd0d99618d0a0e028ad131e25b1538dba795beca8615264eb6cc84d4e18d76ff`; 284 Mitgliedschaften erhalten |
+| Veröffentlichung | 26 geänderte/neue Programmdateien veröffentlicht; anschliessend alle 409 Programmdateien ohne Abweichung verifiziert |
+| Testschutz | Startseite, Sitzungsschnittstelle, JavaScript, CSS und Schrift ohne Passwort HTTP 401, mit Testzugang HTTP 200; Testzugang allein gewährt keinen Mitgliederzugriff |
+
+Die Bildschirmprüfung verwendete synthetische Testdaten und eine lokale Kopie des Originalmagazins. Die neuen HTTP-Prüfungen verwendeten isolierten Kandidatencode auf Staging und temporäre Konten. E-Mail-Transporte, externe HTTP-Anfragen und Änderungen an Nicht-Testkonten wurden abgefangen. Testkonten und Testuploads sind entfernt. Sechs eindeutig eigene Hinweise zu bereits entfernten Testinseraten vom Vortag wurden nach privater Sicherung gezielt entfernt; echte Benachrichtigungen blieben erhalten. Keine Fairgate-Schreiboperation wurde ausgeführt. Eine physische Mobilgeräteabnahme und ein echter Zahlungsdurchlauf wurden nicht durchgeführt.
+
+Vor der Veröffentlichung entsprachen alle 396 gesicherten Ausgangsdateien noch der Ausgangsbasis. Die Veröffentlichung prüfte sie erneut und ersetzte jede betroffene Datei nur bei passender ursprünglicher Prüfsumme. Alte Build-Chunks bleiben für bereits geöffnete Ansichten verfügbar. Datenbank, Uploadbestand und redaktionelle Inhalte wurden nicht ersetzt.
+
+Die vollständige Ausgangssicherung, Prüfergebnisse und das zusätzliche lokale Rückkehrpaket liegen ausserhalb von Git unter `.private/peter-prs-2026-10-14/`. Die unveränderten Testzugangsdaten bleiben in `.private/staging-b-test-2026-10-13.json`. Das serverseitige Rückkehrpaket für diese Veröffentlichung liegt unter `/private/strc-peter-release-20261014130025` und enthält die ursprünglichen geänderten Dateien sowie `rollback.json`. Für eine Rückkehr gilt weiterhin der oben beschriebene Abgleich von `installedSha256`, damit spätere Änderungen erhalten bleiben.

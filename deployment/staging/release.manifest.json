@@ -564,13 +564,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 238687,
-      "sha256": "9ac674e468241547069caa39ea52377199de73d7fcc36062f76c186a7e9bc270"
+      "bytes": 238680,
+      "sha256": "9f440ed9fa4fad00c2c1d9a8f84a5d930c71d307937985839aab04cda1eccc30"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 784776,
-      "sha256": "573bffb24840b11f7115862d6a361746e35324da43c6ba8a72ffbd66d2366672"
+      "bytes": 785400,
+      "sha256": "d396f8be131285ea18a10a7b259a405813f99aad3da2f996c9e9e5d2540954d8"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -698,6 +698,31 @@
       "sha256": "e90733da917cf128aa1c4a285b4c7c3228bc8767a6a0269d09eb8652713bc017"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/LICENSE-Carlito-OFL.txt",
+      "bytes": 5484,
+      "sha256": "207ec1cf5426235729d4a5b869377e41b6aacf17abd181480096a1a05ef80b65"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/StrcSans-Bold.ttf",
+      "bytes": 68364,
+      "sha256": "c2318895bc2a16082f15026f7aaade484900e05c410e6819e843a4592fb6b5e2"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/StrcSans-BoldItalic.ttf",
+      "bytes": 87284,
+      "sha256": "dd206f3b996de903653ed1a8a194bf1f92ec2541bbff05f5b760ea7aef833310"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/StrcSans-Italic.ttf",
+      "bytes": 63064,
+      "sha256": "4c3acaf9171f6928253fe6e441ed036a9eebfec196ebb9819d81986c22613048"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/fonts/StrcSans-Regular.ttf",
+      "bytes": 65472,
+      "sha256": "86c83ece9a91d7885db49a6c9f5e6b579b0a3260fbc0a4a1263493fa1d46f74c"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/jsx-runtime-CdS6qnrt.js",
       "bytes": 10267,
       "sha256": "200a8824c0478033cecf94820f24a5c2e6a20f8085ee91e0f1687b877d279d28"
@@ -716,6 +741,16 @@
       "path": "wordpress/wp-content/themes/strc-app/build/leaflet-src-vRtLPdAS.js",
       "bytes": 188384,
       "sha256": "9b9f4383d577ca4f5b0ebd29e6601702dc01b468dca9f541ea0e7006345c64c3"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-Bbpv3j3x.js",
+      "bytes": 8199,
+      "sha256": "cebd82a4903b41498d56b3657314d54ad6e492ac03503e0c9e9be8def1a51eee"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-BDYVY9ti.js",
+      "bytes": 8199,
+      "sha256": "1dcdd8034b2c30d5fa09c7d2921df6c7f5211f22faa61ce09dd426d0aadbf64e"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-BKn-0vHj.js",
@@ -751,6 +786,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DUNlM3fB.js",
       "bytes": 8199,
       "sha256": "d8dc61cb42893a0c1ac6404034d6b6aa136ea70b1c9daae017261d0a3ad204b4"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DYdiJlXm.js",
+      "bytes": 8199,
+      "sha256": "bae1f7fbb694c94b42c436c6f97aa67914189dd0d1824c55a38b6ee6a33c2e3f"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-fBf1UM1C.js",
@@ -1968,6 +2008,16 @@
       "sha256": "e42d05c5e791cd1b70dc3c6dc91492b16444f9dbc99ce7386412623f9346b81d"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-BjrP63Nt.js",
+      "bytes": 69732,
+      "sha256": "7dde0e21240829b948db6c415e75c12f0d5ed8e9319fcc3ce5718f25bc1a59c0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-BwCkjqgX.js",
+      "bytes": 71412,
+      "sha256": "140b9e4ce7c7379898e43e04dbbdad1f30f9743a49226c62e8c8fa225c33ea8c"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-CzTZeUhr.js",
       "bytes": 69703,
       "sha256": "c6daa0a80a763bc99dbed74924d6081a6c973d371a9c7bf42ae5380e6acd85ec"
@@ -1988,14 +2038,19 @@
       "sha256": "4fbb8dc774ad55510a30898d9080df949d60c1e66502d820ef234c2d1955aaf2"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-XWG8yXrM.js",
+      "bytes": 71955,
+      "sha256": "1c63d2887190dcb5c72dc408b21076463eb6e471f99d7ff632e94fa24aca3660"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/footer.php",
       "bytes": 456,
       "sha256": "f79152606edaa7c21291a009dfce4db50e5b4d18bb5dc37099c8c01fc25da111"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/functions.php",
-      "bytes": 1205,
-      "sha256": "2c481c6ba5d2b4bc9fc08bce2b538d49fef946d2070c1d3962ddb96bd9ddc30b"
+      "bytes": 2787,
+      "sha256": "834fdc70793184c5fee0dc786d45362dce1c6fea7521ae95c6ac7cb52eeb5576"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/header.php",
@@ -2018,7 +2073,9 @@
       "sha256": "1b081d89f7b036644229ac0c5b6ca61209522dd52b2a10961a75ecbb91ebb535"
     }
   ],
-  "status": "candidate",
-  "builtOn": "2026-10-14T11:58:21.292Z",
-  "baselineCapturedOn": "2026-10-13"
+  "status": "published",
+  "builtOn": "2026-10-14T12:57:58.943Z",
+  "baselineCapturedOn": "2026-10-13",
+  "publishedOn": "2026-10-14T13:00:31.650229+00:00",
+  "publishedFiles": 26
 }

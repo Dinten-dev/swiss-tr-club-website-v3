@@ -21,7 +21,7 @@ function strc_app_font_faces(string $uri): string
 {
     $css = '';
     foreach (array(array('Regular', 400, 'normal'), array('Bold', 700, 'normal'), array('Italic', 400, 'italic'), array('BoldItalic', 700, 'italic')) as $face) {
-        $css .= sprintf('@font-face{font-family:"STRC Sans";src:url("%s/build/fonts/StrcSans-%s.woff") format("woff");font-weight:%d;font-style:%s;font-display:swap;size-adjust:109%%}', esc_url_raw($uri), $face[0], $face[1], $face[2]);
+        $css .= sprintf('@font-face{font-family:"STRC Sans";src:url("%s/build/fonts/StrcSans-%s.ttf") format("truetype");font-weight:%d;font-style:%s;font-display:swap;size-adjust:109%%}', esc_url_raw($uri), $face[0], $face[1], $face[2]);
     }
     return $css;
 }
@@ -46,10 +46,10 @@ add_action('wp_enqueue_scripts', static function (): void {
 
 // Die zwei meistgebrauchten Schnitte früh laden, damit der Text nicht sichtbar von Arial auf STRC Sans wechselt.
 add_action('wp_head', static function (): void {
-    if (! is_front_page() || ! is_file(get_template_directory() . '/build/fonts/StrcSans-Regular.woff')) {
+    if (! is_front_page() || ! is_file(get_template_directory() . '/build/fonts/StrcSans-Regular.ttf')) {
         return;
     }
     foreach (array('Regular', 'Bold') as $style) {
-        printf('<link rel="preload" href="%s" as="font" type="font/woff" crossorigin>' . "\n", esc_url(get_template_directory_uri() . '/build/fonts/StrcSans-' . $style . '.woff'));
+        printf('<link rel="preload" href="%s" as="font" type="font/ttf" crossorigin>' . "\n", esc_url(get_template_directory_uri() . '/build/fonts/StrcSans-' . $style . '.ttf'));
     }
 }, 1);
