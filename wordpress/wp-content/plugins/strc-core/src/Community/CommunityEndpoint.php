@@ -273,6 +273,13 @@ final class CommunityEndpoint
             'author'=>($trash&&!current_user_can('strc_manage_community')&&!\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind']))||('1'===($input['mine']??'')&&$type!=='strc_album')?get_current_user_id():'',
             'orderby'=>['date'=>'DESC','ID'=>'DESC']];
         $searchFilter=null;
+        // Prüfliste der Moderation (#forum/pruefung usw.): nur eingereichte Beiträge, ohne Bereichs- oder Gruppenfilter.
+        $reviewOnly='1'===($input['review']??'')&&(\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])||($type==='strc_album'&&$this->originals()));
+        if($reviewOnly){
+            foreach(['group','documentType','model','component','area','galleryCategory','year','language','duration','region'] as $key)unset($input[$key]);
+            $search='';$args['post_status']='pending';
+            if($type==='strc_album'){$args['post_status']=['pending','publish'];$args['meta_query']=[['key'=>'strc_gallery_pending_count','value'=>0,'compare'=>'>','type'=>'NUMERIC']];}
+        }
         if($type==='strc_document'){
             $args['meta_query']=['relation'=>'AND',LibraryPolicy::filter()];
             if(!empty($input['group'])){

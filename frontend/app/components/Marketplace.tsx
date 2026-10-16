@@ -56,7 +56,7 @@ export default function Marketplace({ section, session, notify }: { section:stri
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [model, setModel] = useState('');
-  const [partCategory,setPartCategory]=useState('');const [submitted,setSubmitted]=useState<'created'|'edited'|null>(null);
+  const [partCategory,setPartCategory]=useState('');const [submitted,setSubmitted]=useState<'created'|'edited'|null>(null);const [submittedOnline,setSubmittedOnline]=useState(false);
   const catalog=useCatalog();
   const [mine]=useState(section==='meine');
   const [page, setPage] = useState(1);
@@ -109,14 +109,14 @@ export default function Marketplace({ section, session, notify }: { section:stri
         {collection.pages > 1 && <div className="market-pagination"><button disabled={page === 1} onClick={() => { setLoading(true); setPage(page - 1); }}>{t('Zurück')}</button><span>{t("Seite")} {page} {t("von")} {collection.pages}</span><button disabled={page >= collection.pages} onClick={() => { setLoading(true); setPage(page + 1); }}>{t("Weiter")}</button></div>}
       </>}
     </section>
-    {creating && <CreateDialog session={session} initialCategory={parts?'Teile':'Fahrzeuge'} close={() => setCreating(false)} created={() => { setCreating(false); setSearch(''); setModel(''); setPage(1); refresh(); setSubmitted('created'); }}/>}
-    {editing&&<CreateDialog ad={editing} session={session} initialCategory={editing.category==='Fahrzeuge'?'Fahrzeuge':'Teile'} close={()=>setEditing(null)} created={()=>{setEditing(null);refresh();setSubmitted('edited');}}/>}
-    {submitted&&<Dialog title={t('Vielen Dank!')} close={()=>{setSubmitted(null);requestAnimationFrame(()=>createButton.current?.focus());}}><div className="club-dialog-body market-confirmation"><p className="market-confirmation-icon" aria-hidden="true">✓</p><p><strong>{t(submitted==='created'?'Ihr Inserat ist bei uns eingegangen.':'Ihre Änderungen sind bei uns eingegangen.')}</strong></p><p>{t('Das Marktplatz-Team prüft das Inserat in der Regel innert ein bis zwei Tagen. Sobald es veröffentlicht ist, erhalten Sie eine Nachricht per E-Mail und im Dashboard.')}</p><p>{t('Ihre Inserate finden Sie jederzeit unter')} <a href="#marktplatz/meine">{t('Meine Inserate')}</a>.</p><div className="club-actions"><button className="market-primary" onClick={()=>{setSubmitted(null);requestAnimationFrame(()=>createButton.current?.focus());}}>{t('Schliessen')}</button></div></div></Dialog>}
+    {creating && <CreateDialog session={session} initialCategory={parts?'Teile':'Fahrzeuge'} close={() => setCreating(false)} created={saved => { setCreating(false); setSearch(''); setModel(''); setPage(1); refresh(); setSubmittedOnline(saved.status==='publish'); setSubmitted('created'); }}/>}
+    {editing&&<CreateDialog ad={editing} session={session} initialCategory={editing.category==='Fahrzeuge'?'Fahrzeuge':'Teile'} close={()=>setEditing(null)} created={saved=>{setEditing(null);refresh();setSubmittedOnline(saved.status==='publish');setSubmitted('edited');}}/>}
+    {submitted&&<Dialog title={t('Vielen Dank!')} close={()=>{setSubmitted(null);requestAnimationFrame(()=>createButton.current?.focus());}}><div className="club-dialog-body market-confirmation"><p className="market-confirmation-icon" aria-hidden="true">✓</p><p><strong>{t(submitted==='created'?'Ihr Inserat ist bei uns eingegangen.':'Ihre Änderungen sind bei uns eingegangen.')}</strong></p><p>{t(submittedOnline?'Ihr Inserat ist ab sofort online und 90 Tage sichtbar.':'Fahrzeuginserate prüft das Marktplatz-Team in der Regel innert ein bis zwei Tagen. Sobald es veröffentlicht ist, erhalten Sie eine Nachricht per E-Mail und im Dashboard.')}</p><p>{t('Ihre Inserate finden Sie jederzeit unter')} <a href="#marktplatz/meine">{t('Meine Inserate')}</a>.</p><div className="club-actions"><button className="market-primary" onClick={()=>{setSubmitted(null);requestAnimationFrame(()=>createButton.current?.focus());}}>{t('Schliessen')}</button></div></div></Dialog>}
     {selected && <AdDialog edit={()=>{setEditing(selected);setSelected(null);}} ad={selected} session={session} close={() => setSelected(null)} sold={() => { setSelected(null); refresh(); notify('Inserat gespeichert.'); requestAnimationFrame(() => createButton.current?.focus()); }}/>}
   </>;
 }
 
-function CreateDialog({ ad,session, initialCategory, close, created }: {ad?:Ad; session: MarketplaceSession | null; initialCategory:'Teile'|'Fahrzeuge'; close: () => void; created: () => void }) {
+function CreateDialog({ ad,session, initialCategory, close, created }: {ad?:Ad; session: MarketplaceSession | null; initialCategory:'Teile'|'Fahrzeuge'; close: () => void; created: (ad:Ad) => void }) {
   const catalog=useCatalog();
   const [title, setTitle] = useState(ad?.title||'');
   const [price, setPrice] = useState(ad?.price||'');
@@ -158,7 +158,7 @@ function CreateDialog({ ad,session, initialCategory, close, created }: {ad?:Ad; 
       form.set('offerType',offerType);form.set('priceMode',priceMode);form.set('operation',ad?'edit':'create');if(ad){form.set('retainedDocumentKeys',JSON.stringify(retainedDocuments));form.set('id',String(ad.id));form.set('retainedImageIds',JSON.stringify(retained));} form.set('title', title); form.set('price', price); form.set('description', description); form.set('category', category);
       form.set('parts',parts);form.set('models',JSON.stringify(form.getAll('models[]')));form.delete('models[]');
       images.forEach(image => form.append('images[]', image.file));documents.forEach(file=>form.append('documents[]',file));
-      try { await mutate<Ad>(form, session.marketplaceNonce!); created(); }
+      try { const saved=await mutate<Ad>(form, session.marketplaceNonce!); created(saved); }
       catch (reason) { setError(reason instanceof Error ? reason.message : 'Speichern fehlgeschlagen.'); requestAnimationFrame(() => errorRef.current?.focus()); }
       finally { submitting.current = false; setBusy(false); }
     }}>
