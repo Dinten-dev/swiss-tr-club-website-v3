@@ -2700,3 +2700,31 @@ dialog .club-actions .market-primary{min-width:140px}
 .role-chip.is-members{background:#fbf1e4;border-color:#eedcc4;color:#7a5216}
 .role-assignment-docs{margin:12px 0 0;font-size:13.5px;color:#536a79}
 .role-assignment-row>strong{display:block}.role-assignment-row>small{display:block;margin-top:2px;color:#647886}
+/* Regionalseite direkt bearbeiten */
+.regional-edit-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 20px;margin:0 0 18px;padding:12px 16px;border-radius:8px;background:var(--navy);color:#fff;box-shadow:0 6px 18px rgba(10,37,63,.18)}
+.regional-edit-bar>div:first-child{display:grid;gap:2px}
+.regional-edit-bar>div:first-child span{font-size:13px;color:#c9d9e5}
+.regional-edit-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.regional-edit-actions .club-secondary{background:#fff}
+.regional-content.is-editing .regional-panel{outline:2px dashed #9ed9f5;outline-offset:3px}
+.regional-content.is-editing .regional-admin-panel{outline-color:var(--red)}
+.regional-edit-group{display:grid;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid #dce5eb}
+.regional-edit-field{display:grid;gap:5px;font-size:13px;font-weight:700;color:#4b606f}
+.regional-edit-field input,.regional-edit-field textarea{width:100%;padding:9px 11px;border:1px solid #bccbd5;border-radius:5px;font:inherit;font-weight:400;color:var(--ink);background:#fff}
+.regional-edit-hint{margin:12px 0 0;font-size:13px;color:#647886}
+.regional-documents .editorial-pdfs{border:0;padding:0;background:none}
+.regional-documents .editorial-pdfs>summary{display:none}
+.regional-documents .editorial-pdfs label{display:grid;gap:5px;font-size:13px;font-weight:700;color:#4b606f}
+.regional-documents .editorial-pdfs input:not([type=file]){width:100%;padding:9px 11px;border:1px solid #bccbd5;border-radius:5px;font:inherit;font-weight:400;background:#fff}
+.regional-documents .editorial-pdfs ul{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.regional-documents .editorial-pdfs li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border:1px solid #dce5eb;border-radius:6px;background:#fff}
+.regional-documents .editorial-pdfs li>a{flex:1 1 100%;font-weight:700}
+.regional-documents .editorial-pdfs li>input[readonly]{display:none}
+/* Ausklappbare Formularabschnitte */
+details.form-section.is-collapsible{border:1px solid #dce5eb;border-radius:8px;padding:0;margin:18px 0;background:#fff}
+details.form-section.is-collapsible>summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:14px 16px;cursor:pointer;font-weight:700;color:var(--navy);list-style:none}
+details.form-section.is-collapsible>summary::-webkit-details-marker{display:none}
+details.form-section.is-collapsible>summary::before{content:"＋";font-weight:700;color:var(--red)}
+details.form-section.is-collapsible[open]>summary::before{content:"－"}
+details.form-section.is-collapsible>summary small{font-weight:400;color:#647886;font-size:13px}
+details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
