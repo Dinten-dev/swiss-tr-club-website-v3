@@ -2736,3 +2736,16 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .market-more{margin-top:18px;border:1px solid #dce5eb;border-radius:8px;padding:12px 14px;background:#fff}
 .market-more>summary{cursor:pointer;font-weight:700;color:var(--navy)}
 .market-more>section{margin-top:12px}
+/* Dashboard: eigene Termine in der Kachel «Agenda verwalten» */
+.db-mod-tile.is-agenda{grid-column:1/-1;display:grid;gap:10px;text-align:left}
+.db-agenda-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;color:inherit;text-decoration:none}
+.db-agenda-head span{margin-left:auto;font-size:13px}
+.db-agenda-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.db-agenda-list li{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:4px 12px;align-items:baseline;padding:7px 0;border-top:1px solid #e3ebf1;font-size:14px}
+.db-agenda-date{color:#536a79;font-variant-numeric:tabular-nums;white-space:nowrap}
+.db-agenda-list a{font-weight:700;min-width:0;overflow-wrap:anywhere}
+.db-agenda-state{font-size:12px;padding:2px 8px;border-radius:999px;background:#e9f4ec;color:#24563a}
+.db-agenda-state.is-draft{background:#fbf1e4;color:#7a5216}
+.db-agenda-count{font-size:13px;color:#536a79;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:560px){.db-agenda-list li{grid-template-columns:1fr auto}.db-agenda-date{grid-column:1/-1}}
+.db-mod-tile.is-agenda .db-agenda-list a{text-align:left}.db-mod-tile.is-agenda{align-items:stretch;justify-items:stretch}

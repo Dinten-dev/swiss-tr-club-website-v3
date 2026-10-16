@@ -39,6 +39,19 @@ final class MemberDashboardEndpoint
             $upcoming[]=['id'=>(int)$post->ID,'title'=>$eventTitle((int)$post->ID),'startAt'=>$start,'location'=>(string)get_post_meta($post->ID,'strc_location',true),'registered'=>in_array((int)$post->ID,$registered,true),'url'=>($required?'#veranstaltung/':'#agenda/').$post->ID];
             if(count($upcoming)>=6)break;
         }
+        // Eigene Termine (erstellt, bearbeitet, geleitet oder zugewiesen) für die Kachel «Agenda verwalten».
+        $myEvents=[];
+                if(\SwissTRClub\Core\Events\RegionalEventAccess::isGlobal()||\SwissTRClub\Core\Events\RegionalEventAccess::isOrganiser()||\SwissTRClub\Core\Events\RegionalEventAccess::regions()){
+            $assigned=\SwissTRClub\Core\Events\RegionalEventAccess::assignedEvents();
+            foreach(get_posts(['post_type'=>'strc_event','post_status'=>['publish','draft','future','pending'],'posts_per_page'=>200,'meta_key'=>'strc_start_at','meta_query'=>[['key'=>'strc_start_at','value'=>gmdate('Y-m-d',time()-86400),'compare'=>'>=']],'orderby'=>'meta_value','order'=>'ASC']) as $post){
+                $settings=\SwissTRClub\Core\Forms\EventRegistration::settings((int)$post->ID);
+                $mineEvent=(int)$post->post_author===$id||(int)get_post_meta($post->ID,'strc_event_editor_id',true)===$id||(int)($settings['organiserUserId']??0)===$id||in_array((int)$post->ID,$assigned,true);
+                if(!$mineEvent)continue;
+                $myEvents[]=['id'=>(int)$post->ID,'title'=>$eventTitle((int)$post->ID),'startAt'=>(string)get_post_meta($post->ID,'strc_start_at',true),'status'=>$post->post_status==='publish'?'publish':'draft',
+                    'registrationRequired'=>(bool)get_post_meta($post->ID,'strc_registration_required',true),'registered'=>\SwissTRClub\Core\Forms\EventRegistration::headcount((int)$post->ID),'capacity'=>(int)get_post_meta($post->ID,'strc_capacity',true)];
+                if(count($myEvents)>=6)break;
+            }
+        }
         $uploads=[];
         global $wpdb;
         $mine=static function(string $where,\WP_Query $query)use($id,$wpdb):string{
@@ -68,6 +81,6 @@ final class MemberDashboardEndpoint
         if($query->posts){$post=$query->posts[0];$magazine=['title'=>$post->post_title,'url'=>'#bibliothek/'.$post->ID];}
         $featured=(new \SwissTRClub\Core\Content\MagazineEndpoint())->preview($language);
         if($featured&&!empty($featured['canRead'])&&LibraryPolicy::canRead((int)$featured['id']))$magazine=['title'=>$featured['title'],'url'=>'#bibliothek/'.$featured['id']];
-        wp_send_json_success(['region'=>(string)((new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id)['region']??''),'displayName'=>wp_get_current_user()->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'vehicles'=>\SwissTRClub\Core\Forms\FormsEndpoint::vehicles(),'upcoming'=>$upcoming,'registrations'=>array_slice($registrations,0,12),'uploads'=>$uploads,'orders'=>$orders,'queues'=>$queues,'notifications'=>array_reverse((array)get_user_meta($id,'strc_notifications',true)),'magazine'=>$magazine,'magazineIssue'=>$featured,'isBoard'=>current_user_can('strc_access_board_documents')]);
+        wp_send_json_success(['region'=>(string)((new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id)['region']??''),'displayName'=>wp_get_current_user()->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'vehicles'=>\SwissTRClub\Core\Forms\FormsEndpoint::vehicles(),'upcoming'=>$upcoming,'myEvents'=>$myEvents,'registrations'=>array_slice($registrations,0,12),'uploads'=>$uploads,'orders'=>$orders,'queues'=>$queues,'notifications'=>array_reverse((array)get_user_meta($id,'strc_notifications',true)),'magazine'=>$magazine,'magazineIssue'=>$featured,'isBoard'=>current_user_can('strc_access_board_documents')]);
     }
 }
