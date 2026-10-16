@@ -59,9 +59,12 @@ final class LibraryPolicy
     private static function classesForUser(int $userId): array
     {
         if(!user_can($userId,'strc_access_member_area'))return [];
-        $level=\SwissTRClub\Core\Roles\RoleAssignments::scoped($userId)?'open':get_user_meta($userId,'strc_library_access',true);
+        // Stufen: Mitglied (alle Mitglieder) · Moderator (jede Clubfunktion) · Vorstand (Rolle Vorstand).
         if(user_can($userId,'strc_access_board_documents'))return ['open','limited','restricted'];
-        return $level==='limited'||\SwissTRClub\Core\Roles\RoleAssignments::limited($userId)||(!\SwissTRClub\Core\Roles\RoleAssignments::scoped($userId)&&user_can($userId,'strc_manage_library'))?['open','limited']:['open'];
+        $moderator=\SwissTRClub\Core\Roles\RoleAssignments::limited($userId)
+            ||user_can($userId,'strc_manage_content_roles')||user_can($userId,'strc_manage_library')||user_can($userId,'strc_manage_members')
+            ||(!\SwissTRClub\Core\Roles\RoleAssignments::scoped($userId)&&get_user_meta($userId,'strc_library_access',true)==='limited');
+        return $moderator?['open','limited']:['open'];
     }
     public static function classification(int $id): string
     {

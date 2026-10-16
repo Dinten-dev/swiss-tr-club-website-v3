@@ -34,12 +34,13 @@ final class RoleDefinitions
         return array_intersect_key($roles, array_fill_keys($slugs, true));
     }
 
-    /** Operational admins may assign club functions, never platform or board access. */
+    /** Operational admins may assign club functions including the board role, never platform access. */
     public static function assignableFor(bool $canManagePlatform): array
     {
         $roles = self::assignable();
         if (! $canManagePlatform) {
-            unset($roles['strc_developer'], $roles['strc_board_member']);
+            // Die Rolle Vorstand teilen die Administratoren zu; Webmaster-Konten bleiben dem Webmaster vorbehalten.
+            unset($roles['strc_developer']);
         }
         return $roles;
     }
