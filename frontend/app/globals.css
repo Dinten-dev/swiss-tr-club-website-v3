@@ -2749,3 +2749,4 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .db-agenda-count{font-size:13px;color:#536a79;white-space:nowrap;font-variant-numeric:tabular-nums}
 @media(max-width:560px){.db-agenda-list li{grid-template-columns:1fr auto}.db-agenda-date{grid-column:1/-1}}
 .db-mod-tile.is-agenda .db-agenda-list a{text-align:left}.db-mod-tile.is-agenda{align-items:stretch;justify-items:stretch}
+.market-card-image .market-pending{position:absolute;left:10px;top:10px;padding:4px 10px;border-radius:999px;background:var(--red);color:#fff;font-size:12px;font-weight:700}.market-card-image{position:relative}

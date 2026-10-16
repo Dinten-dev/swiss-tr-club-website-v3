@@ -73,7 +73,7 @@ final class MemberDashboardEndpoint
             if($area==='gallery'){$args['post_status']=['pending','publish'];$args['meta_query']=[['key'=>'strc_gallery_pending_count','value'=>0,'compare'=>'>','type'=>'NUMERIC']];}
             if($area==='library')$args['meta_query']=[LibraryPolicy::filter()];
             $query=new \WP_Query($args);
-            $queues[]=['title'=>EditorialAccess::AREAS[$area],'count'=>(int)$query->found_posts,'url'=>'#'.['forum'=>'forum','gallery'=>'galerie','library'=>'bibliothek','market'=>'marktplatz'][$area]];
+            $queues[]=['title'=>EditorialAccess::AREAS[$area],'count'=>(int)$query->found_posts,'url'=>'#'.['forum'=>'forum','gallery'=>'galerie','library'=>'bibliothek','market'=>'marktplatz/pruefung'][$area]];
         }
         $orders=[];
         if(function_exists('wc_get_orders'))foreach(wc_get_orders(['customer_id'=>$id,'limit'=>8,'orderby'=>'date','order'=>'DESC']) as $order)$orders[]=['id'=>$order->get_id(),'title'=>'Bestellung #'.$order->get_order_number(),'status'=>wc_get_order_status_name($order->get_status()),'total'=>wp_strip_all_tags($order->get_formatted_order_total()),'url'=>$order->get_view_order_url()];
