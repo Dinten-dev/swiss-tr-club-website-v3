@@ -2728,3 +2728,11 @@ details.form-section.is-collapsible>summary::before{content:"＋";font-weight:70
 details.form-section.is-collapsible[open]>summary::before{content:"－"}
 details.form-section.is-collapsible>summary small{font-weight:400;color:#647886;font-size:13px}
 details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
+/* Marktplatz-Formular in Schritten */
+.market-form .market-step{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:26px 0 10px;padding-top:16px;border-top:1px solid #dce5eb;color:var(--navy);font:700 17px/1.3 var(--font-sans)}
+.market-form .market-step:first-of-type{margin-top:6px;border-top:0;padding-top:0}
+.market-form .market-step>span{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px}
+.market-form .market-step small{font-weight:400;font-size:13px;color:#647886}
+.market-more{margin-top:18px;border:1px solid #dce5eb;border-radius:8px;padding:12px 14px;background:#fff}
+.market-more>summary{cursor:pointer;font-weight:700;color:var(--navy)}
+.market-more>section{margin-top:12px}
