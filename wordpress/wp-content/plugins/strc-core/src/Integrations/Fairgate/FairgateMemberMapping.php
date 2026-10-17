@@ -76,6 +76,12 @@ final class FairgateMemberMapping
     public static function storeExtras(int $userId,array $extras): void
     {
         foreach (array('print','newsletter') as $name) if (isset($extras[$name])) update_user_meta($userId,'strc_subscription_'.$name,$extras[$name]?'1':'0');
+        // Gemeldete Änderung ist erledigt, sobald Fairgate denselben Stand liefert.
+        $request=get_user_meta($userId,'strc_subscription_request',true);
+        if (is_array($request)) {
+            $current=static fn(string $name):bool=>get_user_meta($userId,'strc_subscription_'.$name,true)!=='0';
+            if (($request['print']??null)===$current('print') && ($request['newsletter']??null)===$current('newsletter')) delete_user_meta($userId,'strc_subscription_request');
+        }
     }
 
     public function regionName(array $contact): ?string

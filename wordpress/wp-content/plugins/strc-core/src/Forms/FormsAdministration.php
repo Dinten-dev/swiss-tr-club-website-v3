@@ -20,7 +20,7 @@ final class FormsAdministration
         if($post->post_type==='strc_application')wp_die('Mitgliedsanträge bitte in der Webübersicht unter «Anträge» prüfen und bestätigen.');
         try{
             $data=FormStore::data($post);$state=sanitize_key($_POST['state']??'');
-            $allowed=$post->post_type==='strc_application'||($data['kind']??'')==='profile'?['pending_review','clarification','approved_pending_sync','rejected']:['pending_review','clarification','resolved'];
+            $allowed=$post->post_type==='strc_application'||in_array($data['kind']??'',['profile','subscription'],true)?['pending_review','clarification','approved_pending_sync','rejected']:['pending_review','clarification','resolved'];
             if(!in_array($state,$allowed,true))throw new \RuntimeException('Ungültiger Status.');
             if(!in_array($data['state']??'',$allowed,true))throw new \RuntimeException('Bereits übertragene oder unklare Altanfragen zuerst in Fairgate abgleichen.');
             $data['state']=$state;$data['reviewedAt']=gmdate(DATE_ATOM);$data['reviewedBy']=get_current_user_id();$data['reviewNote']=FormFields::text(wp_unslash($_POST),'note',2000);
@@ -32,7 +32,7 @@ final class FormsAdministration
     {
         if(!current_user_can('strc_manage_members'))wp_die('Kein Zugriff.');
         $page=max(1,absint($_GET['paged']??1));$query=new \WP_Query(['post_type'=>['strc_form','strc_application'],'post_status'=>'private','posts_per_page'=>20,'paged'=>$page,'orderby'=>'ID','order'=>'DESC']);
-        echo '<div class="wrap"><h1>Formularpostfach</h1><p>Anträge, Kontaktanfragen und Profiländerungen. Eine Freigabe vermerkt die Prüfung; sie überträgt noch keine Daten nach Fairgate und erstellt kein Mitgliedskonto. Rückfragen erfolgen persönlich durch die zuständige Person.</p>';
+        echo '<div class="wrap"><h1>Formularpostfach</h1><p>Anträge, Kontaktanfragen, Profil- und Abo-Änderungen. Eine Freigabe vermerkt die Prüfung; sie überträgt noch keine Daten nach Fairgate und erstellt kein Mitgliedskonto. Rückfragen erfolgen persönlich durch die zuständige Person.</p>';
         if(!$query->posts)echo '<p>Keine Anfragen vorhanden.</p>';
         $labels=['pending_review'=>'Prüfung offen','clarification'=>'Rückfrage erforderlich','approved_pending_sync'=>'Geprüft – Fairgate-Übernahme offen','rejected'=>'Abgelehnt','resolved'=>'Erledigt'];
         foreach($query->posts as $post){
