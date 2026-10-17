@@ -36,7 +36,7 @@ final class FormsAdministration
         if(!$query->posts)echo '<p>Keine Anfragen vorhanden.</p>';
         $labels=['pending_review'=>'Prüfung offen','clarification'=>'Rückfrage erforderlich','approved_pending_sync'=>'Geprüft – Fairgate-Übernahme offen','rejected'=>'Abgelehnt','resolved'=>'Erledigt'];
         foreach($query->posts as $post){
-            $data=FormStore::data($post);$kind=$post->post_type==='strc_application'?'Mitgliedsantrag':(['profile'=>'Kontaktänderung','contact'=>'Kontaktanfrage'][$data['kind']??'']??'Anfrage');
+            $data=FormStore::data($post);$kind=$post->post_type==='strc_application'?'Mitgliedsantrag':(['profile'=>'Kontaktänderung','contact'=>'Kontaktanfrage','subscription'=>'Abo-Änderung (Magazin / eNewsletter)'][$data['kind']??'']??'Anfrage');
             if($post->post_type==='strc_application'){
                 echo '<section class="card"><h2>Mitgliedsantrag #'.(int)$post->ID.'</h2><p><a href="'.esc_url((defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url()).'/#antraege').'">In der Webübersicht prüfen, annehmen oder ablehnen</a></p>';
                 \SwissTRClub\Core\Mail\ApplicationNotification::renderStatus((int)$post->ID);

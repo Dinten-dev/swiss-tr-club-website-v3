@@ -2751,3 +2751,9 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .db-mod-tile.is-agenda .db-agenda-list a{text-align:left}.db-mod-tile.is-agenda{align-items:stretch;justify-items:stretch}
 .market-card-image .market-pending{position:absolute;left:10px;top:10px;padding:4px 10px;border-radius:999px;background:var(--red);color:#fff;font-size:12px;font-weight:700}.market-card-image{position:relative}
 .community-review-head{margin:0 0 18px;padding:16px 18px;border:1px solid #ebd2d6;border-radius:8px;background:#f6e8ea}.community-review-head h2{margin:0 0 6px;color:var(--navy)}.community-review-head p{margin:0 0 8px;color:#536a79}
+.personal-dashboard .dashboard-welcome .db-member-line{margin:4px 0 0;font-size:15px;opacity:.92}
+.personal-dashboard .dashboard-welcome .db-member-line+.dashboard-car-chips,.personal-dashboard .dashboard-welcome .dashboard-car-chips{margin-top:10px}
+.personal-dashboard .db-subscriptions{border:0;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.personal-dashboard .db-subscriptions label{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
+.personal-dashboard .db-subscriptions input{width:17px;height:17px;accent-color:var(--blue)}
+.personal-dashboard .db-subscriptions small{color:var(--db-muted,#5b6b78);font-size:12.5px}

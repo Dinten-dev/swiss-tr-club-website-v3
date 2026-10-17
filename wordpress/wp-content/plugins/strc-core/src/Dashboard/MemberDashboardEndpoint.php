@@ -17,8 +17,9 @@ final class MemberDashboardEndpoint
     }
     public function respond(): void
     {
-        [, $input] = AjaxRequest::read('strc_dashboard',[]);
+        [$operation, $input] = AjaxRequest::read('strc_dashboard',['subscriptions']);
         if(!current_user_can('strc_access_member_area'))AjaxRequest::fail('Bitte mit einem aktiven Mitgliederkonto anmelden.',403);
+        if($operation==='subscriptions')wp_send_json_success($this->requestSubscriptions($input));
         $language = $input['language'] ?? 'de';
         if (!in_array($language, ['de', 'fr'], true)) AjaxRequest::fail('Bitte eine gültige Sprache wählen.', 422);
         $eventTitle = static function(int $eventId) use ($language): string {
@@ -81,6 +82,41 @@ final class MemberDashboardEndpoint
         if($query->posts){$post=$query->posts[0];$magazine=['title'=>$post->post_title,'url'=>'#bibliothek/'.$post->ID];}
         $featured=(new \SwissTRClub\Core\Content\MagazineEndpoint())->preview($language);
         if($featured&&!empty($featured['canRead'])&&LibraryPolicy::canRead((int)$featured['id']))$magazine=['title'=>$featured['title'],'url'=>'#bibliothek/'.$featured['id']];
-        wp_send_json_success(['region'=>(string)((new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id)['region']??''),'displayName'=>wp_get_current_user()->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'vehicles'=>\SwissTRClub\Core\Forms\FormsEndpoint::vehicles(),'upcoming'=>$upcoming,'myEvents'=>$myEvents,'registrations'=>array_slice($registrations,0,12),'uploads'=>$uploads,'orders'=>$orders,'queues'=>$queues,'notifications'=>array_reverse((array)get_user_meta($id,'strc_notifications',true)),'magazine'=>$magazine,'magazineIssue'=>$featured,'isBoard'=>current_user_can('strc_access_board_documents')]);
+        wp_send_json_success(['nonce'=>wp_create_nonce('strc_dashboard'),'membership'=>$this->membership($id),'subscriptions'=>self::subscriptions($id),'region'=>(string)((new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id)['region']??''),'displayName'=>wp_get_current_user()->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'vehicles'=>\SwissTRClub\Core\Forms\FormsEndpoint::vehicles(),'upcoming'=>$upcoming,'myEvents'=>$myEvents,'registrations'=>array_slice($registrations,0,12),'uploads'=>$uploads,'orders'=>$orders,'queues'=>$queues,'notifications'=>array_reverse((array)get_user_meta($id,'strc_notifications',true)),'magazine'=>$magazine,'magazineIssue'=>$featured,'isBoard'=>current_user_can('strc_access_board_documents')]);
+    }
+
+    /** Kopfzeile des Dashboards: Mitgliedschaftsart, Nummer, Partner, Mitglied seit, Region. */
+    private function membership(int $id): array
+    {
+        $row=(new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id);
+        if(!$row)return [];
+        $type=\SwissTRClub\Core\Members\MembershipTypePolicy::normalize((string)$row['membership_type']);
+        $label=(string)get_user_meta($id,'strc_fairgate_membership_label',true)?:(\SwissTRClub\Core\Members\MembershipTypePolicy::labels()[$type]??'Mitglied');
+        $number=(string)$row['member_number'];
+        if(str_starts_with($number,'FG:')||get_user_meta($id,'strc_fairgate_number_pending',true)==='1')$number='';
+        $partner='';
+        if(!empty($row['partner_user_id'])&&\SwissTRClub\Core\Members\MembershipTypePolicy::isCouple($type)){$user=get_userdata((int)$row['partner_user_id']);if($user)$partner=trim((string)get_user_meta($user->ID,'first_name',true).' '.(string)get_user_meta($user->ID,'last_name',true))?:$user->display_name;}
+        $since=!empty($row['started_on'])?substr((string)$row['started_on'],0,4):'';
+        return ['type'=>$label,'number'=>$number,'partner'=>$partner,'since'=>$since,'region'=>(string)$row['region']];
+    }
+
+    /** Abonnemente laut Fairgate; ohne Angabe gilt «abonniert». Eine offene Änderungsanfrage wird mitgeliefert. */
+    public static function subscriptions(int $id): array
+    {
+        $value=static fn(string $key):bool=>get_user_meta($id,'strc_subscription_'.$key,true)!=='0';
+        $request=get_user_meta($id,'strc_subscription_request',true);
+        return ['print'=>$value('print'),'newsletter'=>$value('newsletter'),'request'=>is_array($request)?$request:null];
+    }
+
+    /** Fairgate bleibt führend: Änderungen gehen als Anfrage an die Mitgliederverwaltung (Formularpostfach). */
+    private function requestSubscriptions(array $input): array
+    {
+        $id=get_current_user_id();$current=self::subscriptions($id);
+        $wanted=['print'=>($input['print']??'')==='1','newsletter'=>($input['newsletter']??'')==='1'];
+        if($wanted['print']===$current['print']&&$wanted['newsletter']===$current['newsletter']){delete_user_meta($id,'strc_subscription_request');return ['message'=>'Keine Änderung gegenüber Fairgate.','subscriptions'=>self::subscriptions($id)];}
+        $row=(new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id);
+        FormStore::intake('subscription',['name'=>wp_get_current_user()->display_name,'email'=>wp_get_current_user()->user_email,'memberNumber'=>(string)($row['member_number']??''),'printMagazine'=>$wanted['print']?'abonniert':'abbestellt','eNewsletter'=>$wanted['newsletter']?'abonniert':'abbestellt'],wp_generate_uuid4(),$id);
+        update_user_meta($id,'strc_subscription_request',$wanted+['at'=>gmdate(DATE_ATOM)]);
+        return ['message'=>'Änderung an die Mitgliederverwaltung gesendet. Sie wird in Fairgate übernommen.','subscriptions'=>self::subscriptions($id)];
     }
 }

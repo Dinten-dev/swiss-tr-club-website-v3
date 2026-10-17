@@ -21,13 +21,17 @@ final class FairgateMemberSync
             $id=$linkId ?? (string)($row['fairgate_contact_id'] ?? '');
             if (!$id) throw new FairgateApiException('Die Fairgate Contact ID fehlt.');
             if ($linkId && !empty($row['fairgate_contact_id']) && $linkId!==$row['fairgate_contact_id']) throw new FairgateApiException('Eine bestehende Fairgate-Verknüpfung wird nicht automatisch ersetzt.');
-            $fields=$this->mapping->map($this->gateway->contact($id),$id);
+            $contact=$this->gateway->contact($id);
+            $fields=$this->mapping->map($contact,$id);
+            $extras=$this->mapping->extras($contact);
+            if (isset($extras['started_on'])) $fields['started_on']=$extras['started_on'];
             $fields['fairgate_contact_id']=$id;
             $fields['updated_at']=current_time('mysql');
             // Unique constraints protect Contact ID/member number; no account or role is created.
             $saved=$wpdb->update($table,$fields,array('id'=>(int)$row['id']));
             if ($saved===false) throw new FairgateApiException('Abgleich konnte nicht gespeichert werden. Contact ID und Mitgliedsnummer auf Doppelbelegung prüfen.');
             update_user_meta($userId,'strc_fairgate_synced_at',gmdate(DATE_ATOM));
+            FairgateMemberMapping::storeExtras($userId,$extras);
         } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$lock)); }
     }
 }

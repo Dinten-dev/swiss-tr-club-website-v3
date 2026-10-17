@@ -82,6 +82,7 @@ final class FairgateStagingImport
                 $address=$c['corr_address']??[];$comm=$c['communication']??[];
                 $r+=['email'=>$email,'first_name'=>$first,'last_name'=>$last,'status'=>$status,'type'=>self::TYPES[$label],
                     'profile'=>['phone'=>sanitize_text_field($comm['mobile']??''),'street'=>sanitize_text_field($address['street']??''),'postcode'=>sanitize_text_field($address['postale_code']??''),'city'=>sanitize_text_field($address['city']??''),'country'=>sanitize_text_field($address['country']??'')]];
+                $r['extras']=FairgateMemberMapping::fromConstants()->extras($c);
                 $region=FairgateMemberMapping::fromConstants()->regionName($c);
                 if($region!==null)$r['region']=$region;
                 $r['action']=$this->target($r)?'update':($status==='active'?'create':'skip');
@@ -139,6 +140,7 @@ final class FairgateStagingImport
         if($existing && (string)$existing['fairgate_contact_id']!==$r['id'])throw new FairgateApiException('Vorhandene Mitgliedschaft bleibt unverändert');
         $fields=['membership_type'=>$r['type'],'status'=>$r['status'],'updated_at'=>current_time('mysql')];
         if(isset($r['region']))$fields['region']=$r['region'];
+        if(isset($r['extras']['started_on']))$fields['started_on']=$r['extras']['started_on'];
         if(!$existing){
             // Internal unique key only. Never present it as an official member number.
             $fields+=['user_id'=>$u->ID,'fairgate_contact_id'=>$r['id'],'member_number'=>'FG:'.$r['id'],'region'=>$r['region']??'','created_at'=>current_time('mysql')];
@@ -152,6 +154,7 @@ final class FairgateStagingImport
         foreach($r['profile']as $key=>$value)update_user_meta($u->ID,'strc_'.$key,$value);
         update_user_meta($u->ID,'strc_fairgate_membership_label',$r['label']);
         update_user_meta($u->ID,'strc_fairgate_synced_at',gmdate(DATE_ATOM));
+        FairgateMemberMapping::storeExtras((int)$u->ID,$r['extras']??[]);
         // Existing passwords, names, website preferences, vehicles and roles are retained.
         $verifiedExisting=(string)get_user_meta($u->ID,'strc_fairgate_verified_existing_user',true)===(string)$u->ID;
         if(!$verifiedExisting && !in_array('strc_member',$u->roles,true))$u->add_role('strc_member');
