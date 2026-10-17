@@ -11,7 +11,7 @@ use SwissTRClub\Core\Http\AjaxRequest;
 final class RoleAssignments
 {
     public const KEY = 'strc_function_assignments_v1';
-    public const PROTECTED = ['strc_administrator','strc_developer','strc_board_member'];
+    public const PROTECTED = ['strc_administrator','strc_developer'];
     public static function options(bool $platform): array { $roles=RoleDefinitions::assignableFor($platform);if($platform)$roles['strc_administrator']=RoleDefinitions::all()['strc_administrator'];return $roles; }
     private static function listMeta(int $id,string $key): array { $value=get_user_meta($id,$key,true);return is_array($value)?array_values($value):[]; }
     public static function rows(int $id): array
@@ -60,10 +60,10 @@ final class RoleAssignments
             return false;
         });
     }
+    /** Jede zugeteilte Clubfunktion (auch Vorstand) öffnet die Dokumentstufe «Moderator». */
     public static function limited(int $id): bool
     {
-        foreach(self::rows($id) as $row) if ($row['libraryAccess']==='limited') return true;
-        return false;
+        return self::rows($id)!==[];
     }
     public static function areas(int $id): array
     {
@@ -100,10 +100,8 @@ final class RoleAssignments
                 foreach($row['regions'] as $region) if (!is_int($region)||!RegionDirectory::visibleTerm($region)) AjaxRequest::fail('Ungültige Region.',422);
                 foreach($row['assignedEvents'] as $event) if (!is_int($event)||get_post_type($event)!=='strc_event') AjaxRequest::fail('Ungültige Veranstaltung.',422);
                 foreach($row['areas'] as $area) if (!is_string($area)||!isset(EditorialAccess::AREAS[$area])) AjaxRequest::fail('Ungültiger Bereich.',422);
-                $access=$row['libraryAccess']??'';
-                if (!in_array($access,['open','limited','restricted'],true)) AjaxRequest::fail('Ungültiger Dokumentzugriff.',422);
-                if ($access==='restricted' && (!in_array('strc_board_member',$user->roles,true) && !array_filter($rows,static fn($r)=>($r['role']??'')==='strc_board_member'))) AjaxRequest::fail('Vorstandsunterlagen benötigen die Vorstandsrolle.',422);
-                if (!$platform && $access==='restricted' && !array_filter($previous,static fn($p)=>$p['role']===$role&&$p['libraryAccess']==='restricted')) AjaxRequest::fail('Vorstandszugriff verwaltet der Webmaster.',403);
+                // Die Dokumentstufe ergibt sich aus der Rolle: Vorstand → Vorstandsdokumente, jede andere Clubfunktion → Moderator-Dokumente.
+                $access=$role==='strc_board_member'?'restricted':'limited';
                 // Non-regional functions retain legacy scopes, but cannot acquire unrelated new scopes.
                 if (!in_array($role,['strc_regional_manager','strc_event_organiser','strc_moderator'],true) && $row['regions']) {
                     $old=array_values(array_filter($previous,static fn($p)=>$p['role']===$role));

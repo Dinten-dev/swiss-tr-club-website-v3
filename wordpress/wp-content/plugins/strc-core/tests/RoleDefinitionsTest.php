@@ -70,14 +70,14 @@ final class RoleDefinitionsTest extends TestCase
         self::assertArrayNotHasKey('strc_manage_events', RoleDefinitions::all()['strc_event_organiser']['capabilities']);
     }
 
-    public function testClubAdminsCanAssignOperationalRolesButNotPlatformOrBoardRoles(): void
+    public function testClubAdminsCanAssignOperationalAndBoardRolesButNotPlatformRoles(): void
     {
         $roles = RoleDefinitions::assignableFor(false);
 
         self::assertArrayHasKey('strc_regional_manager', $roles);
         self::assertArrayHasKey('strc_treasurer', $roles);
         self::assertArrayNotHasKey('strc_developer', $roles);
-        self::assertArrayNotHasKey('strc_board_member', $roles);
+        self::assertArrayHasKey('strc_board_member', $roles);
         self::assertArrayHasKey('strc_developer', RoleDefinitions::assignableFor(true));
         self::assertArrayHasKey('strc_board_member', RoleDefinitions::assignableFor(true));
     }

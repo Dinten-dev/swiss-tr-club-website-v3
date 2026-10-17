@@ -67,8 +67,10 @@ final class MarketplaceEndpoint
         }
         $category = is_string($input['category'] ?? null) ? $input['category'] : '';
         $meta = array('relation' => 'AND');
-        $reviewChanged=$post->post_status!==($operation==='approve'?'publish':'draft')||($operation==='approve'&&get_post_meta($id,'strc_ad_public_approved',true)!=='1');
         $review=\SwissTRClub\Core\Editorial\EditorialAccess::area('market');
+        // Prüfliste für das Marktplatz-Team: nur eingereichte, noch nicht freigegebene Inserate aller Kategorien.
+        $pendingOnly=$review&&'1'===($input['review']??'');
+        if ($pendingOnly) $category='';
         if (!$mine&&!$review) {
             $meta[]=['key'=>'strc_ad_public_approved','value'=>'1'];
             $meta[]=['key'=>'strc_ad_expires_at','value'=>time(),'compare'=>'>','type'=>'NUMERIC'];
@@ -101,7 +103,7 @@ final class MarketplaceEndpoint
         };
         add_filter('posts_where',$searchFilter,10,2);
         $query = new WP_Query(array(
-            'post_type' => 'strc_ad', 'post_status' => $mine||$review?['publish','pending','draft']:'publish',
+            'post_type' => 'strc_ad', 'post_status' => $pendingOnly?'pending':($mine||$review?['publish','pending','draft']:'publish'),
             'posts_per_page' => 24, 'paged' => max(1, absint($input['page'] ?? 1)),
             'orderby' => array('date' => 'DESC', 'ID' => 'DESC'),
             'author' => $mine ? get_current_user_id() : '',
@@ -228,12 +230,13 @@ final class MarketplaceEndpoint
         if ($attachments) {
             set_post_thumbnail($postId, $attachments[0]);
         }
-        $published = wp_update_post(array('ID' => $postId, 'post_status' => 'pending'), true);
+        $status=$this->settle((int)$postId,true);
+        $published = wp_update_post(array('ID' => $postId, 'post_status' => $status), true);
         if (is_wp_error($published)) {
             $this->rollback($postId, $attachments);
             return new WP_Error('publish_failed', 'Das Inserat konnte nicht veröffentlicht werden. Bitte erneut versuchen.');
         }
-        \SwissTRClub\Core\Community\SubmissionNotifications::send((int)$postId,'market');
+        if($status==='pending')\SwissTRClub\Core\Community\SubmissionNotifications::send((int)$postId,'market');
         return $this->present($postId);
     }
 
@@ -332,11 +335,25 @@ final class MarketplaceEndpoint
                 delete_post_meta($id,'strc_ad_sold');
             }
         }
+        if($status==='pending')$status=$this->settle($id,$operation==='renew');
         $result=wp_update_post(['ID'=>$id,'post_status'=>$status],true);if(is_wp_error($result))return $result;
         if($status!=='publish')delete_post_meta($id,'strc_ad_public_approved');
         if($status==='pending')\SwissTRClub\Core\Community\SubmissionNotifications::send($id,'market');
         if($reviewChanged&&in_array($operation,['approve','reject'],true))\SwissTRClub\Core\Community\SubmissionNotifications::decided($id,'market',$operation==='approve');
         return $this->present($id);
+    }
+
+    /**
+     * Nur Fahrzeuginserate werden vom Marktplatz-Team geprüft. Ersatzteile, Zubehör und Sonstiges
+     * gehen direkt online (90 Tage Laufzeit, bei «renew» oder abgelaufener Laufzeit neu ab heute).
+     */
+    private function settle(int $id,bool $extend): string
+    {
+        if(get_post_meta($id,'strc_ad_category',true)==='Fahrzeuge')return 'pending';
+        update_post_meta($id,'strc_ad_public_approved','1');
+        if($extend||(int)get_post_meta($id,'strc_ad_expires_at',true)<time())update_post_meta($id,'strc_ad_expires_at',time()+90*DAY_IN_SECONDS);
+        update_post_meta($id,'strc_review',['by'=>0,'at'=>gmdate(DATE_ATOM),'automatic'=>true]);
+        return 'publish';
     }
 
     private function present(int $id): array

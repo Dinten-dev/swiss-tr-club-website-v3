@@ -43,8 +43,9 @@ final class EditorialEndpoint
                 array('key'=>'intro','label'=>'Kurzbeschreibung','type'=>'text','default'=>'Lokale Treffen, persönliche Kontakte und gemeinsame Ausfahrten.'),
                 array('key'=>'body','label'=>'Region, Treffpunkt und Kontakt','type'=>'rich','default'=>EditorialAccess::html(wpautop($term->description ?: 'Informationen zu Treffpunkt und Ansprechperson sind für diese Region noch nicht hinterlegt.'))),
             ));
-            $schema['region-'.$term->slug]['fields']=array_merge($schema['region-'.$term->slug]['fields'],json_decode((string)file_get_contents(__DIR__.'/regional-fields.json'),true));
+            $schema['region-'.$term->slug]['fields']=self::regionalLayout(array_merge($schema['region-'.$term->slug]['fields'],json_decode((string)file_get_contents(__DIR__.'/regional-fields.json'),true)));
         }
+        if (isset($schema['triungsters'])) $schema['triungsters']['fields'] = self::regionalLayout($schema['triungsters']['fields'], true);
         // Empty French fields preserve existing content until an editor supplies a translation.
         foreach ($schema as &$definition) {
             $translations = array();
@@ -57,6 +58,33 @@ final class EditorialEndpoint
         }
         unset($definition);
         return $schema;
+    }
+
+    /**
+     * Regionalseiten und TRiungsters: Die Regionalleitung bearbeitet nur a) Treffpunkt, b) Regionale Informationen,
+     * c) Regionale Neuigkeiten und d) Regionale Veranstaltungen. Alle übrigen Felder sind Administration.
+     */
+    private static function regionalLayout(array $fields, bool $triungsters = false): array
+    {
+        $moderated = array(
+            'meetName' => array('a', 'Treffpunkt: Name'),
+            'meetAddress' => array('a', 'Treffpunkt: Adresse'),
+            'meetSchedule' => array('a', 'Treffpunkt: Rhythmus und Zeit (zwei Zeilen möglich)'),
+            'meetDates' => array('a', 'Nächste Treffen'),
+            'body' => array('b', $triungsters ? 'Regionale Informationen (Über die TRiungsters)' : 'Regionale Informationen'),
+            'news' => array('c', 'Regionale Neuigkeiten'),
+            'eventBody' => array('d', 'Regionale Veranstaltungen: Text über der Terminliste'),
+        );
+        $ordered = array();
+        foreach ($moderated as $key => [$section, $label]) {
+            foreach ($fields as $field) {
+                if ($field['key'] === $key) $ordered[] = array_replace($field, array('label'=>$label, 'section'=>$section));
+            }
+        }
+        foreach ($fields as $field) {
+            if (! isset($moderated[$field['key']])) $ordered[] = $field + array('section'=>'admin', 'adminOnly'=>true);
+        }
+        return $ordered;
     }
 
     private static function defaults(array $schema): array
@@ -85,7 +113,7 @@ final class EditorialEndpoint
         if(str_starts_with($key,'model-')&&$isPublished)$published=$this->editableFacts($published,$stored['published']??[]);
         $values=array_replace(self::defaults($schema), $stored['draft'] ?? $published);
         if(str_starts_with($key,'model-'))$values=$this->editableFacts($values,$stored['draft']??$stored['published']??[]);
-        return array('key'=>$key,'schema'=>$schema,'revision'=>(int) ($stored['revision'] ?? 0),
+        return array('key'=>$key,'schema'=>$schema,'revision'=>(int) ($stored['revision'] ?? 0),'canAdminister'=>EditorialAccess::global(),
             'values'=>$values,
             'published'=>$published, 'isPublished'=>$isPublished,
             'hasDraft'=>isset($stored['draft']) || ($draftPage && ! $isPublished), 'history'=>$stored['history'] ?? array());
@@ -111,7 +139,7 @@ final class EditorialEndpoint
 
     public function respond(): void
     {
-        [$operation,$input] = AjaxRequest::read('strc_editorial', array('save','preview','post-save','upload','upload-document','assign','highlights-save'));
+        [$operation,$input] = AjaxRequest::read('strc_editorial', array('save','preview','post-save','upload','upload-document','delete-document','rename-document','assign','highlights-save'));
         $schema = self::schema();
         if ('public' === $operation) {
             $values = $published = array();
@@ -121,6 +149,11 @@ final class EditorialEndpoint
                 $published[$key] = $document['isPublished'];
             }
             wp_send_json_success(array('values'=>$values, 'published'=>$published));
+        }
+        if ('public-documents' === $operation) {
+            $key = $input['key'] ?? '';
+            if (! isset($schema[$key]) || ! (str_starts_with($key,'region-') || 'triungsters' === $key)) AjaxRequest::fail('Seite nicht gefunden.',404);
+            wp_send_json_success(PublicDocumentUpload::listing($key));
         }
         if (! EditorialAccess::available()) AjaxRequest::fail('Kein Zugriff auf die Redaktion.',403);
         $result = match ($operation) {
@@ -134,6 +167,8 @@ final class EditorialEndpoint
             'post-save' => $this->savePost($input),
             'upload' => $this->upload($input,$schema),
             'documents','upload-document' => $this->documents($input,$schema,$operation==='upload-document'),
+            'rename-document' => PublicDocumentUpload::rename($this->readDocument($input,$schema)['key'], absint($input['id'] ?? 0), (string) ($input['title'] ?? '')),
+            'delete-document' => PublicDocumentUpload::delete($this->readDocument($input,$schema)['key'], absint($input['id'] ?? 0)),
             'people' => $this->people(),
             'assign' => $this->assign($input),
             default => AjaxRequest::fail('Unbekannte Anfrage.'),
@@ -238,6 +273,8 @@ final class EditorialEndpoint
             unset($row);
         }
         unset($rows);
+        // Administrationsfelder (Kontakt, WhatsApp usw.) kann nur die globale Redaktion ändern.
+        if (! EditorialAccess::global()) foreach ($schema[$key]['fields'] as $field) if (! empty($field['adminOnly'])) unset($submitted[$field['key']]);
         // Older open editor tabs must not erase newly introduced fields.
         $clean = $this->cleanValues(array_replace($current['values'],$submitted),$schema[$key]);
         if ('publish' === $input['mode'] && !empty($clean['landingImage']) && empty(trim($clean['landingImageAlt'] ?? ''))) AjaxRequest::fail('Bitte das Bild der Landingpage beschreiben.');

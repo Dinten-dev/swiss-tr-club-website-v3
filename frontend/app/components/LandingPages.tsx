@@ -52,7 +52,7 @@ export function StaticPageLayout({documentKey,values,preview=false}:{documentKey
  const text=(key:string)=>typeof values[key]==='string'?values[key] as string:'';
  const vehicle=documentKey.startsWith('model-');
  const hasText=(html:string)=>Boolean(html.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,'').trim()||/<img\b/i.test(html));
- if(documentKey==='triungsters')return <RegionalContent documentKey={documentKey} values={values} canEdit/>;
+ if(documentKey==='triungsters')return <RegionalContent documentKey={documentKey} values={values}/>;
  if(vehicle)return <VehicleDetails values={values} model={text('title')||documentKey.replace('model-','').toUpperCase()} preview={preview}/>;
  const secondary=hasText(text('bodySecondary'));
  const history=documentKey==='history';

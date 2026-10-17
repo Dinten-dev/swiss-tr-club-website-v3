@@ -50,7 +50,7 @@ final class EventManagementEndpoint
             'organisers'=>array_values(array_map(static fn($user)=>['id'=>(int)$user->ID,'name'=>$user->display_name],array_filter(get_users(['number'=>2000,'orderby'=>'display_name']),static fn($user)=>user_can($user,'strc_access_member_area')))),
             'editorName' => (string) (wp_get_current_user()->display_name ?: wp_get_current_user()->user_login),
             'eventTypes'=>array_map(static fn($slug,$name)=>['slug'=>$slug,'name'=>$name],array_keys(array_diff_key(EventPostType::EVENT_TYPES,['weekend-meeting'=>true])),array_values(array_diff_key(EventPostType::EVENT_TYPES,['weekend-meeting'=>true]))),
-            'regions' => array_values(array_map(static fn ($term): array => array('id' => (int) $term->term_id, 'name' => $term->name), array_filter($regions, static fn ($term): bool => RegionalEventAccess::isGlobal() || RegionalEventAccess::isOrganiser() || in_array((int) $term->term_id, RegionalEventAccess::regions(), true)))),
+            'regions' => array_values(array_map(static fn ($term): array => array('id' => (int) $term->term_id, 'name' => $term->name, 'slug' => $term->slug), array_filter($regions, static fn ($term): bool => RegionalEventAccess::isGlobal() || RegionalEventAccess::isOrganiser() || in_array((int) $term->term_id, RegionalEventAccess::regions(), true)))),
         );
     }
 
@@ -213,6 +213,9 @@ final class EventManagementEndpoint
         if (! $id && RegionalEventAccess::isOrganiser() && ! RegionalEventAccess::isGlobal()) {
             if(!\SwissTRClub\Core\Roles\RoleAssignments::createdEvent(get_current_user_id(),(int)$saved)){wp_delete_post((int)$saved,true);AjaxRequest::fail('Die Funktionszuweisung wurde inzwischen geändert. Bitte neu laden.',409);}
         }
+        // Die nominierte Veranstaltungsleitung erhält Zugriff auf diesen Termin (Bearbeiten, Teilnehmerliste), sofern sie die Funktion Event-Organisation hat.
+        $nominated=(int)$registration['organiserUserId'];
+        if($nominated&&$nominated!==get_current_user_id()&&user_can($nominated,'strc_manage_assigned_events'))\SwissTRClub\Core\Roles\RoleAssignments::createdEvent($nominated,(int)$saved);
         update_post_meta($saved, 'strc_event_editor_id', get_current_user_id());
         update_post_meta($saved, 'strc_title_fr', $titleFr);
         update_post_meta($saved, 'strc_description_fr', $descriptionFr);

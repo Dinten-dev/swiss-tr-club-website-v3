@@ -41,6 +41,49 @@ final class FairgateMemberMapping
         return $row;
     }
 
+    /**
+     * Optionale Zusatzfelder (nur wenn in STRC_FAIRGATE_SYNC_FIELDS zugeordnet):
+     * startedOn → Mitglied seit, printMagazine → TR-Magazin Print, eNewsletter → eNewsletter.
+     * Unbekannte oder leere Werte werden ausgelassen (die Website zeigt dann «abonniert»).
+     * @return array{started_on?:string,print?:bool,newsletter?:bool}
+     */
+    public function extras(array $contact): array
+    {
+        $out=array();
+        if (is_string($this->paths['startedOn']??null)) {
+            $value=$this->value($contact,$this->paths['startedOn']);
+            if (is_scalar($value) && preg_match('/^(\d{4})(?:-(\d{2})-(\d{2}))?/',(string)$value,$m)) $out['started_on']=$m[1].'-'.($m[2]??'01').'-'.($m[3]??'01');
+        }
+        foreach (array('printMagazine'=>'print','eNewsletter'=>'newsletter') as $key=>$name) {
+            if (!is_string($this->paths[$key]??null)) continue;
+            $flag=self::flag($this->value($contact,$this->paths[$key]));
+            if ($flag!==null) $out[$name]=$flag;
+        }
+        return $out;
+    }
+
+    public static function flag(mixed $value): ?bool
+    {
+        if (is_bool($value)) return $value;
+        if (!is_scalar($value)) return null;
+        $text=mb_strtolower(trim((string)$value));
+        if (in_array($text,array('1','true','ja','yes','oui','x','abonniert'),true)) return true;
+        if (in_array($text,array('0','false','nein','no','non','nicht abonniert'),true)) return false;
+        return null;
+    }
+
+    /** Abonnemente als Benutzermeta speichern (Quelle Fairgate). */
+    public static function storeExtras(int $userId,array $extras): void
+    {
+        foreach (array('print','newsletter') as $name) if (isset($extras[$name])) update_user_meta($userId,'strc_subscription_'.$name,$extras[$name]?'1':'0');
+        // Gemeldete Änderung ist erledigt, sobald Fairgate denselben Stand liefert.
+        $request=get_user_meta($userId,'strc_subscription_request',true);
+        if (is_array($request)) {
+            $current=static fn(string $name):bool=>get_user_meta($userId,'strc_subscription_'.$name,true)!=='0';
+            if (($request['print']??null)===$current('print') && ($request['newsletter']??null)===$current('newsletter')) delete_user_meta($userId,'strc_subscription_request');
+        }
+    }
+
     public function regionName(array $contact): ?string
     {
         $path = $this->paths['region'] ?? null;
