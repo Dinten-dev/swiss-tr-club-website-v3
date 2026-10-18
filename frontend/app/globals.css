@@ -2757,3 +2757,24 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .personal-dashboard .db-subscriptions label{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
 .personal-dashboard .db-subscriptions input{width:17px;height:17px;accent-color:var(--blue)}
 .personal-dashboard .db-subscriptions small{color:var(--db-muted,#5b6b78);font-size:12.5px}
+/* Mitgliedergalerie: Bild links, Steckbrief rechts, Text darunter */
+.portrait{display:grid;gap:18px}
+.portrait-top{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(220px,1fr);gap:22px;align-items:stretch}
+.portrait-photo{display:block;border-radius:6px;overflow:hidden;background:#eef1f4;min-height:200px}
+.portrait-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.portrait-card{background:#e3f1e6;border:1px solid #9fc7aa;border-radius:6px;padding:18px 20px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.portrait-card h3{margin:0 0 10px;color:#1d6b3a;font-size:26px;font-weight:400}
+.portrait-card h4{margin:12px 0 2px;font-size:19px;font-weight:400;color:var(--ink,#13202b)}
+.portrait-card p{margin:0;font-size:15px;line-height:1.45;color:#3c4a55}
+.portrait-card .portrait-vehicle{font-size:20px;color:var(--ink,#13202b);margin-bottom:4px}
+.portrait-text p{margin:0 0 .8em;font-size:17px;line-height:1.6}
+.portrait-text p:last-child{margin-bottom:0}
+.portrait-form .portrait-fields{border:0;padding:0;margin:0 0 16px;display:grid;gap:10px;min-width:0}
+.portrait-form .portrait-fields legend{font:700 13px/1.4 inherit;letter-spacing:.08em;text-transform:uppercase;color:var(--navy,#0a253f);padding:0;margin-bottom:8px}
+.gallery-toolbar-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.portrait-form small.is-limit{color:#bd2028;font-weight:700}
+.portrait-preview{margin:6px 0 14px;border:1px dashed var(--line,#d5dde4);border-radius:8px;padding:10px 12px}
+.portrait-preview summary{cursor:pointer;font-weight:700;color:var(--navy,#0a253f);margin-bottom:10px}
+.portrait-preview .portrait-text p{font-size:15px}
+.portrait-delete{margin-top:12px;text-align:right}
+@media (max-width:720px){.portrait-top{grid-template-columns:1fr}.portrait-card h3{font-size:22px}}
