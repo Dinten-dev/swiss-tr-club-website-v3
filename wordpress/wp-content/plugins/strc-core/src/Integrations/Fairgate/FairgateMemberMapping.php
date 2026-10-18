@@ -62,6 +62,11 @@ final class FairgateMemberMapping
         $person=$this->personFields($contact,'',array('gender'=>array('basefields','gender'),'birth_date'=>array('basefields','date_of_birth'),'salutation'=>array('basefields','salutation'),'language'=>array('basefields','correspondence_lang')));
         if ($person) $out['person']=$person;
         $copilot=$this->personFields($contact,'copilot',array());
+        // Fairgate führt den Co-Piloten als ein Feld «Copilot Vorname Name».
+        if ((empty($copilot['first_name']) || empty($copilot['last_name'])) && is_string($this->paths['copilotFullName']??null)) {
+            $split=self::splitName(self::normalize('name',$this->value($contact,$this->paths['copilotFullName'])));
+            if ($split) $copilot=$split+$copilot;
+        }
         if (!empty($copilot['first_name']) && !empty($copilot['last_name'])) $out['copilot']=$copilot;
         return $out;
     }
@@ -83,6 +88,15 @@ final class FairgateMemberMapping
             if ($clean!=='') $out[$field]=$clean;
         }
         return $out;
+    }
+
+    /** «Monika Muster» → Vorname Monika, Name Muster; mehrteilige Vornamen bleiben beim Vornamen. */
+    public static function splitName(string $full): array
+    {
+        $parts=preg_split('/\s+/u',trim($full))?:array();
+        if (count($parts)<2) return array();
+        $last=array_pop($parts);
+        return array('first_name'=>implode(' ',$parts),'last_name'=>$last);
     }
 
     public static function normalize(string $field,mixed $value): string

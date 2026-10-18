@@ -14,14 +14,19 @@ namespace SwissTRClub\Core\Integrations\Fairgate;
  * Beispiel:
  * define('STRC_FAIRGATE_PROFILE_WRITE',['enabled'=>true,
  *   'fields'=>['salutation'=>'…','email'=>'…','phone'=>'…','street'=>'…','postcode'=>'…','city'=>'…','country'=>'…'],
- *   'copilot'=>['salutation'=>'…','first_name'=>'…','last_name'=>'…','gender'=>'…','birth_date'=>'…','language'=>'…','email'=>'…','phone'=>'…','street'=>'…','postcode'=>'…','city'=>'…','country'=>'…']]);
+ *   'copilot'=>['full_name'=>'… (Copilot Vorname Name)','gender'=>'…','birth_date'=>'…'] oder einzeln ['salutation'=>'…','first_name'=>'…','last_name'=>'…','gender'=>'…','birth_date'=>'…','language'=>'…','email'=>'…','phone'=>'…','street'=>'…','postcode'=>'…','city'=>'…','country'=>'…']]);
  */
 final class FairgateProfileWriter
 {
     public const MEMBER_FIELDS=['salutation','language','email','phone','street','postcode','city','country'];
     public const COPILOT_FIELDS=['salutation','first_name','last_name','gender','birth_date','language','email','phone','street','postcode','city','country'];
 
+    private array $current=[];
+
     public function __construct(private readonly array $config) {}
+
+    /** Bisherige Werte, damit ein zusammengesetztes Namensfeld vollständig geschrieben wird. */
+    public function withCurrent(array $values): self { $copy=clone $this;$copy->current=$values;return $copy; }
 
     public static function fromConstants(): self
     {
@@ -47,6 +52,8 @@ final class FairgateProfileWriter
             if($part==='fields'&&$field==='language'&&!isset($map['language'])){$payload['correspondence_lang']=$value;continue;}
             if(isset($map[$field]))$configured[$map[$field]]=$value;
         }
+        // Co-Pilot in Fairgate als ein Feld «Copilot Vorname Name» ('full_name').
+        if($part==='copilot'&&isset($map['full_name'])&&(isset($changes['first_name'])||isset($changes['last_name'])))$configured[$map['full_name']]=trim(($changes['first_name']??$this->current['first_name']??'').' '.($changes['last_name']??$this->current['last_name']??''));
         if($configured)$payload['configured_fields']=$configured;
         return $payload;
     }

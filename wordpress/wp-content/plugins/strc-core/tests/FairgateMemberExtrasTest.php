@@ -38,4 +38,11 @@ final class FairgateMemberExtrasTest extends TestCase
         self::assertSame(array('first_name'=>'Monika','last_name'=>'Muster','gender'=>'female','birth_date'=>'1960-02-01'), $extras['copilot']);
         self::assertSame('', FairgateMemberMapping::normalize('gender','unbekannt'));
     }
+
+    public function testCopilotFullNameIsSplit(): void
+    {
+        $mapping = new FairgateMemberMapping(array('contactId'=>'/id','status'=>'/status','copilotFullName'=>'/cp'), array('Aktiv'=>'active'));
+        self::assertSame(array('first_name'=>'Anna Maria','last_name'=>'Muster'), $mapping->extras(array('id'=>1,'cp'=>'Anna Maria Muster'))['copilot']);
+        self::assertArrayNotHasKey('copilot', $mapping->extras(array('id'=>1,'cp'=>'Anna')));
+    }
 }

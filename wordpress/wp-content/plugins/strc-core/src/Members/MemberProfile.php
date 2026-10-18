@@ -128,7 +128,7 @@ final class MemberProfile
         $changes=array_diff_assoc($data,$guest['values']);
         if(!$changes&&$guest['source'])return ['message'=>'Keine Änderungen.'];
         $contactId=(string)(((new MembershipRepository())->findForUser($owner))['fairgate_contact_id']??'');
-        $written=$changes&&$this->writer->write($contactId,'copilot',$changes);
+        $written=$changes&&$this->writer->withCurrent($data)->write($contactId,'copilot',$changes);
         update_user_meta($owner,'strc_copilot',['values'=>$data,'updatedAt'=>gmdate(DATE_ATOM),'pendingSync'=>!$written]);
         if($written)return ['message'=>'Co-Pilot gespeichert und in Fairgate übernommen.'];
         FormStore::intake('copilot',$data+['forMember'=>get_userdata($owner)->display_name],wp_generate_uuid4(),$owner);
