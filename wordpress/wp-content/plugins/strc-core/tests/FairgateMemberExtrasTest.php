@@ -26,4 +26,16 @@ final class FairgateMemberExtrasTest extends TestCase
         self::assertTrue(FairgateMemberMapping::flag('abonniert'));
         self::assertNull(FairgateMemberMapping::flag(null));
     }
+
+    public function testPersonAndCopilotFieldsAreNormalized(): void
+    {
+        $mapping = new FairgateMemberMapping(
+            array('contactId'=>'/id','status'=>'/status','copilotFirstName'=>'/cp/first','copilotLastName'=>'/cp/last','copilotGender'=>'/cp/g','copilotBirthDate'=>'/cp/dob'),
+            array('Aktiv'=>'active')
+        );
+        $extras = $mapping->extras(array('id'=>1,'basefields'=>array('gender'=>'Männlich','date_of_birth'=>'03.07.1956','correspondence_lang'=>'FR'),'cp'=>array('first'=>'Monika','last'=>'Muster','g'=>'w','dob'=>'1960-02-01')));
+        self::assertSame(array('gender'=>'male','birth_date'=>'1956-07-03','language'=>'fr'), $extras['person']);
+        self::assertSame(array('first_name'=>'Monika','last_name'=>'Muster','gender'=>'female','birth_date'=>'1960-02-01'), $extras['copilot']);
+        self::assertSame('', FairgateMemberMapping::normalize('gender','unbekannt'));
+    }
 }

@@ -2810,5 +2810,53 @@
         "default": "100"
       }
     ]
+  },
+  "profile": {
+    "title": "Mitgliedschafts-Profil",
+    "route": "#profil",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Überschrift",
+        "type": "text",
+        "default": "Mitgliedschafts-Profil"
+      },
+      {
+        "key": "intro",
+        "label": "Einleitung",
+        "type": "text",
+        "default": "Deine Angaben und die deines Co-Piloten auf einen Blick."
+      },
+      {
+        "key": "memberHint",
+        "label": "Hinweis linke Spalte (Mitglied)",
+        "type": "text",
+        "default": "Vorname, Name, Geschlecht und Geburtsdatum führt der Club in Fairgate. Alle anderen Angaben kannst du selbst anpassen."
+      },
+      {
+        "key": "copilotHint",
+        "label": "Hinweis rechte Spalte (Co-Pilot)",
+        "type": "text",
+        "default": "Ist dein Co-Pilot kein Clubmitglied, kannst du ihn hier erfassen. Bei Anlass-Anmeldungen wird er dann vorausgefüllt (Gästepreis)."
+      },
+      {
+        "key": "coupleText",
+        "label": "Text zum Wechsel in die Paarmitgliedschaft",
+        "type": "rich",
+        "default": "<p>Wir möchten zur Paarmitgliedschaft wechseln. Der Jahresbeitrag ändert sich auf CHF 160.–. Der Aktuar verbindet uns danach in Fairgate.</p>"
+      },
+      {
+        "key": "vehiclesHint",
+        "label": "Hinweis Fahrzeuge",
+        "type": "text",
+        "default": "Die Fahrzeuge sind auf das Hauptmitglied eingetragen."
+      },
+      {
+        "key": "subscriptionsHint",
+        "label": "Hinweis TR-Magazin & eNewsletter",
+        "type": "text",
+        "default": "Änderungen gehen an die Mitgliederverwaltung und werden in Fairgate übernommen."
+      }
+    ]
   }
 }

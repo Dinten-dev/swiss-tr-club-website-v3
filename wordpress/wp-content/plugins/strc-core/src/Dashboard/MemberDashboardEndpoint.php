@@ -76,6 +76,7 @@ final class MemberDashboardEndpoint
             $query=new \WP_Query($args);
             $queues[]=['title'=>EditorialAccess::AREAS[$area],'count'=>(int)$query->found_posts,'url'=>'#'.['forum'=>'forum','gallery'=>'galerie','library'=>'bibliothek','market'=>'marktplatz'][$area].'/pruefung'];
         }
+        if(current_user_can('strc_manage_members'))$queues[]=['title'=>'Paarmitgliedschaften','count'=>\SwissTRClub\Core\Members\MemberProfile::openCoupleRequests(),'url'=>admin_url('admin.php?page=strc-forms')];
         $orders=[];
         if(function_exists('wc_get_orders'))foreach(wc_get_orders(['customer_id'=>$id,'limit'=>8,'orderby'=>'date','order'=>'DESC']) as $order)$orders[]=['id'=>$order->get_id(),'title'=>'Bestellung #'.$order->get_order_number(),'status'=>wc_get_order_status_name($order->get_status()),'total'=>wp_strip_all_tags($order->get_formatted_order_total()),'url'=>$order->get_view_order_url()];
         $magazine=null;$query=new \WP_Query(['post_type'=>'strc_document','post_status'=>'publish','posts_per_page'=>1,'meta_query'=>['relation'=>'AND',LibraryPolicy::filter(),['key'=>'strc_document_type','value'=>'magazine'],'year'=>['key'=>'strc_document_year','type'=>'NUMERIC'],'issue'=>['key'=>'strc_document_issue','type'=>'NUMERIC']],'orderby'=>['year'=>'DESC','issue'=>'DESC']]);

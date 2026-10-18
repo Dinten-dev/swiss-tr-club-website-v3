@@ -2796,3 +2796,37 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
   .site-header nav .language-switcher{order:2;margin:0;padding:0;border:0}
 }
 @media (prefers-reduced-motion:reduce){.nav-toggle-icon i{transition:none}}
+/* Mitgliedschafts-Profil: zwei Spalten Mitglied | Co-Pilot */
+.member-profile .profile-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:18px 0 22px;padding:16px 18px;background:var(--blue,#114973);color:#fff;border-radius:10px}
+.member-profile .profile-summary dt{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.member-profile .profile-summary dd{margin:2px 0 0;font-size:18px;font-weight:700}
+.profile-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start;margin-bottom:26px}
+.profile-card{background:#fff;border:1px solid var(--line,#d5dde4);border-radius:10px;padding:20px 22px;display:grid;gap:12px;min-width:0}
+.profile-card header{display:grid;gap:2px}
+.profile-card header .eyebrow{margin:0}
+.profile-card header h2{margin:0;font-size:24px}
+.profile-card.is-copilot{background:#f6f9fb}
+.profile-status{justify-self:start;margin-top:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;background:#e7eef3;color:#0a253f}
+.profile-status.is-guest{background:#fff4d6;color:#7a5200}
+.profile-status.is-member,.profile-status.is-active{background:#e3f1e6;color:#1d6b3a}
+.profile-status.is-pending{background:#fff4d6;color:#7a5200;font-family:ui-monospace,monospace}
+.profile-data{display:grid;grid-template-columns:minmax(120px,40%) 1fr;margin:0;border-top:1px solid var(--line,#d5dde4)}
+.profile-data>div{display:contents}
+.profile-data dt,.profile-data dd{padding:8px 0;border-bottom:1px solid var(--line,#d5dde4);margin:0;font-size:15px}
+.profile-data dt{color:#5b6b78;padding-right:12px}
+.profile-data dd{font-weight:600;overflow-wrap:anywhere}
+.profile-data.is-compact dt,.profile-data.is-compact dd{padding:5px 0;font-size:14px}
+.profile-lock{font-size:12px}
+.profile-fixed{display:grid;gap:4px;padding:10px 12px;border-radius:8px;background:#eef1f4;font-size:14px}
+.profile-fixed span{color:#5b6b78;font-weight:700}
+.profile-pending{margin:0;padding:8px 12px;border-radius:8px;background:#fff4d6;color:#5c3d00;font-size:14px}
+.profile-couple{display:grid;gap:8px;padding:14px;border:1px dashed #9fb3c2;border-radius:10px;background:#fff}
+.profile-couple.is-pending{border-style:solid;border-color:#e2c46b;background:#fffaf0}
+.profile-couple.is-active{border-style:solid;border-color:#9fc7aa;background:#f1f8f2}
+.profile-couple .rich-content p{margin:0;font-size:14px}
+.profile-subscriptions{margin-top:0}
+@media (max-width:820px){.profile-columns{grid-template-columns:1fr}}
+.member-profile .profile-subscriptions{display:grid;gap:8px}
+.member-profile .profile-subscriptions label{display:flex;gap:10px;align-items:center;font-size:16px;cursor:pointer}
+.member-profile .profile-subscriptions input{width:18px;height:18px;accent-color:var(--blue,#114973)}
+.member-profile .profile-subscriptions small{color:#5b6b78}
