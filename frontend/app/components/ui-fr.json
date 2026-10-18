@@ -804,5 +804,18 @@
   "Name suchen …": "Rechercher un nom…",
   "Sortierung": "Tri",
   "PLZ / Ort": "Code postal / localité",
-  "Das Verzeichnis ist nur für aktive Clubmitglieder sichtbar. Die Karte zeigt ungefähre Standorte nach Postleitzahl; Wohnadressen werden nicht zur Standortbestimmung verwendet.": "L’annuaire est réservé aux membres actifs du club. La carte affiche des positions approximatives selon le code postal ; les adresses privées ne sont pas utilisées pour déterminer les positions."
+  "Das Verzeichnis ist nur für aktive Clubmitglieder sichtbar. Die Karte zeigt ungefähre Standorte nach Postleitzahl; Wohnadressen werden nicht zur Standortbestimmung verwendet.": "L’annuaire est réservé aux membres actifs du club. La carte affiche des positions approximatives selon le code postal ; les adresses privées ne sont pas utilisées pour déterminer les positions.",
+  "Menü": "Menu",
+  "Mitgliedergalerie": "Galerie des membres",
+  "Mitgliederporträt erfassen": "Ajouter un portrait de membre",
+  "Steckbrief": "Fiche",
+  "Besonderheiten": "Particularités",
+  "Besitzer": "Propriétaire",
+  "Baujahr": "Année",
+  "Porträt bearbeiten": "Modifier le portrait",
+  "Meine Anlässe": "Mes événements",
+  "Meine Shop-Bestellungen": "Mes commandes boutique",
+  "Printausgabe abonniert": "Abonné à l’édition imprimée",
+  "eNewsletter abonniert": "Abonné à la eNewsletter",
+  "Mitglied seit": "Membre depuis"
 }

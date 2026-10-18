@@ -67,6 +67,7 @@ function ClubApp() {
   const {language}=useUILanguage();
   const [page, setPage] = useState<Page>('home');
   const [subroute,setSubroute]=useState('');
+  const [menuOpen,setMenuOpen]=useState(false);
   const [memberSession, setMemberSession] = useState<MemberSession | null>(null);
   const [events, setEvents] = useState<ClubEvent[]>([]);
   const [eventsState, setEventsState] = useState<'loading'|'ready'|'error'>('loading');
@@ -118,8 +119,9 @@ function ClubApp() {
       <button className="brand brand-button" onClick={() => navigate('home')} aria-label={t("Swiss TR-Club Startseite")}>
         <Image className="brand-logo" src={assetUrl(c('global.logo'))} width={954} height={954} alt={t("Swiss TR-Club Logo")} priority/><span><strong>{c('global.name')}</strong><small>{c('global.tagline')}</small></span>
       </button>
-      <nav aria-label={t("Hauptnavigation")}>
-        <div className="nav-tabs">
+      <nav aria-label={t("Hauptnavigation")} className={menuOpen?'is-menu-open':''} onKeyDown={event=>{if(event.key==='Escape'&&menuOpen){setMenuOpen(false);(event.currentTarget.querySelector('.nav-toggle') as HTMLButtonElement|null)?.focus();}}}>
+        <button type="button" className="nav-toggle" aria-expanded={menuOpen} aria-controls="hauptmenu" onClick={()=>setMenuOpen(open=>!open)}><span className="nav-toggle-icon" aria-hidden="true"><i/><i/><i/></span>{t(menuOpen?'Schliessen':'Menü')}</button>
+        <div className="nav-tabs" id="hauptmenu" onClick={()=>setMenuOpen(false)}>
         <button className={page==='home'?'active':''} onClick={() => navigate('home')}>{t("Home")}</button>
         <button className={['club','organisation','mission','membership','models','triungsters','history'].includes(page)?'active':''} onClick={() => navigate('club')}>{c('global.navClub')}</button>
         <button className={page==='agenda'?'active':''} onClick={() => navigate('agenda')}>{c('global.navAgenda')}</button>

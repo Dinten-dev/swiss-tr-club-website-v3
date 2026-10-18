@@ -2778,3 +2778,21 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .portrait-preview .portrait-text p{font-size:15px}
 .portrait-delete{margin-top:12px;text-align:right}
 @media (max-width:720px){.portrait-top{grid-template-columns:1fr}.portrait-card h3{font-size:22px}}
+/* Handy/Tablet: Hamburger-Menü statt Navigations-Tabs */
+.site-header nav .nav-toggle{display:none}
+@media (max-width:960px){
+  .site-header nav{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0;padding-inline:8px}
+  .site-header nav .nav-toggle{display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 12px;font-size:17px;font-weight:700;color:#fff;background:none;border:0;border-bottom:0;cursor:pointer}
+  .site-header nav .nav-toggle:hover,.site-header nav .nav-toggle[aria-expanded="true"]{background:#971a20}
+  .nav-toggle-icon{display:grid;gap:5px;width:24px}
+  .nav-toggle-icon i{display:block;height:3px;border-radius:2px;background:currentColor;transition:transform .2s,opacity .2s}
+  .nav-toggle[aria-expanded="true"] .nav-toggle-icon i:nth-child(1){transform:translateY(8px) rotate(45deg)}
+  .nav-toggle[aria-expanded="true"] .nav-toggle-icon i:nth-child(2){opacity:0}
+  .nav-toggle[aria-expanded="true"] .nav-toggle-icon i:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+  .site-header nav .nav-tabs{display:none;order:3;flex-basis:100%;flex-direction:column;align-items:stretch;border-top:1px solid #ffffff40;padding:4px 0 10px}
+  .site-header nav.is-menu-open .nav-tabs{display:flex}
+  .site-header nav .nav-tabs button{width:100%;text-align:left;min-height:50px;padding:12px 14px;font-size:17px;border-bottom:0;border-left:4px solid transparent}
+  .site-header nav .nav-tabs button.active{border-left-color:#fff;border-bottom-color:transparent}
+  .site-header nav .language-switcher{order:2;margin:0;padding:0;border:0}
+}
+@media (prefers-reduced-motion:reduce){.nav-toggle-icon i{transition:none}}
