@@ -2830,3 +2830,11 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .member-profile .profile-subscriptions label{display:flex;gap:10px;align-items:center;font-size:16px;cursor:pointer}
 .member-profile .profile-subscriptions input{width:18px;height:18px;accent-color:var(--blue,#114973)}
 .member-profile .profile-subscriptions small{color:#5b6b78}
+/* Marktplatz: Service-Inserat für ein Mitglied */
+.market-service{display:grid;gap:8px;margin:0 0 16px;padding:12px 14px;border:1px dashed #9fb3c2;border-radius:10px;background:#f6f9fb}
+.market-service small{color:#5b6b78}
+.market-service-hits{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:220px;overflow:auto}
+.market-service-hits button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:8px 10px;border:1px solid #d5dde4;border-radius:8px;background:#fff;cursor:pointer}
+.market-service-hits button:hover,.market-service-hits button:focus-visible{border-color:#114973}
+.market-service-hits small{color:#5b6b78}
+.market-service-chosen{margin:0}

@@ -15,9 +15,10 @@ export type MarketplaceSession = {
   canCreateAd?: boolean;
   marketplaceNonce?: string | null;
 };
+type ServiceMember={id:number;name:string;memberNumber:string;city:string};
 type Ad = {
   id: number; title: string; description: string; descriptionHtml?:string; price: string;
-  documents?:{key:string;name:string;size:number;url:string}[]; category: string; images: string[]; imageIds:number[]; seller: string; createdAt: string; status:string; canReview:boolean; expiresAt:string;
+  documents?:{key:string;name:string;size:number;url:string}[]; category: string; images: string[]; imageIds:number[]; seller: string; createdAt: string; status:string; canReview:boolean; expiresAt:string; service?:string;
   mine: boolean; sold: boolean; details:Record<string,string|string[]>;
 };
 type Collection = { ads: Ad[]; total: number; pages: number };
@@ -133,6 +134,10 @@ function CreateDialog({ ad,session, initialCategory, close, created }: {ad?:Ad; 
   const [imageError, setImageError] = useState('');
   const [discard, setDiscard] = useState(false);
   const errorRef = useRef<HTMLParagraphElement>(null);
+  // Service-Inserat: Moderation/Admin erstellt im Namen eines Mitglieds.
+  const [canService,setCanService]=useState(false);const [serviceFor,setServiceFor]=useState<ServiceMember|null>(null);const [memberQuery,setMemberQuery]=useState('');const [memberHits,setMemberHits]=useState<ServiceMember[]>([]);
+  useEffect(()=>{if(ad)return;const controller=new AbortController();query<{canReview:boolean}>({operation:'config'},controller.signal).then(value=>setCanService(!!value.canReview)).catch(()=>{});return()=>controller.abort();},[ad]);
+  useEffect(()=>{if(!canService||memberQuery.trim().length<2)return;const controller=new AbortController();const timer=setTimeout(()=>{query<{members:ServiceMember[]}>({operation:'members',q:memberQuery.trim()},controller.signal).then(value=>setMemberHits(value.members)).catch(()=>{});},250);return()=>{clearTimeout(timer);controller.abort();};},[canService,memberQuery]);
   useEffect(() => { const urls = imageUrls.current; return () => { urls.forEach(url => URL.revokeObjectURL(url)); }; }, []);
 
   function requestClose() {
@@ -155,7 +160,7 @@ function CreateDialog({ ad,session, initialCategory, close, created }: {ad?:Ad; 
       if (offerType==='sale'&&priceMode!=='request'&&(!/^\d{1,7}([.,]\d{1,2})?$/.test(price.trim()) || Number(price.replace(',', '.')) > 1000000)) { setError('Bitte einen Preis von CHF 0 bis CHF 1’000’000 mit höchstens zwei Nachkommastellen eingeben.'); return; }
       submitting.current = true; setBusy(true); setError('');
       const form = new FormData(event.currentTarget);
-      form.set('offerType',offerType);form.set('priceMode',priceMode);form.set('operation',ad?'edit':'create');if(ad){form.set('retainedDocumentKeys',JSON.stringify(retainedDocuments));form.set('id',String(ad.id));form.set('retainedImageIds',JSON.stringify(retained));} form.set('title', title); form.set('price', price); form.set('description', description); form.set('category', category);
+      form.set('offerType',offerType);form.set('priceMode',priceMode);form.set('operation',ad?'edit':'create');if(!ad&&serviceFor)form.set('onBehalfOf',String(serviceFor.id));if(ad){form.set('retainedDocumentKeys',JSON.stringify(retainedDocuments));form.set('id',String(ad.id));form.set('retainedImageIds',JSON.stringify(retained));} form.set('title', title); form.set('price', price); form.set('description', description); form.set('category', category);
       form.set('parts',parts);form.set('models',JSON.stringify(form.getAll('models[]')));form.delete('models[]');
       images.forEach(image => form.append('images[]', image.file));documents.forEach(file=>form.append('documents[]',file));
       try { const saved=await mutate<Ad>(form, session.marketplaceNonce!); created(saved); }
@@ -163,6 +168,7 @@ function CreateDialog({ ad,session, initialCategory, close, created }: {ad?:Ad; 
       finally { submitting.current = false; setBusy(false); }
     }}>
       <p className="market-form-intro">In wenigen Schritten online. Pflichtfelder sind mit * markiert. Gesuche gehören ins Forum.</p>
+      {canService&&!ad&&<div className="market-service"><strong>{t('Service: Inserat für ein Mitglied erstellen')}</strong>{serviceFor?<p className="market-service-chosen">{t('Inserat im Namen von')} <b>{serviceFor.name}</b>{serviceFor.memberNumber?` · Nr. ${serviceFor.memberNumber}`:''}{serviceFor.city?` · ${serviceFor.city}`:''} <button type="button" className="market-text-button" onClick={()=>{setServiceFor(null);setMemberQuery('');setMemberHits([]);}}>{t('ändern')}</button></p>:<><label>{t('Mitglied suchen (optional)')}<input type="search" value={memberQuery} onChange={e=>{setMemberQuery(e.target.value);if(e.target.value.trim().length<2)setMemberHits([]);}} placeholder={t('Name, E-Mail oder Login')}/></label>{memberHits.length>0&&<ul className="market-service-hits">{memberHits.map(member=><li key={member.id}><button type="button" onClick={()=>{setServiceFor(member);setMemberHits([]);}}>{member.name}<small>{[member.memberNumber&&'Nr. '+member.memberNumber,member.city].filter(Boolean).join(' · ')}</small></button></li>)}</ul>}{memberQuery.trim().length>=2&&!memberHits.length&&<small>{t('Kein Mitglied gefunden.')}</small>}</>}<small>{t(serviceFor?'Das Inserat gehört dem Mitglied, ist sofort online und Kontaktanfragen gehen an seine E-Mail. Das Mitglied wird per E-Mail informiert.':'Leer lassen, um ein eigenes Inserat zu erstellen.')}</small></div>}
       <fieldset disabled={busy}>
         <legend className="market-sr-only">Angaben zum Inserat</legend>
         <h3 className="market-step"><span>1</span>{t('Was bieten Sie an?')}</h3><label htmlFor="ad-title">{t('Inserat-Titel *')}</label><input id="ad-title" name="title" value={title} onChange={event => setTitle(event.target.value)} required maxLength={100} placeholder="z. B. Speichenräder für Triumph TR6"/>
@@ -196,6 +202,7 @@ function AdDialog({ ad, session, close, sold,edit }: {edit:()=>void; ad: Ad; ses
     {!!ad.images.length && <div className="market-gallery"><div className="market-gallery-stage"><Image unoptimized className="market-detail-image" src={ad.images[activeImage]} alt={`${ad.title}, Bild ${activeImage + 1} von ${ad.images.length}`} width={900} height={600}/>{ad.images.length>1&&<div className="market-gallery-controls"><button type="button" aria-label={t("Vorheriges Inseratbild")} onClick={()=>setActiveImage(index=>(index-1+ad.images.length)%ad.images.length)}>‹</button><span aria-live="polite">{activeImage+1} / {ad.images.length}</span><button type="button" aria-label={t("Nächstes Inseratbild")} onClick={()=>setActiveImage(index=>(index+1)%ad.images.length)}>›</button></div>}</div>{ad.images.length > 1 && <div className="market-thumbnails" aria-label="Alle Inseratbilder">{ad.images.map((url, index) => <button type="button" key={`${url}-${index}`} aria-label={`Bild ${index + 1} anzeigen`} aria-pressed={index === activeImage} onClick={() => setActiveImage(index)}><Image unoptimized src={url} alt="" width={100} height={80}/></button>)}</div>}</div>}
     <div className="market-detail-meta"><span>{ad.category}{ad.sold ? ' · Verkauft' : ''}</span><strong>{priceLabel(ad)}</strong></div>
     {ad.category==='Teile'&&Array.isArray(ad.details?.parts)&&ad.details.parts.length>0&&<section className="market-detail-parts"><h3>Enthaltene Teile</h3><ul>{ad.details.parts.map((part,index)=><li key={`${part}-${index}`}>{part}</li>)}</ul>{ad.details.parts.length>1&&<p>Der angezeigte Preis gilt für das gesamte Inserat.</p>}</section>}
+    {ad.service&&<p className="club-hint market-service-note">{t('Erstellt durch den Marktplatz-Service')} ({ad.service})</p>}
     {ad.details&&<dl className="profile-facts">{Object.entries({location:'Standort',condition:'Zustand',model:'Modell',year:'Baujahr',mileage:'Kilometerstand',exteriorColour:'Aussenfarbe',interiorColour:'Innenfarbe',colour:'Farbe',partCategory:'Teilebereich',restoration:'Restaurationsarbeiten'}).map(([key,label])=>ad.details[key]?<div key={key}><dt>{label}</dt><dd>{key==='model'&&Array.isArray(ad.details.models)?ad.details.models.join(', '):ad.details[key]}</dd></div>:null)}</dl>}{ad.descriptionHtml?<RichHtml html={ad.descriptionHtml}/>:<p className="market-description">{ad.description}</p>}<p className="market-seller">Angeboten von {ad.seller} · {new Date(ad.createdAt).toLocaleDateString('de-CH')}</p>
     {ad.status!=='publish'&&<p className="club-notice">{ad.status==='pending'?'In Prüfung':'Entwurf / zurückgezogen'}</p>}
     {ad.mine&&<button className="club-secondary" disabled={busy} onClick={edit}>{t('Inserat bearbeiten')}</button>}{ad.expiresAt&&<p>{t(new Date(ad.expiresAt)<new Date()?'Abgelaufen am':'Gültig bis')} {new Date(ad.expiresAt).toLocaleDateString('de-CH')}</p>}
