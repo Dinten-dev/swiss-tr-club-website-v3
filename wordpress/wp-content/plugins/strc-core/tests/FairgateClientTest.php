@@ -80,4 +80,41 @@ final class FairgateClientTest extends TestCase
         $this->expectExceptionMessage('HTTP 401');
         $client->createAccessToken();
     }
+
+    public function testNotificationConfigurationUsesSeparateEndpoints(): void
+    {
+        $requests = [];
+        $client = new FairgateClient(new FairgateConfiguration('strc', 'secret'),
+            static function(string $method, string $url, array $options) use (&$requests): array {
+                $requests[] = compact('method', 'url', 'options');
+                return ['status' => 200, 'body' => $method === 'GET' ? '[]' : '{"message":"Events subscribed successfully"}'];
+            });
+        $client->notificationEvents('token');
+        $client->notificationEvents('token', true);
+        $endpoint = 'https://staging.example.test/wp-json/strc/v1/fairgate/events/'.str_repeat('a', 64);
+        $client->subscribeNotifications('token', ['contact.data.updated'], $endpoint);
+        self::assertSame('https://fsa.fairgate.ch/fsa/v2.0/subscription/strc', $requests[0]['url']);
+        self::assertSame('https://fsa.fairgate.ch/fsa/v2.0/subscription/strc/events', $requests[1]['url']);
+        self::assertSame('POST', $requests[2]['method']);
+        self::assertSame(['events' => ['contact.data.updated'], 'endpoint' => $endpoint], $requests[2]['options']['json']);
+        self::assertStringNotContainsString(str_repeat('a', 64), $requests[2]['url']);
+    }
+
+    public function testRejectsUnsafeCallbackBeforeNetworkAccess(): void
+    {
+        $client = new FairgateClient(new FairgateConfiguration('strc', 'secret'), static function(): array {
+            self::fail('Invalid callback must not reach the network');
+        });
+        $this->expectException(FairgateApiException::class);
+        $client->subscribeNotifications('token', ['contact.data.updated'], 'http://example.test/webhook');
+    }
+
+    public function testRejectsUnknownNotificationEvent(): void
+    {
+        $client = new FairgateClient(new FairgateConfiguration('strc', 'secret'), static function(): array {
+            self::fail('Unknown event must not reach the network');
+        });
+        $this->expectException(FairgateApiException::class);
+        $client->subscribeNotifications('token', ['contact.admin.delete'], 'https://example.test/wp-json/strc/v1/fairgate/events/'.str_repeat('a', 64));
+    }
 }
