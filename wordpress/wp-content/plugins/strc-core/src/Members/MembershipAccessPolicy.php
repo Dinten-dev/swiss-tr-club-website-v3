@@ -32,6 +32,7 @@ final class MembershipAccessPolicy
             'strc_moderate',
             'strc_edit_website_content',
             'strc_manage_content_roles',
+            'strc_assign_admins',
             'strc_manage_events',
             'strc_manage_drives',
             'strc_manage_community',

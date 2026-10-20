@@ -947,5 +947,12 @@
   "In Fairgate verbunden – erledigt": "Relié dans Fairgate – terminé",
   "Zuletzt bearbeitet": "Traité récemment",
   "Keine offenen Anfragen.": "Aucune demande en attente.",
-  "Co-Pilot (neues Paarmitglied)": "Copilote (nouveau membre couple)"
+  "Co-Pilot (neues Paarmitglied)": "Copilote (nouveau membre couple)",
+  "Admin": "Admin",
+  "Superadmin (Redaktor)": "Superadmin (rédacteur)",
+  "Admin (bisher Redaktor)": "Admin (auparavant rédacteur)",
+  "Regional": "Régional",
+  "Die Rollen dieses Kontos verwaltet eine höhere Stufe (Superadmin oder Webmaster).": "Les rôles de ce compte sont gérés par un niveau supérieur (superadmin ou webmaster).",
+  "Stufen: Webmaster (Technik) · Superadmin (ernennt die Admins) · Admin (volle Administration) · Moderatoren (nur im zugeteilten Bereich) · Mitglieder. Mitgliederverwaltung und Kassier gibt es nur als eigene Rolle. Ein Mitglied kann mehrere Rollen haben.": "Niveaux : webmaster (technique) · superadmin (nomme les admins) · admin (administration complète) · modérateurs (uniquement dans leur domaine) · membres. La gestion des membres et la caisse ne s'obtiennent qu'avec leur propre rôle. Un membre peut avoir plusieurs rôles.",
+  "Bibliothek: Mitglieder sehen alle Dokumente ausser «Regional» und «Vorstand». Regionalleitungen, Admins und die Bibliotheksverwaltung sehen zusätzlich «Regional». Nur der Vorstand sieht alles.": "Bibliothèque : les membres voient tous les documents sauf « Régional » et « Comité ». Les responsables régionaux, les admins et la gestion de la bibliothèque voient en plus « Régional ». Seul le comité voit tout."
 }

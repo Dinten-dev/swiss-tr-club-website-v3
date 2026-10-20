@@ -31,7 +31,7 @@ final class MemberSessionEndpoint
         wp_send_json(array(
             'authenticated' => true,
             'isBoard' => current_user_can('strc_access_board_documents'),
-            'canManageRoles' => current_user_can('strc_manage_content_roles'),
+            'canManageRoles' => current_user_can('strc_manage_content_roles') || current_user_can('strc_assign_superadmin'),
             'memberAccess' => $memberAccess,
             'marketplaceNonce' => $memberAccess ? wp_create_nonce('strc_marketplace') : null,
             'communityNonce' => $memberAccess ? wp_create_nonce('strc_community') : null,

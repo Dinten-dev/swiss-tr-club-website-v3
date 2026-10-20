@@ -64,7 +64,7 @@ final class EventRegistration
             if(!$event||$event->post_type!=='strc_event'||$event->post_status!=='publish'||$event->post_password)throw new \RuntimeException('Veranstaltung nicht verfügbar.',404);
             if($op==='participants'){
                 if(!RegionalEventAccess::canEdit($id))throw new \RuntimeException('Kein Zugriff auf die Teilnehmerliste.',403);
-                wp_send_json_success(['registrations'=>array_map(fn($p)=>$this->present($p),FormStore::find('strc_registration',0,$id)),'canReconcile'=>current_user_can('strc_manage_finance')||current_user_can('manage_options')]);
+                wp_send_json_success(['registrations'=>array_map(fn($p)=>$this->present($p),FormStore::find('strc_registration',0,$id)),'canReconcile'=>current_user_can('strc_manage_finance')]);
             }
             if($op==='roster'){
                 $people=[];

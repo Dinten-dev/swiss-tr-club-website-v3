@@ -8,7 +8,7 @@ final class RegionalEventAccess
 {
     public static function isGlobal(): bool
     {
-        return current_user_can('strc_manage_events') || current_user_can('manage_options') || \SwissTRClub\Core\Editorial\EditorialAccess::area('events');
+        return current_user_can('strc_manage_events') || \SwissTRClub\Core\Editorial\EditorialAccess::area('events');
     }
 
     public static function isOrganiser(): bool

@@ -113,7 +113,7 @@ final class ShopEndpoint
         }
         return $args;
     }
-    private static function canInspect(): bool { return current_user_can('manage_options')||(current_user_can('strc_access_member_area')&&(current_user_can('strc_manage_finance')||self::canManageShop())); }
+    private static function canInspect(): bool { return (current_user_can('strc_access_member_area')&&(current_user_can('strc_manage_finance')||self::canManageShop())); }
     private function pickupEvents(): array
     {
         return array_values(array_filter(get_posts(['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>100,'meta_key'=>'strc_start_at','orderby'=>'meta_value','order'=>'ASC']),static fn($post)=>strtotime((string)get_post_meta($post->ID,'strc_start_at',true))>=time()));
@@ -240,8 +240,9 @@ final class ShopEndpoint
 
     private static function canManageShop(): bool
     {
+        // Webmaster (nur Technik) verwaltet das Sortiment nicht über die Website; WooCommerce-Admin bleibt technisch erreichbar.
         return ShopAccessPolicy::canManage(
-            current_user_can('manage_options'),
+            false,
             current_user_can('strc_manage_content_roles') || (current_user_can('strc_access_member_area') && current_user_can('strc_manage_shop')),
             current_user_can('strc_access_member_area'),
             current_user_can('strc_moderate'),

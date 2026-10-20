@@ -13,7 +13,7 @@ final class EventFinance
         [$op,$input]=AjaxRequest::read('strc_event_finance',['reconcile','promote']);
         try {
             $eventId=absint($input['eventId']??0);
-            $finance=current_user_can('manage_options')||current_user_can('strc_manage_finance');
+            $finance=current_user_can('strc_manage_finance');
             if (!$eventId || get_post_type($eventId)!=='strc_event' || (!$finance&&!RegionalEventAccess::canEdit($eventId))) throw new \RuntimeException('Kein Zugriff auf diese Veranstaltung.',403);
             if($op==='promote'){
                 if(!RegionalEventAccess::canEdit($eventId))throw new \RuntimeException('Nur die zuständige Veranstaltungsleitung darf die Warteliste bestätigen.',403);
