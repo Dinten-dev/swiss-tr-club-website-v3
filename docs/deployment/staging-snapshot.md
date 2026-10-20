@@ -118,3 +118,66 @@ Die Bildschirmprüfung verwendete synthetische Testdaten und eine lokale Kopie d
 Vor der Veröffentlichung entsprachen alle 396 gesicherten Ausgangsdateien noch der Ausgangsbasis. Die Veröffentlichung prüfte sie erneut und ersetzte jede betroffene Datei nur bei passender ursprünglicher Prüfsumme. Alte Build-Chunks bleiben für bereits geöffnete Ansichten verfügbar. Datenbank, Uploadbestand und redaktionelle Inhalte wurden nicht ersetzt.
 
 Die vollständige Ausgangssicherung, Prüfergebnisse und das zusätzliche lokale Rückkehrpaket liegen ausserhalb von Git unter `.private/peter-prs-2026-10-14/`. Die unveränderten Testzugangsdaten bleiben in `.private/staging-b-test-2026-10-13.json`. Das serverseitige Rückkehrpaket für diese Veröffentlichung liegt unter `/private/strc-peter-release-20261014130025` und enthält die ursprünglichen geänderten Dateien sowie `rollback.json`. Für eine Rückkehr gilt weiterhin der oben beschriebene Abgleich von `installedSha256`, damit spätere Änderungen erhalten bleiben.
+
+## Peters Oktober-Aufträge: Veröffentlichung am 20. Oktober 2026
+
+Die Pull Requests #11–#19 sind vollständig enthalten. #11–#15 waren bereits auf GitHub zusammengeführt, aber noch nicht auf Staging veröffentlicht. Der geprüfte Stand `1f16f066b9e5306ca95941e8aaba4f6d452fd394` wurde über [PR #19](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/19) in `main` übernommen (`7583ecf`). Die darin enthaltenen PRs #16–#18 sind ebenfalls als zusammengeführt markiert; zum Abschluss waren keine offenen Pull Requests vorhanden. Peters Originalcommits und Gestaltung bleiben erhalten.
+
+| Bereich | Ausgelieferter Stand |
+|---|---|
+| Startseite und Regionen | Grauer Trenner, Georgia-Titel, direkte Redaktion, öffentliche PDFs mit Titel/Bearbeitung |
+| Veranstaltungen | Vier Preisarten, Weekend EZ/DZ, nominierte Veranstaltungsleitung mit Funktionsprüfung |
+| Dashboard | Mitgliedschaftskopf, Abowünsche, eigene Anlässe und Prüflisten |
+| Rollen | Tabelle und Vorstandszuteilung durch Administratoren; Vorstandsdokumente weiterhin explizit geschützt |
+| Mitgliederverwaltung | Bestehende Zuordnung ausschliesslich an Aktuar/Kasse geprüft und erhalten |
+| Mitgliedergalerie | Redaktionelle Steckbriefe, geschützt gespeichertes Bild, Fakten und Einwilligung |
+| Mobilnavigation | Hamburger-Menü, Escape schliesst und stellt Fokus wieder her |
+| Mitgliedschaftsprofil | Zwei Spalten, Co-Pilot, Paarantrag, gesperrte Fairgate-Identität, lokal erhaltene Änderungsanfragen |
+| Marktplatz | Ersatzteile sofort sichtbar; Fahrzeuge geprüft; Service-Inserat im Namen eines aktiven Mitglieds |
+| Mitgliederverzeichnis | Frühere Abmeldungen ausdrücklich respektiert; Fotoänderung aktiviert niemanden erneut |
+| Fairgate-Fahrzeuge | Additiver, konfigurierbarer Import mit Duplikatprüfung implementiert; realer Import mangels API-Feldern nicht ausgeführt |
+
+Die Prüfung korrigierte verlorene Paarverknüpfungen beim Fairgate-Abgleich, unvollständig bestätigte Profilübertragungen, wiederauflebende alte Änderungsanfragen, doppelte Abowünsche und unberechtigte Service-Empfänger. Bestätigte lokale Paarhaushalte bleiben bei späteren Importen erhalten. Fehlende Feldzuordnungen ergeben einen vollständigen lokalen Antrag statt einer fälschlich erfolgreichen Teilübertragung. PDF-Titel werden vor dem Anlegen eines Anhangs geprüft. Neue Ansichten und Beschriftungen wurden auf Französisch ergänzt.
+
+### Prüfungen und Datenbestand
+
+| Nachweis | Ergebnis |
+|---|---|
+| Quellen und Build | TypeScript, ESLint, Vite und Strukturprüfung erfolgreich; GitHub-Prüfungen für exakt `1f16f06` grün |
+| PHP | 107 Plugin-Dateien syntaktisch geprüft; 60 Tests mit 185 Assertions erfolgreich |
+| WordPress | 42 Oktober-Integrationsprüfungen und 18 bisherige Integrationsprüfungen erfolgreich |
+| HTTP | 41 Prüfungen erfolgreich: Profile, Anfragen, Rechte, Porträts, Service-Inserate, Veranstaltungen, regionale PDFs |
+| Darstellung | Desktop 1280 px und Mobil 390 px: Profilspalten, Menü, Porträts, Rollen und Service-Auswahl geprüft |
+| Fairgate-Zusatzdaten | 285 Mitgliedschaften geprüft; 285 Eintrittsdaten und Geschlechtsangaben sowie 282 Sprachen gezielt aktualisiert |
+| Erhaltung | Alle anderen Mitgliedschaftsspalten, reale Benutzerrollen, 35 redaktionelle Optionen und das vorhandene Website-Fahrzeug unverändert |
+| Veröffentlichung | 409 Ausgangsdateien vor Austausch erneut geprüft; 32 Programmdateien veröffentlicht; alle 419 Manifest-Dateien anschliessend ohne Abweichung geprüft |
+| Testschutz | Startseite, Sitzungsschnittstelle, JavaScript, CSS und Schrift ohne Passwort 401, mit Testzugang 200 |
+| Trennung der Zugänge | Gemeinsames Testpasswort allein gewährt weiterhin keinen Mitgliederzugriff; Zugangsdaten unverändert |
+
+Die Datenkorrektur übernahm ausschliesslich die tatsächlich lesbaren Fairgate-Eintrittsdaten, Geschlechtsangaben und Korrespondenzsprachen in bestehende Website-Verknüpfungen. Vorwerte wurden gesichert, konkurrierende Änderungen geprüft und sämtliche Ergebnisse erneut gelesen. Es wurden keine Konten, Rollen oder Mitgliedschaftstypen ausgetauscht. Alle 285 Mitgliedschaften bleiben erhalten. Kein Datenbankimport und kein Fairgate-Schreibzugriff wurden ausgeführt.
+
+Die HTTP- und WordPress-Prüfungen verwendeten isolierten Kandidatencode auf dem Staging-Server mit temporären Konten und eigenen Testdateien. E-Mail-Transporte und externe Anfragen wurden abgefangen; keine echten Nachrichten wurden gesendet. Testkonten und Testuploads sind entfernt. Die Browserprüfung verwendete den echten Build mit synthetischen Daten. Nach dem Upload wurden Dateiintegrität und Zugriffsschutz direkt auf Staging geprüft. Physisches Mobilgerät, echter Zahlungsdurchlauf und echter WhatsApp-Versand: nicht durchgeführt. Die gemeinsame Rollenabnahme mit Alain bleibt eine manuelle Abnahme, es wurde niemand kontaktiert.
+
+### Konfiguration und externe Voraussetzungen
+
+Die nicht geheimen Vorgaben stehen versioniert in `deployment/staging/options.php`. Auf Staging werden sie aus `/private/strc-october-2026.php` vor WordPress geladen. Die bestehende Konfiguration erhielt nur diesen Include; vorhandene Geheimnisse wurden erhalten. Bereits gesetzte Konstanten werden nicht überschrieben.
+
+| Funktion | Verifizierter Stand / verbleibende Voraussetzung |
+|---|---|
+| Fairgate-Grundzuordnung | Kontakt-ID, Status, Eintrittsdatum, Geschlecht und Korrespondenzsprache anhand tatsächlicher API-Antworten zugeordnet |
+| Fairgate-Sonderfelder | Alle 524 lesbaren Kontakte und zusätzliche Detailantworten geprüft; Fahrzeuge, Geburtstage, Co-Pilot und Abos werden vom aktuellen API-Zugang nicht geliefert |
+| Fahrzeugübernahme | Benötigt freigegebene Fahrzeugfelder und deren JSON-Pointer für `STRC_FAIRGATE_VEHICLE_FIELDS`; danach Vorschau prüfen und nur fehlende Fahrzeuge ergänzen |
+| Co-Pilot/Haushalt | Feldfreigabe und Haushaltzuordnung fehlen; bestehende lokale Partnerverknüpfungen bleiben wirksam |
+| Fairgate-Feldpflege | Umbenennung, Migration und Löschung alter Felder wurde nicht ohne gesicherte Zuordnung durchgeführt |
+| Profiländerungen | Fairgate-Schreibfunktion deaktiviert; Änderungen bleiben als nachvollziehbare Anfragen im Formularpostfach |
+| WhatsApp | Vorlagen `tr_forum_de` / `tr_forum_fr` gesetzt; Versand deaktiviert, Make-Webhook fehlt |
+| zahls.ch | Deaktiviert, Modus `TEST`; Instanz und API-/Webhook-Schlüssel fehlen |
+| Newsletter | Brevo bleibt ungenutzt; der Club verwendet Fairgate |
+
+### Sicherung und Rückkehr
+
+Die vollständige Ausgangssicherung, Konfiguration, Prüfergebnisse und Datenvorwerte liegen ausschliesslich privat unter `.private/peter-2026-10-20/`. `release-receipt.json` enthält die Konfigurationsprüfsummen; `extra-fields-before.json` enthält die gezielt geänderten Datenvorwerte. `server-rollback.tar.gz` wurde zusätzlich lokal gesichert und auf Vollständigkeit geprüft. Keine Zugangsdaten oder Personenexporte wurden eingecheckt.
+
+Serverseitiges Rückkehrpaket: `/private/strc-peter-release-20261020063832`. Es enthält ursprüngliche Programmdateien, `rollback.json`, ursprüngliche WordPress-Konfiguration, installierte nicht geheime Optionen und Zusatzdatenvorwerte. Dateiberechtigungen der Ausgangsbasis bleiben lokal dokumentiert.
+
+Bei Rückkehr zuerst spätere Änderungen ausschliessen: Programmdateien nur bei passender `installedSha256` wiederherstellen; neue Dateien nur bei passender Prüfsumme entfernen. Die WordPress-Konfiguration nur bei passender installierter Prüfsumme aus dem Receipt ersetzen und ihre dokumentierten Rechte erhalten. Den privaten Options-Include anschliessend entfernen, wenn die wiederhergestellte Konfiguration ihn nicht mehr verwendet. Datenfelder nur zurücksetzen, wenn sie noch dem im Plan gesicherten `after`-Wert entsprechen. Andere redaktionelle Inhalte, Uploads, Rollen und Mitgliedsdaten nicht zurückspielen. Der unveränderte historische Staging-Snapshot bleibt Vergleichsbasis; das Veröffentlichungsmanifest dokumentiert den tatsächlichen neuen Stand.
