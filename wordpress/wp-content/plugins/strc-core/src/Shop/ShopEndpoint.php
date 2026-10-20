@@ -133,7 +133,7 @@ final class ShopEndpoint
     {
         $options=[''=>'Bitte Veranstaltung wählen'];
         foreach($this->pickupEvents() as $post)$options[$post->ID]=$post->post_title;
-        $fields['order']['strc_pickup_event']=['type'=>'select','label'=>'Abholung an Veranstaltung (bei Abholung erforderlich)','options'=>$options,'required'=>false,'priority'=>50];
+        $fields['order']['strc_pickup_event']=['type'=>'select','label'=>'Abholung an welcher Veranstaltung? *','options'=>$options,'required'=>false,'priority'=>50];
         return $fields;
     }
     public function savePickup(\WC_Order $order,array $data): void

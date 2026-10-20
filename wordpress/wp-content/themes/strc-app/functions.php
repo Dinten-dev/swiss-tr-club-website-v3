@@ -103,3 +103,66 @@ add_action('wp', static function (): void {
 // Warenkorb: kein Versandkosten-Rechner (Versand nur Schweiz oder Abholung); Hinweistext zum Bezahlvorgang ausblenden.
 add_filter('woocommerce_shipping_show_shipping_calculator', '__return_false');
 add_filter('woocommerce_shipping_may_be_available_html', '__return_empty_string');
+
+/**
+ * Kasse: kein Gutscheinhinweis (Gutschein im Warenkorb), Adresse aus dem Mitgliederprofil vorausgefüllt
+ * (überschreibbar), PLZ und Ort nebeneinander, kein Kanton, Mobilnummer Pflicht, Abholfeld nur bei Abholung.
+ */
+remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10);
+add_filter('woocommerce_checkout_get_value', static function ($value, string $input) {
+    if ($value !== null && $value !== '' || ! is_user_logged_in()) {
+        return $value;
+    }
+    $user = wp_get_current_user();
+    $map = array(
+        'billing_first_name' => (string) get_user_meta($user->ID, 'first_name', true),
+        'billing_last_name' => (string) get_user_meta($user->ID, 'last_name', true),
+        'billing_address_1' => (string) get_user_meta($user->ID, 'strc_street', true),
+        'billing_postcode' => (string) get_user_meta($user->ID, 'strc_postcode', true),
+        'billing_city' => (string) get_user_meta($user->ID, 'strc_city', true),
+        'billing_phone' => (string) get_user_meta($user->ID, 'strc_phone', true),
+        'billing_email' => (string) $user->user_email,
+    );
+    return isset($map[$input]) && $map[$input] !== '' ? $map[$input] : $value;
+}, 10, 2);
+add_filter('woocommerce_get_country_locale', static function (array $locale): array {
+    $locale['CH']['state'] = array('required' => false, 'hidden' => true);
+    $locale['CH']['postcode'] = array_merge($locale['CH']['postcode'] ?? array(), array('priority' => 60, 'class' => array('form-row-first')));
+    $locale['CH']['city'] = array_merge($locale['CH']['city'] ?? array(), array('priority' => 61, 'class' => array('form-row-last')));
+    return $locale;
+});
+add_filter('woocommerce_billing_fields', static function (array $fields): array {
+    unset($fields['billing_state'], $fields['billing_company']);
+    if (isset($fields['billing_phone'])) {
+        $fields['billing_phone']['required'] = true;
+        $fields['billing_phone']['label'] = get_locale() === 'fr_FR' ? 'Mobile (pour les questions)' : 'Mobilnummer (für Rückfragen)';
+        $fields['billing_phone']['priority'] = 95;
+    }
+    return $fields;
+});
+add_filter('woocommerce_shipping_fields', static function (array $fields): array {
+    unset($fields['shipping_state'], $fields['shipping_company']);
+    return $fields;
+});
+// Kurzer Datenschutzhinweis statt des langen WooCommerce-Absatzes.
+add_filter('woocommerce_checkout_privacy_policy_text', static fn (): string => '');
+add_action('wp_footer', static function (): void {
+    if (! function_exists('is_checkout') || ! is_checkout()) {
+        return;
+    }
+    ?>
+<script>
+(function(){
+  function toggle(){
+    var field=document.getElementById('strc_pickup_event_field');if(!field)return;
+    var chosen=document.querySelector('input[name^="shipping_method"]:checked')||document.querySelector('select[name^="shipping_method"]');
+    var pickup=!!chosen&&/^local_pickup/.test(chosen.value);
+    field.style.display=pickup?'':'none';
+  }
+  document.addEventListener('change',function(e){if(e.target&&/^shipping_method/.test(e.target.name||''))toggle();});
+  if(window.jQuery)window.jQuery(document.body).on('updated_checkout',toggle);
+  toggle();
+})();
+</script>
+    <?php
+});
