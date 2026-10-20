@@ -139,6 +139,8 @@ final class FairgateStagingImport
         $existing=$wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE user_id=%d",$u->ID),ARRAY_A);
         if($existing && (string)$existing['fairgate_contact_id']!==$r['id'])throw new FairgateApiException('Vorhandene Mitgliedschaft bleibt unverändert');
         $fields=['membership_type'=>$r['type'],'status'=>$r['status'],'updated_at'=>current_time('mysql')];
+        // Until Fairgate households are explicitly mapped, preserve a verified local couple link.
+        if($existing&&\SwissTRClub\Core\Members\MembershipTypePolicy::isCouple((string)$existing['membership_type'])&&\SwissTRClub\Core\Members\MemberProfile::household((int)$u->ID)['mode']!=='single')$fields['membership_type']=$existing['membership_type'];
         if(isset($r['region']))$fields['region']=$r['region'];
         if(isset($r['extras']['started_on']))$fields['started_on']=$r['extras']['started_on'];
         if(!$existing){

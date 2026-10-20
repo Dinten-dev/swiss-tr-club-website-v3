@@ -82,6 +82,9 @@ try{
  oct_user($staff);$applied=$import->apply($contacts);foreach($applied as$row)if(isset($row['postId']))$posts[]=$row['postId'];oct_check(FormStore::revision(get_post($original))===$originalHash,'Additive vehicle import preserves website data and photo');
  $again=$import->apply($contacts);oct_check(!in_array('create',array_column($again,'action'),true)&&count(FormStore::find('strc_vehicle',$owner))===2,'Repeating vehicle import creates no duplicate');
  $bad=$contacts;unset($bad[0]['cars'][1]['chassis']);oct_check(in_array('missing-fields',array_column($import->plan($bad),'action'),true),'Unavailable vehicle API fields are reported explicitly');
+ $wpdb->update($wpdb->prefix.'strc_memberships',['membership_type'=>'couple_primary','partner_user_id'=>$other],['user_id'=>$owner]);$wpdb->update($wpdb->prefix.'strc_memberships',['membership_type'=>'couple_partner','partner_user_id'=>$owner],['user_id'=>$other]);
+ $configuration=SwissTRClub\Core\Integrations\Fairgate\FairgateConfiguration::fromConstants();$gateway=new SwissTRClub\Core\Integrations\Fairgate\FairgateGateway(new SwissTRClub\Core\Integrations\Fairgate\FairgateClient($configuration),$configuration);$memberImport=new SwissTRClub\Core\Integrations\Fairgate\FairgateStagingImport($gateway);
+ oct_call($memberImport,'persist',['id'=>$contactId,'email'=>get_userdata($owner)->user_email,'first_name'=>'QA','last_name'=>'owner','name'=>'QA owner','label'=>'Einzelmitglied','type'=>'individual','status'=>'active','profile'=>[]]);oct_check(MemberProfile::household($owner)['mode']==='primary','Read-only Fairgate refresh preserves a manually verified couple household');
 }finally{
  wp_set_current_user(0);foreach($posts as$id)wp_delete_post($id,true);require_once ABSPATH.'wp-admin/includes/user.php';foreach($users as$id){foreach(FormStore::find('strc_form',$id)as$p)wp_delete_post($p->ID,true);$wpdb->delete($wpdb->prefix.'strc_memberships',['user_id'=>$id]);wp_delete_user($id);}
 }

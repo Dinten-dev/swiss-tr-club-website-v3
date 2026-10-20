@@ -349,8 +349,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateStagingImport.php",
-      "bytes": 11602,
-      "sha256": "c008d8826aff66bec3a2c222679666ab2dd74ceec3a065e4a932e774549bce2e"
+      "bytes": 11959,
+      "sha256": "f4b4a6fcd45b114be472b87a3a2c0bbdbb888f4b4fda85e64a3e7beac5ec8cca"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateVehicleImport.php",
@@ -2114,6 +2114,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-10-20T06:25:03.272Z",
+  "builtOn": "2026-10-20T06:29:42.120Z",
   "baselineCapturedOn": "2026-10-13"
 }
