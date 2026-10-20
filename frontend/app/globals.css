@@ -3036,3 +3036,14 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 @media(max-width:640px){.couple-request-grid{grid-template-columns:1fr}}
 .couple-review{padding:0!important;box-shadow:none;border:0;background:none}.couple-review textarea{width:100%}
 .couple-request h3{font-size:20px}
+
+/* Sortiment: Reihenfolge durch die Shop-Moderation (Ziehen oder ◀ ▶) */
+.shop-sort-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin:0 0 18px;padding:12px 16px;border:1px dashed #114973;border-radius:7px;background:#eef4f8}
+.shop-sort-bar p{margin:0;font-weight:700;color:#114973}
+.shop-product-grid.is-sorting .shop-product-card{cursor:grab;position:relative;outline:2px dashed #9fb3c2;outline-offset:-2px}
+.shop-product-grid.is-sorting .shop-product-card a,.shop-product-grid.is-sorting .shop-product-link{pointer-events:none}
+.shop-product-grid.is-sorting .shop-product-card.is-dragging{opacity:.45}
+.shop-sort-controls{position:absolute;top:8px;left:8px;right:8px;z-index:2;display:flex;justify-content:space-between;align-items:center}
+.shop-sort-controls button{width:38px;height:38px;border-radius:50%;border:0;background:#114973;color:#fff;font-size:15px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.shop-sort-controls button:disabled{opacity:.3;cursor:default}
+.shop-sort-controls span{min-width:30px;height:30px;border-radius:15px;background:#bd2028;color:#fff;font-weight:700;display:grid;place-items:center}

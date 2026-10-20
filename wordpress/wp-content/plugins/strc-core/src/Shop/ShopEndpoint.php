@@ -24,6 +24,8 @@ final class ShopEndpoint
         add_filter('woocommerce_package_rates',function(array $rates):array{if(!$this->pickupEvents())foreach($rates as $key=>$rate)if($rate->get_method_id()==='local_pickup')unset($rates[$key]);return $rates;});
         add_action('admin_init',static function():void{if(!wp_doing_ajax()&&($_GET['page']??'')==='wc-settings'&&!current_user_can('manage_options'))wp_die('Technische Shop-Einstellungen verwaltet der Webmaster.',403);});
         add_filter('rest_pre_dispatch',static function($response,$server,$request){if(!current_user_can('manage_options')&&preg_match('~^/(?:wc/v[123]/(?:settings|payment_gateways)|wc-admin/(?:settings|options)|wc-analytics/settings)(?:/|$)~',$request->get_route()))return new \WP_Error('strc_settings','Nur Webmaster dürfen technische Shop-Einstellungen verwalten.',['status'=>403]);return $response;},10,3);
+        // Sortiment überall in der von der Shop-Moderation festgelegten Reihenfolge (menu_order).
+        add_filter('woocommerce_default_catalog_orderby',static fn():string=>'menu_order');
         add_action('woocommerce_payment_complete', array($this, 'notifyShopManagers'), 20);
         add_action('woocommerce_order_status_processing', array($this, 'notifyShopManagers'), 20);
         add_action('woocommerce_order_status_completed', array($this, 'notifyShopManagers'), 20);
@@ -31,10 +33,10 @@ final class ShopEndpoint
 
     public function respond(): void
     {
-        [$operation,$input] = AjaxRequest::read('strc_shop', array('product-save','order-save'));
-        if(in_array($operation,['product-save','order-save','order-options'],true)){
+        [$operation,$input] = AjaxRequest::read('strc_shop', array('product-save','order-save','product-order'));
+        if(in_array($operation,['product-save','order-save','order-options','product-order'],true)){
             if(!self::canManageShop()||!function_exists('wc_get_product'))AjaxRequest::fail('Keine Shopberechtigung.',403);
-            try{wp_send_json_success(match($operation){'product-save'=>ShopOperations::saveProduct($input),'order-save'=>ShopOperations::order($input),default=>ShopOperations::choices()});}
+            try{wp_send_json_success(match($operation){'product-save'=>ShopOperations::saveProduct($input),'order-save'=>ShopOperations::order($input),'product-order'=>ShopOperations::sortProducts($input),default=>ShopOperations::choices()});}
             catch(\InvalidArgumentException $e){AjaxRequest::fail($e->getMessage(),422);}
             catch(\Throwable $e){error_log('STRC shop operation: '.$e->getMessage());AjaxRequest::fail('Vorgang konnte nicht abgeschlossen werden. Bitte Bestand und Angaben neu prüfen.',409);}
         }

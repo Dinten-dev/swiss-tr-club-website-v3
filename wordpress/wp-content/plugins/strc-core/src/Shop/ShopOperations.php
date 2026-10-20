@@ -25,6 +25,18 @@ final class ShopOperations
         if(is_wp_error($id))throw new \RuntimeException('Produktbild konnte nicht gespeichert werden.');
         return (int)$id;
     }
+    /** Reihenfolge im Sortiment: ids als JSON-Liste in der gewünschten Reihenfolge, gespeichert als menu_order 1…n. */
+    public static function sortProducts(array $input): array
+    {
+        $ids=json_decode((string)($input['ids']??'[]'),true);
+        if(!is_array($ids)||!$ids||count($ids)>200)throw new \InvalidArgumentException('Bitte die Reihenfolge der Artikel angeben.');
+        $ids=array_values(array_unique(array_map('absint',$ids)));
+        foreach($ids as $id)if(!$id||get_post_type($id)!=='product')throw new \InvalidArgumentException('Unbekannter Artikel in der Reihenfolge.');
+        foreach($ids as $index=>$id)if((int)get_post_field('menu_order',$id)!==$index+1)wp_update_post(['ID'=>$id,'menu_order'=>$index+1]);
+        if(function_exists('wc_delete_product_transients'))wc_delete_product_transients();
+        return ['message'=>'Reihenfolge gespeichert.'];
+    }
+
     public static function saveProduct(array $input): array
     {
         return FormStore::locked('shop-products',static function()use($input):array{
