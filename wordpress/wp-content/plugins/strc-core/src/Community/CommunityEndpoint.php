@@ -242,7 +242,36 @@ final class CommunityEndpoint
     private function present(\WP_Post $post): array
     {
         $author = get_userdata((int) $post->post_author);
-        return array('id' => (int) $post->ID, 'kind' => array_search($post->post_type, self::TYPES, true), 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'description' => html_entity_decode(wp_strip_all_tags($post->post_content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($post->post_content)), 'author' => $author ? $author->display_name : 'Clubmitglied', 'createdAt' => get_post_time(DATE_ATOM, true, $post), 'canEdit' => $this->canEdit($post), 'canReview'=>$this->canReview($post),'subscribed'=>in_array((int)$post->ID,(array)get_user_meta(get_current_user_id(),'strc_topic_subscriptions',true),true),'pinned'=>(bool)get_post_meta($post->ID,'strc_topic_pinned',true),'mergedInto'=>(int)get_post_meta($post->ID,'strc_topic_merged_into',true),'closed'=>(bool)get_post_meta($post->ID,'strc_topic_closed',true),'status' => $post->post_status, 'classification'=>get_post_meta($post->ID,'strc_form_classification',true)?:[], 'replyCount' => (int) get_comments(array('post_id' => $post->ID, 'status' => 'approve', 'count' => true)), 'files' => array_map(fn ($file): array => array('key' => $file['key'], 'name' => $file['name'], 'mime' => $file['mime'], 'size' => $file['size'], 'caption' => $file['caption'] ?? '', 'photographer' => $file['photographer'] ?? '', 'public'=>(bool)($file['public']??false),'retainOriginal'=>(bool)($file['retainOriginal']??false),'reviewStatus'=>$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending'),'canCaption'=>$this->canReview($post)||(int)($file['submittedBy']??$post->post_author)===get_current_user_id(),'originalUrl'=>get_post_type($post->ID)==='strc_album'&&$this->originals()?add_query_arg(['action'=>'strc_community','operation'=>'file','id'=>$post->ID,'key'=>$file['key'],'original'=>'1'],admin_url('admin-ajax.php')):'', 'url' => add_query_arg(array('action' => 'strc_community', 'operation' => 'file', 'id' => $post->ID, 'key' => $file['key']), admin_url('admin-ajax.php'))), $this->visibleFiles($post)), 'coverKey'=>(string)get_post_meta($post->ID,'strc_album_cover',true),'portrait'=>self::portrait((int)$post->ID));
+        return array('id' => (int) $post->ID, 'kind' => array_search($post->post_type, self::TYPES, true), 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'description' => html_entity_decode(wp_strip_all_tags($post->post_content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($post->post_content)), 'author' => $author ? $author->display_name : 'Clubmitglied', 'createdAt' => get_post_time(DATE_ATOM, true, $post), 'canEdit' => $this->canEdit($post), 'canReview'=>$this->canReview($post),'subscribed'=>in_array((int)$post->ID,(array)get_user_meta(get_current_user_id(),'strc_topic_subscriptions',true),true),'pinned'=>(bool)get_post_meta($post->ID,'strc_topic_pinned',true),'mergedInto'=>(int)get_post_meta($post->ID,'strc_topic_merged_into',true),'closed'=>(bool)get_post_meta($post->ID,'strc_topic_closed',true),'status' => $post->post_status, 'classification'=>get_post_meta($post->ID,'strc_form_classification',true)?:[], 'replyCount' => (int) get_comments(array('post_id' => $post->ID, 'status' => 'approve', 'count' => true)), 'files' => array_map(fn ($file): array => array('key' => $file['key'], 'name' => $file['name'], 'mime' => $file['mime'], 'size' => $file['size'], 'caption' => $file['caption'] ?? '', 'photographer' => $file['photographer'] ?? '', 'public'=>(bool)($file['public']??false),'retainOriginal'=>(bool)($file['retainOriginal']??false),'reviewStatus'=>$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending'),'canCaption'=>$this->canReview($post)||(int)($file['submittedBy']??$post->post_author)===get_current_user_id(),'originalUrl'=>get_post_type($post->ID)==='strc_album'&&$this->originals()?add_query_arg(['action'=>'strc_community','operation'=>'file','id'=>$post->ID,'key'=>$file['key'],'original'=>'1'],admin_url('admin-ajax.php')):'', 'url' => add_query_arg(array('action' => 'strc_community', 'operation' => 'file', 'id' => $post->ID, 'key' => $file['key']), admin_url('admin-ajax.php'))), $this->visibleFiles($post)), 'coverKey'=>(string)get_post_meta($post->ID,'strc_album_cover',true),'portrait'=>self::portrait((int)$post->ID))+('strc_topic'===$post->post_type?$this->topicStats($post):array());
+    }
+
+    /** Forum-Statistik wie in einem klassischen Forum: Aufrufe, letzte Antwort und Beitragszahl des Autors. */
+    private function topicStats(\WP_Post $post): array
+    {
+        $last=get_comments(array('post_id'=>$post->ID,'status'=>'approve','number'=>1,'orderby'=>'comment_ID','order'=>'DESC'));
+        $lastReply=null;
+        if($last){$user=get_userdata((int)$last[0]->user_id);$lastReply=array('author'=>$user?$user->display_name:'Clubmitglied','createdAt'=>$last[0]->comment_date_gmt.'Z');}
+        return array('views'=>(int)get_post_meta($post->ID,'strc_topic_views',true),'lastReply'=>$lastReply,'authorPosts'=>self::forumPosts((int)$post->post_author));
+    }
+
+    /** Anzahl Themen und Antworten eines Mitglieds im Forum (pro Anfrage zwischengespeichert). */
+    private static function forumPosts(int $userId): int
+    {
+        static $cache=array();
+        if($userId<=0)return 0;
+        if(!isset($cache[$userId]))$cache[$userId]=(int)count_user_posts($userId,'strc_topic',true)+(int)get_comments(array('user_id'=>$userId,'status'=>'approve','post_type'=>'strc_topic','count'=>true));
+        return $cache[$userId];
+    }
+
+    /** Ein Aufruf pro Mitglied und Stunde; eigene Themen zählen nicht. */
+    private function countView(\WP_Post $post): void
+    {
+        $user=get_current_user_id();
+        if($user<=0||(int)$post->post_author===$user||'publish'!==$post->post_status)return;
+        $key='strc_tv_'.$post->ID.'_'.$user;
+        if(get_transient($key))return;
+        set_transient($key,1,HOUR_IN_SECONDS);
+        update_post_meta($post->ID,'strc_topic_views',(int)get_post_meta($post->ID,'strc_topic_views',true)+1);
     }
 
     private function albumOptions(): array
@@ -357,10 +386,11 @@ final class CommunityEndpoint
         $result['replies'] = array();
         $result['replyPages'] = 0;
         if ('strc_topic' === $post->post_type) {
+            if(1===$page){$this->countView($post);$result['views']=(int)get_post_meta($post->ID,'strc_topic_views',true);}
             $comments = get_comments(array('post_id' => $id, 'status' => 'approve', 'number' => 20, 'offset' => ($page - 1) * 20, 'orderby' => 'comment_ID', 'order' => 'ASC'));
             $result['replies'] = array_map(static function ($comment): array {
                 $user = get_userdata((int) $comment->user_id);
-                return array('id' => (int) $comment->comment_ID, 'author' => $user ? $user->display_name : 'Clubmitglied', 'text' => html_entity_decode(wp_strip_all_tags($comment->comment_content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'createdAt' => $comment->comment_date_gmt . 'Z');
+                return array('id' => (int) $comment->comment_ID, 'author' => $user ? $user->display_name : 'Clubmitglied', 'authorPosts' => self::forumPosts((int) $comment->user_id), 'text' => html_entity_decode(wp_strip_all_tags($comment->comment_content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'createdAt' => $comment->comment_date_gmt . 'Z');
             }, $comments);
             $result['replyPages'] = (int) ceil($result['replyCount'] / 20);
         }
