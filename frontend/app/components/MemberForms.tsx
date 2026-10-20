@@ -20,7 +20,7 @@ const genders:Record<string,string>={female:'Weiblich',male:'Männlich',other:'D
 const languages:Record<string,string>={de:'Deutsch',fr:'Français'};
 const date=(value:string)=>{if(!value)return '';const d=new Date(value);return Number.isNaN(d.getTime())?value:d.toLocaleDateString('de-CH');};
 const rows:[keyof PersonValues,string][]=[['salutation','Anrede'],['first_name','Vorname'],['last_name','Name'],['gender','Geschlecht'],['birth_date','Geburtsdatum'],['language','Korrespondenzsprache'],['email','E-Mail'],['phone','Mobilnummer'],['street','Strasse und Nr.'],['postcode','PLZ'],['city','Ort'],['country','Land']];
-function shown(key:keyof PersonValues,value:string){if(!value)return '–';if(key==='gender')return t(genders[value]||value);if(key==='language')return languages[value]||value;if(key==='birth_date')return date(value);return value;}
+function shown(key:keyof PersonValues,value:string){if(!value)return '–';if(key==='gender')return t(genders[value]||value);if(key==='language')return t(languages[value]||value);if(key==='salutation')return t(value);if(key==='birth_date')return date(value);return value;}
 
 function PersonView({block}:{block:PersonBlock}){return <dl className="profile-data">{rows.map(([key,label])=><div key={key}><dt>{t(label)}{block.locked.includes(key)&&<span className="profile-lock" title={t('Wird vom Club in Fairgate geführt')} aria-label={t('nicht veränderbar')}> 🔒</span>}</dt><dd>{shown(key,block.values[key])}</dd></div>)}</dl>;}
 
@@ -50,7 +50,7 @@ export default function MemberForms(){
  const copilotState=!data?'':data.copilot.kind==='member'?`${t('Mitglied')} · ${t('Paarmitgliedschaft')}${data.copilot.memberNumber?' · Nr. '+data.copilot.memberNumber:''}`:data.copilot.kind==='guest'?t('Nicht-Mitglied'):t('Noch kein Co-Pilot erfasst');
  const copilotComplete=!!data&&data.copilot.kind==='guest'&&['first_name','last_name','email','phone','street','postcode','city','country'].every(key=>data.copilot.values[key as keyof PersonValues]);
  return <><section className="page-hero"><p className="eyebrow">{t('Mein Mitgliederbereich')}</p><h1>{c('profile.title')}</h1><p>{c('profile.intro')}</p></section><section className="page-content member-forms member-profile"><a href="#mitglieder">← {t('Zurück zur Übersicht')}</a><FormNotice error={error} message={message}/>{error&&<button className="market-text-button" onClick={()=>{setError('');setRevision(v=>v+1);}}>{t('Neu laden')}</button>}{!data?<p role="status">{t('Profil wird geladen …')}</p>:<>
- <dl className="profile-summary">{[['Mitgliedsnummer',data.membership.number||'–'],['Mitgliedschaft',data.membership.typeLabel||'–'],['Region',data.membership.region||t('Noch nicht zugeordnet')],['Mitglied seit',data.membership.since||'–']].map(([label,value])=><div key={label}><dt>{t(label)}</dt><dd>{value}</dd></div>)}</dl>
+ <dl className="profile-summary">{[['Mitgliedsnummer',data.membership.number||'–'],['Mitgliedschaft',t(data.membership.typeLabel||'–')],['Region',data.membership.region||t('Noch nicht zugeordnet')],['Mitglied seit',data.membership.since||'–']].map(([label,value])=><div key={label}><dt>{t(label)}</dt><dd>{value}</dd></div>)}</dl>
  {partnerView&&<p className="club-notice">{t('Die Profildaten eurer Paarmitgliedschaft werden vom Hauptmitglied gepflegt. Du kannst sie hier ansehen.')}</p>}
  <div className="profile-columns">
   <article className="profile-card"><header><p className="eyebrow">{t(leftTitle)}</p><h2>{[data.person.values.first_name,data.person.values.last_name].filter(Boolean).join(' ')||data.name}</h2></header>

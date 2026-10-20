@@ -719,7 +719,7 @@
   "Mitgliedschaftsantrag": "Demande d’adhésion",
   "Gewünschte Mitgliedschaft *": "Adhésion souhaitée *",
   "Einzelmitgliedschaft": "Adhésion individuelle",
-  "Paarmitgliedschaft": "Adhésion en couple",
+  "Paarmitgliedschaft": "Adhésion de couple",
   "Young / TRiungsters": "Jeune / TRiungsters",
   "Hauptmitglied": "Membre principal",
   "Co-Pilot / zweite Person": "Co-pilote / deuxième personne",
@@ -927,5 +927,9 @@
   "Bibliothek: Jede Clubfunktion sieht die Moderator-Dokumente, nur die Rolle Vorstand zusätzlich die Vorstandsdokumente.": "Bibliothèque : chaque fonction du club accède aux documents de modération ; seul le rôle Comité accède en plus aux documents du comité.",
   "Änderung bereits gemeldet.": "Modification déjà transmise.",
   "Keine Änderung gegenüber Fairgate.": "Aucune modification par rapport à Fairgate.",
-  "Keine Änderungen.": "Aucune modification."
+  "Keine Änderungen.": "Aucune modification.",
+  "Einzelmitglied": "Membre individuel",
+  "Strasse und Nr.": "Rue et numéro",
+  "PLZ": "Code postal",
+  "Land": "Pays"
 }

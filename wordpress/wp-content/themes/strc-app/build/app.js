@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-BULkA_pD.js";
+import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-u4X_5GKm.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var l = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -20773,7 +20773,7 @@ function Ln({ item: e, nonce: t, close: n, saved: r, deleted: i }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var Rn = (0, h.lazy)(() => import("./MagazineReader-ZOat_DiX.js")), zn = "strc_community", Bn = {
+var Rn = (0, h.lazy)(() => import("./MagazineReader-DnlZ1knC.js")), zn = "strc_community", Bn = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliedergalerie",
 	restorations: "Fahrzeugrestaurationen",
@@ -22706,7 +22706,7 @@ var or = {
 	["country", "Land"]
 ];
 function ur(e, t) {
-	return t ? e === "gender" ? o(or[t] || t) : e === "language" ? sr[t] || t : e === "birth_date" ? cr(t) : t : "–";
+	return t ? e === "gender" ? o(or[t] || t) : e === "language" ? o(sr[t] || t) : e === "salutation" ? o(t) : e === "birth_date" ? cr(t) : t : "–";
 }
 function dr({ block: e }) {
 	return /* @__PURE__ */ (0, _.jsx)("dl", {
@@ -22927,7 +22927,7 @@ function pr() {
 					className: "profile-summary",
 					children: [
 						["Mitgliedsnummer", t.membership.number || "–"],
-						["Mitgliedschaft", t.membership.typeLabel || "–"],
+						["Mitgliedschaft", o(t.membership.typeLabel || "–")],
 						["Region", t.membership.region || o("Noch nicht zugeordnet")],
 						["Mitglied seit", t.membership.since || "–"]
 					].map(([e, t]) => /* @__PURE__ */ (0, _.jsxs)("div", { children: [/* @__PURE__ */ (0, _.jsx)("dt", { children: o(e) }), /* @__PURE__ */ (0, _.jsx)("dd", { children: t })] }, e))
@@ -23782,7 +23782,7 @@ function yr() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var br = (0, h.lazy)(() => import("./MagazineReader-ZOat_DiX.js"));
+var br = (0, h.lazy)(() => import("./MagazineReader-DnlZ1knC.js"));
 function xr({ issue: e, loading: t, error: r, retry: i }) {
 	let { text: a } = ue(), s = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: c } = n(), l = (e, t) => c === "fr" ? t : e, [u, d] = (0, h.useState)(!1), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(0), [y, b] = (0, h.useState)(!1), x = (0, h.useRef)(null), S = (0, h.useRef)(!1), C = (e?.previewPages || []).slice(0, 6), w = Math.min(m, Math.max(0, C.length - 1)), T = e?.previewCaptions?.[w] || `${l("Vorschau", "Aperçu")} ${w + 1} · ${e?.title || ""}`;
 	(0, h.useEffect)(() => {
