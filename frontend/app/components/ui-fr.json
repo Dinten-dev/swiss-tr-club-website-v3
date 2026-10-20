@@ -931,5 +931,21 @@
   "Einzelmitglied": "Membre individuel",
   "Strasse und Nr.": "Rue et numéro",
   "PLZ": "Code postal",
-  "Land": "Pays"
+  "Land": "Pays",
+  "Anträge bearbeiten": "Traiter les demandes",
+  "Mitgliedsanträge": "Demandes d'adhésion",
+  "Paarmitgliedschaften": "Adhésions couple",
+  "offen": "en attente",
+  "Termin": "date",
+  "Termine": "dates",
+  "Agenda verwalten öffnen": "Ouvrir la gestion de l'agenda",
+  "Aufrufe": "Vues",
+  "Letzte Antwort": "Dernière réponse",
+  "Noch keine Antworten": "Pas encore de réponses",
+  "Themenstarter": "Auteur du sujet",
+  "geschlossen": "fermé",
+  "In Fairgate verbunden – erledigt": "Relié dans Fairgate – terminé",
+  "Zuletzt bearbeitet": "Traité récemment",
+  "Keine offenen Anfragen.": "Aucune demande en attente.",
+  "Co-Pilot (neues Paarmitglied)": "Copilote (nouveau membre couple)"
 }

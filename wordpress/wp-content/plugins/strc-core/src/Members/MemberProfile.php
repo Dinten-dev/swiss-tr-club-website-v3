@@ -166,7 +166,7 @@ final class MemberProfile
         $status=['state'=>'sending','attemptedAt'=>gmdate(DATE_ATOM),'recipients'=>self::aktuarRecipients()];
         update_post_meta($form,'strc_couple_notification',$status);
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
-        $body="Neuer Antrag: Wechsel zur Paarmitgliedschaft\n\nMitglied: {$member}\nCo-Pilot: {$copilot}\n\nBitte die beiden in Fairgate über den Eintrag «Haushalt» verbinden und als Paarmitglied führen. Nach dem nächsten Abgleich ist die Paarmitgliedschaft auf der Website aktiv.\n\nAngaben im Formularpostfach:\n".admin_url('admin.php?page=strc-forms')."\n\nClubportal:\n{$base}/#mitglieder\n\nSwiss TR-Club\n";
+        $body="Neuer Antrag: Wechsel zur Paarmitgliedschaft\n\nMitglied: {$member}\nCo-Pilot: {$copilot}\n\nBitte die beiden in Fairgate über den Eintrag «Haushalt» verbinden und als Paarmitglied führen. Nach dem nächsten Abgleich ist die Paarmitgliedschaft auf der Website aktiv.\n\nBearbeiten unter «Anträge bearbeiten» → Paarmitgliedschaften:\n{$base}/#antraege/paar\n\nSwiss TR-Club\n";
         try{$accepted=wp_mail($status['recipients'],'Swiss TR-Club: Wechsel zur Paarmitgliedschaft',$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
         catch(\Throwable $error){$status['state']='uncertain';}
         update_post_meta($form,'strc_couple_notification',$status);

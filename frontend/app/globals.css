@@ -3009,3 +3009,30 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .community-list.forum-topics .forum-topic-main .market-text-button{font-size:13px}
 .forum-avatar{flex:none}
 @media(max-width:760px){.forum-author{flex-wrap:wrap;text-align:left}.forum-author small{white-space:nowrap}}
+
+/* Moderationskacheln: Agenda klappt die Termine erst nach dem Öffnen auf; Anträge mit Option Paarmitgliedschaften */
+.personal-dashboard .db-mod-tile.is-agenda:not(.is-open){grid-column:auto;display:flex;align-items:center;text-align:center;justify-content:center}
+.personal-dashboard .db-agenda-head{background:none;border:0;padding:0;font:inherit;cursor:pointer;width:100%}
+.personal-dashboard .db-mod-tile.is-agenda:not(.is-open) .db-agenda-head{flex-direction:column;justify-content:center;gap:2px}
+.personal-dashboard .db-mod-tile.is-agenda:not(.is-open) .db-agenda-head span{margin-left:0}
+.personal-dashboard .db-agenda-open{font-size:13px;font-weight:700;color:var(--strc-hero,#114973);text-align:right}
+.personal-dashboard .db-tool-main{display:flex;flex-direction:column;align-items:center;gap:2px;color:inherit;text-decoration:none}
+.personal-dashboard .db-tool-option{margin-top:6px;padding-top:6px;border-top:1px solid var(--db-line);font-size:12.5px;color:var(--strc-hero,#114973);text-decoration:underline;align-self:stretch}
+.personal-dashboard .db-mod-tile.has-open .db-tool-option{color:var(--red,#bd2028);font-weight:700}
+.personal-dashboard .db-mod-tile.is-tool.has-open .db-tool-main span{color:var(--strc-hero,#114973)}
+/* Anträge bearbeiten: Reiter und Paar-Anfragen */
+.inbox-tabs{display:flex;gap:6px;margin:0 0 18px;border-bottom:2px solid #dce4ea}
+.inbox-tabs button{background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 16px;font:inherit;font-weight:700;color:#617381;cursor:pointer}
+.inbox-tabs button.is-active{color:#0a253f;border-bottom-color:#bd2028}
+.couple-request{margin:0 0 16px}
+.couple-request header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.couple-request h3{margin:0}.couple-request h3 span{font-weight:400;color:#34556c}
+.couple-state{padding:4px 10px;border-radius:999px;background:#edf3f6;color:#34556c;font-size:12.5px;font-weight:700}
+.couple-state.is-pending_review,.couple-state.is-clarification{background:#fbeaea;color:#bd2028}
+.couple-state.is-approved_pending_sync{background:#e9f4ec;color:#2d6a3e}
+.couple-request-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:10px 0}
+.couple-request-grid h4{margin:0 0 4px;font-size:14px;color:#617381}
+.couple-done>summary{cursor:pointer;font-weight:700;margin:10px 0}
+@media(max-width:640px){.couple-request-grid{grid-template-columns:1fr}}
+.couple-review{padding:0!important;box-shadow:none;border:0;background:none}.couple-review textarea{width:100%}
+.couple-request h3{font-size:20px}
