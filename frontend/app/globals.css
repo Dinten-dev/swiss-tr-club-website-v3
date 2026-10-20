@@ -2298,16 +2298,6 @@ footer{background:var(--strc-hero)}
 .regions-grid a.region-card[href$="/nordwestschweiz"]{background-color:#f4cfd0}.regions-grid a.region-card[href$="/nordwestschweiz"] h2{color:#7c2a35}
 .regions-grid a.region-card:is([href$="/suisse-romande"],[href$="/swiss-romande"],[href$="/romandie"]){background-color:#ceede0}.regions-grid a.region-card:is([href$="/suisse-romande"],[href$="/swiss-romande"],[href$="/romandie"]) h2{color:#1d5c47}
 .regions-grid a.region-card[href="#triungsters"]{background-color:#c6f0da}.regions-grid a.region-card[href="#triungsters"] h2{color:#155c49}
-.page-hero.regional-hero[style*="00000325-Zuerich"]{background-color:#d8e6d1;background-image:linear-gradient(90deg,#114973 0%,#114973 52%,#11497300 64%),url("/regions/00000325-Zuerich_Grossmuenster_4x3.png")!important}
-.page-hero.regional-hero[style*="00000328-Bern"]{background-color:#fcdcc6;background-image:linear-gradient(90deg,#114973 0%,#114973 52%,#11497300 64%),url("/regions/00000328-Bern_Zytglogge_4x3.png")!important}
-.page-hero.regional-hero[style*="00000330-St_Gallen"]{background-color:#e2d9f1;background-image:linear-gradient(90deg,#114973 0%,#114973 52%,#11497300 64%),url("/regions/00000330-St_Gallen_Kathedrale_4x3.png")!important}
-.page-hero.regional-hero[style*="00000326-Aarau"]{background-color:#fdedbf;background-image:linear-gradient(90deg,#114973 0%,#114973 52%,#11497300 64%),url("/regions/00000326-Aarau_Obertorturm_4x3.png")!important}
-.page-hero.regional-hero[style*="00000329-Luzern"]{background-color:#c8e5f7;background-image:linear-gradient(90deg,#114973 0%,#114973 52%,#11497300 64%),url("/regions/00000329-Luzern_Kapellbruecke_4x3.png")!important}
-.page-hero.regional-hero[style*="00000327-Basel"]{background-color:#f4cfd0;background-image:linear-gradient(90deg,#114973 0%,#114973 52%,#11497300 64%),url("/regions/00000327-Basel_Muenster_4x3.png")!important}
-.page-hero.regional-hero[style*="00000332-Waadt"]{background-color:#ceede0;background-image:linear-gradient(90deg,#114973 0%,#114973 52%,#11497300 64%),url("/regions/00000332-Waadt_Schloss_Chillon_4x3.png")!important}
-.page-hero.regional-hero[style*="00000331-TRiungsters"]{background-color:#c6f0da;background-image:linear-gradient(90deg,#114973 0%,#114973 52%,#11497300 64%),url("/regions/00000331-TRiungsters_TR_Roadster_4x3.png")!important}
-.page-hero.regional-hero[style*="/regions/000003"]{background-size:100% 100%,auto 100%!important;background-position:0 0,right center!important;background-repeat:no-repeat!important}
-@media(max-width:1100px){.page-hero.regional-hero[style*="/regions/000003"]{background-image:none!important;background-color:#114973}}
 .category-tile:nth-child(4n+1){background:#e9f4ec;border-color:var(--strc-news-line);border-top-color:var(--red)}
 .category-tile:nth-child(4n+2){background:#e7f0f8;border-color:var(--strc-events-line);border-top-color:var(--red)}
 .category-tile:nth-child(4n+3){background:#fbf1e4;border-color:var(--strc-community-line);border-top-color:var(--red)}
@@ -2858,3 +2848,17 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .woocommerce-MyAccount-navigation a:hover,.woocommerce-MyAccount-navigation .is-active a{border-color:#114973;background:#114973;color:#fff}
 .woocommerce-MyAccount-content a{color:#114973;text-decoration:underline}
 @media (max-width:720px){.woocommerce-account .woocommerce{grid-template-columns:1fr}.strc-native-page .strc-store-main a,.strc-native-page .strc-store-shop a{padding:0 9px;font-size:15px}}
+
+/* Regionale Banner: nur Clubblau, ohne zweite Farbe und ohne Bild (Wunsch Alain 20.10.) */
+.page-hero.regional-hero{background:#114973!important}
+/* Mitgliedschafts-Profil: Kacheln unter den beiden Spalten */
+.profile-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start;margin:0 0 26px}
+.profile-tile.is-wide{grid-column:1/-1}
+.profile-tile .profile-couple{margin-top:4px}
+.profile-tile .club-form{margin:0}
+.profile-tile fieldset{border:0;padding:0;margin:0 0 12px}
+.member-profile .profile-columns{margin-bottom:22px}
+@media (max-width:820px){.profile-tiles{grid-template-columns:1fr}}
+.profile-couple .application-consent{display:flex;gap:10px;align-items:center;font-weight:700}
+.profile-couple .application-consent input{width:18px;height:18px;margin:0;accent-color:var(--blue,#114973)}
+.profile-tile>.market-primary,.profile-tile>.club-secondary{justify-self:start}

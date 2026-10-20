@@ -57,7 +57,10 @@ const pinSvg='<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" vie
 function DirectoryMap({members,detail,loading}:{members:MapMember[];detail:(id:number)=>void;loading:boolean}){
  const container=useRef<HTMLDivElement>(null);const [error,setError]=useState('');const [progress,setProgress]=useState({done:0,total:0});
  useEffect(()=>{let disposed=false;let map:LeafletMap|undefined;const controller=new AbortController();
-  (async()=>{const L=await import('leaflet');if(disposed||!container.current)return;map=L.map(container.current,{scrollWheelZoom:true,maxZoom:16}).setView([46.85,8.25],8);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:16,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+  (async()=>{const L=await import('leaflet');if(disposed||!container.current)return;// Kleinste Zoomstufe = ganze Schweiz; weiter herauszoomen oder wegschieben geht nicht.
+   const switzerland=L.latLngBounds([45.78,5.92],[47.86,10.53]);
+   map=L.map(container.current,{scrollWheelZoom:true,maxZoom:16,maxBounds:switzerland.pad(0.08),maxBoundsViscosity:1}).fitBounds(switzerland);
+   const limit=()=>{if(map){map.setMinZoom(map.getBoundsZoom(switzerland,false));}};limit();map.on('resize',limit);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:16,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
    const icon=L.divIcon({html:pinSvg,className:'dir-pin',iconSize:[28,38],iconAnchor:[14,37],popupAnchor:[0,-32]});
    const bounds:[number,number][]=[];
    const add=(position:[number,number],list:MapMember[],offset=0)=>{
