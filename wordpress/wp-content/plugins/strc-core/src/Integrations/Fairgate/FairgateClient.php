@@ -61,6 +61,27 @@ final class FairgateClient
         return $this->request('PUT', '/fsa/v2.0/contact/'.rawurlencode($this->configuration->organisationId()).'/data/'.$contactId, ['token'=>$accessToken, 'json'=>$payload]);
     }
 
+    public function notificationEvents(string $accessToken, bool $subscribed = false): array
+    {
+        $this->requireConfiguration();
+        return $this->request('GET', '/fsa/v2.0/subscription/'.rawurlencode($this->configuration->organisationId()).($subscribed ? '/events' : ''), ['token' => $accessToken]);
+    }
+
+    /** Configures notifications only; contact writes remain forbidden on staging. */
+    public function subscribeNotifications(string $accessToken, array $events, string $endpoint): array
+    {
+        $this->requireConfiguration();
+        $allowed = ['contact.created','contact.data.updated','contact.deleted','contact.clubexecutiveboardfunction.updated','contact.assignments.updated','contact.job.complete'];
+        $url = parse_url($endpoint);
+        if (!$events || array_diff($events, $allowed) || !$url || ($url['scheme'] ?? '') !== 'https'
+            || empty($url['host']) || isset($url['user']) || isset($url['pass']) || isset($url['query']) || isset($url['fragment'])
+            || !preg_match('~/wp-json/strc/v1/fairgate/events/[a-f0-9]{64}$~D', $url['path'] ?? '')) {
+            throw new FairgateApiException('Ungültige Webhook-Konfiguration.');
+        }
+        return $this->request('POST', '/fsa/v2.0/subscription/'.rawurlencode($this->configuration->organisationId()).'/events',
+            ['token' => $accessToken, 'json' => ['events' => array_values(array_unique($events)), 'endpoint' => $endpoint]]);
+    }
+
     public function extendedContact(string $accessToken, string $contactId): array
     {
         $this->requireConfiguration();
