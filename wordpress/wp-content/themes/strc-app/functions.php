@@ -53,3 +53,49 @@ add_action('wp_head', static function (): void {
         printf('<link rel="preload" href="%s" as="font" type="font/ttf" crossorigin>' . "\n", esc_url(get_template_directory_uri() . '/build/fonts/StrcSans-' . $style . '.ttf'));
     }
 }, 1);
+
+/**
+ * Artikelseite im Shop: ruhiger Aufbau statt WooCommerce-Standard.
+ * Beschreibung direkt unter dem Artikel (keine Reiter, keine Rezensionen),
+ * Artikelnummer und Kategorie ohne «Uncategorized», ähnliche Artikel kompakt.
+ */
+add_action('wp', static function (): void {
+    if (! function_exists('is_product') || ! is_product()) {
+        return;
+    }
+    remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
+    add_action('woocommerce_after_single_product_summary', static function (): void {
+        global $post;
+        $content = $post ? apply_filters('the_content', $post->post_content) : '';
+        if (trim(wp_strip_all_tags($content)) === '') {
+            return;
+        }
+        echo '<section class="strc-product-description"><h2>' . esc_html(get_locale() === 'fr_FR' ? 'Description' : 'Beschreibung') . '</h2>' . $content . '</section>'; // Inhalt aus dem Editor, von the_content gefiltert
+    }, 10);
+    remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40);
+    add_action('woocommerce_single_product_summary', static function (): void {
+        global $product;
+        if (! $product instanceof WC_Product) {
+            return;
+        }
+        $fr = get_locale() === 'fr_FR';
+        $parts = array();
+        if ($product->get_sku()) {
+            $parts[] = '<span>' . esc_html($fr ? 'N° d’article' : 'Artikelnummer') . ': ' . esc_html($product->get_sku()) . '</span>';
+        }
+        $default = (int) get_option('default_product_cat');
+        $terms = array_filter((array) get_the_terms($product->get_id(), 'product_cat'), static fn ($term): bool => $term instanceof WP_Term && (int) $term->term_id !== $default && $term->slug !== 'uncategorized');
+        if ($terms) {
+            $parts[] = '<span>' . esc_html($fr ? 'Catégorie' : 'Kategorie') . ': ' . esc_html(implode(', ', array_map(static fn ($term): string => $term->name, $terms))) . '</span>';
+        }
+        if ($parts) {
+            echo '<p class="strc-product-meta">' . implode(' · ', $parts) . '</p>'; // Teile einzeln escaped
+        }
+    }, 40);
+    add_filter('woocommerce_product_related_products_heading', static fn (): string => get_locale() === 'fr_FR' ? 'Vous aimerez aussi' : 'Das könnte dich auch interessieren');
+    add_filter('woocommerce_output_related_products_args', static function (array $args): array {
+        $args['posts_per_page'] = 4;
+        $args['columns'] = 4;
+        return $args;
+    });
+});
