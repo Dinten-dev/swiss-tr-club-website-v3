@@ -2838,3 +2838,23 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .market-service-hits button:hover,.market-service-hits button:focus-visible{border-color:#114973}
 .market-service-hits small{color:#5b6b78}
 .market-service-chosen{margin:0}
+/* Shop-/Kontoseiten (WordPress): Clubkopf mit Hauptnavigation, gut sichtbare Konto-Links */
+.strc-native-page .strc-store-header{max-width:none;display:grid;grid-template-columns:1fr;gap:0;padding:0;border:0;background:var(--blue,#114973)}
+.strc-native-page .strc-store-brand{justify-self:center;display:flex;align-items:center;gap:14px;padding:14px 16px;color:#fff;font:700 22px Georgia,serif}
+.strc-native-page .strc-store-brand img{width:56px;height:56px}
+.strc-native-page .strc-store-header nav{display:flex;flex-wrap:wrap;justify-content:center;gap:0 6px}
+.strc-native-page .strc-store-main{background:var(--red,#bd2028);padding:0 10px}
+.strc-native-page .strc-store-main a,.strc-native-page .strc-store-shop a{color:#fff;font-weight:700;padding:0 14px;min-height:46px;text-decoration:none}
+.strc-native-page .strc-store-main a:hover,.strc-native-page .strc-store-main a.is-members{background:#971a20}
+.strc-native-page .strc-store-shop{background:#eef1f4;padding:0 10px}
+.strc-native-page .strc-store-shop a{color:#114973}
+.strc-native-page .strc-store-shop a:hover{text-decoration:underline}
+.strc-store-back{margin:-6px 0 22px}
+.strc-store-back a{color:#114973;font-weight:700}
+.strc-store-page h1{font-size:clamp(32px,5vw,48px);margin:0 0 14px}
+.woocommerce-account .woocommerce{display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:28px;align-items:start}
+.woocommerce-MyAccount-navigation ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.woocommerce-MyAccount-navigation a{display:block;padding:10px 14px;border:1px solid #d5dde4;border-radius:8px;background:#fff;color:#114973;font-weight:700;text-decoration:none}
+.woocommerce-MyAccount-navigation a:hover,.woocommerce-MyAccount-navigation .is-active a{border-color:#114973;background:#114973;color:#fff}
+.woocommerce-MyAccount-content a{color:#114973;text-decoration:underline}
+@media (max-width:720px){.woocommerce-account .woocommerce{grid-template-columns:1fr}.strc-native-page .strc-store-main a,.strc-native-page .strc-store-shop a{padding:0 9px;font-size:15px}}

@@ -83,6 +83,7 @@ final class Plugin
         (new MembershipAccessGuard($memberships))->registerHooks();
         (new MemberSessionEndpoint($memberships))->registerHooks();
         (new \SwissTRClub\Core\Members\MemberDirectoryEndpoint())->registerHooks();
+        (new \SwissTRClub\Core\Members\MemberLoginExperience())->registerHooks();
         (new \SwissTRClub\Core\Dashboard\MemberDashboardEndpoint())->registerHooks();
     }
 }
