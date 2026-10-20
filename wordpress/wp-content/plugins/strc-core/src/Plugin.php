@@ -70,6 +70,7 @@ final class Plugin
         (new FairgateAdministrationPage($fairgate, $gateway, $sync))->registerHooks();
         $memberImport = new \SwissTRClub\Core\Integrations\Fairgate\FairgateStagingImport($gateway);
         $memberImport->registerHooks();
+        (new \SwissTRClub\Core\Integrations\Fairgate\FairgateWebhook($memberImport))->registerHooks();
         (new \SwissTRClub\Core\Admin\FairgateImportPage($memberImport))->registerHooks();
         (new \SwissTRClub\Core\Admin\MemberSetupPage(new \SwissTRClub\Core\Members\MemberSetupPreparation($memberImport)))->registerHooks();
         (new \SwissTRClub\Core\Integrations\Fairgate\FairgateApplications($gateway, $fairgate, \SwissTRClub\Core\Integrations\Fairgate\FairgateApplicationSettings::fromConstants()))->registerHooks();

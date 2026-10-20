@@ -111,12 +111,13 @@ final class FairgateStagingImport
         return $u?:null;
     }
 
-    public function apply(array $contacts): array
+    public function apply(array $contacts, bool $existingOnly = false): array
     {
         self::guard();
-        return FormStore::locked('fairgate-staging-import',function()use($contacts){
+        return FormStore::locked('fairgate-staging-import',function()use($contacts,$existingOnly){
             $result=[];
             foreach($this->plan($contacts)as $r){
+                if($existingOnly && $r['action']==='create'){$result[]=['id'=>$r['id'],'action'=>'skip','reason'=>'Neues Konto benötigt einen geprüften Import'];continue;}
                 if($r['action']==='skip'){$result[]=['id'=>$r['id'],'name'=>$r['name']??'','action'=>'skip','reason'=>$r['reason']];continue;}
                 try{$uid=$this->persist($r);$result[]=['id'=>$r['id'],'name'=>$r['name'],'action'=>$r['action'],'userId'=>$uid];}
                 catch(\Throwable $e){$result[]=['id'=>$r['id'],'name'=>$r['name'],'action'=>'error','reason'=>$e instanceof FairgateApiException?$e->getMessage():'Lokale Speicherung fehlgeschlagen; erneut prüfen'];}

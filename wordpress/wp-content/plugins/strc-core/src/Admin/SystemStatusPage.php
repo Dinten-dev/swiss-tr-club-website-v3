@@ -44,6 +44,12 @@ final class SystemStatusPage
             __('Mitgliedschaft und Buchhaltung', 'strc-core') => __('Fairgate (führendes System)', 'strc-core'),
             __('Fairgate Contacts API', 'strc-core') => $this->fairgate?->isConfigured() ? __('Configured', 'strc-core') : __('Not configured', 'strc-core'),
         );
+        $webhook = \SwissTRClub\Core\Integrations\Fairgate\FairgateWebhook::status();
+        $checks['Fairgate Webhook'] = $webhook['enabled'] ? 'Aktiv' : 'Nicht aktiviert';
+        $checks['Fairgate letzte Meldung (UTC)'] = $webhook['lastReceivedAt'] ?? 'Keine';
+        $checks['Fairgate letzter Webhook-Abgleich (UTC)'] = $webhook['lastCompletedAt'] ?? 'Keiner';
+        $checks['Fairgate Warteschlange'] = $webhook['pending'] ? 'Ausstehend; Versuche: '.$webhook['attempts'] : 'Leer';
+        $checks['Fairgate letzter Abgleichfehler (UTC)'] = $webhook['lastErrorAt'] ?? 'Keiner';
         ?>
         <div class="wrap">
             <h1><?php echo esc_html__('STRC System Status', 'strc-core'); ?></h1>
