@@ -99,3 +99,7 @@ add_action('wp', static function (): void {
         return $args;
     });
 });
+
+// Warenkorb: kein Versandkosten-Rechner (Versand nur Schweiz oder Abholung); Hinweistext zum Bezahlvorgang ausblenden.
+add_filter('woocommerce_shipping_show_shipping_calculator', '__return_false');
+add_filter('woocommerce_shipping_may_be_available_html', '__return_empty_string');
