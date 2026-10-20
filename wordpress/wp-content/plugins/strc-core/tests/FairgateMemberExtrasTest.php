@@ -45,4 +45,14 @@ final class FairgateMemberExtrasTest extends TestCase
         self::assertSame(array('first_name'=>'Anna Maria','last_name'=>'Muster'), $mapping->extras(array('id'=>1,'cp'=>'Anna Maria Muster'))['copilot']);
         self::assertArrayNotHasKey('copilot', $mapping->extras(array('id'=>1,'cp'=>'Anna')));
     }
+
+    public function testRealCorrespondenceKeyAndInvalidDates(): void
+    {
+        $mapping=new FairgateMemberMapping(['startedOn'=>'/membership/first_joining_date'],[]);
+        self::assertSame(['started_on'=>'1998-01-01','person'=>['language'=>'fr']], $mapping->extras(['membership'=>['first_joining_date'=>'1998-01-01'],'basefields'=>['correspondence_language'=>'fr']]));
+        self::assertSame([], $mapping->extras(['membership'=>['first_joining_date'=>'1998-13-01']]));
+        self::assertSame('', FairgateMemberMapping::normalize('birth_date','1990-02-30'));
+        self::assertSame('', FairgateMemberMapping::normalize('birth_date','2990-01-01'));
+        self::assertSame('1960-02-29', FairgateMemberMapping::normalize('birth_date','29.02.1960'));
+    }
 }

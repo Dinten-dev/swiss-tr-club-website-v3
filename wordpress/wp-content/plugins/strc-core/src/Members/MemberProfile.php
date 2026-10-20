@@ -26,7 +26,7 @@ final class MemberProfile
     public static function household(int $id): array
     {
         $repo=new MembershipRepository();$m=$repo->findForUser($id);$type=MembershipTypePolicy::normalize((string)($m['membership_type']??''));
-        if($type==='couple_primary'&&!empty($m['partner_user_id'])){$p=$repo->findForUser((int)$m['partner_user_id']);if($p&&(int)$p['partner_user_id']===$id)return ['mode'=>'primary','primary'=>$id,'partner'=>(int)$p['user_id'],'membership'=>$m];}
+        if($type==='couple_primary'&&!empty($m['partner_user_id'])){$p=$repo->findForUser((int)$m['partner_user_id']);if($p&&(int)$p['partner_user_id']===$id&&MembershipTypePolicy::normalize((string)$p['membership_type'])==='couple_partner'&&in_array($p['status'],['active','grace'],true))return ['mode'=>'primary','primary'=>$id,'partner'=>(int)$p['user_id'],'membership'=>$m];}
         if($type==='couple_partner'&&!empty($m['partner_user_id'])){$p=$repo->findForUser((int)$m['partner_user_id']);if($p&&(int)$p['partner_user_id']===$id&&MembershipTypePolicy::normalize((string)$p['membership_type'])==='couple_primary')return ['mode'=>'partner','primary'=>(int)$p['user_id'],'partner'=>$id,'membership'=>$p];}
         return ['mode'=>'single','primary'=>$id,'partner'=>0,'membership'=>$m];
     }
@@ -43,7 +43,7 @@ final class MemberProfile
             $data=FormStore::data($post);
             if(($data['kind']??'')!=='profile'||!in_array($data['state']??'',self::PENDING,true)||!is_array($data['payload']??null))continue;
             $requested=array_intersect_key($data['payload'],array_flip(FairgateProfileWriter::MEMBER_FIELDS));
-            if(!array_diff_assoc(array_map('strval',$requested),array_intersect_key($values,$requested)))continue; // bereits übernommen
+            if(!array_diff_assoc(array_map('strval',$requested),array_intersect_key($values,$requested)))break; // latest request already matches; do not resurrect older requests
             $pending=['at'=>(string)($data['createdAt']??''),'id'=>(int)$post->ID];$values=array_merge($values,array_map('strval',$requested));break;
         }
         return ['values'=>$values,'pending'=>$pending];
@@ -55,6 +55,9 @@ final class MemberProfile
         $fairgate=get_user_meta($userId,'strc_copilot_fairgate',true);$fairgate=is_array($fairgate)?$fairgate:[];
         $local=get_user_meta($userId,'strc_copilot',true);$local=is_array($local)?$local:[];
         $values=array_fill_keys(self::FIELDS,'');
+        if($fairgate&&!empty($local['pendingSync'])&&!array_diff_assoc(array_map('strval',(array)($local['values']??[])),array_replace($values,array_map('strval',$fairgate)))){
+            $local['pendingSync']=false;update_user_meta($userId,'strc_copilot',$local);
+        }
         // Direkt nach Fairgate geschrieben oder bereits abgeglichen: Fairgate ist führend; sonst gilt die lokale Erfassung.
         $preferFairgate=empty($local['pendingSync']);
         foreach(self::FIELDS as $field){$own=$local['values'][$field]??null;$official=$fairgate[$field]??null;$values[$field]=(string)($preferFairgate?($official??$own??''):($own??$official??''));}

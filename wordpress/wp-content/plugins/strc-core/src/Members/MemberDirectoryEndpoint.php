@@ -20,8 +20,8 @@ final class MemberDirectoryEndpoint
         if(!user_can($id,'strc_access_member_area'))return false;
         $membership=(new MembershipRepository())->findForUser($id);
         if(!$membership||!in_array($membership['status'],['active','grace'],true))return false;
-        // Aufnahme ins Mitgliederverzeichnis ist für aktive Mitglieder verbindlich (keine Abwahl mehr).
-        return true;
+        $preferences=get_user_meta($id,'strc_website_preferences',true);
+        return !is_array($preferences)||!array_key_exists('directory',$preferences)||!empty($preferences['directory']);
     }
 
     private function member(int $id,bool $detail=false): array

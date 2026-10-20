@@ -52,8 +52,19 @@ final class FormStore
             $record=['kind'=>$kind,'state'=>'pending_review','createdAt'=>gmdate(DATE_ATOM),'reference'=>$reference,'payload'=>$data];
             $id=wp_insert_post(wp_slash(['post_type'=>'strc_form','post_status'=>'private','post_title'=>'Clubanfrage','post_content'=>wp_json_encode($record),'post_excerpt'=>$key,'post_author'=>$owner,'comment_status'=>'closed','ping_status'=>'closed']),true);
             if(is_wp_error($id)||!$id) throw new \RuntimeException('Die Anfrage konnte nicht gespeichert werden.',503);
+            if(in_array($kind,['profile','copilot','subscription'],true))self::supersede($kind,$owner,(int)$id);
             return (int)$id;
         });
+    }
+    /** Older pending edits must not overwrite a newer request later in the inbox. */
+    public static function supersede(string $kind,int $owner,int $except=0): void
+    {
+        foreach(self::find('strc_form',$owner) as $post){
+            $data=self::data($post);
+            if((int)$post->ID===$except||($data['kind']??'')!==$kind||!in_array($data['state']??'',['pending_review','clarification','approved_pending_sync'],true))continue;
+            $data['state']='superseded';$data['supersededAt']=gmdate(DATE_ATOM);
+            self::save('strc_form',$data,$owner,0,$post,self::revision($post));
+        }
     }
     public static function quota(): void
     {

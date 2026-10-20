@@ -48,6 +48,12 @@ final class FairgateProfileWriter
     public function payload(string $part,array $changes): array
     {
         $map=$this->config[$part]??[];$configured=[];$payload=[];
+        // Never report an entire change as saved when only some fields can be sent.
+        $allowed=$part==='fields'?self::MEMBER_FIELDS:($part==='copilot'?self::COPILOT_FIELDS:[]);
+        foreach($changes as $field=>$value){
+            if(!in_array($field,$allowed,true))return [];
+            if(!isset($map[$field])&&!($part==='fields'&&$field==='language')&&!($part==='copilot'&&isset($map['full_name'])&&in_array($field,['first_name','last_name'],true)))return [];
+        }
         foreach($changes as $field=>$value){
             if($part==='fields'&&$field==='language'&&!isset($map['language'])){$payload['correspondence_lang']=$value;continue;}
             if(isset($map[$field]))$configured[$map[$field]]=$value;

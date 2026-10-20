@@ -176,7 +176,8 @@ final class MarketplaceEndpoint
         if($service){
             if(!\SwissTRClub\Core\Editorial\EditorialAccess::area('market'))return $this->denied();
             $member=get_userdata($service);
-            if(!$member||$service===$owner||!user_can($member,'strc_access_member_area'))return new WP_Error('member','Bitte ein aktives Mitglied auswählen.',['status'=>422]);
+            $membership=(new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($service);
+            if(!$member||$service===$owner||!$membership||!in_array($membership['status'],['active','grace'],true)||!user_can($member,'strc_access_member_area'))return new WP_Error('member','Bitte ein aktives Mitglied auswählen.',['status'=>422]);
             $owner=$service;
         }
         $validated=$this->validateFields($input);if(is_wp_error($validated))return $validated;
@@ -267,7 +268,9 @@ final class MarketplaceEndpoint
         $rows=[];$repo=new \SwissTRClub\Core\Members\MembershipRepository();
         foreach(array_merge($users,$byName) as $user){
             if(isset($rows[$user->ID])||!user_can($user,'strc_access_member_area'))continue;
-            $number=(string)($repo->findForUser((int)$user->ID)['member_number']??'');
+            $membership=$repo->findForUser((int)$user->ID);
+            if(!$membership||!in_array($membership['status'],['active','grace'],true)||(int)$user->ID===get_current_user_id())continue;
+            $number=(string)($membership['member_number']??'');
             $rows[$user->ID]=['id'=>(int)$user->ID,'name'=>$user->display_name,'memberNumber'=>str_starts_with($number,'FG:')?'':$number,'city'=>(string)get_user_meta($user->ID,'strc_city',true)];
             if(count($rows)>=20)break;
         }

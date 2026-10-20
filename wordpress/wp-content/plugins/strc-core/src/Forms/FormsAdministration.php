@@ -34,7 +34,7 @@ final class FormsAdministration
         $page=max(1,absint($_GET['paged']??1));$query=new \WP_Query(['post_type'=>['strc_form','strc_application'],'post_status'=>'private','posts_per_page'=>20,'paged'=>$page,'orderby'=>'ID','order'=>'DESC']);
         echo '<div class="wrap"><h1>Formularpostfach</h1><p>Anträge, Kontaktanfragen, Profil- und Abo-Änderungen. Eine Freigabe vermerkt die Prüfung; sie überträgt noch keine Daten nach Fairgate und erstellt kein Mitgliedskonto. Rückfragen erfolgen persönlich durch die zuständige Person.</p>';
         if(!$query->posts)echo '<p>Keine Anfragen vorhanden.</p>';
-        $labels=['pending_review'=>'Prüfung offen','clarification'=>'Rückfrage erforderlich','approved_pending_sync'=>'Geprüft – Fairgate-Übernahme offen','rejected'=>'Abgelehnt','resolved'=>'Erledigt'];
+        $labels=['pending_review'=>'Prüfung offen','clarification'=>'Rückfrage erforderlich','approved_pending_sync'=>'Geprüft – Fairgate-Übernahme offen','rejected'=>'Abgelehnt','resolved'=>'Erledigt','superseded'=>'Durch neuere Angaben ersetzt'];
         foreach($query->posts as $post){
             $data=FormStore::data($post);$kind=$post->post_type==='strc_application'?'Mitgliedsantrag':(['profile'=>'Kontaktänderung','contact'=>'Kontaktanfrage','subscription'=>'Abo-Änderung (Magazin / eNewsletter)','copilot'=>'Co-Pilot-Angaben (Nicht-Mitglied)','couple'=>'Wechsel zur Paarmitgliedschaft'][$data['kind']??'']??'Anfrage');
             if($post->post_type==='strc_application'){
