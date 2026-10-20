@@ -31,3 +31,11 @@ Ein Webhook erweitert keine API-Berechtigung. Eintrittsdatum, Geschlecht und Kor
 ## Rückkehr
 
 Vor Veröffentlichung Programmdateien, `.htaccess`, WordPress-Konfiguration und bestehenden Subscription-Stand privat sichern. Nur selbst registrierte Ereignisse entfernen, deren Callback weiterhin exakt der eigenen Adresse entspricht; fremde spätere Änderungen zuerst klären. Bei Dateirückkehr aktuelle Prüfsummen gegen den installierten Stand abgleichen. Den privaten Include entfernen, Webhook-Cron-Hooks leeren und Warteschlangen-/Statusoptionen nur nach Sicherung entfernen. Den vorhandenen Passwortschutz vollständig wiederherstellen. Keine Mitgliederdatenbank, Inhalte, Rollen oder Uploads zurückspielen.
+
+## Bestätigte Aktivierung am 20. Oktober 2026
+
+Nach ausdrücklicher Nutzerfreigabe wurde der Empfänger auf Staging aktiviert. Alle vier tatsächlich angebotenen Ereignisse sind registriert und lesend bestätigt. Die exakte POST-Ausnahme verwendet eine Apache-kompatible Prüfung der ursprünglichen HTTP-Anfrage, sodass interne WordPress-Weiterleitungen den Zugriff nicht auf andere Ressourcen erweitern. Andere Methoden und Pfade behalten den Passwortschutz.
+
+17 HTTP-Prüfungen bestanden; die gültige Testmeldung wurde in 1,319 Sekunden mit 202 beantwortet. Der reale Cron-Worker schloss den lesenden Abgleich aller 285 bestehenden Mitgliedschaften ohne Fehler ab. Ein vom Verein in Fairgate erzeugtes reales Änderungsereignis wurde nicht absichtlich ausgelöst. Für spätere Prüfung sind letzte Meldung und letzter Abschluss im Systemstatus sichtbar. Die fehlenden Zusatzfeldfreigaben und der Staging-Schreibschutz bleiben bestehen.
+
+Aktivierungsnachweis und vollständiges privates Rückkehrpaket liegen unter `.private/fairgate-webhook-2026-10-20/`, serverseitig unter `/private/strc-peter-release-20261020173307`. Vor Rückkehr eigene registrierte Subscriptions anhand ihrer aktuellen Callback-Adresse prüfen, ausschliesslich eigene Abonnements entfernen und Konfigurations-/Programmprüfsummen abgleichen.
