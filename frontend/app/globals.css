@@ -2967,3 +2967,4 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .woocommerce-checkout #place_order:hover{background:#971a20!important}
 @media (max-width:900px){.woocommerce-checkout form.checkout{grid-template-columns:1fr}.woocommerce-checkout form.checkout>#customer_details,.woocommerce-checkout form.checkout>#order_review_heading,.woocommerce-checkout form.checkout>#order_review{grid-column:1;grid-row:auto;position:static}}
 .market-filters:empty{display:none}
+.editorial-access-bar .access-logout{margin-left:auto}
