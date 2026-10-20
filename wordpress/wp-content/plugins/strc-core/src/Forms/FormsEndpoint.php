@@ -18,7 +18,7 @@ final class FormsEndpoint
     }
     public function respond(): void
     {
-        [$operation,$input]=AjaxRequest::read('strc_forms',['contact','profile','vehicle-save','vehicle-remove','preferences']);
+        [$operation,$input]=AjaxRequest::read('strc_forms',['contact','profile','copilot-save','couple-request','vehicle-save','vehicle-remove','preferences']);
         try {
             if ((int)($_SERVER['CONTENT_LENGTH']??0)>22*1024*1024) throw new \RuntimeException('Bitte höchstens ein Bild mit 20 MB hochladen.',413);
             if ($operation==='config') wp_send_json_success(['nonce'=>wp_create_nonce('strc_forms'),'shopUrl'=>function_exists('wc_get_page_permalink')&&get_post_status((int)get_option('woocommerce_shop_page_id'))==='publish'?wc_get_page_permalink('shop'):'']);
@@ -34,7 +34,9 @@ final class FormsEndpoint
             if(!current_user_can('strc_access_member_area')) throw new \RuntimeException('Bitte mit einem aktiven Mitgliedskonto anmelden.',403);
             $result=match($operation){
                 'list','profile-read'=>$this->profile(),
-                'profile'=>$this->contactChange($input),
+                'profile'=>FormStore::locked('profile-'.get_current_user_id(),fn()=>\SwissTRClub\Core\Members\MemberProfile::create()->savePerson(get_current_user_id(),$input,false)),
+                'copilot-save'=>FormStore::locked('profile-'.get_current_user_id(),fn()=>\SwissTRClub\Core\Members\MemberProfile::create()->savePerson(get_current_user_id(),$input,true)),
+                'couple-request'=>FormStore::locked('couple-'.get_current_user_id(),fn()=>\SwissTRClub\Core\Members\MemberProfile::create()->requestCouple(get_current_user_id())),
                 'vehicle-save'=>FormStore::locked('vehicle-save-'.get_current_user_id(),fn()=>$this->vehicleSave($input)),
                 'vehicle-remove'=>$this->vehicleRemove($input),
                 'preferences'=>$this->preferences($input),
@@ -66,13 +68,7 @@ final class FormsEndpoint
         $requests=FormStore::find('strc_form',$user->ID);$pending=[];
         foreach($requests as $post){$data=FormStore::data($post);if(($data['kind']??'')==='profile'&&in_array($data['state']??'',['pending_review','clarification','approved_pending_sync'],true))$pending[]=['id'=>$post->ID,'submittedAt'=>$data['createdAt'],'values'=>$data['payload'],'state'=>$data['state']];}
         $photo=get_user_meta($user->ID,'strc_profile_photo',true);
-        return ['nonce'=>wp_create_nonce('strc_forms'),'name'=>$user->display_name,'contact'=>$contact,'pending'=>$pending,'membership'=>array_intersect_key((new MembershipRepository())->findForUser($user->ID)??[],array_flip(['member_number','membership_type','status','region','started_on'])),'vehicles'=>self::vehicles(),'canEditVehicles'=>self::vehicleOwner()===$user->ID,'legacyVehicle'=>(string)get_user_meta($user->ID,'strc_vehicle',true),'preferences'=>get_user_meta($user->ID,'strc_website_preferences',true)?:['directory'=>true], 'photo'=>$photo?add_query_arg(['action'=>'strc_forms','operation'=>'photo','profile'=>'1'],admin_url('admin-ajax.php')):''];
-    }
-    private function contactChange(array $input): array
-    {
-        $data=FormFields::contact($input,'',false);
-        FormStore::intake('profile',$data,$input['requestId']??'',get_current_user_id());
-        return ['message'=>'Änderungsanfrage gespeichert. Bis zur bestätigten Übernahme durch Fairgate gelten weiterhin Ihre bisherigen Kontaktdaten.'];
+        return \SwissTRClub\Core\Members\MemberProfile::create()->read($user->ID)+['subscriptions'=>\SwissTRClub\Core\Dashboard\MemberDashboardEndpoint::subscriptions($user->ID),'dashboardNonce'=>wp_create_nonce('strc_dashboard'),'nonce'=>wp_create_nonce('strc_forms'),'name'=>$user->display_name,'contact'=>$contact,'pending'=>$pending,'membership'=>array_intersect_key((new MembershipRepository())->findForUser($user->ID)??[],array_flip(['member_number','membership_type','status','region','started_on'])),'vehicles'=>self::vehicles(),'canEditVehicles'=>self::vehicleOwner()===$user->ID,'legacyVehicle'=>(string)get_user_meta($user->ID,'strc_vehicle',true),'preferences'=>get_user_meta($user->ID,'strc_website_preferences',true)?:['directory'=>true], 'photo'=>$photo?add_query_arg(['action'=>'strc_forms','operation'=>'photo','profile'=>'1'],admin_url('admin-ajax.php')):''];
     }
     private function vehicleSave(array $input): array
     {
@@ -110,9 +106,11 @@ final class FormsEndpoint
         $old=get_user_meta($id,'strc_profile_photo',true);$next=$files[0]??(($input['removePhoto']??'')==='1'?[]:$old);
         if($next!==$old&&!update_user_meta($id,'strc_profile_photo',$next)){$store->remove($files);throw new \RuntimeException('Profilbild konnte nicht gespeichert werden.',503);}
         if($old&&$old!==$next)$store->remove([$old]);
-        $preferences=['directory'=>($input['directory']??'')==='1'];
+        $stored=get_user_meta($id,'strc_website_preferences',true);
+        $preferences=is_array($stored)?$stored:['directory'=>true];
+        if(isset($input['directory']))$preferences['directory']=$input['directory']==='1';
         if(get_user_meta($id,'strc_website_preferences',true)!==$preferences&&!update_user_meta($id,'strc_website_preferences',$preferences))throw new \RuntimeException('Einstellungen konnten nicht gespeichert werden.',503);
-        return ['message'=>'Profileinstellungen gespeichert.'];
+        return ['message'=>'Profilbild gespeichert.'];
     }
     private function photo(array $input): never
     {

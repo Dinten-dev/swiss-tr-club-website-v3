@@ -52,14 +52,77 @@ final class FairgateMemberMapping
         $out=array();
         if (is_string($this->paths['startedOn']??null)) {
             $value=$this->value($contact,$this->paths['startedOn']);
-            if (is_scalar($value) && preg_match('/^(\d{4})(?:-(\d{2})-(\d{2}))?/',(string)$value,$m)) $out['started_on']=$m[1].'-'.($m[2]??'01').'-'.($m[3]??'01');
+            if (is_scalar($value) && preg_match('/^(\d{4})(?:-(\d{2})-(\d{2}))?(?:$|T| )/',(string)$value,$m)) {
+                $date=$m[1].'-'.($m[2]??'01').'-'.($m[3]??'01');
+                if(self::validCalendarDate($date))$out['started_on']=$date;
+            }
         }
         foreach (array('printMagazine'=>'print','eNewsletter'=>'newsletter') as $key=>$name) {
             if (!is_string($this->paths[$key]??null)) continue;
             $flag=self::flag($this->value($contact,$this->paths[$key]));
             if ($flag!==null) $out[$name]=$flag;
         }
+        $person=$this->personFields($contact,'',array('gender'=>array('basefields','gender'),'birth_date'=>array('basefields','date_of_birth'),'salutation'=>array('basefields','salutation'),'language'=>array('basefields',isset($contact['basefields']['correspondence_language'])?'correspondence_language':'correspondence_lang')));
+        if ($person) $out['person']=$person;
+        $copilot=$this->personFields($contact,'copilot',array());
+        // Fairgate führt den Co-Piloten als ein Feld «Copilot Vorname Name».
+        if ((empty($copilot['first_name']) || empty($copilot['last_name'])) && is_string($this->paths['copilotFullName']??null)) {
+            $split=self::splitName(self::normalize('name',$this->value($contact,$this->paths['copilotFullName'])));
+            if ($split) $copilot=$split+$copilot;
+        }
+        if (!empty($copilot['first_name']) && !empty($copilot['last_name'])) $out['copilot']=$copilot;
         return $out;
+    }
+
+    /**
+     * Persönliche Zusatzangaben. Zuordnung über STRC_FAIRGATE_SYNC_FIELDS, z. B. 'gender'=>'/basefields/gender'
+     * oder für den in Fairgate erfassten Co-Piloten 'copilotFirstName'=>'/fields/123'.
+     * Ohne Zuordnung werden für das Mitglied gängige Fairgate-Grundfelder gelesen, falls vorhanden.
+     */
+    private function personFields(array $contact,string $prefix,array $fallback): array
+    {
+        $keys=$prefix===''?array('gender','birth_date','salutation','language'):FairgateProfileWriter::COPILOT_FIELDS;
+        $out=array();
+        foreach ($keys as $field) {
+            $name=$prefix===''?lcfirst(str_replace('_','',ucwords($field,'_'))):$prefix.str_replace('_','',ucwords($field,'_'));
+            $value=is_string($this->paths[$name]??null)?$this->value($contact,$this->paths[$name]):null;
+            if ($value===null && isset($fallback[$field])) {$value=$contact;foreach($fallback[$field] as $part){$value=is_array($value)&&array_key_exists($part,$value)?$value[$part]:null;}}
+            $clean=self::normalize($field,$value);
+            if ($clean!=='') $out[$field]=$clean;
+        }
+        return $out;
+    }
+
+    /** «Monika Muster» → Vorname Monika, Name Muster; mehrteilige Vornamen bleiben beim Vornamen. */
+    public static function splitName(string $full): array
+    {
+        $parts=preg_split('/\s+/u',trim($full))?:array();
+        if (count($parts)<2) return array();
+        $last=array_pop($parts);
+        return array('first_name'=>implode(' ',$parts),'last_name'=>$last);
+    }
+
+    public static function normalize(string $field,mixed $value): string
+    {
+        if (!is_scalar($value)) return '';
+        $text=trim(function_exists('sanitize_text_field')?sanitize_text_field((string)$value):strip_tags((string)$value));
+        if ($text==='') return '';
+        $lower=mb_strtolower($text);
+        $clean=match($field){
+            'gender'=>in_array($lower,array('m','male','mann','männlich','masculin','herr'),true)?'male':(in_array($lower,array('f','w','female','frau','weiblich','féminin','feminin'),true)?'female':(in_array($lower,array('d','other','divers','diverse','x'),true)?'other':'')),
+            'birth_date'=>preg_match('/^(\d{4})-(\d{2})-(\d{2})/',$text,$m)?$m[1].'-'.$m[2].'-'.$m[3]:(preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/',$text,$m)?sprintf('%04d-%02d-%02d',$m[3],$m[2],$m[1]):''),
+            'salutation'=>in_array($lower,array('frau','madame','mme','ms','mrs'),true)?'Frau':(in_array($lower,array('herr','monsieur','m.','mr'),true)?'Herr':''),
+            'language'=>in_array(substr($lower,0,2),array('de','fr'),true)?substr($lower,0,2):'',
+            default=>mb_substr($text,0,200),
+        };
+        if($field==='birth_date'&&(!self::validCalendarDate($clean)||$clean>gmdate('Y-m-d')))return '';
+        return $clean;
+    }
+
+    private static function validCalendarDate(string $value): bool
+    {
+        $date=\DateTimeImmutable::createFromFormat('!Y-m-d',$value);
+        return $date&&$date->format('Y-m-d')===$value;
     }
 
     public static function flag(mixed $value): ?bool
@@ -76,6 +139,8 @@ final class FairgateMemberMapping
     public static function storeExtras(int $userId,array $extras): void
     {
         foreach (array('print','newsletter') as $name) if (isset($extras[$name])) update_user_meta($userId,'strc_subscription_'.$name,$extras[$name]?'1':'0');
+        foreach (($extras['person']??array()) as $field=>$value) update_user_meta($userId,'strc_'.$field,$value);
+        if (isset($extras['copilot'])) update_user_meta($userId,'strc_copilot_fairgate',$extras['copilot']);
         // Gemeldete Änderung ist erledigt, sobald Fairgate denselben Stand liefert.
         $request=get_user_meta($userId,'strc_subscription_request',true);
         if (is_array($request)) {

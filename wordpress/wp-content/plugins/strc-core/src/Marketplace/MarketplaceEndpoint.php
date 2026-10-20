@@ -47,6 +47,7 @@ final class MarketplaceEndpoint
         $result = match ($operation) {
             'config'=>['nonce'=>wp_create_nonce('strc_marketplace'),'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area('market'),'partCategories'=>\SwissTRClub\Core\Community\CatalogSettings::parts()],
             'list' => $this->listAds($input),
+            'members' => $this->serviceMembers((string)($input['q']??'')),
             'create' => $this->createAd($input, $_FILES),
             'approve','reject','withdraw','renew','edit'=>$this->changeAd($operation,$input),
             'sold' => $this->markSold(absint($input['id'] ?? 0)),
@@ -170,6 +171,15 @@ final class MarketplaceEndpoint
         if (! current_user_can('strc_access_member_area') || ! current_user_can('publish_strc_ads')) {
             return $this->denied();
         }
+        // Service: Marktplatz-Moderation oder Admin erstellt das Inserat im Namen eines Mitglieds.
+        $owner=get_current_user_id();$service=absint($input['onBehalfOf']??0);
+        if($service){
+            if(!\SwissTRClub\Core\Editorial\EditorialAccess::area('market'))return $this->denied();
+            $member=get_userdata($service);
+            $membership=(new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($service);
+            if(!$member||$service===$owner||!$membership||!in_array($membership['status'],['active','grace'],true)||!user_can($member,'strc_access_member_area'))return new WP_Error('member','Bitte ein aktives Mitglied auswählen.',['status'=>422]);
+            $owner=$service;
+        }
         $validated=$this->validateFields($input);if(is_wp_error($validated))return $validated;
         [$title,$description,$price,$category,$details,$parts]=$validated;
         $images = $files['images'] ?? array();
@@ -204,7 +214,7 @@ final class MarketplaceEndpoint
         // Publish only once every upload has succeeded; failed uploads leave no partial ad.
         $postId = wp_insert_post(wp_slash(array(
             'post_type' => 'strc_ad', 'post_status' => 'draft',
-            'post_author' => get_current_user_id(), 'post_title' => $title, 'post_content' => $description,
+            'post_author' => $owner, 'post_title' => $title, 'post_content' => $description,
             'post_excerpt' => implode(', ', $parts),
         )), true);
         if (is_wp_error($postId)) {
@@ -230,14 +240,51 @@ final class MarketplaceEndpoint
         if ($attachments) {
             set_post_thumbnail($postId, $attachments[0]);
         }
-        $status=$this->settle((int)$postId,true);
+        if($service){
+            // Von der Moderation erfasst = bereits geprüft, auch bei Fahrzeugen.
+            update_post_meta($postId,'strc_ad_service',['by'=>get_current_user_id(),'at'=>gmdate(DATE_ATOM)]);
+            update_post_meta($postId,'strc_ad_public_approved','1');update_post_meta($postId,'strc_ad_expires_at',time()+90*DAY_IN_SECONDS);
+            update_post_meta($postId,'strc_review',['by'=>get_current_user_id(),'at'=>gmdate(DATE_ATOM),'service'=>true]);
+            $status='publish';
+        }else $status=$this->settle((int)$postId,true);
         $published = wp_update_post(array('ID' => $postId, 'post_status' => $status), true);
         if (is_wp_error($published)) {
             $this->rollback($postId, $attachments);
             return new WP_Error('publish_failed', 'Das Inserat konnte nicht veröffentlicht werden. Bitte erneut versuchen.');
         }
         if($status==='pending')\SwissTRClub\Core\Community\SubmissionNotifications::send((int)$postId,'market');
+        if($service)$this->notifyServiceOwner((int)$postId);
         return $this->present($postId);
+    }
+
+    /** Mitgliedersuche für das Service-Inserat (nur Marktplatz-Moderation / Admin). */
+    private function serviceMembers(string $search): array|WP_Error
+    {
+        if(!\SwissTRClub\Core\Editorial\EditorialAccess::area('market'))return $this->denied();
+        $search=trim(sanitize_text_field($search));
+        if(mb_strlen($search)<2)return ['members'=>[]];
+        $users=get_users(['search'=>'*'.$search.'*','search_columns'=>['display_name','user_email','user_login'],'number'=>40,'orderby'=>'display_name']);
+        $byName=get_users(['number'=>40,'meta_query'=>['relation'=>'OR',['key'=>'first_name','value'=>$search,'compare'=>'LIKE'],['key'=>'last_name','value'=>$search,'compare'=>'LIKE']]]);
+        $rows=[];$repo=new \SwissTRClub\Core\Members\MembershipRepository();
+        foreach(array_merge($users,$byName) as $user){
+            if(isset($rows[$user->ID])||!user_can($user,'strc_access_member_area'))continue;
+            $membership=$repo->findForUser((int)$user->ID);
+            if(!$membership||!in_array($membership['status'],['active','grace'],true)||(int)$user->ID===get_current_user_id())continue;
+            $number=(string)($membership['member_number']??'');
+            $rows[$user->ID]=['id'=>(int)$user->ID,'name'=>$user->display_name,'memberNumber'=>str_starts_with($number,'FG:')?'':$number,'city'=>(string)get_user_meta($user->ID,'strc_city',true)];
+            if(count($rows)>=20)break;
+        }
+        return ['members'=>array_values($rows)];
+    }
+
+    /** Das Mitglied erfährt, dass in seinem Namen ein Inserat online ist (Kontaktanfragen gehen an seine E-Mail). */
+    private function notifyServiceOwner(int $id): void
+    {
+        $post=get_post($id);$owner=$post?get_userdata((int)$post->post_author):null;
+        if(!$owner||!is_email($owner->user_email))return;
+        $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
+        $body="Hallo ".($owner->first_name?:$owner->display_name)."\n\nDer Marktplatz-Service des Swiss TR-Club hat in deinem Namen ein Inserat erstellt:\n«".$post->post_title."»\n\nKontaktanfragen von Interessierten erhältst du an diese E-Mail-Adresse. Unter «Meine Inserate» kannst du das Inserat bearbeiten, als verkauft markieren oder zurückziehen:\n{$base}/#marktplatz/meine\n\nSwiss TR-Club\n";
+        try{wp_mail($owner->user_email,'Swiss TR-Club: Dein Inserat ist online',$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable $error){error_log('STRC marketplace service mail failed for ad '.$id.'.');}
     }
 
     public function markSold(int $id): array|WP_Error
@@ -374,6 +421,7 @@ final class MarketplaceEndpoint
             'createdAt' => get_post_time(DATE_ATOM, true, $id),
             'status'=>$post->post_status,'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area('market'),'expiresAt'=>get_post_meta($id,'strc_ad_expires_at',true)?gmdate(DATE_ATOM,(int)get_post_meta($id,'strc_ad_expires_at',true)):'',
             'mine' => get_current_user_id() > 0 && (int) $post->post_author === get_current_user_id(),
+            'service' => (get_current_user_id()>0&&((int)$post->post_author===get_current_user_id()||\SwissTRClub\Core\Editorial\EditorialAccess::area('market')))&&is_array(get_post_meta($id,'strc_ad_service',true))?(string)(get_userdata((int)(get_post_meta($id,'strc_ad_service',true)['by']??0))->display_name??'Marktplatz-Service'):'',
             'sold' => (bool) get_post_meta($id, 'strc_ad_sold', true),
         );
     }

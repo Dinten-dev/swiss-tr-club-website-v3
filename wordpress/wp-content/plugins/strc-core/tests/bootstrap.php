@@ -15,4 +15,5 @@ require_once dirname(__DIR__) . '/src/Integrations/Fairgate/FairgateApiException
 require_once dirname(__DIR__) . '/src/Integrations/Fairgate/FairgateConfiguration.php';
 require_once dirname(__DIR__) . '/src/Integrations/Fairgate/FairgateClient.php';
 require_once dirname(__DIR__) . '/src/Integrations/Fairgate/FairgateMemberMapping.php';
+require_once dirname(__DIR__) . '/src/Integrations/Fairgate/FairgateProfileWriter.php';
 require_once dirname(__DIR__) . '/src/Forms/EventRegistration.php';

@@ -15,6 +15,7 @@ final class PublicDocumentUpload
 
     public static function receive(string $key): array
     {
+        $title=self::title($_POST['title']??'');
         $file=$_FILES['file']??null;
         if(!is_array($file)||!is_string($file['tmp_name']??null)||!is_uploaded_file($file['tmp_name'])||(int)($file['error']??1)!==UPLOAD_ERR_OK||(int)($file['size']??0)>50*1024*1024)AjaxRequest::fail('Bitte ein PDF bis 50 MB wählen.');
         $mimes=['pdf'=>'application/pdf'];
@@ -27,7 +28,6 @@ final class PublicDocumentUpload
         $id=media_handle_upload('file',0,[],['test_form'=>false,'mimes'=>$mimes]);
         if(is_wp_error($id))AjaxRequest::fail('Das PDF konnte nicht hochgeladen werden. Bitte erneut versuchen.');
         if(!add_post_meta($id,'strc_public_document_page',$key,true)){wp_delete_attachment($id,true);AjaxRequest::fail('Das PDF konnte nicht zugeordnet werden.');}
-        $title=self::title($_POST['title']??'');
         if($title!=='')wp_update_post(['ID'=>$id,'post_title'=>$title]);
         return ['id'=>$id,'title'=>get_the_title($id),'url'=>wp_get_attachment_url($id)];
     }
