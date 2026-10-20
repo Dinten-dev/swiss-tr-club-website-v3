@@ -114,11 +114,11 @@ final class MemberDashboardEndpoint
     {
         $id=get_current_user_id();$current=self::subscriptions($id);
         $wanted=['print'=>($input['print']??'')==='1','newsletter'=>($input['newsletter']??'')==='1'];
-        if($wanted['print']===$current['print']&&$wanted['newsletter']===$current['newsletter']){FormStore::supersede('subscription',$id);delete_user_meta($id,'strc_subscription_request');return ['message'=>'Keine Änderung gegenüber Fairgate.','subscriptions'=>self::subscriptions($id)];}
+        if($wanted['print']===$current['print']&&$wanted['newsletter']===$current['newsletter']){FormStore::supersede('subscription',$id);delete_user_meta($id,'strc_subscription_request');return ['message'=>'Keine Änderung.','subscriptions'=>self::subscriptions($id)];}
         if(is_array($current['request'])&&$wanted===array_intersect_key($current['request'],$wanted))return ['message'=>'Änderung bereits gemeldet.','subscriptions'=>$current];
         $row=(new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id);
         FormStore::intake('subscription',['name'=>wp_get_current_user()->display_name,'email'=>wp_get_current_user()->user_email,'memberNumber'=>(string)($row['member_number']??''),'printMagazine'=>$wanted['print']?'abonniert':'abbestellt','eNewsletter'=>$wanted['newsletter']?'abonniert':'abbestellt'],wp_generate_uuid4(),$id);
         update_user_meta($id,'strc_subscription_request',$wanted+['at'=>gmdate(DATE_ATOM)]);
-        return ['message'=>'Änderung an die Mitgliederverwaltung gesendet. Sie wird in Fairgate übernommen.','subscriptions'=>self::subscriptions($id)];
+        return ['message'=>'Danke, deine Änderung ist gemeldet.','subscriptions'=>self::subscriptions($id)];
     }
 }

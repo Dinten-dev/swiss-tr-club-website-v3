@@ -2855,7 +2855,7 @@
         "key": "subscriptionsHint",
         "label": "Hinweis TR-Magazin & eNewsletter",
         "type": "text",
-        "default": "Änderungen gehen an die Mitgliederverwaltung und werden in Fairgate übernommen."
+        "default": ""
       }
     ]
   }
