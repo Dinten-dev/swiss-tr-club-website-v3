@@ -153,6 +153,11 @@ final class RoleDefinitions
                 'name' => 'STRC Administrator / Editor',
                 'capabilities' => self::caps('read', 'upload_files', 'edit_posts', 'edit_others_posts', 'edit_published_posts', 'publish_posts', 'delete_posts', 'delete_published_posts', 'strc_edit_website_content'),
             ),
+            // Externer Speditionsdienstleister: kein Mitglied, sieht nur Versandaufträge und Lager unter «Mein Konto».
+            'strc_shipping_partner' => array(
+                'name' => 'STRC Versandpartner',
+                'capabilities' => self::caps('read', 'strc_shipping'),
+            ),
             'strc_board_member' => array(
                 'name' => 'STRC Board Member',
                 'capabilities' => self::caps('read', 'strc_access_board_documents'),

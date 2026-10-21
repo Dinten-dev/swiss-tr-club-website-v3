@@ -118,4 +118,13 @@ final class RoleDefinitionsTest extends TestCase
         self::assertArrayNotHasKey('strc_access_board_documents', RoleDefinitions::all()['strc_developer']['capabilities']);
         self::assertArrayNotHasKey('strc_access_board_documents', RoleDefinitions::all()['strc_superadmin']['capabilities']);
     }
+
+    public function testShippingPartnerIsExternalWithoutMemberAccess(): void
+    {
+        $partner = RoleDefinitions::all()['strc_shipping_partner']['capabilities'];
+        self::assertTrue($partner['strc_shipping']);
+        self::assertArrayNotHasKey('strc_access_member_area', $partner);
+        self::assertArrayNotHasKey('strc_manage_shop', $partner);
+        self::assertArrayNotHasKey('strc_shipping_partner', RoleDefinitions::assignable());
+    }
 }

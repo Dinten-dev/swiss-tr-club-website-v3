@@ -8,7 +8,7 @@ use SwissTRClub\Core\Infrastructure\Schema;
 
 final class RoleManager
 {
-    private const ROLE_VERSION = '20261021-1';
+    private const ROLE_VERSION = '20261021-2';
 
     public function registerHooks(): void
     {

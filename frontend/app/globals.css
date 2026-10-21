@@ -3121,3 +3121,16 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .role-assignment-panel .role-scope{margin:0 12px 0 40px!important;padding:6px 0 10px!important}
 .role-assignment-panel .role-scope-chips label{position:relative}.role-assignment-panel .role-scope-chips input{width:1px;height:1px;left:0;top:0}
 @media(max-width:900px){.role-layout{grid-template-columns:minmax(0,1fr)}}
+
+/* «Mein Konto» des Versandpartners: offene Versandaufträge, Versand melden, Lager */
+.strc-shipping h2{margin:24px 0 12px}
+.strc-shipping-order{border:1px solid #d5dde4;border-radius:8px;padding:14px 16px;margin:0 0 12px;background:#fff}
+.strc-shipping-order header{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.strc-shipping-order h3{margin:0;font-size:18px;color:#0a253f}.strc-shipping-order header span{color:#617381;font-size:14px}
+.strc-shipping-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0}.strc-shipping-grid ul{margin:0;padding-left:18px}
+.strc-shipping-form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border-top:1px solid #eef1f4;padding-top:12px}
+.strc-shipping-form label{display:flex;flex-direction:column;font-size:13px;font-weight:700;flex:1 1 220px}
+.strc-shipping-form input[type=text]{margin-top:4px;min-height:40px;padding:6px 10px;border:1px solid #9fb3c2;border-radius:6px}
+.strc-shipping-form .button.alt{background:#bd2028;color:#fff;border-color:#bd2028}
+.strc-shipping-done{margin:8px 0 16px}.strc-shipping-done summary{cursor:pointer;font-weight:700}
+@media(max-width:640px){.strc-shipping-grid{grid-template-columns:1fr}}
