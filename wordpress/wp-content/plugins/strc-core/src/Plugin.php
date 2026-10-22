@@ -59,6 +59,7 @@ final class Plugin
         (new \SwissTRClub\Core\Content\MagazineEndpoint())->registerHooks();
         (new MarketplaceEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShopEndpoint())->registerHooks();
+        (new \SwissTRClub\Core\Shop\ShippingPartner())->registerHooks();
         (new DashboardShortcode())->registerHooks();
         $fairgate = FairgateConfiguration::fromConstants();
         (new SystemStatusPage($fairgate))->registerHooks();
@@ -84,6 +85,7 @@ final class Plugin
         (new MembershipAccessGuard($memberships))->registerHooks();
         (new MemberSessionEndpoint($memberships))->registerHooks();
         (new \SwissTRClub\Core\Members\MemberDirectoryEndpoint())->registerHooks();
+        (new \SwissTRClub\Core\Members\MemberLoginExperience())->registerHooks();
         (new \SwissTRClub\Core\Dashboard\MemberDashboardEndpoint())->registerHooks();
     }
 }

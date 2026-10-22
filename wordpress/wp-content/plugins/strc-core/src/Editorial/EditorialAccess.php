@@ -11,7 +11,7 @@ final class EditorialAccess
 
     public static function global(): bool
     {
-        return current_user_can('strc_edit_website_content') || current_user_can('manage_options');
+        return current_user_can('strc_edit_website_content');
     }
 
     public static function area(string $area): bool
@@ -40,7 +40,8 @@ final class EditorialAccess
     public static function available(): bool
     {
         $editorialAreas = array_diff(array_keys(self::AREAS), array('shop'));
-        return self::global() || (current_user_can('strc_access_member_area') && (RegionalEventAccess::regions() || array_filter($editorialAreas, array(self::class, 'area'))));
+        // Der Webmaster erreicht die Redaktion nur für die Rollenzuteilung (Superadmin ernennen).
+        return self::global() || current_user_can('strc_assign_superadmin') || (current_user_can('strc_access_member_area') && (RegionalEventAccess::regions() || array_filter($editorialAreas, array(self::class, 'area'))));
     }
 
     public static function document(string $key): bool

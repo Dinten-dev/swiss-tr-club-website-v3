@@ -24,13 +24,19 @@ foreach (array('memberships') as $suffix) {
 
 $requiredCapabilities = array(
     'strc_member' => 'strc_access_member_area',
-    'strc_editor' => 'strc_edit_website_content',
-    'strc_administrator' => 'strc_manage_members',
+    'strc_administrator' => 'strc_edit_website_content',
+    'strc_superadmin' => 'strc_assign_admins',
+    'strc_registration_moderator' => 'strc_manage_members',
     'strc_developer' => 'strc_manage_platform',
 );
 foreach ($requiredCapabilities as $roleName => $capability) {
     $role = get_role($roleName);
     strc_assert($role && $role->has_cap($capability), "Role capability missing: {$roleName}/{$capability}");
+}
+// Mitgliederverwaltung und Kassier sind exklusiv; der Webmaster hat nur technische Rechte.
+foreach (array('strc_administrator', 'strc_superadmin', 'strc_developer', 'administrator') as $roleName) {
+    $role = get_role($roleName);
+    strc_assert(! $role || (! $role->has_cap('strc_manage_members') && ! $role->has_cap('strc_manage_finance')), "Exclusive capability leaked: {$roleName}");
 }
 
 $member = $wpdb->get_row(

@@ -2843,7 +2843,7 @@
         "key": "coupleText",
         "label": "Text zum Wechsel in die Paarmitgliedschaft",
         "type": "rich",
-        "default": "<p>Wir möchten zur Paarmitgliedschaft wechseln. Der Jahresbeitrag ändert sich auf CHF 160.–. Der Aktuar verbindet uns danach in Fairgate.</p>"
+        "default": "<p>Wir möchten zur Paarmitgliedschaft wechseln. Der Jahresbeitrag ändert sich auf CHF 160.–.</p>"
       },
       {
         "key": "vehiclesHint",
@@ -2855,7 +2855,7 @@
         "key": "subscriptionsHint",
         "label": "Hinweis TR-Magazin & eNewsletter",
         "type": "text",
-        "default": "Änderungen gehen an die Mitgliederverwaltung und werden in Fairgate übernommen."
+        "default": ""
       }
     ]
   }

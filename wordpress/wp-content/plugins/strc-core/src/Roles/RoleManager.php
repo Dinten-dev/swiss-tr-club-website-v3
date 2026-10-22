@@ -8,7 +8,7 @@ use SwissTRClub\Core\Infrastructure\Schema;
 
 final class RoleManager
 {
-    private const ROLE_VERSION = '20261011-1';
+    private const ROLE_VERSION = '20261021-2';
 
     public function registerHooks(): void
     {
@@ -33,49 +33,66 @@ final class RoleManager
 
     public static function install(): void
     {
+        global $wpdb;
+        add_option('strc_roles_before_20261021', ['definitions'=>get_option($wpdb->prefix.'user_roles'), 'version'=>get_option('strc_roles_version')], '', false);
+        $managed = array_merge(RoleDefinitions::allManagedCapabilities(), RoleDefinitions::platformCapabilities(), array('strc_access_board_documents' => true));
         foreach (RoleDefinitions::all() as $slug => $definition) {
             $role = get_role($slug);
-
             if (! $role) {
                 add_role($slug, $definition['name'], $definition['capabilities']);
                 continue;
             }
-
             foreach ($definition['capabilities'] as $capability => $granted) {
-                if ($granted) {
-                    $role->add_cap($capability);
+                if ($granted) $role->add_cap($capability);
+            }
+            // Rechte, die eine Rolle laut Definition nicht (mehr) hat, werden entfernt, z. B. Mitgliederverwaltung beim Admin.
+            if (! in_array($slug, RoleDefinitions::LEGACY_ADMIN_ROLES, true)) {
+                foreach (array_keys($role->capabilities) as $capability) {
+                    if (isset($managed[$capability]) && empty($definition['capabilities'][$capability])) $role->remove_cap($capability);
                 }
             }
         }
 
         // Content administrators cannot turn themselves into technical administrators.
-        $contentAdmin = get_role('strc_administrator');
-        if ($contentAdmin) {
-            foreach (array('create_users','promote_users','delete_users','remove_users') as $capability) $contentAdmin->remove_cap($capability);
+        foreach (RoleDefinitions::ADMIN_ROLES as $slug) {
+            $contentAdmin = get_role($slug);
+            if ($contentAdmin) foreach (array('create_users','promote_users','delete_users','remove_users') as $capability) $contentAdmin->remove_cap($capability);
         }
 
+        // WordPress-Administratoren sind technisch zuständig (Webmaster): keine Fach- und Redaktionsrechte des Clubs.
         $administrator = get_role('administrator');
-        if (! $administrator) {
-            return;
-        }
-
-        foreach (RoleDefinitions::allManagedCapabilities() as $capability => $granted) {
-            if ($granted) {
-                $administrator->add_cap($capability);
+        if ($administrator) {
+            foreach (array_keys(RoleDefinitions::operationalCapabilities()) as $capability) {
+                if (str_starts_with($capability, 'strc_') || str_contains($capability, '_strc_')) $administrator->remove_cap($capability);
             }
+            $administrator->remove_cap('strc_access_board_documents');
+            foreach (array_keys(RoleDefinitions::platformCapabilities()) as $capability) $administrator->add_cap($capability);
         }
 
-        $developer = get_role('strc_developer');
-        if (! $developer) {
-            return;
-        }
+        self::migrateLegacyAdmins();
+    }
 
-        $developer->remove_cap('strc_access_board_documents');
-        foreach ($administrator->capabilities as $capability => $granted) {
-            if($capability==='strc_access_board_documents')continue;
-            if ($granted) {
-                $developer->add_cap($capability);
+    /** Frühere Rollen «Redaktor» / «Administrator / Editor» werden zu «Admin». */
+    private static function migrateLegacyAdmins(): void
+    {
+        foreach (get_users(array('role__in' => RoleDefinitions::LEGACY_ADMIN_ROLES, 'fields' => 'all')) as $user) {
+            if (!metadata_exists('user',$user->ID,'strc_role_migration_20261021_before')) {
+                add_user_meta($user->ID,'strc_role_migration_20261021_before',['roles'=>$user->roles,'assignments'=>get_user_meta($user->ID,RoleAssignments::KEY,true)],true);
             }
+            $user->add_role('strc_administrator');
+            foreach (RoleDefinitions::LEGACY_ADMIN_ROLES as $legacy) $user->remove_role($legacy);
+            $rows = get_user_meta($user->ID, RoleAssignments::KEY, true);
+            if (is_array($rows)) {
+                $clean = array(); $seen = array();
+                foreach ($rows as $row) {
+                    if (! is_array($row) || ! isset($row['role'])) continue;
+                    if (in_array($row['role'], RoleDefinitions::LEGACY_ADMIN_ROLES, true)) $row['role'] = 'strc_administrator';
+                    if (isset($seen[$row['role']])) continue;
+                    $seen[$row['role']] = true; $clean[] = $row;
+                }
+                update_user_meta($user->ID, RoleAssignments::KEY, $clean);
+            }
+            update_user_meta($user->ID, 'strc_role_migration_20261021', array('from' => 'legacy-admin', 'at' => gmdate(DATE_ATOM)));
         }
     }
 }

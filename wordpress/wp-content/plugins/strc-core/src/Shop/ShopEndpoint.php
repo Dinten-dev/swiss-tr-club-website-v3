@@ -24,6 +24,8 @@ final class ShopEndpoint
         add_filter('woocommerce_package_rates',function(array $rates):array{if(!$this->pickupEvents())foreach($rates as $key=>$rate)if($rate->get_method_id()==='local_pickup')unset($rates[$key]);return $rates;});
         add_action('admin_init',static function():void{if(!wp_doing_ajax()&&($_GET['page']??'')==='wc-settings'&&!current_user_can('manage_options'))wp_die('Technische Shop-Einstellungen verwaltet der Webmaster.',403);});
         add_filter('rest_pre_dispatch',static function($response,$server,$request){if(!current_user_can('manage_options')&&preg_match('~^/(?:wc/v[123]/(?:settings|payment_gateways)|wc-admin/(?:settings|options)|wc-analytics/settings)(?:/|$)~',$request->get_route()))return new \WP_Error('strc_settings','Nur Webmaster dürfen technische Shop-Einstellungen verwalten.',['status'=>403]);return $response;},10,3);
+        // Sortiment überall in der von der Shop-Moderation festgelegten Reihenfolge (menu_order).
+        add_filter('woocommerce_default_catalog_orderby',static fn():string=>'menu_order');
         add_action('woocommerce_payment_complete', array($this, 'notifyShopManagers'), 20);
         add_action('woocommerce_order_status_processing', array($this, 'notifyShopManagers'), 20);
         add_action('woocommerce_order_status_completed', array($this, 'notifyShopManagers'), 20);
@@ -31,10 +33,10 @@ final class ShopEndpoint
 
     public function respond(): void
     {
-        [$operation,$input] = AjaxRequest::read('strc_shop', array('product-save','order-save'));
-        if(in_array($operation,['product-save','order-save','order-options'],true)){
+        [$operation,$input] = AjaxRequest::read('strc_shop', array('product-save','order-save','product-order'));
+        if(in_array($operation,['product-save','order-save','order-options','product-order'],true)){
             if(!self::canManageShop()||!function_exists('wc_get_product'))AjaxRequest::fail('Keine Shopberechtigung.',403);
-            try{wp_send_json_success(match($operation){'product-save'=>ShopOperations::saveProduct($input),'order-save'=>ShopOperations::order($input),default=>ShopOperations::choices()});}
+            try{wp_send_json_success(match($operation){'product-save'=>ShopOperations::saveProduct($input),'order-save'=>ShopOperations::order($input),'product-order'=>ShopOperations::sortProducts($input),default=>ShopOperations::choices()});}
             catch(\InvalidArgumentException $e){AjaxRequest::fail($e->getMessage(),422);}
             catch(\Throwable $e){error_log('STRC shop operation: '.$e->getMessage());AjaxRequest::fail('Vorgang konnte nicht abgeschlossen werden. Bitte Bestand und Angaben neu prüfen.',409);}
         }
@@ -111,7 +113,7 @@ final class ShopEndpoint
         }
         return $args;
     }
-    private static function canInspect(): bool { return current_user_can('manage_options')||(current_user_can('strc_access_member_area')&&(current_user_can('strc_manage_finance')||self::canManageShop())); }
+    private static function canInspect(): bool { return (current_user_can('strc_access_member_area')&&(current_user_can('strc_manage_finance')||self::canManageShop())); }
     private function pickupEvents(): array
     {
         return array_values(array_filter(get_posts(['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>100,'meta_key'=>'strc_start_at','orderby'=>'meta_value','order'=>'ASC']),static fn($post)=>strtotime((string)get_post_meta($post->ID,'strc_start_at',true))>=time()));
@@ -123,7 +125,7 @@ final class ShopEndpoint
         $args=['limit'=>50,'page'=>$page,'paginate'=>true,'orderby'=>'date','order'=>'DESC'];
         if($event)$args['meta_query']=[['key'=>'_strc_pickup_event','value'=>$event]];
         $result=wc_get_orders($args);$orders=[];
-        foreach($result->orders as $order){$pickup=(int)$order->get_meta('_strc_pickup_event');$orders[]=['id'=>$order->get_id(),'number'=>$order->get_order_number(),'date'=>$order->get_date_created()?->date(DATE_ATOM),'status'=>$order->get_status(),'customer'=>trim($order->get_billing_first_name().' '.$order->get_billing_last_name()),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'paymentMethod'=>$order->get_payment_method_title(),'pickupEvent'=>$pickup?get_the_title($pickup):'','items'=>array_values(array_map(static fn($item)=>$item->get_name().' × '.$item->get_quantity(),$order->get_items()))];}
+        foreach($result->orders as $order){$pickup=(int)$order->get_meta('_strc_pickup_event');$orders[]=['id'=>$order->get_id(),'number'=>$order->get_order_number(),'date'=>$order->get_date_created()?->date(DATE_ATOM),'status'=>$order->get_status(),'customer'=>trim($order->get_billing_first_name().' '.$order->get_billing_last_name()),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'paymentMethod'=>$order->get_payment_method_title(),'pickupEvent'=>$pickup?get_the_title($pickup):'','shippedAt'=>(string)$order->get_meta('_strc_shipped_at'),'tracking'=>(string)$order->get_meta('_strc_tracking'),'items'=>array_values(array_map(static fn($item)=>$item->get_name().' × '.$item->get_quantity(),$order->get_items()))];}
         $stock=[];$products=wc_get_products(['limit'=>50,'page'=>max(1,absint($input['stockPage']??1)),'paginate'=>true,'status'=>['publish','draft','private']]);
         foreach($products->products as $product){$stock[]=['id'=>$product->get_id(),'name'=>$product->get_name(),'sku'=>$product->get_sku(),'quantity'=>$product->get_stock_quantity(),'stockStatus'=>$product->get_stock_status(),'type'=>$product->get_type()];if($product->is_type('variable'))foreach($product->get_children() as $variantId){$variant=wc_get_product($variantId);if($variant)$stock[]=['id'=>$variantId,'name'=>$variant->get_name(),'sku'=>$variant->get_sku(),'quantity'=>$variant->get_stock_quantity(),'stockStatus'=>$variant->get_stock_status(),'type'=>'variation'];}}
         wp_send_json_success(['orders'=>$orders,'total'=>$result->total,'pages'=>$result->max_num_pages,'stock'=>$stock,'stockPages'=>$products->max_num_pages,'events'=>array_map(static fn($post)=>['id'=>(int)$post->ID,'title'=>$post->post_title],$this->pickupEvents())]);
@@ -133,7 +135,7 @@ final class ShopEndpoint
     {
         $options=[''=>'Bitte Veranstaltung wählen'];
         foreach($this->pickupEvents() as $post)$options[$post->ID]=$post->post_title;
-        $fields['order']['strc_pickup_event']=['type'=>'select','label'=>'Abholung an Veranstaltung (bei Abholung erforderlich)','options'=>$options,'required'=>false,'priority'=>50];
+        $fields['order']['strc_pickup_event']=['type'=>'select','label'=>'Abholung an welcher Veranstaltung? *','options'=>$options,'required'=>false,'priority'=>50];
         return $fields;
     }
     public function savePickup(\WC_Order $order,array $data): void
@@ -238,8 +240,9 @@ final class ShopEndpoint
 
     private static function canManageShop(): bool
     {
+        // Webmaster (nur Technik) verwaltet das Sortiment nicht über die Website; WooCommerce-Admin bleibt technisch erreichbar.
         return ShopAccessPolicy::canManage(
-            current_user_can('manage_options'),
+            false,
             current_user_can('strc_manage_content_roles') || (current_user_can('strc_access_member_area') && current_user_can('strc_manage_shop')),
             current_user_can('strc_access_member_area'),
             current_user_can('strc_moderate'),

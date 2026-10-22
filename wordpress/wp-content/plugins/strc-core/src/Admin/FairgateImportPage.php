@@ -9,7 +9,7 @@ final class FairgateImportPage
     public function registerHooks(): void
     {
         if(!FairgateStagingImport::enabled())return;
-        add_action('admin_menu',function(){add_submenu_page('strc-club','Fairgate-Mitglieder','Mitglieder übernehmen','strc_manage_members','strc-fairgate-import',[$this,'render']);});
+        add_action('admin_menu',function(){add_submenu_page('strc-club','Fairgate-Mitglieder','Mitglieder übernehmen',current_user_can('strc_manage_members')?'strc_manage_members':'strc_manage_platform','strc-fairgate-import',[$this,'render']);});
         add_action('admin_post_strc_fairgate_import',[$this,'handle']);
     }
     public function handle(): void

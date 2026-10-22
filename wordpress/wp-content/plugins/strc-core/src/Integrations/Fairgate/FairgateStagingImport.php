@@ -36,7 +36,7 @@ final class FairgateStagingImport
     {
         $env=wp_get_environment_type();
         if (!self::enabled() && !($env==='local' && defined('STRC_FAIRGATE_IMPORT_TESTING') && STRC_FAIRGATE_IMPORT_TESTING)) throw new FairgateApiException('Der schreibgeschützte Mitgliederimport ist nicht freigegeben.');
-        if (!wp_doing_cron() && !current_user_can('strc_manage_members')) throw new FairgateApiException('Kein Zugriff auf den Mitgliederimport.');
+        if (!wp_doing_cron() && !current_user_can('strc_manage_members') && !current_user_can('strc_manage_platform')) throw new FairgateApiException('Kein Zugriff auf den Mitgliederimport.');
     }
 
     /** Fetch the complete list before writing anything, so shared emails are detectable. */

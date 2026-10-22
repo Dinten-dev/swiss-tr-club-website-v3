@@ -133,7 +133,7 @@ function ClubApp() {
       </nav>
     </header>
 
-    {memberSession?.canEditContent&&<div className="editorial-access-bar"><a href="#redaktion">{t("Redaktion öffnen")}</a>{memberSession.editableDocuments?.includes(editorialKey)&&<a href={`#redaktion/${editorialKey}`}>{t("Diese Seite bearbeiten")}</a>}{memberSession.logoutUrl&&<a href={memberSession.logoutUrl}>{t("Abmelden")}</a>}</div>}
+    {(memberSession?.canEditContent||memberSession?.authenticated)&&<div className="editorial-access-bar">{memberSession.canEditContent&&<><a href="#redaktion">{t("Redaktion öffnen")}</a>{memberSession.editableDocuments?.includes(editorialKey)&&<a href={`#redaktion/${editorialKey}`}>{t("Diese Seite bearbeiten")}</a>}</>}{memberSession.memberAccess&&!memberSession.canEditContent&&<a href="#mitglieder">{t("Mein Dashboard")}</a>}{memberSession.logoutUrl&&<a className="access-logout" href={memberSession.logoutUrl}>{t("Abmelden")}</a>}</div>}
     <Breadcrumbs page={page} subroute={subroute}/>
     {page==='editorial'&&(memberSession?.canEditContent?<EditorialDashboard nonce={memberSession.editorialNonce||''} canManageEvents={!!memberSession.canManageEvents}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='home' && <HomePage memberAccess={!!memberSession?.memberAccess} navigate={navigate} events={events} eventsState={eventsState} openEvent={setSelectedEvent}/>}
@@ -228,7 +228,7 @@ function MembersPage({session,navigate}:{session:MemberSession|null,navigate:(p:
   if(session.canEditContent&&session.canManageRoles)extraTools.push({url:'#redaktion',label:'Redaktion',icon:'✎'});
   if(session.canManageEvents)extraTools.push({url:'#agenda-verwalten',label:'Agenda verwalten',icon:'A'});
   if(session.formsInboxUrl)extraTools.push({url:'#antraege',label:'Anträge & Anfragen',icon:'✎'});
-  return <><section className="page-content dashboard-introduction"><ContentBlock id="members.dashboardIntro"/></section><MemberDashboard extraTools={extraTools}/></>; }
+  return <><section className="page-content dashboard-introduction"><ContentBlock id="members.dashboardIntro"/></section><MemberDashboard extraTools={extraTools} logoutUrl={session.logoutUrl||''}/></>; }
 
 
 

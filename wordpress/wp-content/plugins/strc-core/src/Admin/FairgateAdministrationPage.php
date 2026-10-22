@@ -26,7 +26,8 @@ final class FairgateAdministrationPage
         add_menu_page(
             __('STRC Clubverwaltung', 'strc-core'),
             __('Clubverwaltung', 'strc-core'),
-            'strc_manage_members',
+            // Mitgliederverwaltung (fachlich) oder Webmaster (technischer Abgleich).
+            current_user_can('strc_manage_members') ? 'strc_manage_members' : 'strc_manage_platform',
             'strc-club',
             array($this, 'render'),
             'dashicons-groups',
@@ -36,7 +37,7 @@ final class FairgateAdministrationPage
 
     public function handle(): void
     {
-        if (!current_user_can('strc_manage_members')) wp_die('Kein Zugriff.', '', array('response'=>403));
+        if (!current_user_can('strc_manage_members') && !current_user_can('strc_manage_platform')) wp_die('Kein Zugriff.', '', array('response'=>403));
         if (($_SERVER['REQUEST_METHOD'] ?? '')!=='POST') wp_die('Bitte das Formular verwenden.', '', array('response'=>405));
         check_admin_referer('strc_fairgate_check');
         try {
@@ -53,7 +54,7 @@ final class FairgateAdministrationPage
 
     public function render(): void
     {
-        if (! current_user_can('strc_manage_members')) {
+        if (! current_user_can('strc_manage_members') && ! current_user_can('strc_manage_platform')) {
             wp_die(esc_html__('Kein Zugriff.', 'strc-core'));
         }
         ?>

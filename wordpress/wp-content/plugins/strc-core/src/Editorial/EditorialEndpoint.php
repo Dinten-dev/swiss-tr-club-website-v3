@@ -17,7 +17,11 @@ final class EditorialEndpoint
         add_filter('map_meta_cap', static function (array $caps, string $cap, int $userId, array $args): array {
             if (in_array($cap,array('edit_user','delete_user','promote_user'),true) && isset($args[0]) && $userId !== (int)$args[0]) {
                 $actor=get_userdata($userId); $target=get_userdata((int)$args[0]);
-                if ($actor && empty($actor->allcaps['manage_options']) && $target && array_intersect(array('administrator','strc_developer','strc_administrator'),$target->roles)) return array('do_not_allow');
+                // Höhere oder gleichrangige Konten bearbeitet nur die nächsthöhere Stufe (Admin < Superadmin < Webmaster).
+                if ($actor && $target) {
+                    $blocked=!empty($actor->allcaps['manage_options'])?array():(!empty($actor->allcaps['strc_assign_admins'])?array('administrator','strc_developer','strc_superadmin'):array('administrator','strc_developer','strc_superadmin','strc_administrator'));
+                    if ($blocked && array_intersect($blocked,$target->roles)) return array('do_not_allow');
+                }
             }
             return $caps;
         }, 10, 4);
@@ -185,7 +189,7 @@ final class EditorialEndpoint
             $documents[] = array('key'=>$key,'title'=>$definition['title'],'route'=>$definition['route'],'hasDraft'=>$state['hasDraft']);
         }
         return array('documents'=>$documents,'areas'=>array_keys(array_filter(EditorialAccess::AREAS,static fn ($label,$key)=>EditorialAccess::area($key), ARRAY_FILTER_USE_BOTH)),
-            'canAssign'=>current_user_can('strc_manage_content_roles'),
+            'canAssign'=>(bool)\SwissTRClub\Core\Roles\RoleAssignments::options(),
             'magazineUrl'=>EditorialAccess::area('library') ? admin_url('options-general.php?page=strc-magazine') : '');
     }
 
@@ -386,12 +390,11 @@ final class EditorialEndpoint
 
     private function people(): array
     {
-        if (! current_user_can('strc_manage_content_roles')) AjaxRequest::fail('Nur Administratoren dürfen Zuständigkeiten vergeben.',403);
+        if (! \SwissTRClub\Core\Roles\RoleAssignments::options()) AjaxRequest::fail('Nur Admins, Superadmin und Webmaster dürfen Rollen zuteilen.',403);
         $users=get_users(array('number'=>1000,'orderby'=>'display_name'));
-        $webmaster=current_user_can('manage_options');
-        $users=array_filter($users,static fn ($user)=>$user->ID!==get_current_user_id() && ! in_array('administrator',$user->roles,true) && ($webmaster || ! in_array('strc_developer',$user->roles,true)));
+        $users=array_filter($users,static fn ($user)=>$user->ID!==get_current_user_id() && ! in_array('administrator',$user->roles,true));
         $regions=\SwissTRClub\Core\Events\RegionDirectory::terms();
-        $roleOptions=array_map(static fn ($definition)=>$definition['name'], \SwissTRClub\Core\Roles\RoleAssignments::options(current_user_can('manage_options')));
+        $roleOptions=array_map(static fn ($definition)=>$definition['name'], \SwissTRClub\Core\Roles\RoleAssignments::options());
         $events=$roleOptions ? get_posts(array('post_type'=>'strc_event','post_status'=>array('publish','draft','pending','private'),'posts_per_page'=>500,'orderby'=>'title','order'=>'ASC')) : array();
         return array('users'=>array_values(array_map(static fn ($user)=>array('id'=>$user->ID,'name'=>$user->display_name,'city'=>(string)get_user_meta($user->ID,'strc_city',true),'revision'=>\SwissTRClub\Core\Roles\RoleAssignments::revision($user->ID),'assignments'=>\SwissTRClub\Core\Roles\RoleAssignments::rows($user->ID),'isMember'=>user_can($user,'strc_access_member_area'),'regions'=>RegionalEventAccess::regions($user->ID),'areas'=>(array)get_user_meta($user->ID,'strc_moderation_areas',true),'libraryOnly'=>(bool)array_intersect(['strc_administrator','strc_editor'],$user->roles),'libraryAccess'=>get_user_meta($user->ID,'strc_library_access',true)?:'open','roles'=>array_values(array_intersect($user->roles,array_keys(\SwissTRClub\Core\Roles\RoleDefinitions::assignable()))),'assignedEvents'=>RegionalEventAccess::assignedEvents($user->ID)), $users)),
             'regions'=>array_values(array_map(static fn ($term)=>array('id'=>$term->term_id,'name'=>$term->name),$regions)), 'areas'=>EditorialAccess::AREAS,'roleOptions'=>$roleOptions,

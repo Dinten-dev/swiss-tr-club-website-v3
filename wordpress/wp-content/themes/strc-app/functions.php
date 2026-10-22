@@ -53,3 +53,116 @@ add_action('wp_head', static function (): void {
         printf('<link rel="preload" href="%s" as="font" type="font/ttf" crossorigin>' . "\n", esc_url(get_template_directory_uri() . '/build/fonts/StrcSans-' . $style . '.ttf'));
     }
 }, 1);
+
+/**
+ * Artikelseite im Shop: ruhiger Aufbau statt WooCommerce-Standard.
+ * Beschreibung direkt unter dem Artikel (keine Reiter, keine Rezensionen),
+ * Artikelnummer und Kategorie ohne «Uncategorized», ähnliche Artikel kompakt.
+ */
+add_action('wp', static function (): void {
+    if (! function_exists('is_product') || ! is_product()) {
+        return;
+    }
+    remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
+    add_action('woocommerce_after_single_product_summary', static function (): void {
+        global $post;
+        $content = $post ? apply_filters('the_content', $post->post_content) : '';
+        if (trim(wp_strip_all_tags($content)) === '') {
+            return;
+        }
+        echo '<section class="strc-product-description"><h2>' . esc_html(get_locale() === 'fr_FR' ? 'Description' : 'Beschreibung') . '</h2>' . $content . '</section>'; // Inhalt aus dem Editor, von the_content gefiltert
+    }, 10);
+    remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40);
+    add_action('woocommerce_single_product_summary', static function (): void {
+        global $product;
+        if (! $product instanceof WC_Product) {
+            return;
+        }
+        $fr = get_locale() === 'fr_FR';
+        $parts = array();
+        if ($product->get_sku()) {
+            $parts[] = '<span>' . esc_html($fr ? 'N° d’article' : 'Artikelnummer') . ': ' . esc_html($product->get_sku()) . '</span>';
+        }
+        $default = (int) get_option('default_product_cat');
+        $terms = array_filter((array) get_the_terms($product->get_id(), 'product_cat'), static fn ($term): bool => $term instanceof WP_Term && (int) $term->term_id !== $default && $term->slug !== 'uncategorized');
+        if ($terms) {
+            $parts[] = '<span>' . esc_html($fr ? 'Catégorie' : 'Kategorie') . ': ' . esc_html(implode(', ', array_map(static fn ($term): string => $term->name, $terms))) . '</span>';
+        }
+        if ($parts) {
+            echo '<p class="strc-product-meta">' . implode(' · ', $parts) . '</p>'; // Teile einzeln escaped
+        }
+    }, 40);
+    add_filter('woocommerce_product_related_products_heading', static fn (): string => get_locale() === 'fr_FR' ? 'Vous aimerez aussi' : 'Das könnte dich auch interessieren');
+    add_filter('woocommerce_output_related_products_args', static function (array $args): array {
+        $args['posts_per_page'] = 4;
+        $args['columns'] = 4;
+        return $args;
+    });
+});
+
+// Warenkorb: kein Versandkosten-Rechner (Versand nur Schweiz oder Abholung); Hinweistext zum Bezahlvorgang ausblenden.
+add_filter('woocommerce_shipping_show_shipping_calculator', '__return_false');
+add_filter('woocommerce_shipping_may_be_available_html', '__return_empty_string');
+
+/**
+ * Kasse: kein Gutscheinhinweis (Gutschein im Warenkorb), Adresse aus dem Mitgliederprofil vorausgefüllt
+ * (überschreibbar), PLZ und Ort nebeneinander, kein Kanton, Mobilnummer Pflicht, Abholfeld nur bei Abholung.
+ */
+remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10);
+add_filter('woocommerce_checkout_get_value', static function ($value, string $input) {
+    if ($value !== null && $value !== '' || ! is_user_logged_in()) {
+        return $value;
+    }
+    $user = wp_get_current_user();
+    $map = array(
+        'billing_first_name' => (string) get_user_meta($user->ID, 'first_name', true),
+        'billing_last_name' => (string) get_user_meta($user->ID, 'last_name', true),
+        'billing_address_1' => (string) get_user_meta($user->ID, 'strc_street', true),
+        'billing_postcode' => (string) get_user_meta($user->ID, 'strc_postcode', true),
+        'billing_city' => (string) get_user_meta($user->ID, 'strc_city', true),
+        'billing_phone' => (string) get_user_meta($user->ID, 'strc_phone', true),
+        'billing_email' => (string) $user->user_email,
+    );
+    return isset($map[$input]) && $map[$input] !== '' ? $map[$input] : $value;
+}, 10, 2);
+add_filter('woocommerce_get_country_locale', static function (array $locale): array {
+    $locale['CH']['state'] = array('required' => false, 'hidden' => true);
+    $locale['CH']['postcode'] = array_merge($locale['CH']['postcode'] ?? array(), array('priority' => 60, 'class' => array('form-row-first')));
+    $locale['CH']['city'] = array_merge($locale['CH']['city'] ?? array(), array('priority' => 61, 'class' => array('form-row-last')));
+    return $locale;
+});
+add_filter('woocommerce_billing_fields', static function (array $fields): array {
+    unset($fields['billing_state'], $fields['billing_company']);
+    if (isset($fields['billing_phone'])) {
+        $fields['billing_phone']['required'] = true;
+        $fields['billing_phone']['label'] = get_locale() === 'fr_FR' ? 'Mobile (pour les questions)' : 'Mobilnummer (für Rückfragen)';
+        $fields['billing_phone']['priority'] = 95;
+    }
+    return $fields;
+});
+add_filter('woocommerce_shipping_fields', static function (array $fields): array {
+    unset($fields['shipping_state'], $fields['shipping_company']);
+    return $fields;
+});
+// Kurzer Datenschutzhinweis statt des langen WooCommerce-Absatzes.
+add_filter('woocommerce_checkout_privacy_policy_text', static fn (): string => '');
+add_action('wp_footer', static function (): void {
+    if (! function_exists('is_checkout') || ! is_checkout()) {
+        return;
+    }
+    ?>
+<script>
+(function(){
+  function toggle(){
+    var field=document.getElementById('strc_pickup_event_field');if(!field)return;
+    var chosen=document.querySelector('input[name^="shipping_method"]:checked')||document.querySelector('select[name^="shipping_method"]');
+    var pickup=!!chosen&&/^local_pickup/.test(chosen.value);
+    field.style.display=pickup?'':'none';
+  }
+  document.addEventListener('change',function(e){if(e.target&&/^shipping_method/.test(e.target.name||''))toggle();});
+  if(window.jQuery)window.jQuery(document.body).on('updated_checkout',toggle);
+  toggle();
+})();
+</script>
+    <?php
+});

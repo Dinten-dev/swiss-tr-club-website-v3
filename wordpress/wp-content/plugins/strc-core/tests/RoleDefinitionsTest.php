@@ -36,50 +36,79 @@ final class RoleDefinitionsTest extends TestCase
 
         self::assertTrue($administrator['publish_strc_events']);
         self::assertTrue($administrator['publish_strc_drives']);
-        self::assertTrue($administrator['strc_manage_members']);
-        self::assertTrue($administrator['strc_manage_finance']);
         self::assertTrue($administrator['strc_send_bulk_mail']);
         self::assertTrue($administrator['strc_manage_content_roles']);
-        self::assertTrue($administrator['strc_manage_member_welcome_mail']);
+        self::assertTrue($administrator['strc_edit_website_content']);
+        self::assertTrue($administrator['strc_manage_community']);
+        self::assertTrue($administrator['strc_manage_shop']);
     }
 
-    public function testEditorCannotManageEvents(): void
+    public function testMemberAdministrationAndTreasurerAreExclusiveRoles(): void
     {
-        $editor = RoleDefinitions::all()['strc_editor']['capabilities'];
-
-        self::assertTrue($editor['publish_posts']);
-        self::assertArrayNotHasKey('publish_strc_events', $editor);
+        foreach (array('strc_administrator', 'strc_superadmin', 'strc_developer') as $slug) {
+            $capabilities = RoleDefinitions::all()[$slug]['capabilities'];
+            self::assertArrayNotHasKey('strc_manage_members', $capabilities, $slug);
+            self::assertArrayNotHasKey('strc_manage_finance', $capabilities, $slug);
+            self::assertArrayNotHasKey('strc_manage_member_welcome_mail', $capabilities, $slug);
+        }
+        self::assertTrue(RoleDefinitions::all()['strc_registration_moderator']['capabilities']['strc_manage_members']);
+        self::assertTrue(RoleDefinitions::all()['strc_registration_moderator']['capabilities']['strc_manage_member_welcome_mail']);
+        self::assertTrue(RoleDefinitions::all()['strc_treasurer']['capabilities']['strc_manage_finance']);
     }
 
-    public function testDeveloperHasPlatformAccess(): void
+    public function testSuperadminHasAdminRightsAndAppointsAdmins(): void
+    {
+        $admin = RoleDefinitions::all()['strc_administrator']['capabilities'];
+        $super = RoleDefinitions::all()['strc_superadmin']['capabilities'];
+        foreach ($admin as $capability => $granted) self::assertTrue($super[$capability] ?? false, $capability);
+        self::assertTrue($super['strc_assign_admins']);
+        self::assertArrayNotHasKey('strc_assign_admins', $admin);
+        self::assertArrayNotHasKey('manage_options', $super);
+        self::assertArrayNotHasKey('strc_manage_platform', $super);
+    }
+
+    public function testWebmasterIsTechnicalOnly(): void
     {
         $developer = RoleDefinitions::all()['strc_developer']['capabilities'];
 
         self::assertTrue($developer['manage_options']);
-        self::assertTrue($developer['publish_strc_events']);
-        self::assertTrue($developer['publish_strc_ads']);
+        self::assertTrue($developer['strc_manage_platform']);
+        self::assertTrue($developer['strc_assign_superadmin']);
+        foreach (array('strc_edit_website_content', 'strc_manage_community', 'strc_manage_events', 'strc_manage_content_roles', 'publish_strc_events', 'publish_strc_ads', 'strc_manage_shop') as $capability) {
+            self::assertArrayNotHasKey($capability, $developer, $capability);
+        }
+        self::assertArrayNotHasKey('strc_assign_superadmin', RoleDefinitions::operationalCapabilities());
+        self::assertArrayHasKey('strc_manage_members', RoleDefinitions::operationalCapabilities());
     }
 
     public function testFunctionalRolesAreAdditiveWithoutMemberAccess(): void
     {
-        foreach (RoleDefinitions::assignable() as $slug => $definition) {
-            if ($slug === 'strc_developer') continue;
-            self::assertArrayNotHasKey('strc_access_member_area', $definition['capabilities'], $slug);
+        foreach (RoleDefinitions::MODERATOR_ROLES as $slug) {
+            self::assertArrayNotHasKey('strc_access_member_area', RoleDefinitions::all()[$slug]['capabilities'], $slug);
         }
         self::assertArrayHasKey('strc_manage_assigned_events', RoleDefinitions::all()['strc_event_organiser']['capabilities']);
         self::assertArrayNotHasKey('strc_manage_events', RoleDefinitions::all()['strc_event_organiser']['capabilities']);
     }
 
-    public function testClubAdminsCanAssignOperationalAndBoardRolesButNotPlatformRoles(): void
+    public function testEachLevelAssignsOnlyTheLevelsBelow(): void
     {
-        $roles = RoleDefinitions::assignableFor(false);
+        $admin = RoleDefinitions::assignableBy(false, false, true);
+        self::assertArrayHasKey('strc_regional_manager', $admin);
+        self::assertArrayHasKey('strc_treasurer', $admin);
+        self::assertArrayHasKey('strc_board_member', $admin);
+        self::assertArrayNotHasKey('strc_administrator', $admin);
+        self::assertArrayNotHasKey('strc_superadmin', $admin);
+        self::assertArrayNotHasKey('strc_developer', $admin);
 
-        self::assertArrayHasKey('strc_regional_manager', $roles);
-        self::assertArrayHasKey('strc_treasurer', $roles);
-        self::assertArrayNotHasKey('strc_developer', $roles);
-        self::assertArrayHasKey('strc_board_member', $roles);
-        self::assertArrayHasKey('strc_developer', RoleDefinitions::assignableFor(true));
-        self::assertArrayHasKey('strc_board_member', RoleDefinitions::assignableFor(true));
+        $super = RoleDefinitions::assignableBy(false, true, true);
+        self::assertArrayHasKey('strc_administrator', $super);
+        self::assertArrayNotHasKey('strc_superadmin', $super);
+        self::assertArrayNotHasKey('strc_developer', $super);
+
+        $webmaster = RoleDefinitions::assignableBy(true, false, false);
+        self::assertSame(array('strc_superadmin', 'strc_developer'), array_keys($webmaster));
+        self::assertArrayNotHasKey('strc_editor', RoleDefinitions::assignable());
+        self::assertArrayNotHasKey('strc_administrator_editor', RoleDefinitions::assignable());
     }
 
     public function testBoardDocumentsDoNotFollowTechnicalAdministration(): void
@@ -87,5 +116,15 @@ final class RoleDefinitionsTest extends TestCase
         self::assertArrayHasKey('strc_access_board_documents', RoleDefinitions::all()['strc_board_member']['capabilities']);
         self::assertArrayNotHasKey('strc_access_board_documents', RoleDefinitions::allManagedCapabilities());
         self::assertArrayNotHasKey('strc_access_board_documents', RoleDefinitions::all()['strc_developer']['capabilities']);
+        self::assertArrayNotHasKey('strc_access_board_documents', RoleDefinitions::all()['strc_superadmin']['capabilities']);
+    }
+
+    public function testShippingPartnerIsExternalWithoutMemberAccess(): void
+    {
+        $partner = RoleDefinitions::all()['strc_shipping_partner']['capabilities'];
+        self::assertTrue($partner['strc_shipping']);
+        self::assertArrayNotHasKey('strc_access_member_area', $partner);
+        self::assertArrayNotHasKey('strc_manage_shop', $partner);
+        self::assertArrayNotHasKey('strc_shipping_partner', RoleDefinitions::assignable());
     }
 }

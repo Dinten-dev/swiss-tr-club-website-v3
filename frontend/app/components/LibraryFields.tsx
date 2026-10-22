@@ -3,7 +3,7 @@ import {t} from './UILanguage';
 import types from '../../../wordpress/wp-content/plugins/strc-core/src/Community/library-types.json';
 export const libraryTypes:(typeof types[number]&{group?:string})[]=types;
 // Dokumentstufen: Mitglied (alle Mitglieder) · Moderator (jede Clubfunktion) · Vorstand (Rolle Vorstand).
-export const accessLabels:Record<string,string>={open:'Mitglied',limited:'Moderator',restricted:'Vorstand'};
+export const accessLabels:Record<string,string>={open:'Mitglied',limited:'Regional',restricted:'Vorstand'};
 export function libraryType(value:string){return types.find(t=>t.key===value)?.key||({'TR-Magazin':'magazine','Technik / Anleitung':'technical'}[value]??value)||'legacy';}
 const labels:Record<string,string>={issue:'Ausgabe / Nummer',year:'Erscheinungsjahr',component:'Baugruppe / Technikbereich',occasion:'Anlass / Veranstaltung',date:'Datum',version:'Version / Stand',region:'Region / Zuständigkeit (auch Ausland)',start:'Startort',end:'Zielort',distance:'Distanz (km)',drivingTime:'Fahrzeit',duration:'Dauer (Halbtag, Tag, Wochenende, mehrere Tage)'};
 const valueText=(value:string|string[]|undefined)=>Array.isArray(value)?value.join(', '):value||'';
