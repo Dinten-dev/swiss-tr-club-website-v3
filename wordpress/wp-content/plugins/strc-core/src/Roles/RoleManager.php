@@ -33,6 +33,8 @@ final class RoleManager
 
     public static function install(): void
     {
+        global $wpdb;
+        add_option('strc_roles_before_20261021', ['definitions'=>get_option($wpdb->prefix.'user_roles'), 'version'=>get_option('strc_roles_version')], '', false);
         $managed = array_merge(RoleDefinitions::allManagedCapabilities(), RoleDefinitions::platformCapabilities(), array('strc_access_board_documents' => true));
         foreach (RoleDefinitions::all() as $slug => $definition) {
             $role = get_role($slug);
@@ -74,6 +76,9 @@ final class RoleManager
     private static function migrateLegacyAdmins(): void
     {
         foreach (get_users(array('role__in' => RoleDefinitions::LEGACY_ADMIN_ROLES, 'fields' => 'all')) as $user) {
+            if (!metadata_exists('user',$user->ID,'strc_role_migration_20261021_before')) {
+                add_user_meta($user->ID,'strc_role_migration_20261021_before',['roles'=>$user->roles,'assignments'=>get_user_meta($user->ID,RoleAssignments::KEY,true)],true);
+            }
             $user->add_role('strc_administrator');
             foreach (RoleDefinitions::LEGACY_ADMIN_ROLES as $legacy) $user->remove_role($legacy);
             $rows = get_user_meta($user->ID, RoleAssignments::KEY, true);

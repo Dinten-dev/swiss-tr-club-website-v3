@@ -59,41 +59,43 @@ final class ShippingPartner
 
     public function deliveryNote(int $orderId): void
     {
-        if (! function_exists('wc_get_order')) return;
-        $order = wc_get_order($orderId);
-        if (! $order instanceof \WC_Order || ! self::needsShipping($order)) return;
-        // Pro Bestellung genau einmal (auch wenn on-hold und processing nacheinander ausgelöst werden).
-        if ($order->get_meta('_strc_delivery_note_sent') || ! add_post_meta($orderId, '_strc_delivery_note_lock', time(), true)) return;
-        $partner = self::partnerEmail();
-        $copies = self::shopManagers();
-        $to = $partner !== '' ? array($partner) : $copies;
-        if (! $to) { $order->add_order_note('Lieferschein nicht versandt: kein Versandpartner und kein Shopmanager hinterlegt.'); return; }
-        $file = wp_tempnam('lieferschein-' . $order->get_order_number() . '.pdf');
+        if (!function_exists('wc_get_order')) return;
         try {
-            file_put_contents($file, self::pdf($order));
-            $pdfPath = dirname($file) . '/Lieferschein-' . $order->get_order_number() . '.pdf';
-            rename($file, $pdfPath);
-            $address = self::address($order);
-            $body = "Guten Tag\n\nIm TR-Shop des Swiss TR-Club ist eine Versandbestellung eingegangen. Der Lieferschein liegt als PDF bei.\n\n"
-                . 'Bestellung: #' . $order->get_order_number() . "\n"
-                . 'Lieferadresse: ' . implode(', ', array_filter($address)) . "\n\n"
-                . "Nach dem Versand bitte unter «Mein Konto» → Versandaufträge «Versand melden» wählen:\n" . wc_get_page_permalink('myaccount') . "\n\nFreundliche Grüsse\nSwiss TR-Club\n";
-            $headers = array('Content-Type: text/plain; charset=UTF-8');
-            if ($partner !== '') foreach ($copies as $copy) $headers[] = 'Cc: ' . $copy;
-            $accepted = wp_mail($to, 'Lieferschein Swiss TR-Club – Bestellung #' . $order->get_order_number(), $body, $headers, array($pdfPath));
-            if ($accepted) {
-                $order->update_meta_data('_strc_delivery_note_sent', gmdate(DATE_ATOM));
-                $order->add_order_note('Lieferschein per E-Mail an ' . implode(', ', $to) . ($partner !== '' && $copies ? ' (Kopie Shopmanager)' : '') . ' gesendet.');
-                $order->save();
-            } else {
-                delete_post_meta($orderId, '_strc_delivery_note_lock');
-                $order->add_order_note('Lieferschein konnte nicht per E-Mail gesendet werden.');
-            }
-            @unlink($pdfPath);
-        } catch (\Throwable $error) {
-            delete_post_meta($orderId, '_strc_delivery_note_lock');
-            error_log('STRC delivery note failed for order ' . $orderId . '.');
-            if (is_file($file)) @unlink($file);
+            \SwissTRClub\Core\Forms\FormStore::locked('shipping-note-'.$orderId, function() use ($orderId): void {
+                $order = wc_get_order($orderId);
+                if (!$order instanceof \WC_Order || !self::needsShipping($order) || $order->get_meta('_strc_delivery_note_sent')) return;
+                $partner = self::partnerEmail();
+                $copies = self::shopManagers();
+                $to = $partner !== '' ? [$partner] : $copies;
+                if (!$to) {
+                    $order->add_order_note('Lieferschein nicht versandt: kein Versandpartner und kein Shopmanager hinterlegt.');
+                    return;
+                }
+                // Unique temporary path, also with HPOS; always remove it after the mail transport returns.
+                $temporary = wp_tempnam('Lieferschein-'.$orderId.'.pdf');
+                if (!$temporary) throw new \RuntimeException('Temporärer PDF-Speicher fehlt.');
+                $file = $temporary.'.pdf';
+                if (!rename($temporary, $file)) { unlink($temporary); throw new \RuntimeException('Temporärer PDF-Speicher fehlt.'); }
+                try {
+                    if (file_put_contents($file, self::pdf($order)) === false) throw new \RuntimeException('PDF konnte nicht gespeichert werden.');
+                    $address = self::address($order);
+                    $body = "Guten Tag\n\nIm TR-Shop des Swiss TR-Club ist eine Versandbestellung eingegangen. Der Lieferschein liegt als PDF bei.\n\n"
+                        . 'Bestellung: #' . $order->get_order_number() . "\n"
+                        . 'Lieferadresse: ' . implode(', ', array_filter($address)) . "\n\n"
+                        . "Nach dem Versand bitte unter «Mein Konto» → Versandaufträge «Versand melden» wählen:\n" . wc_get_page_permalink('myaccount') . "\n\nFreundliche Grüsse\nSwiss TR-Club\n";
+                    $headers = ['Content-Type: text/plain; charset=UTF-8'];
+                    if ($partner !== '') foreach ($copies as $copy) $headers[] = 'Cc: '.$copy;
+                    if (wp_mail($to, 'Lieferschein Swiss TR-Club – Bestellung #'.$order->get_order_number(), $body, $headers, [$file])) {
+                        $order->update_meta_data('_strc_delivery_note_sent', gmdate(DATE_ATOM));
+                        $order->save();
+                        $order->add_order_note('Lieferschein per E-Mail an '.implode(', ', $to).' gesendet.');
+                    } else $order->add_order_note('Lieferschein konnte nicht per E-Mail gesendet werden.');
+                } finally {
+                    if (is_file($file)) unlink($file);
+                }
+            });
+        } catch (\Throwable) {
+            error_log('STRC delivery note failed for order '.$orderId.'.');
         }
     }
 
@@ -128,7 +130,7 @@ final class ShippingPartner
         foreach ($order->get_items() as $item) {
             $product = $item->get_product();
             $meta = array();
-            foreach ($item->get_formatted_meta_data('') as $entry) $meta[] = wp_strip_all_tags($entry->display_key . ': ' . $entry->display_value);
+            foreach ($item->get_formatted_meta_data() as $entry) $meta[] = wp_strip_all_tags($entry->display_key . ': ' . $entry->display_value);
             $rows .= '<tr><td width="18%">' . $e($product ? (string) $product->get_sku() : '') . '</td><td width="64%"><strong>' . $e($item->get_name()) . '</strong>' . ($meta ? '<br><span style="color:#555">' . $e(implode(' · ', $meta)) . '</span>' : '') . '</td><td width="18%" align="right">' . (int) $item->get_quantity() . '</td></tr>';
         }
         $note = trim((string) $order->get_customer_note());
@@ -179,20 +181,30 @@ final class ShippingPartner
     {
         $id = absint($_POST['order'] ?? 0);
         check_admin_referer('strc_mark_shipped_' . $id);
-        $order = self::allowedOrder($id);
-        $back = wc_get_page_permalink('myaccount');
-        if ($order->get_meta('_strc_shipped_at') || ! in_array($order->get_status(), self::OPEN, true)) { wp_safe_redirect(add_query_arg('strc_shipped', 'already', $back)); exit; }
-        $tracking = substr(sanitize_text_field(wp_unslash($_POST['tracking'] ?? '')), 0, 60);
-        $order->update_meta_data('_strc_shipped_at', gmdate(DATE_ATOM));
-        $order->update_meta_data('_strc_shipped_by', get_current_user_id());
-        if ($tracking !== '') $order->update_meta_data('_strc_tracking', $tracking);
-        $order->save();
-        $order->add_order_note('Versand gemeldet durch ' . wp_get_current_user()->display_name . ($tracking !== '' ? ' · Sendungsnummer ' . $tracking : '') . '.');
-        self::notifyCustomer($order, $tracking);
-        // Bezahlte Bestellungen sind damit abgeschlossen; Rechnungsbestellungen bleiben «in Wartestellung», bis die Zahlung abgestimmt ist.
-        if ($order->get_status() === 'processing') $order->update_status('completed', 'Versand gemeldet.');
-        wp_safe_redirect(add_query_arg('strc_shipped', $order->get_order_number(), $back));
+        try { $changed = $this->confirmShipment($id, (string)($_POST['tracking'] ?? '')); }
+        catch (\Throwable) { wp_die('Versand konnte nicht bestätigt werden. Bitte den Bestellstand neu laden.', '', ['response'=>409]); }
+        wp_safe_redirect(add_query_arg('strc_shipped', $changed ? (string)$id : 'already', wc_get_page_permalink('myaccount')));
         exit;
+    }
+
+    public function confirmShipment(int $id, string $tracking = ''): bool
+    {
+        // Check access before entering the order lock and re-read inside it.
+        self::allowedOrder($id);
+        return \SwissTRClub\Core\Forms\FormStore::locked('shipping-order-'.$id, function() use ($id,$tracking): bool {
+                $order = self::allowedOrder($id);
+                if ($order->get_meta('_strc_shipped_at') || !in_array($order->get_status(), self::OPEN, true)) return false;
+                $tracking = mb_substr(sanitize_text_field($tracking), 0, 60);
+                $order->update_meta_data('_strc_shipped_at', gmdate(DATE_ATOM));
+                $order->update_meta_data('_strc_shipped_by', get_current_user_id());
+                if ($tracking !== '') $order->update_meta_data('_strc_tracking', $tracking);
+                $order->save();
+                $order->add_order_note('Versand gemeldet durch '.wp_get_current_user()->display_name.($tracking !== '' ? ' · Sendungsnummer '.$tracking : '').'.');
+                self::notifyCustomer($order, $tracking);
+                // An invoice remains on-hold until payment reconciliation.
+                if ($order->get_status() === 'processing') $order->update_status('completed', 'Versand gemeldet.');
+                return true;
+            });
     }
 
     private static function notifyCustomer(\WC_Order $order, string $tracking): void
@@ -206,10 +218,11 @@ final class ShippingPartner
         if (is_email($email)) {
             $mailer = function_exists('WC') ? WC()->mailer() : null;
             $subject = 'Deine Bestellung #' . $order->get_order_number() . ' ist unterwegs';
-            if ($mailer) $mailer->send($email, $subject, $mailer->wrap_message('Deine Bestellung ist unterwegs', $body), array('Content-Type: text/html; charset=UTF-8'));
-            else wp_mail($email, $subject, wp_strip_all_tags($body));
-            $order->update_meta_data('_strc_shipping_mail_sent', gmdate(DATE_ATOM));
-            $order->save();
+            $accepted = $mailer ? $mailer->send($email, $subject, $mailer->wrap_message('Deine Bestellung ist unterwegs', $body), ['Content-Type: text/html; charset=UTF-8']) : wp_mail($email, $subject, wp_strip_all_tags($body));
+            if ($accepted) {
+                $order->update_meta_data('_strc_shipping_mail_sent', gmdate(DATE_ATOM));
+                $order->save();
+            } else $order->add_order_note('Versandbestätigung konnte nicht per E-Mail gesendet werden.');
         }
         $user = (int) $order->get_customer_id();
         if ($user > 0) {
@@ -260,7 +273,7 @@ final class ShippingPartner
             $items = array();
             foreach ($order->get_items() as $item) {
                 $meta = array();
-                foreach ($item->get_formatted_meta_data('') as $entry) $meta[] = wp_strip_all_tags($entry->display_value);
+                foreach ($item->get_formatted_meta_data() as $entry) $meta[] = wp_strip_all_tags($entry->display_value);
                 $items[] = '<li>' . (int) $item->get_quantity() . ' × ' . esc_html($item->get_name()) . ($meta ? ' <small>(' . esc_html(implode(', ', $meta)) . ')</small>' : '') . '</li>';
             }
             $download = wp_nonce_url(admin_url('admin-post.php?action=strc_delivery_note&order=' . $id), 'strc_delivery_note_' . $id);

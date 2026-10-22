@@ -145,7 +145,7 @@ final class MarketplaceEndpoint
         try {
             $details=['offerType'=>$offerType,'priceMode'=>$priceMode];
             foreach(['partCategory','model','condition','location','year','colour','exteriorColour','interiorColour','restoration','mileage','mfk']as$key)$details[$key]=\SwissTRClub\Core\Forms\FormFields::text($input,$key,$key==='restoration'?2000:160,in_array($key,['condition','location'],true));
-            if ($details['mfk']!==''&&(!preg_match('/^\d{4}-\d{2}-\d{2}$/D',$details['mfk'])||$details['mfk']>gmdate('Y-m-d')))throw new \InvalidArgumentException('Bitte ein gültiges MFK-Datum angeben.');
+            if ($details['mfk']!==''&&(!preg_match('/^\d{4}-\d{2}-\d{2}$/D',$details['mfk'])||!checkdate((int)substr($details['mfk'],5,2),(int)substr($details['mfk'],8,2),(int)substr($details['mfk'],0,4))||$details['mfk']>gmdate('Y-m-d')))throw new \InvalidArgumentException('Bitte ein gültiges MFK-Datum angeben.');
             if ($details['mileage']!=='' && !preg_match('/^[0-9]{1,9}$/D',$details['mileage'])) throw new \InvalidArgumentException('Bitte einen gültigen Kilometerstand angeben.');
             $parts = [];
             if ($category === 'Teile') {
@@ -211,7 +211,7 @@ final class MarketplaceEndpoint
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/media.php';
         require_once ABSPATH . 'wp-admin/includes/image.php';
-        if($category==='Fahrzeuge'&&count((array)($files['documents']['name']??[]))>1)return new WP_Error('pdf_count','Bei Fahrzeugen ist ein PDF möglich.');
+        if($category==='Fahrzeuge'&&count(array_filter((array)($files['documents']['error']??[]),static fn($error)=>$error!==UPLOAD_ERR_NO_FILE))>1)return new WP_Error('pdf_count','Bei Fahrzeugen ist ein PDF möglich.');
         $documents=AdDocuments::save($files['documents']??[]);if(is_wp_error($documents))return $documents;
         // Publish only once every upload has succeeded; failed uploads leave no partial ad.
         $postId = wp_insert_post(wp_slash(array(
@@ -370,7 +370,7 @@ final class MarketplaceEndpoint
                 $documentKeys=json_decode($input['retainedDocumentKeys']??wp_json_encode(array_column($oldDocuments,'key')),true);
                 if(!is_array($documentKeys)||!array_is_list($documentKeys)||array_filter($documentKeys,static fn($key)=>!is_string($key))||array_diff($documentKeys,array_column($oldDocuments,'key')))return new WP_Error('pdf_keys','Ungültige PDF-Auswahl.');
                 $keptDocuments=array_values(array_filter($oldDocuments,static fn($file)=>in_array($file['key'],$documentKeys,true)));
-                if($category==='Fahrzeuge'&&count($keptDocuments)+count((array)($_FILES['documents']['name']??[]))>1)return new WP_Error('pdf_count','Bei Fahrzeugen ist ein PDF möglich.');
+                if($category==='Fahrzeuge'&&count($keptDocuments)+count(array_filter((array)($_FILES['documents']['error']??[]),static fn($error)=>$error!==UPLOAD_ERR_NO_FILE))>max(1,count($oldDocuments)))return new WP_Error('pdf_count','Bei Fahrzeugen ist ein PDF möglich.');
                 $newDocuments=AdDocuments::save($_FILES['documents']??[],count($keptDocuments));if(is_wp_error($newDocuments))return $newDocuments;
                 require_once ABSPATH.'wp-admin/includes/file.php';require_once ABSPATH.'wp-admin/includes/media.php';require_once ABSPATH.'wp-admin/includes/image.php';
                 $newImages=[];

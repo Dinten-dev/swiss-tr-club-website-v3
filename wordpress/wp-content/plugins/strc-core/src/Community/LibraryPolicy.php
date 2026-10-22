@@ -62,8 +62,7 @@ final class LibraryPolicy
         // Stufen: Mitglied (alle Mitglieder) · Regional (Regionalleitungen, Admins, Bibliotheksverwaltung) · Vorstand (Rolle Vorstand, sieht alles).
         if(user_can($userId,'strc_access_board_documents'))return ['open','limited','restricted'];
         $regional=\SwissTRClub\Core\Roles\RoleAssignments::limited($userId)
-            ||user_can($userId,'strc_manage_content_roles')||user_can($userId,'strc_manage_library')
-            ||(!\SwissTRClub\Core\Roles\RoleAssignments::scoped($userId)&&get_user_meta($userId,'strc_library_access',true)==='limited');
+            ||user_can($userId,'strc_manage_content_roles')||user_can($userId,'strc_manage_library');
         return $regional?['open','limited']:['open'];
     }
     public static function classification(int $id): string

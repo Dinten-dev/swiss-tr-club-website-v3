@@ -59,7 +59,6 @@ export default function RoleAssignments({nonce}:{nonce:string}){
  const regionName=(id:number)=>data?.regions.find(region=>region.id===id)?.name||String(id);
  if(!data)return <section className="role-assignment-panel"><h2>{t('Rollen und Zuständigkeiten')}</h2>{error?<p role="alert">{t(error)} <button type="button" className="club-secondary" onClick={()=>setRevision(value=>value+1)}>{t('Neu laden')}</button></p>:<p role="status">{t('Mitglieder werden geladen …')}</p>}</section>;
  const accountEditable=!!person&&!person.assignments.some(row=>higher(data.roleOptions).includes(row.role));
- const has=(role:string)=>!!person?.assignments.some(row=>row.role===role);
  const legacy=person?.assignments.filter(row=>!order.includes(row.role))||[];
  const roleCard=(role:string)=>{
   const row=person?.assignments.find(entry=>entry.role===role);const allowed=!!data.roleOptions[role];
@@ -86,7 +85,7 @@ export default function RoleAssignments({nonce}:{nonce:string}){
      {!person.isMember&&<p className="club-notice">{t('Kein aktives Mitgliedskonto: Rollen können erst mit Mitgliedschaft zugeteilt werden.')}</p>}
      {!accountEditable&&<p className="club-notice">{t('Die Rollen dieses Kontos verwaltet eine höhere Stufe (Superadmin oder Webmaster).')}</p>}
      {groups.map(group=><section key={group.title} className="role-group"><h4>{t(group.title)}{group.hint&&<small>{t(group.hint)}</small>}</h4><ul>{group.roles.map(roleCard)}</ul></section>)}
-     {legacy.length>0&&<section className="role-group"><h4>{t('Bisherige Zuteilungen')}</h4><ul>{legacy.map(row=><li key={row.role} className="role-option is-on"><label><input type="checkbox" checked disabled={busy||!accountEditable} onChange={()=>toggle(row.role,false)}/><span><strong>{t(labels[row.role]||row.role)}</strong><small>{t(descriptions[row.role]||'Bitte durch eine aktuelle Rolle ersetzen.')}</small>{row.areas.length>0&&<small>{row.areas.map(area=>t(data.areas[area]||area)).join(', ')}</small>}</span></label></li>)}</ul></section>}
+     {legacy.length>0&&<section className="role-group"><h4>{t('Bisherige Zuteilungen')}</h4><ul>{legacy.map(row=><li key={row.role} className="role-option is-on"><label><input type="checkbox" checked disabled={busy||!accountEditable||!data.roleOptions.strc_registration_moderator} onChange={()=>toggle(row.role,false)}/><span><strong>{t(labels[row.role]||row.role)}</strong><small>{t(descriptions[row.role]||'Bitte durch eine aktuelle Rolle ersetzen.')}</small>{row.areas.length>0&&<small>{row.areas.map(area=>t(data.areas[area]||area)).join(', ')}</small>}</span></label></li>)}</ul></section>}
      <div className="role-actions"><span role="status">{notice?'✓ '+t(notice):dirty?t('Ungespeicherte Änderungen'):''}</span><button type="button" className="club-secondary" disabled={!dirty||busy} onClick={()=>{const user=data.users.find(value=>value.id===person.id);if(user){setPerson(copy(user));setNotice('');}}}>{t('Verwerfen')}</button><button type="button" className="market-primary" disabled={!dirty||busy||!accountEditable} onClick={()=>void save()}>{busy?t('Wird gespeichert …'):t('Speichern')}</button></div>
     </div>}
    </div>

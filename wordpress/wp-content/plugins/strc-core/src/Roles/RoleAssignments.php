@@ -99,14 +99,14 @@ final class RoleAssignments
             $rows=json_decode($input['assignments'],true);$allowed=array_keys(self::options());
             $previous=self::rows($id);
             // Existing legacy scopes can be reviewed without silently dropping responsibilities.
-            if (array_filter($previous,static fn($row)=>$row['role']==='strc_moderator')) $allowed[]='strc_moderator';
+            if (current_user_can('strc_manage_content_roles') && array_filter($previous,static fn($row)=>$row['role']==='strc_moderator')) $allowed[]='strc_moderator';
             if (!is_array($rows)||!array_is_list($rows)||count($rows)>30) AjaxRequest::fail('Ungültige Funktionszuweisungen.',422);
             $seen=[];$clean=[];
             foreach($rows as $row){
                 if (!is_array($row)||!is_string($row['role']??null)) AjaxRequest::fail('Ungültige Funktion.',422);
                 $role=$row['role'];
                 // Rollen ausserhalb der eigenen Stufe bleiben unverändert erhalten (z. B. Moderatoren, wenn der Webmaster einen Superadmin ernennt).
-                if (!in_array($role,$allowed,true) && $role!=='strc_moderator' && isset(self::known()[$role])) {
+                if (!in_array($role,$allowed,true) && ($role==='strc_moderator' || isset(self::known()[$role]))) {
                     $old=array_values(array_filter($previous,static fn($p)=>$p['role']===$role));
                     if (count($old)!==1 || $old[0]!==$row) AjaxRequest::fail('Diese Rolle teilt eine andere Stufe zu.',403);
                     $clean[]=$row;$seen[$role]=true;continue;
@@ -126,7 +126,7 @@ final class RoleAssignments
                 }
                 $clean[]=['role'=>$role,'regions'=>array_values(array_unique($row['regions'])),'libraryAccess'=>$access,'assignedEvents'=>$role==='strc_event_organiser'?array_values(array_unique($row['assignedEvents'])):[],'areas'=>$role==='strc_moderator'?array_values(array_unique($row['areas'])):[]];
             }
-            foreach($previous as $row) if(!in_array($row['role'],$allowed,true)&&$row['role']!=='strc_moderator'&&isset(self::known()[$row['role']])&&!array_filter($clean,static fn($r)=>$r['role']===$row['role'])) $clean[]=$row;
+            foreach($previous as $row) if(!in_array($row['role'],$allowed,true)&&($row['role']==='strc_moderator'||isset(self::known()[$row['role']]))&&!array_filter($clean,static fn($r)=>$r['role']===$row['role'])) $clean[]=$row;
             if ($clean && !in_array('strc_member',$user->roles,true)) AjaxRequest::fail('Funktionsrollen benötigen ein Mitgliedskonto.',403);
             if (!metadata_exists('user',$id,'strc_assignment_legacy_backup')) update_user_meta($id,'strc_assignment_legacy_backup',['roles'=>$user->roles,'regions'=>get_user_meta($id,'strc_managed_regions',true),'areas'=>get_user_meta($id,'strc_moderation_areas',true),'libraryAccess'=>get_user_meta($id,'strc_library_access',true),'events'=>get_user_meta($id,'strc_assigned_events',true),'verifiedImport'=>get_user_meta($id,'strc_fairgate_verified_existing_user',true)]);
             update_user_meta($id,self::KEY,$clean);
