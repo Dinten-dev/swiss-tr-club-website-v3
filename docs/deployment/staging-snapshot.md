@@ -197,3 +197,29 @@ Vier tatsächlich verfügbare Ereignisse sind registriert und durch erneutes Les
 Der aktuelle lesende Fairgate-Abgleich bestätigte erneut 524 Kontakte. Verfügbar sind vier Notification-Ereignisse; vor Einrichtung existierten keine Abonnements. Die API liefert weiterhin ausschliesslich die konfigurierten Grundfelder, keine Fahrzeuge, Geburtstage, Co-Pilot- oder Abofelder. Deren Freigabe kann die WordPress-Implementierung nicht ersetzen. Staging schreibt weiterhin keine Fairgate-Kontaktdaten.
 
 Betrieb und Vorbereitung sind in [fairgate-webhooks.md](fairgate-webhooks.md) dokumentiert. Vollständige private Ausgangssicherung, Prüfergebnisse, Konfigurationsvorbereitung und lokales Rückkehrpaket: `.private/fairgate-webhook-2026-10-20/`. Serverseitiges Rückkehrpaket: `/private/strc-peter-release-20261020173307`. Die Rückkehr erfolgt ausschliesslich nach Abgleich der aktuell installierten Prüfsummen; keine Datenbank, Inhalte oder Uploads zurückspielen.
+
+## Peters Pushes vom 22. Oktober 2026
+
+[PR #26](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/26) integriert Peters PRs #20, #21, #23, #24 und #25 einschliesslich ihrer ursprünglichen Commits. Geprüfter Integrationsstand: `8c1d359`, zusammengeführt als `dd61c6f`. Sämtliche sechs Pull Requests sind zusammengeführt; Peters Branches bleiben erhalten.
+
+Übernommen: Mitgliederlogin zum Dashboard, Profil- und Mobilgestaltung, regionale Banner, Forumübersicht, Paaranfragen im Antragspostfach, Shopgestaltung und Produktsortierung, Fahrzeugfelder sowie Rollen- und Versandablauf. Ergänzende Korrekturen erhalten Verzeichnis-Abmeldungen und bestehende Inserat-PDFs, validieren das MFK-Kalenderdatum und sichern Rollenwechsel gegen veraltete Speicherstände. Die neue Rollenhierarchie trennt technische Webmasterrechte, Superadmin, Administration und operative Funktionen. Mitgliederverwaltung und Finanzen bleiben exklusiv; Vorstandsdokumente benötigen eine ausdrückliche Vorstandsrolle.
+
+Versand verwendet eine Bestellsperre, wiederholbaren Mailtransport und einmalige Versandbestätigung. Versand bestätigt keine Rechnungszahlung. Private Bestellmetadaten erscheinen nicht auf dem Lieferschein. Der Versandpartner besitzt keinen Mitglieder- oder allgemeinen Shopverwaltungszugang. Es wurden kein reales Versandkonto eingerichtet, keine Versandrolle vergeben und kein externer Empfänger konfiguriert. Eine spätere Aktivierung benötigt die ausdrückliche Freigabe für Konto, Empfänger und tatsächliche Auftragsweitergabe. Es wurden keine echten Bestellungen oder E-Mails ausgelöst.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Quellcode und CI | TypeScript, ESLint, Build, Struktur und GitHub-Prüfungen für exakt `8c1d359` erfolgreich |
+| PHP | 110 Dateien syntaktisch geprüft; 66 PHPUnit-Tests mit 285 Assertions bestanden |
+| WordPress | 99 isolierte Integrationsprüfungen bestanden; 10 Testmails abgefangen, keine externen Anfragen |
+| Rollen nach Veröffentlichung | 170 definierte Rechte und exklusive Grenzen geprüft; Rollenstand `20261021-2` |
+| Darstellung | Synthetische Profil-/Rollenansichten Desktop 1280 px und Mobil 390 px; französische Profiltexte; Lieferschein als PDF gerendert und geprüft |
+| Veröffentlichung | 420 Ausgangsdateien erneut abgeglichen; 37 Programmdateien veröffentlicht; alle 426 Manifest-Dateien ohne Abweichung |
+| Datenerhaltung | 285 Mitgliedschaften, alle 286 Benutzerzuweisungen samt Zuständigkeits-/Datenschutzwerten, 35 redaktionelle Optionen und vorhandene Fahrzeugdaten unverändert |
+| HTTP und Schutz | 24 direkte Prüfungen bestanden: Ressourcen, Login, Shop, Warenkorb, Checkout und begrenzte Webhook-Ausnahme |
+| Testbereinigung | Keine temporären Benutzer oder Bestellungen verbleiben |
+
+`STRC_FRONTEND_ORIGIN` wurde als einzige Konfigurationszeile von der alten Plesk-Adresse auf `https://staging.swisstrclub.ch` korrigiert. Vor Austausch wurde die unveränderte Konfiguration anhand der gesicherten Prüfsumme bestätigt; Berechtigung 0600 bleibt erhalten. Webhook-Geheimnis, bestehende Includes, Zugangsdaten und `.htaccess` bleiben erhalten. Der Webhook bleibt aktiv. Fairgate-Kontaktschreibzugriff und fehlende Sonderfeldfreigaben wurden nicht verändert oder als vorhanden dargestellt.
+
+Die Rolleninstallation hat die vorherigen Definitionen einmalig gesichert. Reale Benutzerrollenzuweisungen blieben unverändert; niemand wurde automatisch zum Superadmin oder Versandpartner. Die Browserprüfungen verwendeten synthetische Daten; die anschliessenden Datei-, Daten-, Rechte- und HTTP-Prüfungen erfolgten direkt auf Staging. Physisches Mobilgerät, echter Zahlungsdurchlauf und externe Versandabwicklung wurden nicht getestet.
+
+Private Nachweise und vollständige Ausgangssicherung: `.private/peter-2026-10-22/`. Serverseitiges Rückkehrpaket: `/private/strc-peter-release-20261022104212`; lokal zusätzlich `server-rollback.tar.gz`. Es enthält ursprüngliche Programmdateien, `rollback.json`, ursprüngliche Konfiguration, frühere Rollendefinitionen und Benutzerzuweisungen. Programmdateien nur bei unveränderter installierter Prüfsumme zurücksetzen, neu hinzugefügte Dateien nur bei passender Prüfsumme entfernen. Konfiguration nur bei der dokumentierten installierten Prüfsumme aus `origin-change.json` zurücksetzen, Berechtigung 0600 erhalten. Rollendefinitionen und Versionsoption nur zurücksetzen, wenn sie noch dem gesicherten installierten Rollenstand entsprechen; spätere Zuweisungen und Daten niemals pauschal überschreiben. Der historische Snapshot bleibt unverändert.
