@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 if(!is_front_page()&&function_exists('is_woocommerce')&&(is_woocommerce()||is_cart()||is_checkout()||is_account_page())){
-    get_header();echo '<main class="strc-store-page">';
-    while(have_posts()){the_post();echo '<h1>'.esc_html(get_the_title()).'</h1>';the_content();}
-    echo '</main>';get_footer();return;
+    // Warenkorb, Kasse und Konto sind normale Seiten: gleiche Darstellung wie woocommerce.php (deutsche Titel, Zurück zum Dashboard).
+    require __DIR__.'/woocommerce.php';return;
 }
 ?>
 <!doctype html>
