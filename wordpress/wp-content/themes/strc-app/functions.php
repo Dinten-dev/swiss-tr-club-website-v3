@@ -155,6 +155,20 @@ add_filter('woocommerce_checkout_fields', static function (array $fields): array
     }
     return $fields;
 }, 1000);
+// Staging 23.10.: Ein anderes Plugin bzw. die WooCommerce-Einstellung setzt das Telefon nach allen Feldfiltern wieder auf optional.
+// Darum direkt beim Darstellen des Feldes und zusätzlich bei der Prüfung der Bestellung.
+add_filter('woocommerce_form_field_args', static function (array $args, string $key): array {
+    if ($key === 'billing_phone') {
+        $args['required'] = true;
+        $args['label'] = get_locale() === 'fr_FR' ? 'Mobile (pour les questions)' : 'Mobilnummer (für Rückfragen)';
+    }
+    return $args;
+}, 1000, 2);
+add_action('woocommerce_after_checkout_validation', static function (array $data, \WP_Error $errors): void {
+    if (trim((string) ($data['billing_phone'] ?? '')) === '' && ! $errors->get_error_message('billing_phone_required')) {
+        $errors->add('billing_phone_required', get_locale() === 'fr_FR' ? 'Merci d’indiquer un numéro de mobile pour les questions.' : 'Bitte eine Mobilnummer für Rückfragen angeben.', array('id' => 'billing_phone'));
+    }
+}, 10, 2);
 add_action('wp_footer', static function (): void {
     if (! function_exists('is_checkout') || ! is_checkout()) {
         return;
