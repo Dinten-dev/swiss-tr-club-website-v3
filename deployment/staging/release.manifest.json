@@ -2134,8 +2134,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/functions.php",
-      "bytes": 8820,
-      "sha256": "b2986e725c411ffc69dd7e9b071148f520b88eae4e1704488be96ed604eb7cec"
+      "bytes": 9493,
+      "sha256": "188c293cfdee013c5e60f33a68401a15452fd97190af2595af3af8d481341df8"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/header.php",
@@ -2144,8 +2144,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/index.php",
-      "bytes": 1877,
-      "sha256": "7fbc814c361da13e3ddcb6580fe715ca0d13d6f82e43d9e0b105fea8499f9e94"
+      "bytes": 1867,
+      "sha256": "c6bff3d9fddea10cc8e7b03b3f0a07c80cade68befcdc88596e96648e2c3f71d"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/style.css",
@@ -2159,8 +2159,8 @@
     }
   ],
   "status": "published",
-  "builtOn": "2026-10-22T10:36:14.281Z",
+  "builtOn": "2026-10-23T07:56:21.413186+00:00",
   "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-22T10:42:18.970673+00:00",
-  "publishedFiles": 37
+  "publishedOn": "2026-10-23T07:57:06.908058+00:00",
+  "publishedFiles": 2
 }
