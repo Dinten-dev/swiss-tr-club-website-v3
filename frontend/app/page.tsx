@@ -26,7 +26,7 @@ import {ClubLanding, MissionPage, StaticPage} from './components/LandingPages';
 type Page = 'history' | 'news' | 'applications' | 'registration' | 'profile' | 'triungsters' | 'organisation' | 'mission' | 'membership' | 'models' | 'shop' | 'home' | 'club' | 'agenda' | 'regions' | 'market' | 'members' | 'forum' | 'gallery' | 'library' | 'clubdocs' | 'directory' | 'contact' | 'privacy' | 'statutes' | 'event-admin' | 'editorial';
 type MemberSession = MarketplaceSession & EventAdminSession & {
   applicationsNonce?:string|null; communityNonce?: string | null; formsInboxUrl?:string|null;
-  canEditContent?:boolean; canManageRoles?:boolean; editorialNonce?:string; editableDocuments?:string[]; logoutUrl?:string;
+  canEditContent?:boolean; canManageRoles?:boolean; editorialNonce?:string; editableDocuments?:string[]; logoutUrl?:string; contact?:{name:string;email:string;phone:string;city?:string}|null;
   authenticated: boolean;
   memberAccess: boolean;
   displayName?: string;
@@ -130,10 +130,11 @@ function ClubApp() {
         <button className={['members','profile','applications','forum','gallery','library','clubdocs','directory','editorial','event-admin'].includes(page)?'active':''} onClick={() => navigate('members')}>{t(memberSession?.memberAccess?'Mitgliederbereich':'Mitglieder-Login')}</button>
         </div>
         <LanguageSwitcher/>
+        {memberSession?.logoutUrl&&<a className="nav-logout" href={memberSession.logoutUrl} title={t('Abmelden')} aria-label={t('Abmelden')}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></a>}
       </nav>
     </header>
 
-    {(memberSession?.canEditContent||memberSession?.authenticated)&&<div className="editorial-access-bar">{memberSession.canEditContent&&<><a href="#redaktion">{t("Redaktion öffnen")}</a>{memberSession.editableDocuments?.includes(editorialKey)&&<a href={`#redaktion/${editorialKey}`}>{t("Diese Seite bearbeiten")}</a>}</>}{memberSession.memberAccess&&!memberSession.canEditContent&&<a href="#mitglieder">{t("Mein Dashboard")}</a>}{memberSession.logoutUrl&&<a className="access-logout" href={memberSession.logoutUrl}>{t("Abmelden")}</a>}</div>}
+    {(memberSession?.canEditContent||memberSession?.authenticated)&&<div className="editorial-access-bar">{memberSession.canEditContent&&<><a href="#redaktion">{t("Redaktion öffnen")}</a>{memberSession.editableDocuments?.includes(editorialKey)&&<a href={`#redaktion/${editorialKey}`}>{t("Diese Seite bearbeiten")}</a>}</>}{memberSession.memberAccess&&!memberSession.canEditContent&&<a href="#mitglieder">{t("Mein Dashboard")}</a>}</div>}
     <Breadcrumbs page={page} subroute={subroute}/>
     {page==='editorial'&&(memberSession?.canEditContent?<EditorialDashboard nonce={memberSession.editorialNonce||''} canManageEvents={!!memberSession.canManageEvents}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='home' && <HomePage memberAccess={!!memberSession?.memberAccess} navigate={navigate} events={events} eventsState={eventsState} openEvent={setSelectedEvent}/>}

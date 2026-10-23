@@ -404,6 +404,10 @@ final class CommunityEndpoint
         if ('' === $title || mb_strlen($title) > 160 || mb_strlen($description) > 10000) {
             AjaxRequest::fail('Bitte einen Titel angeben und die Textlänge prüfen.');
         }
+        // Galerie: Albumbeschreibung höchstens 250 Zeichen (Mitgliederporträts haben ihr eigenes Textfeld).
+        if (($input['kind'] ?? '') === 'gallery' && ($input['operation'] ?? '') !== 'portrait' && mb_strlen(trim(wp_strip_all_tags($description))) > 250) {
+            AjaxRequest::fail('Die Albumbeschreibung darf höchstens 250 Zeichen lang sein.');
+        }
         return array($title, $description);
     }
 

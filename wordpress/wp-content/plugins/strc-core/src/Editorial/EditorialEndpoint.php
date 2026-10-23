@@ -65,8 +65,8 @@ final class EditorialEndpoint
     }
 
     /**
-     * Regionalseiten und TRiungsters: Die Regionalleitung bearbeitet nur a) Treffpunkt, b) Regionale Informationen,
-     * c) Regionale Neuigkeiten und d) Regionale Veranstaltungen. Alle übrigen Felder sind Administration.
+     * Regionalseiten und TRiungsters: Die Regionalleitung bearbeitet nur a) Treffpunkt, b) Weitere Termine,
+     * c) Neuigkeiten und d) Unsere Anlässe. Alle übrigen Felder sind Administration.
      */
     private static function regionalLayout(array $fields, bool $triungsters = false): array
     {
@@ -75,9 +75,9 @@ final class EditorialEndpoint
             'meetAddress' => array('a', 'Treffpunkt: Adresse'),
             'meetSchedule' => array('a', 'Treffpunkt: Rhythmus und Zeit (zwei Zeilen möglich)'),
             'meetDates' => array('a', 'Nächste Treffen'),
-            'body' => array('b', $triungsters ? 'Regionale Informationen (Über die TRiungsters)' : 'Regionale Informationen'),
-            'news' => array('c', 'Regionale Neuigkeiten'),
-            'eventBody' => array('d', 'Regionale Veranstaltungen: Text über der Terminliste'),
+            'body' => array('b', $triungsters ? 'Über die TRiungsters' : 'Weitere Termine'),
+            'news' => array('c', 'Neuigkeiten'),
+            'eventBody' => array('d', 'Unsere Anlässe: Text über der Terminliste'),
         );
         $ordered = array();
         foreach ($moderated as $key => [$section, $label]) {
