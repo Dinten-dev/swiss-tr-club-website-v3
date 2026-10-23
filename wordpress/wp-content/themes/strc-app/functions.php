@@ -144,8 +144,17 @@ add_filter('woocommerce_shipping_fields', static function (array $fields): array
     unset($fields['shipping_state'], $fields['shipping_company']);
     return $fields;
 });
-// Kurzer Datenschutzhinweis statt des langen WooCommerce-Absatzes.
-add_filter('woocommerce_checkout_privacy_policy_text', static fn (): string => '');
+// Kein langer (englischer) Datenschutzabsatz an der Kasse; der Datenschutz ist im Footer verlinkt.
+add_filter('woocommerce_get_privacy_policy_text', static fn ($text, $type = '') => $type === 'checkout' ? '' : $text, 10, 2);
+// Mobilnummer verbindlich, auch wenn die WooCommerce-Einstellung «Telefon optional» lautet (die Einstellung greift nach woocommerce_billing_fields).
+add_filter('woocommerce_checkout_fields', static function (array $fields): array {
+    if (isset($fields['billing']['billing_phone'])) {
+        $fields['billing']['billing_phone']['required'] = true;
+        $fields['billing']['billing_phone']['label'] = get_locale() === 'fr_FR' ? 'Mobile (pour les questions)' : 'Mobilnummer (für Rückfragen)';
+        $fields['billing']['billing_phone']['priority'] = 95;
+    }
+    return $fields;
+}, 1000);
 add_action('wp_footer', static function (): void {
     if (! function_exists('is_checkout') || ! is_checkout()) {
         return;
