@@ -59,6 +59,13 @@ final class RoleAssignments
         foreach(self::rows($id) as $row) if (in_array($row['role'],['strc_regional_manager','strc_event_organiser','strc_moderator'],true)) $regions=array_merge($regions,$row['regions']);
         return array_values(array_unique($regions));
     }
+    /** Agenda scopes do not grant editorial access to regional pages. */
+    public static function agendaRegions(int $id): array
+    {
+        $regions=[];
+        foreach(self::rows($id) as $row) if($row['role']==='strc_agenda_moderator') $regions=array_merge($regions,$row['regions']);
+        return array_values(array_unique($regions));
+    }
     public static function events(int $id): array
     {
         if (!self::scoped($id)) return self::listMeta($id,'strc_assigned_events');
@@ -120,7 +127,7 @@ final class RoleAssignments
                 // Die Dokumentstufe ergibt sich aus der Rolle: Vorstand → Vorstandsdokumente, jede andere Clubfunktion → Moderator-Dokumente.
                 $access=$role==='strc_board_member'?'restricted':(in_array($role,['strc_regional_manager','strc_administrator','strc_superadmin','strc_library_administrator'],true)?'limited':'open');
                 // Non-regional functions retain legacy scopes, but cannot acquire unrelated new scopes.
-                if (!in_array($role,['strc_regional_manager','strc_event_organiser','strc_moderator'],true) && $row['regions']) {
+                if (!in_array($role,['strc_agenda_moderator','strc_regional_manager','strc_event_organiser','strc_moderator'],true) && $row['regions']) {
                     $old=array_values(array_filter($previous,static fn($p)=>$p['role']===$role));
                     if (!$old || $old[0]['regions']!==$row['regions']) AjaxRequest::fail('Diese Funktion ist clubweit.',422);
                 }

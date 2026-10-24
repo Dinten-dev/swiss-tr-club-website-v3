@@ -154,13 +154,13 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/EditorialAccess.php",
-      "bytes": 3501,
-      "sha256": "e0df1d715b3fdb713938d82d22b30f077167260ccbcc31e2db2944eccaa420ee"
+      "bytes": 3938,
+      "sha256": "e4a5d14cd68274bc0fcd6a03b66e492c76374a37775f93bb7db60bf0cdffc3dd"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/EditorialEndpoint.php",
-      "bytes": 27322,
-      "sha256": "ace45d33016e3aeb0ec6131bbb1d775c42759bec31d189d9c7236037cd689316"
+      "bytes": 27445,
+      "sha256": "2ed95b2a2ba6d5c32e6fa57f485ef24294ef377e5def76fd1dcc4212f14baf91"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/PublicDocumentUpload.php",
@@ -199,18 +199,18 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventPublicEndpoint.php",
-      "bytes": 10551,
-      "sha256": "e73ceaf4a8c204123490432be0047e33d9b27ab7342666f172a983cf6cdc0a0b"
+      "bytes": 10668,
+      "sha256": "7253eae0d9b37b5c1dcc81855346faec4bc5c6a28b10ad8b4cbf9dfabe13a5bd"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/RegionalEventAccess.php",
-      "bytes": 4604,
-      "sha256": "121f04769b8bf326c066c8f53f1b3d85c05c1d7c267c14675bbb7b001be55dd2"
+      "bytes": 4768,
+      "sha256": "af9238ab2dce90a2c0769cb4af44826e407084f4a3a1c8e9c99cd5a11498b0c6"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/RegionDirectory.php",
-      "bytes": 6628,
-      "sha256": "47e24e193ddd70b87a6660327972e0e1fc67432e8b68236ef195c2dbdb39022c"
+      "bytes": 6944,
+      "sha256": "7758b69f71a243ce41fe6728f5f407ef0cf018ab19cd2d41d4c3a478af743fe0"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Finance/CamtImporter.php",
@@ -454,13 +454,13 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MembershipAccessGuard.php",
-      "bytes": 1462,
-      "sha256": "7dda19d62cd8726f0faa344d4aa1e17901fca49b0aa1a99d016c8607362011ea"
+      "bytes": 2586,
+      "sha256": "ccf272d17d5bdd97ee2c79b7c7d468a6f19a2f8fd2a6eebd36233d15c7fbaff9"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MembershipAccessPolicy.php",
-      "bytes": 1857,
-      "sha256": "29ff9c8d2a895f6a981ce7c5bf0d5fd78c4574c5a77f29886d753648c0faf417"
+      "bytes": 1894,
+      "sha256": "01ef594b0f5e349dc39bbad0040890a06708ade8d99c6e893d4b27332426fea6"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MembershipRepository.php",
@@ -479,18 +479,18 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleAssignments.php",
-      "bytes": 11572,
-      "sha256": "0e0a929399d4221f30d96b415cfcd25a8695a5fbc0810c68ef41807cd273f870"
+      "bytes": 11945,
+      "sha256": "825cb1aabcff0f9a95e7c4c8d3b267ebd78f3efaf4c04c6127caa56e6e152b4c"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleDefinitions.php",
-      "bytes": 11732,
-      "sha256": "d0c5ad6af0fbb42efdd4909993e22c690d3d5af5cb38e75ef83cfbf28f0e8828"
+      "bytes": 11948,
+      "sha256": "f622fa95449db1d1d8ad09de3b6cca3d2cad1a73043e91defb2d7fee05a5744f"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleManager.php",
-      "bytes": 4703,
-      "sha256": "219c90dcd6353045d49009e23b9176f7880faf980cbcd33ffa9b9693b7d0b683"
+      "bytes": 4866,
+      "sha256": "378d08a850a7e29cafac5bbea8b4b5a64151160ed50fa3ec4d153e69c1a264ee"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/InvoiceGateway.php",
@@ -584,8 +584,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/tests/RegionDirectoryTest.php",
-      "bytes": 1513,
-      "sha256": "df1537f3f54ce0c3d14a44f2941bb6ac47f65fe2fbc65d24eab82e2874349701"
+      "bytes": 1601,
+      "sha256": "4570ae9b30986577a9b278ea9db0aab54cf834ce89182bf8b544f7ad7a2187f0"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/tests/RoleAssignmentsTest.php",
@@ -594,8 +594,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/tests/RoleDefinitionsTest.php",
-      "bytes": 6602,
-      "sha256": "4d289dfe426d35e62a32ae8c80dca071ee020f2631efa65a4b627dc0640faabc"
+      "bytes": 7266,
+      "sha256": "4d686d9389ab48fd6cee7d520d5775bca6fc18677a71a5a7bb491dbe361b2f2e"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/tests/ShopAccessPolicyTest.php",
@@ -614,8 +614,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 904757,
-      "sha256": "6a414c43a453c7db85f2ff9a28ee1ab6026cd1051cd958e177d406a91491395c"
+      "bytes": 904991,
+      "sha256": "36b33e232c73e4d9b851cf7814d650d522c2b822f10e4b156b5b3e5d116b7dc9"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -821,6 +821,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CTFZ8mmG.js",
       "bytes": 8199,
       "sha256": "ccba4c9fec4f9d376d7cbff6716e67a69244cb3bbd8f642551df23ffb6cd471c"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CuB-V2zw.js",
+      "bytes": 8199,
+      "sha256": "23d7002123c0ffa270f16ec6e13e0fd6304e3913521927601eb9777058043010"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CxMz7wG9.js",
@@ -2108,6 +2113,11 @@
       "sha256": "ff48cf6d6796de03d9682c4aad6a0449cccb14e39ccde3ceb69ce558196aebe6"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-Cvs5qAkn.js",
+      "bytes": 93892,
+      "sha256": "ec13c59c0d077b32e0c59dab346ead50e12e5f6a31df98d9cedd9898c1645303"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-CzTZeUhr.js",
       "bytes": 69703,
       "sha256": "c6daa0a80a763bc99dbed74924d6081a6c973d371a9c7bf42ae5380e6acd85ec"
@@ -2168,9 +2178,7 @@
       "sha256": "6355c019a358f34e46406a5dad8f0057bae8d1bd0c530f0420d1d56a37087eb0"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-10-24T08:54:11.514Z",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-24T09:07:14.800224+00:00",
-  "publishedFiles": 11
+  "status": "candidate",
+  "builtOn": "2026-10-24T10:56:58.310Z",
+  "baselineCapturedOn": "2026-10-13"
 }

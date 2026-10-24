@@ -8,7 +8,7 @@ use SwissTRClub\Core\Infrastructure\Schema;
 
 final class RoleManager
 {
-    private const ROLE_VERSION = '20261021-2';
+    private const ROLE_VERSION = '20261024-1';
 
     public function registerHooks(): void
     {
@@ -35,6 +35,7 @@ final class RoleManager
     {
         global $wpdb;
         add_option('strc_roles_before_20261021', ['definitions'=>get_option($wpdb->prefix.'user_roles'), 'version'=>get_option('strc_roles_version')], '', false);
+        add_option('strc_roles_before_20261024', ['definitions'=>get_option($wpdb->prefix.'user_roles'), 'version'=>get_option('strc_roles_version')], '', false);
         $managed = array_merge(RoleDefinitions::allManagedCapabilities(), RoleDefinitions::platformCapabilities(), array('strc_access_board_documents' => true));
         foreach (RoleDefinitions::all() as $slug => $definition) {
             $role = get_role($slug);

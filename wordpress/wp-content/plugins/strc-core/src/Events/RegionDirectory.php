@@ -14,6 +14,7 @@ final class RegionDirectory
         'innerschweiz' => 'Innerschweiz',
         'nordwestschweiz' => 'Nordwestschweiz',
         'suisse-romande' => 'Suisse Romande',
+        'triungsters' => 'TRiungsters',
     );
 
     /** @return list<object> */
@@ -47,6 +48,7 @@ final class RegionDirectory
         $key = $fold($value);
         $aliases = array(
             'zuerich' => 'zuerich', 'zurich' => 'zuerich',
+            'triungsters' => 'triungsters',
             'bern' => 'bern', 'ostschweiz' => 'ostschweiz', 'mittelland' => 'mittelland',
             'innerschweiz' => 'innerschweiz', 'zentralschweiz' => 'innerschweiz',
             'nordwestschweiz' => 'nordwestschweiz',
@@ -66,6 +68,8 @@ final class RegionDirectory
     public static function synchronize(): void
     {
         if ((int) get_option('strc_region_directory_version', 0) >= 1) {
+            // Add the new assignment scope without rerunning historical region retirement.
+            if (! get_term_by('slug', 'triungsters', 'strc_region')) wp_insert_term('TRiungsters', 'strc_region', ['slug'=>'triungsters']);
             return;
         }
 

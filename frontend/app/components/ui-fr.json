@@ -1101,5 +1101,7 @@
   "Umsatz, bezahlte und offene Beträge, nach Zahlungsart und Abholung.": "Chiffre d’affaires, montants payés et en attente, par mode de paiement et retrait.",
   "Alle Shop-Bestellungen mit Zahlungs- und Lieferstand. Filter nach Abholung oder Zahlungsstand, Export als CSV.": "Toutes les commandes avec l’état du paiement et de la livraison. Filtres par retrait ou paiement, export CSV.",
   "Verkauf am Anlass oder manuelle Bestellung erfassen; der Lagerbestand wird automatisch angepasst.": "Saisir une vente lors d’un événement ou une commande manuelle ; le stock est ajusté automatiquement.",
-  "Aktueller Bestand pro Artikel und Variante.": "Stock actuel par article et variante."
+  "Aktueller Bestand pro Artikel und Variante.": "Stock actuel par article et variante.",
+  "Agenda-Moderator": "Modérateur de l’agenda",
+  "Agenda verwalten: gewählte Regionen, ohne Auswahl clubweit. Keine Bearbeitung der Regionalseiten.": "Gérer l’agenda des régions sélectionnées, ou de tout le club sans sélection. Ne permet pas de modifier les pages régionales."
 }

@@ -22,6 +22,7 @@ final class MembershipAccessPolicy
             'delete_strc_topics',
             'strc_manage_members',
             'strc_manage_assigned_events',
+            'strc_agenda_moderator',
             'strc_forum_moderator',
             'strc_gallery_moderator',
             'strc_marketplace_moderator',

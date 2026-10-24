@@ -27,7 +27,9 @@ final class RegionalEventAccess
     /** @return list<int> */
     public static function regions(?int $userId = null): array
     {
-        $stored = \SwissTRClub\Core\Roles\RoleAssignments::regions($userId ?? get_current_user_id());
+        $id = $userId ?? get_current_user_id();
+        $stored = \SwissTRClub\Core\Roles\RoleAssignments::regions($id);
+        if (user_can($id, 'strc_agenda_moderator')) $stored = array_merge($stored, \SwissTRClub\Core\Roles\RoleAssignments::agendaRegions($id));
         if (! is_array($stored)) {
             return array();
         }

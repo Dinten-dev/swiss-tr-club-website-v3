@@ -12,6 +12,7 @@ final class RegionDirectoryTest extends TestCase
 {
     public function testNormalizesFairgateRegionNamesAndKnownLegacyValues(): void
     {
+        self::assertSame('TRiungsters', RegionDirectory::canonicalName('TRiungsters'));
         self::assertSame('Zürich', RegionDirectory::canonicalName('Zürich'));
         self::assertSame('Zürich', RegionDirectory::canonicalName('Zurich'));
         self::assertSame('Innerschweiz', RegionDirectory::canonicalName('Zentralschweiz'));

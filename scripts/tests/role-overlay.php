@@ -9,4 +9,5 @@ unset($qaRoles['administrator']['capabilities']['strc_access_board_documents']);
 add_filter('pre_option_'.$qaRoleOption,static fn()=>$qaRoles);
 add_filter('pre_update_option_'.$qaRoleOption,static fn($new,$old)=>$old,10,2);
 add_filter('pre_option_strc_roles_before_20261021',static fn()=>['qa'=>true]);
+add_filter('pre_option_strc_roles_before_20261024',static fn()=>['qa'=>true]);
 $wp_roles=new WP_Roles();

@@ -28,7 +28,7 @@ final class RoleDefinitions
      * Mitgliederverwaltung und Kassier sind exklusiv: Admins erhalten diese Rechte nur mit der Rolle.
      */
     public const MODERATOR_ROLES = array(
-        'strc_registration_moderator', 'strc_event_organiser', 'strc_regional_manager',
+        'strc_registration_moderator', 'strc_agenda_moderator', 'strc_event_organiser', 'strc_regional_manager',
         'strc_forum_moderator', 'strc_gallery_moderator', 'strc_marketplace_moderator',
         'strc_library_administrator', 'strc_shop_manager', 'strc_treasurer',
     );
@@ -116,6 +116,10 @@ final class RoleDefinitions
             'strc_registration_moderator' => array(
                 'name' => 'STRC Registration Moderator',
                 'capabilities' => self::caps('read', 'strc_manage_members', 'strc_manage_member_welcome_mail'),
+            ),
+            'strc_agenda_moderator' => array(
+                'name' => 'STRC Agenda-Moderator',
+                'capabilities' => self::caps('read', 'strc_agenda_moderator'),
             ),
             'strc_event_organiser' => array(
                 'name' => 'STRC Event Organiser',
