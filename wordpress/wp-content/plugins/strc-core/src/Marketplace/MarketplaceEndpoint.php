@@ -34,7 +34,7 @@ final class MarketplaceEndpoint
         if (! is_string($operation)) {
             wp_send_json_error(array('message' => 'Ungültige Anfrage.'), 400);
         }
-        if (in_array($operation, array('create', 'edit', 'sold', 'withdraw', 'renew', 'approve', 'reject', 'contact'), true)) {
+        if (in_array($operation, array('create', 'edit', 'sold', 'withdraw', 'renew', 'approve', 'reject', 'contact', 'delete'), true)) {
             if ('POST' !== $method) {
                 wp_send_json_error(array('message' => 'Bitte das Formular verwenden.'), 405);
             }
@@ -50,6 +50,7 @@ final class MarketplaceEndpoint
             'members' => $this->serviceMembers((string)($input['q']??'')),
             'create' => $this->createAd($input, $_FILES),
             'approve','reject','withdraw','renew','edit'=>$this->changeAd($operation,$input),
+            'delete'=>$this->deleteAd($input),
             'sold' => $this->markSold(absint($input['id'] ?? 0)),
             'contact' => $this->contact(absint($input['id'] ?? 0), $input),
             default => new WP_Error('invalid_operation', 'Ungültige Anfrage.', array('status' => 400)),
@@ -385,6 +386,8 @@ final class MarketplaceEndpoint
                 delete_post_meta($id,'strc_ad_sold');
             }
         }
+        // Admin/Marktplatz-Moderation korrigiert ein veröffentlichtes Inserat: es bleibt online (keine erneute Prüfung).
+        if($status==='pending'&&$operation==='edit'&&$review&&$post->post_status==='publish'&&(int)$post->post_author!==get_current_user_id()){$status='publish';update_post_meta($id,'strc_review',['by'=>get_current_user_id(),'at'=>gmdate(DATE_ATOM),'edited'=>true]);}
         if($status==='pending')$status=$this->settle($id,$operation==='renew');
         $result=wp_update_post(['ID'=>$id,'post_status'=>$status],true);if(is_wp_error($result))return $result;
         if($status!=='publish')delete_post_meta($id,'strc_ad_public_approved');
@@ -427,6 +430,17 @@ final class MarketplaceEndpoint
             'service' => (get_current_user_id()>0&&((int)$post->post_author===get_current_user_id()||\SwissTRClub\Core\Editorial\EditorialAccess::area('market')))&&is_array(get_post_meta($id,'strc_ad_service',true))?(string)(get_userdata((int)(get_post_meta($id,'strc_ad_service',true)['by']??0))->display_name??'Marktplatz-Service'):'',
             'sold' => (bool) get_post_meta($id, 'strc_ad_sold', true),
         );
+    }
+
+    /** Admin und Marktplatz-Moderation entfernen ein Inserat (Papierkorb, wiederherstellbar in wp-admin). */
+    private function deleteAd(array $input): array|WP_Error
+    {
+        if(!current_user_can('strc_access_member_area')||!\SwissTRClub\Core\Editorial\EditorialAccess::area('market'))return $this->denied();
+        $id=absint($input['id']??0);$post=get_post($id);
+        if(!$post||$post->post_type!=='strc_ad'||$post->post_status==='trash')return new WP_Error('missing','Inserat nicht gefunden.',['status'=>404]);
+        update_post_meta($id,'strc_review',['by'=>get_current_user_id(),'at'=>gmdate(DATE_ATOM),'deleted'=>true]);
+        if(!wp_trash_post($id))return new WP_Error('delete_failed','Inserat konnte nicht entfernt werden.',['status'=>500]);
+        return ['deleted'=>true,'id'=>$id];
     }
 
     private function denied(): WP_Error

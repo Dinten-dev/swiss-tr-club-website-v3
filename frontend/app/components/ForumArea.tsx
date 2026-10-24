@@ -55,30 +55,44 @@ export function ForumSubscribe({area,forum}:{area:string;forum:ReturnType<typeof
 /** Moderation: Fachexperten zuteilen (Mehrfachauswahl Fahrzeuge × Technikbereiche). */
 export function ExpertAssignment({forum}:{forum:ReturnType<typeof useForumSettings>}){
   const catalog=useCatalog();
-  const [search,setSearch]=useState('');const [members,setMembers]=useState<ForumSettings['members']>([]);const [selected,setSelected]=useState<ForumSettings['members'][number]|null>(null);
-  const [models,setModels]=useState<string[]>([]);const [components,setComponents]=useState<string[]>([]);const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
-  useEffect(()=>{const controller=new AbortController();const timer=setTimeout(()=>{query<ForumSettings>('strc_forum_settings',{search},controller.signal).then(result=>setMembers(result.members)).catch(()=>{});},200);return()=>{clearTimeout(timer);controller.abort();};},[search]);
+  // Gleiche Bedienung wie «Rollen und Zuständigkeiten»: links suchen und ankreuzen, rechts «Wer ist Experte wofür».
+  const [search,setSearch]=useState('');const [results,setResults]=useState<ForumSettings['members']>([]);const [experts,setExperts]=useState<ForumSettings['members']>([]);const [selected,setSelected]=useState<ForumSettings['members'][number]|null>(null);
+  const [models,setModels]=useState<string[]>([]);const [components,setComponents]=useState<string[]>([]);const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [filter,setFilter]=useState('');
+  useEffect(()=>{const controller=new AbortController();query<ForumSettings>('strc_forum_settings',{search:''},controller.signal).then(result=>setExperts(result.members.filter(member=>member.expertise.some(row=>row.model||row.component)))).catch(()=>{});return()=>controller.abort();},[]);
+  useEffect(()=>{if(search.trim().length<2)return;const controller=new AbortController();const timer=setTimeout(()=>{query<ForumSettings>('strc_forum_settings',{search},controller.signal).then(result=>setResults(result.members.slice(0,8))).catch(()=>{});},200);return()=>{clearTimeout(timer);controller.abort();};},[search]);
   if(!forum.settings?.canManage)return <p role="alert">{t('Nur für Administration und Forumsmoderation.')}</p>;
-  function pick(member:ForumSettings['members'][number]){setSelected(member);setModels([...new Set(member.expertise.map(row=>row.model).filter(Boolean))]);setComponents([...new Set(member.expertise.map(row=>row.component).filter(Boolean))]);setMessage('');}
+  const original=selected?JSON.stringify([[...new Set(selected.expertise.map(row=>row.model).filter(Boolean))].sort(),[...new Set(selected.expertise.map(row=>row.component).filter(Boolean))].sort()]):'';
+  const dirty=!!selected&&JSON.stringify([[...models].sort(),[...components].sort()])!==original;
+  function pick(member:ForumSettings['members'][number]){if(dirty&&!window.confirm(t('Ungespeicherte Änderungen verwerfen?')))return;setSearch('');setSelected(member);setModels([...new Set(member.expertise.map(row=>row.model).filter(Boolean))]);setComponents([...new Set(member.expertise.map(row=>row.component).filter(Boolean))]);setMessage('');}
   async function save(){
     if(!selected||!forum.settings)return;
     const rows=(models.length?models:['']).flatMap(model=>(components.length?components:['']).map(component=>({model,component,area:''}))).filter(row=>row.model||row.component);
     setBusy(true);setMessage('');
-    try{await mutate('strc_forum_settings',forum.settings.nonce,fields({operation:'expert-save',id:String(selected.id),expertise:JSON.stringify(rows)}));setMessage(t('Fachexperte gespeichert.'));setMembers(list=>list.map(member=>member.id===selected.id?{...member,expertise:rows}:member));}
+    try{await mutate('strc_forum_settings',forum.settings.nonce,fields({operation:'expert-save',id:String(selected.id),expertise:JSON.stringify(rows)}));const saved={...selected,expertise:rows};setSelected(saved);setMessage(t('Gespeichert.'));setExperts(list=>[...list.filter(member=>member.id!==saved.id),...(rows.length?[saved]:[])].sort((a,b)=>a.name.localeCompare(b.name,'de-CH')));}
     catch(error){setMessage((error as Error).message);}finally{setBusy(false);}
   }
   const toggle=(list:string[],value:string)=>list.includes(value)?list.filter(item=>item!==value):[...list,value];
-  return <><WhatsAppStatus/><section className="forum-experts form-section">
-    <h2>{t('Fachexperten zuteilen')}</h2>
-    <p className="club-hint">{t('Mitglied wählen und Fahrzeuge sowie Technikbereiche ankreuzen. Beispiel: TR3, TR4, TR4A, TR5 für Motor, Vergaser, Getriebe. Ohne Fahrzeug gilt der Bereich für alle Modelle.')}</p>
-    <label>{t('Mitglied suchen')}<input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder={t('Name …')}/></label>
-    <div className="forum-expert-members">{members.map(member=><button type="button" key={member.id} className={selected?.id===member.id?'market-primary':'club-secondary'} onClick={()=>pick(member)}>{member.name}{member.expertise.length?` · ${member.expertise.length}`:''}</button>)}{!members.length&&<span className="club-hint">{t(search?'Keine Treffer.':'Noch keine Fachexperten zugeteilt. Namen eingeben, um ein Mitglied zu suchen.')}</span>}</div>
-    {selected&&<div className="forum-expert-form"><h3>{selected.name}</h3>
-      <fieldset><legend>{t('Fahrzeuge')}</legend><div className="forum-checkgrid">{vehicleModels.map(model=><label key={model}><input type="checkbox" checked={models.includes(model)} onChange={()=>setModels(list=>toggle(list,model))}/>{model}</label>)}</div></fieldset>
-      <fieldset><legend>{t('Technikbereiche')}</legend><div className="forum-checkgrid">{catalog.components.map(component=><label key={component}><input type="checkbox" checked={components.includes(component)} onChange={()=>setComponents(list=>toggle(list,component))}/>{t(component)}</label>)}</div></fieldset>
-      <div className="club-actions"><button className="market-primary" disabled={busy||(!models.length&&!components.length&&!selected.expertise.length)} onClick={()=>void save()}>{t('Speichern')}</button>{(models.length||components.length)?<button className="club-secondary" disabled={busy} onClick={()=>{setModels([]);setComponents([]);}}>{t('Alle Häkchen entfernen')}</button>:null}</div>
-      {message&&<p role="status">{message}</p>}
-    </div>}
+  const summary=(member:ForumSettings['members'][number])=>{const m=[...new Set(member.expertise.map(row=>row.model).filter(Boolean))];const c=[...new Set(member.expertise.map(row=>row.component).filter(Boolean))];return {m,c};};
+  const shown=experts.filter(member=>!filter||member.expertise.some(row=>row.model===filter||row.component===filter));
+  const chips=(values:string[],list:string[],set:(next:string[])=>void,label:(v:string)=>string)=><div className="role-scope-chips">{values.map(value=><label key={value} className={list.includes(value)?'is-on':''}><input type="checkbox" checked={list.includes(value)} onChange={()=>set(toggle(list,value))}/>{label(value)}</label>)}</div>;
+  return <><WhatsAppStatus/><section className="role-assignment-panel forum-experts">
+    <header className="role-head"><div><h2>{t('Fachexperten zuteilen')}</h2><p className="club-hint">{t('Mitglied suchen, Fahrzeuge und Technikbereiche ankreuzen, speichern. Ohne Fahrzeug gilt der Bereich für alle Modelle. Fachexperte ist keine Rolle, sondern eine Einstufung für Benachrichtigungen.')}</p></div></header>
+    <div className="role-layout">
+     <div className="role-editor">
+      <div className="role-search"><label>{t('Mitglied suchen')}<input type="search" value={search} placeholder={t('Name, mind. 2 Zeichen')} onChange={e=>setSearch(e.target.value)}/></label>
+       {search.trim().length>=2&&<ul className="role-search-results">{results.length?results.map(member=><li key={member.id}><button type="button" onClick={()=>pick(member)}><strong>{member.name}</strong>{member.expertise.some(row=>row.model||row.component)&&<em>{t('Fachexperte')}</em>}</button></li>):<li className="is-empty">{t('Keine passenden Personen gefunden.')}</li>}</ul>}
+      </div>
+      {!selected?<div className="role-empty"><p>{t('Wähle ein Mitglied über die Suche oder rechts in der Übersicht.')}</p></div>:<div className="role-person">
+       <div className="role-person-head"><span className="role-avatar" aria-hidden="true">{selected.name.split(/\s+/).slice(0,2).map(part=>part[0]).join('')}</span><div><h3>{selected.name}</h3><p>{models.length||components.length?`${models.length} ${t('Fahrzeuge')} · ${components.length} ${t('Technikbereiche')}`:t('Noch keine Zuteilung')}</p></div><button type="button" className="market-text-button" onClick={()=>{if(!dirty||window.confirm(t('Ungespeicherte Änderungen verwerfen?'))){setSelected(null);setMessage('');}}}>{t('Schliessen')}</button></div>
+       <section className="role-group"><h4>{t('Fahrzeuge')}</h4>{chips(vehicleModels,models,setModels,value=>value)}</section>
+       <section className="role-group"><h4>{t('Technikbereiche')}</h4>{chips(catalog.components,components,setComponents,value=>t(value))}</section>
+       <div className="role-actions"><span role="status">{message?'✓ '+message:dirty?t('Ungespeicherte Änderungen'):''}</span>{(models.length>0||components.length>0)&&<button type="button" className="club-secondary" disabled={busy} onClick={()=>{setModels([]);setComponents([]);}}>{t('Alle entfernen')}</button>}<button type="button" className="market-primary" disabled={busy||!dirty} onClick={()=>void save()}>{busy?t('Wird gespeichert …'):t('Speichern')}</button></div>
+      </div>}
+     </div>
+     <aside className="role-overview"><div className="role-overview-head"><h3>{t('Wer ist Experte wofür')} · {experts.length}</h3><select aria-label={t('Nach Thema filtern')} value={filter} onChange={e=>setFilter(e.target.value)}><option value="">{t('Alle Themen')}</option><optgroup label={t('Fahrzeuge')}>{vehicleModels.filter(model=>experts.some(member=>member.expertise.some(row=>row.model===model))).map(model=><option key={model} value={model}>{model}</option>)}</optgroup><optgroup label={t('Technikbereiche')}>{catalog.components.filter(component=>experts.some(member=>member.expertise.some(row=>row.component===component))).map(component=><option key={component} value={component}>{t(component)}</option>)}</optgroup></select></div>
+      {shown.length?<ul className="expert-overview">{shown.map(member=>{const {m,c}=summary(member);return <li key={member.id}><button type="button" className={selected?.id===member.id?'is-selected':''} onClick={()=>pick(member)}><strong>{member.name}</strong><span className="role-chips">{m.map(model=><span key={model} className="role-chip">{model}</span>)}{c.map(component=><span key={component} className="role-chip is-members">{t(component)}</span>)}{!m.length&&c.length>0&&<span className="role-chip is-admin">{t('alle Modelle')}</span>}</span></button></li>;})}</ul>:<p className="club-hint">{t(filter?'Für dieses Thema ist noch niemand eingeteilt.':'Noch keine Fachexperten zugeteilt.')}</p>}
+     </aside>
+    </div>
   </section></>;
 }
 

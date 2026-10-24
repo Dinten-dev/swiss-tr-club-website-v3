@@ -15,7 +15,7 @@ import RegionalContent from './RegionalContent';
 import {StaticPageLayout,isStaticDocument} from './LandingPages';
 
 type Field={key:string;label:string;type:string;default:ContentValue;maxItems?:number;imageKey?:string;legacy?:boolean;translationOf?:string;section?:string;adminOnly?:boolean};
-const sectionTitles:Record<string,string>={a:'a) Treffpunkt',b:'b) Regionale Informationen',c:'c) Regionale Neuigkeiten',d:'d) Regionale Veranstaltungen',admin:'Administration'};
+const sectionTitles:Record<string,string>={a:'a) Treffpunkt',b:'b) Weitere Termine',c:'c) Neuigkeiten',d:'d) Unsere Anlässe',admin:'Administration'};
 type Doc={key:string;schema:{title:string;route:string;fields:Field[]};revision:number;values:ContentValues;published:ContentValues;hasDraft:boolean;canAdminister?:boolean;history:{at:string;by:string;values:ContentValues}[]};
 type Menu={documents:{key:string;title:string;route:string;hasDraft:boolean}[];areas:string[];canAssign:boolean;magazineUrl:string};
 type Post={id:number;title:string;body:string;excerpt:string;titleFr?:string;bodyFr?:string;excerptFr?:string;status:string;version:string;image:string;imageId:number;price:string};
