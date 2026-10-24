@@ -7,7 +7,7 @@ use SwissTRClub\Core\Forms\FormFields;
 use SwissTRClub\Core\Forms\FormStore;
 use SwissTRClub\Core\Members\MemberProfile;
 
-/** Additive import: existing website vehicles and photos are never overwritten. */
+/** Additive import: existing website vehicles and photos are never overwritten. «kein TR» wird als Vermerk beim Mitglied gespeichert. */
 final class FairgateVehicleImport
 {
     public function __construct(private readonly array $slots) {}
@@ -47,8 +47,12 @@ final class FairgateVehicleImport
                 foreach($mapping as$key=>$pointer){$value=$contact;foreach(explode('/',substr($pointer,1))as$part){$part=str_replace(['~1','~0'],['/','~'],$part);if(!is_array($value)||!array_key_exists($part,$value)){$missing=true;break;}$value=$value[$part];}if(!is_scalar($value)&&$value!==null)$missing=true;$input[$key]=is_scalar($value)?trim((string)$value):'';}
                 $base=['userId'=>$owner,'source'=>$source];
                 if($missing){$out[]=$base+['action'=>'missing-fields'];continue;}
-                if(!array_filter($input,static fn($v)=>$v!==''))continue;
-                try{$vehicle=FormFields::vehicle($input);}catch(\InvalidArgumentException$e){$out[]=$base+['action'=>'invalid','reason'=>$e->getMessage()];continue;}
+                // Fairgate-Angaben in den Modellkatalog bringen (siehe FairgateVehicleNormalizer).
+                $normalized=FairgateVehicleNormalizer::normalize($input);
+                if($normalized['result']==='empty')continue;
+                if($normalized['result']==='no-tr'){$out[]=$base+['action'=>'no-tr'];continue;}
+                if($normalized['result']==='review'){$out[]=$base+['action'=>'review','reason'=>$normalized['reason'],'fairgate'=>$input];continue;}
+                try{$vehicle=FormFields::vehicle($normalized['input']);}catch(\InvalidArgumentException$e){$out[]=$base+['action'=>'invalid','reason'=>$e->getMessage(),'fairgate'=>$input];continue;}
                 $action='create';
                 foreach($existing as$row){
                     if(($row['fairgateSource']??'')===$source){$action='already-imported';break;}
@@ -66,8 +70,13 @@ final class FairgateVehicleImport
         FairgateStagingImport::guard();
         return FormStore::locked('fairgate-additive-vehicles',function()use($contacts){
             $plan=$this->plan($contacts);
-            if(array_filter($plan,static fn($r)=>in_array($r['action'],['missing-fields','invalid'],true)))throw new FairgateApiException('Fahrzeugfelder fehlen oder sind ungültig; keine Fahrzeuge importiert.');
-            foreach($plan as&$row)if($row['action']==='create')$row['postId']=FormStore::save('strc_vehicle',$row['vehicle']+['fairgateSource'=>$row['source'],'fairgateImportedAt'=>gmdate(DATE_ATOM),'requestId'=>wp_generate_uuid4()],$row['userId']);
+            // Fehlende API-Felder brechen ab. Einzelne nicht erkannte Einträge («review»/«invalid») werden nur aufgelistet
+            // und blockieren die übrigen Fahrzeuge nicht mehr; die Mitgliederverwaltung klärt sie von Hand.
+            if(array_filter($plan,static fn($r)=>$r['action']==='missing-fields'))throw new FairgateApiException('Fahrzeugfelder fehlen in der Fairgate-Antwort; keine Fahrzeuge importiert.');
+            foreach($plan as&$row){
+                if($row['action']==='create')$row['postId']=FormStore::save('strc_vehicle',$row['vehicle']+['fairgateSource'=>$row['source'],'fairgateImportedAt'=>gmdate(DATE_ATOM),'requestId'=>wp_generate_uuid4()],$row['userId']);
+                if($row['action']==='no-tr')update_user_meta($row['userId'],'strc_fairgate_no_tr',gmdate(DATE_ATOM));
+            }
             unset($row);return $plan;
         });
     }
