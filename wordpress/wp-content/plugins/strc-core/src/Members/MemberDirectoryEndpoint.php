@@ -20,8 +20,9 @@ final class MemberDirectoryEndpoint
         if(!user_can($id,'strc_access_member_area'))return false;
         $membership=(new MembershipRepository())->findForUser($id);
         if(!$membership||!in_array($membership['status'],['active','grace'],true))return false;
-        $preferences=get_user_meta($id,'strc_website_preferences',true);
-        return !is_array($preferences)||!array_key_exists('directory',$preferences)||!empty($preferences['directory']);
+        // Vorstandsentscheid (Alain, 25.10.2026): Die Aufnahme ins Mitgliederverzeichnis ist für aktive Mitglieder Pflicht.
+        // Frühere Abwahlen bleiben in strc_website_preferences gespeichert (Nachweis), werden aber nicht mehr ausgewertet.
+        return true;
     }
 
     private function member(int $id,bool $detail=false): array
