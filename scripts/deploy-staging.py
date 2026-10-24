@@ -71,7 +71,14 @@ echo json_encode(['publishedFiles'=>count($c['changed']),'rollbackDirectory'=>$r
     subprocess.run(ssh+['cat > '+shlex.quote(remote_script)],input=source.encode(),check=True,timeout=60)
     result=subprocess.run(ssh+['cd '+shlex.quote(args.site_path)+' && PATH=/opt/php83/bin:$PATH wp --skip-themes eval-file --use-include '+shlex.quote(remote_script)],capture_output=True,timeout=180)
     if result.returncode:raise SystemExit(result.stderr.decode()[-2000:])
-    status=json.loads(result.stdout)
+    # PHP startup diagnostics may precede the one-line publication receipt.
+    receipts=[]
+    for line in result.stdout.decode().splitlines():
+        try: receipt=json.loads(line)
+        except json.JSONDecodeError: continue
+        if isinstance(receipt,dict) and receipt.get('rollbackDirectory')==release and receipt.get('publishedFiles')==len(changed): receipts.append(receipt)
+    if len(receipts)!=1: raise SystemExit('Publication receipt unclear; inspect the remote release and checksums before retrying: '+release)
+    status=receipts[0]
     manifest['status']='published';manifest['publishedOn']=datetime.datetime.now(datetime.timezone.utc).isoformat()
     manifest['publishedFiles']=status['publishedFiles']
     manifest_path.write_text(json.dumps(manifest,indent=2)+'\n')

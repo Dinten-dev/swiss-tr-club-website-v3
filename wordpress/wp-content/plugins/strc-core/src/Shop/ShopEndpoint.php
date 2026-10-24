@@ -122,7 +122,7 @@ final class ShopEndpoint
     {
         if(!self::canInspect()||!function_exists('wc_get_orders'))AjaxRequest::fail('Keine Shop-Auswertungsberechtigung.',403);
         $page=max(1,absint($input['page']??1));$event=absint($input['event']??0);
-        $args=['limit'=>50,'page'=>$page,'paginate'=>true,'orderby'=>'date','order'=>'DESC'];
+        $args=['type'=>'shop_order','limit'=>50,'page'=>$page,'paginate'=>true,'orderby'=>'date','order'=>'DESC'];
         if($event)$args['meta_query']=[['key'=>'_strc_pickup_event','value'=>$event]];
         $result=wc_get_orders($args);$orders=[];
         foreach($result->orders as $order){$pickup=(int)$order->get_meta('_strc_pickup_event');$orders[]=['id'=>$order->get_id(),'number'=>$order->get_order_number(),'date'=>$order->get_date_created()?->date(DATE_ATOM),'status'=>$order->get_status(),'customer'=>trim($order->get_billing_first_name().' '.$order->get_billing_last_name()),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'paymentMethod'=>$order->get_payment_method_title(),'pickupEvent'=>$pickup?get_the_title($pickup):'','shippedAt'=>(string)$order->get_meta('_strc_shipped_at'),'tracking'=>(string)$order->get_meta('_strc_tracking'),'items'=>array_values(array_map(static fn($item)=>$item->get_name().' × '.$item->get_quantity(),$order->get_items()))];}

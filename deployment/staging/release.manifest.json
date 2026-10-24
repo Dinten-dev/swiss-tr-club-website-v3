@@ -79,13 +79,13 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/CommunityEndpoint.php",
-      "bytes": 59190,
-      "sha256": "2364a82225e9b413060990507c3d8773d8b0fec2ede423259b876e1c7a267ab9"
+      "bytes": 59918,
+      "sha256": "9f38c95cf1dba2adbbb647b585e8b060dcec14c8afc91bb160ce0c8f63ee8e78"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/ForumSettings.php",
-      "bytes": 11949,
-      "sha256": "7ff75e119767832e0fd40f5386a77aee462b0dd7f2e805401d319f160d211b1e"
+      "bytes": 12350,
+      "sha256": "1790339eba0738d8b2946146949b33ccf9b87df27bd85fed8d2b8e9fa71adf02"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/GalleryRetention.php",
@@ -159,8 +159,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/EditorialEndpoint.php",
-      "bytes": 27404,
-      "sha256": "9d06547bf229decf55761f8b5bddd47a40f3d23413475bab3cadceac1b641404"
+      "bytes": 27322,
+      "sha256": "ace45d33016e3aeb0ec6131bbb1d775c42759bec31d189d9c7236037cd689316"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/PublicDocumentUpload.php",
@@ -399,8 +399,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Marketplace/MarketplaceEndpoint.php",
-      "bytes": 32784,
-      "sha256": "55d952a38c1aee4bc1601fdcda7168b2d33b24af55d5df7d7059d980d46d830c"
+      "bytes": 34051,
+      "sha256": "fe40be0a2ac0ca838137ced39e586bef2e10f2c6ba783f74a20c8a40ca179a6a"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/ApplicationAdmission.php",
@@ -444,8 +444,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberSessionEndpoint.php",
-      "bytes": 3556,
-      "sha256": "9bd3845bbde3122ebce5c938ac9a8993300533e7a6143ce6af8dfb2f1c9f6f1f"
+      "bytes": 3993,
+      "sha256": "e694d8d774048645b62cd8c515ec2d5e2b8b5f3d8dda41ba9026da93a4cc23f4"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberSetupPreparation.php",
@@ -509,8 +509,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopEndpoint.php",
-      "bytes": 17656,
-      "sha256": "cca1262c84250bc2f55f87776c87523b77591939d0c588b0e6651df236fe32bd"
+      "bytes": 19470,
+      "sha256": "18b9db54ecf65c9c9896f42a3aac0ecd710e9bd2ddd62ad755121a4f542f79f6"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopOperations.php",
@@ -609,13 +609,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 281996,
-      "sha256": "9badc6599380a2215d53a997c5fa02270ebfeb58c6886a7729094c1318f3e64a"
+      "bytes": 290889,
+      "sha256": "84f218602b37c5bd6053d4e1cc00d8516e1f46266856346df13b43fe66eb417a"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 888162,
-      "sha256": "85d01cbbbca762c9a5044fa4d1ce2024afc91f8bc59124430e59be86c36415da"
+      "bytes": 904757,
+      "sha256": "6a414c43a453c7db85f2ff9a28ee1ab6026cd1051cd958e177d406a91491395c"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -816,6 +816,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-C5EqHhMj.js",
       "bytes": 8199,
       "sha256": "2214b02cce500c8daec939e136b5d08e017532862e78d414522166e3ae0de68b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CTFZ8mmG.js",
+      "bytes": 8199,
+      "sha256": "ccba4c9fec4f9d376d7cbff6716e67a69244cb3bbd8f642551df23ffb6cd471c"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CxMz7wG9.js",
@@ -2093,6 +2098,11 @@
       "sha256": "4a9b0e7494941cf8917ab6749a929905e9fe350933bb21f2d865053d503cb55e"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-CkjR6w6D.js",
+      "bytes": 93603,
+      "sha256": "c3b5ba3a81b8f54a91d3745c7f82630f8ca22b2560d2bf040f9a75500d8fb796"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-CUSN4xVu.js",
       "bytes": 88034,
       "sha256": "ff48cf6d6796de03d9682c4aad6a0449cccb14e39ccde3ceb69ce558196aebe6"
@@ -2134,8 +2144,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/functions.php",
-      "bytes": 9493,
-      "sha256": "188c293cfdee013c5e60f33a68401a15452fd97190af2595af3af8d481341df8"
+      "bytes": 10508,
+      "sha256": "f4ecb2900785533185f0f409054d6b6c44fbc4793e8dc45ad179a17521b3d50d"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/header.php",
@@ -2158,9 +2168,7 @@
       "sha256": "6355c019a358f34e46406a5dad8f0057bae8d1bd0c530f0420d1d56a37087eb0"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-10-23T07:56:21.413186+00:00",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-23T07:57:06.908058+00:00",
-  "publishedFiles": 2
+  "status": "candidate",
+  "builtOn": "2026-10-24T08:54:11.514Z",
+  "baselineCapturedOn": "2026-10-13"
 }

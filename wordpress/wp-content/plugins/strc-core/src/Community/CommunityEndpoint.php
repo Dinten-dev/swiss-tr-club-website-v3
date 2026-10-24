@@ -404,9 +404,13 @@ final class CommunityEndpoint
         if ('' === $title || mb_strlen($title) > 160 || mb_strlen($description) > 10000) {
             AjaxRequest::fail('Bitte einen Titel angeben und die Textlänge prüfen.');
         }
-        // Galerie: Albumbeschreibung höchstens 250 Zeichen (Mitgliederporträts haben ihr eigenes Textfeld).
-        if (($input['kind'] ?? '') === 'gallery' && ($input['operation'] ?? '') !== 'portrait' && mb_strlen(trim(wp_strip_all_tags($description))) > 250) {
-            AjaxRequest::fail('Die Albumbeschreibung darf höchstens 250 Zeichen lang sein.');
+        // Neue Albumtexte begrenzen; unveränderte ältere Beschreibungen bleiben bearbeitbar.
+        $existing = ($input['operation'] ?? '') === 'edit' ? get_post(absint($input['id'] ?? 0)) : null;
+        $album = ($input['kind'] ?? '') === 'gallery' || ($existing && $existing->post_type === 'strc_album');
+        if ($album && ($input['operation'] ?? '') !== 'portrait' && mb_strlen(trim(wp_strip_all_tags($description))) > 250) {
+            if (! $existing || $existing->post_type !== 'strc_album' || $description !== \SwissTRClub\Core\Editorial\EditorialAccess::html($existing->post_content)) {
+                AjaxRequest::fail('Die Albumbeschreibung darf höchstens 250 Zeichen lang sein.');
+            }
         }
         return array($title, $description);
     }
