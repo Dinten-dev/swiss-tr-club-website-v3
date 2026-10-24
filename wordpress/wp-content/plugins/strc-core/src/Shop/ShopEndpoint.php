@@ -122,13 +122,30 @@ final class ShopEndpoint
     {
         if(!self::canInspect()||!function_exists('wc_get_orders'))AjaxRequest::fail('Keine Shop-Auswertungsberechtigung.',403);
         $page=max(1,absint($input['page']??1));$event=absint($input['event']??0);
-        $args=['limit'=>50,'page'=>$page,'paginate'=>true,'orderby'=>'date','order'=>'DESC'];
+        $args=['type'=>'shop_order','limit'=>50,'page'=>$page,'paginate'=>true,'orderby'=>'date','order'=>'DESC'];
         if($event)$args['meta_query']=[['key'=>'_strc_pickup_event','value'=>$event]];
         $result=wc_get_orders($args);$orders=[];
         foreach($result->orders as $order){$pickup=(int)$order->get_meta('_strc_pickup_event');$orders[]=['id'=>$order->get_id(),'number'=>$order->get_order_number(),'date'=>$order->get_date_created()?->date(DATE_ATOM),'status'=>$order->get_status(),'customer'=>trim($order->get_billing_first_name().' '.$order->get_billing_last_name()),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'paymentMethod'=>$order->get_payment_method_title(),'pickupEvent'=>$pickup?get_the_title($pickup):'','shippedAt'=>(string)$order->get_meta('_strc_shipped_at'),'tracking'=>(string)$order->get_meta('_strc_tracking'),'items'=>array_values(array_map(static fn($item)=>$item->get_name().' × '.$item->get_quantity(),$order->get_items()))];}
         $stock=[];$products=wc_get_products(['limit'=>50,'page'=>max(1,absint($input['stockPage']??1)),'paginate'=>true,'status'=>['publish','draft','private']]);
         foreach($products->products as $product){$stock[]=['id'=>$product->get_id(),'name'=>$product->get_name(),'sku'=>$product->get_sku(),'quantity'=>$product->get_stock_quantity(),'stockStatus'=>$product->get_stock_status(),'type'=>$product->get_type()];if($product->is_type('variable'))foreach($product->get_children() as $variantId){$variant=wc_get_product($variantId);if($variant)$stock[]=['id'=>$variantId,'name'=>$variant->get_name(),'sku'=>$variant->get_sku(),'quantity'=>$variant->get_stock_quantity(),'stockStatus'=>$variant->get_stock_status(),'type'=>'variation'];}}
-        wp_send_json_success(['orders'=>$orders,'total'=>$result->total,'pages'=>$result->max_num_pages,'stock'=>$stock,'stockPages'=>$products->max_num_pages,'events'=>array_map(static fn($post)=>['id'=>(int)$post->ID,'title'=>$post->post_title],$this->pickupEvents())]);
+        $summary=null;
+        if(($input['summary']??'')==='1'){
+            // Abrechnung: alle Bestellungen ohne stornierte, erstattete und fehlgeschlagene.
+            $summary=['count'=>0,'total'=>0.0,'paid'=>0.0,'open'=>0.0,'currency'=>function_exists('get_woocommerce_currency')?get_woocommerce_currency():'CHF','byMethod'=>[],'byPickup'=>[],'byStatus'=>[]];
+            $byMethod=[];$byPickup=[];$byStatus=[];
+            foreach(wc_get_orders(['limit'=>-1,'status'=>['pending','on-hold','processing','completed'],'type'=>'shop_order']) as $order){
+                $amount=(float)$order->get_total();$status=$order->get_status();$summary['count']++;$summary['total']+=$amount;
+                if(in_array($status,['processing','completed'],true))$summary['paid']+=$amount;else $summary['open']+=$amount;
+                $method=$order->get_payment_method_title()?:'Ohne Zahlungsart';$pickup=(int)$order->get_meta('_strc_pickup_event');$place=$pickup?'Abholung: '.get_the_title($pickup):'Versand';
+                $add=static function(array &$bucket,string $key,float $amount):void{$bucket[$key]['count']=($bucket[$key]['count']??0)+1;$bucket[$key]['total']=round(($bucket[$key]['total']??0)+$amount,2);};
+                $add($byMethod,$method,$amount);$add($byPickup,$place,$amount);$add($byStatus,$status,$amount);
+            }
+            foreach($byMethod as $label=>$row)$summary['byMethod'][]=['label'=>$label]+$row;
+            foreach($byPickup as $label=>$row)$summary['byPickup'][]=['label'=>$label]+$row;
+            foreach($byStatus as $label=>$row)$summary['byStatus'][]=['status'=>$label]+$row;
+            $summary['total']=round($summary['total'],2);$summary['paid']=round($summary['paid'],2);$summary['open']=round($summary['open'],2);
+        }
+        wp_send_json_success(['summary'=>$summary,'orders'=>$orders,'total'=>$result->total,'pages'=>$result->max_num_pages,'stock'=>$stock,'stockPages'=>$products->max_num_pages,'events'=>array_map(static fn($post)=>['id'=>(int)$post->ID,'title'=>$post->post_title],$this->pickupEvents())]);
     }
 
     public function pickupField(array $fields): array

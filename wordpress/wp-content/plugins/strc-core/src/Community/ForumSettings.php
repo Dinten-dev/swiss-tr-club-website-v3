@@ -55,19 +55,20 @@ final class ForumSettings
             wp_send_json_success($result+['status'=>self::whatsappStatus($id),'nonce'=>wp_create_nonce('strc_forum_settings')]);
         }elseif($op!=='list')AjaxRequest::fail('Unbekannte Anfrage.',400);
         $members=[];
-        if($manage){$search=mb_strtolower(sanitize_text_field($input['search']??''));foreach((new MembershipRepository())->all() as $member){$target=(int)$member['user_id'];if(!in_array($member['status'],['active','grace'],true)||!user_can($target,'strc_access_member_area'))continue;$user=get_userdata($target);$expertise=(array)get_user_meta($target,'strc_forum_expertise',true);if(($search&&str_contains(mb_strtolower($user->display_name),$search))||(!$search&&$expertise))$members[]=['id'=>$target,'name'=>$user->display_name,'expertise'=>$expertise];} $members=array_slice($members,0,50);}
+        if($manage){$search=mb_strtolower(sanitize_text_field($input['search']??''));foreach((new MembershipRepository())->all() as $member){$target=(int)$member['user_id'];if(!in_array($member['status'],['active','grace'],true)||!user_can($target,'strc_access_member_area'))continue;$user=get_userdata($target);$expertise=array_values(array_filter((array)get_user_meta($target,'strc_forum_expertise',true),'is_array')); /* leerer Metawert ergab [''] und zählte als Fachexperte */if(($search&&str_contains(mb_strtolower($user->display_name),$search))||(!$search&&$expertise))$members[]=['id'=>$target,'name'=>$user->display_name,'expertise'=>$expertise];} $members=array_slice($members,0,50);}
         $preferences=self::preferences($id);unset($preferences['whatsappConsentAt']);
-        wp_send_json_success(['nonce'=>wp_create_nonce('strc_forum_settings'),'preferences'=>$preferences,'expertise'=>(array)get_user_meta($id,'strc_forum_expertise',true),'canManage'=>$manage,'members'=>$members]);
+        wp_send_json_success(['nonce'=>wp_create_nonce('strc_forum_settings'),'preferences'=>$preferences,'expertise'=>array_values(array_filter((array)get_user_meta($id,'strc_forum_expertise',true),'is_array')),'canManage'=>$manage,'members'=>$members]);
     }
-    private static function matches(array $rows,array $classification): bool
+    private static function matches(array $rows,array $classification,bool $wildcard=true): bool
     {
-        foreach($rows as $row){$match=true;foreach(['model','component','area'] as $key)if(!empty($row[$key])&&$row[$key]!==($classification[$key]??''))$match=false;if($match)return true;}
+        // Ein leerer Metawert ('') ist keine Zuordnung; bei Fachexperten passt auch eine leere Zeile nicht auf jedes Thema.
+        foreach($rows as $row){if(!is_array($row)||(!$wildcard&&empty($row['model'])&&empty($row['component'])&&empty($row['area'])))continue;$match=true;foreach(['model','component','area'] as $key)if(!empty($row[$key])&&$row[$key]!==($classification[$key]??''))$match=false;if($match)return true;}
         return false;
     }
     public static function notifyNewTopic(\WP_Post $post): void
     {
         $classification=(array)get_post_meta($post->ID,'strc_form_classification',true);
-        foreach((new MembershipRepository())->all() as $member){$id=(int)$member['user_id'];if($id===get_current_user_id()||!user_can($id,'strc_access_member_area'))continue;$prefs=self::preferences($id);$expertise=(array)get_user_meta($id,'strc_forum_expertise',true);if(self::matches($prefs['interests'],$classification)||($prefs['expertNotifications']&&self::matches($expertise,$classification)))self::notify($id,'topic-'.$post->ID,'Neues Thema: '.$post->post_title,home_url('/#forum/'.$post->ID));}
+        foreach((new MembershipRepository())->all() as $member){$id=(int)$member['user_id'];if($id===get_current_user_id()||!user_can($id,'strc_access_member_area'))continue;$prefs=self::preferences($id);$expertise=(array)get_user_meta($id,'strc_forum_expertise',true);if(self::matches($prefs['interests'],$classification)||($prefs['expertNotifications']&&self::matches($expertise,$classification,false)))self::notify($id,'topic-'.$post->ID,'Neues Thema: '.$post->post_title,home_url('/#forum/'.$post->ID));}
     }
     public static function notify(int $id,string $key,string $title,string $url): void
     {

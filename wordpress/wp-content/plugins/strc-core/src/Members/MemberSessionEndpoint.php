@@ -34,6 +34,8 @@ final class MemberSessionEndpoint
             'canManageRoles' => current_user_can('strc_manage_content_roles') || current_user_can('strc_assign_superadmin'),
             'memberAccess' => $memberAccess,
             'marketplaceNonce' => $memberAccess ? wp_create_nonce('strc_marketplace') : null,
+            // Vorbefüllung von Kontaktformularen (z. B. Marktplatz «Verkäufer kontaktieren»); nur für die angemeldete Person selbst.
+            'contact' => $memberAccess ? array('name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->display_name, 'email' => $user->user_email, 'phone' => (string) get_user_meta($user->ID, 'strc_phone', true), 'city' => (string) get_user_meta($user->ID, 'strc_city', true)) : null,
             'communityNonce' => $memberAccess ? wp_create_nonce('strc_community') : null,
             'formsInboxUrl'=>current_user_can('strc_manage_members')?admin_url('admin.php?page=strc-forms'):null,
             'applicationsNonce'=>current_user_can('strc_manage_members')?wp_create_nonce('strc_applications'):null,
