@@ -43,6 +43,7 @@ final class EditorialEndpoint
         }
         $regions = \SwissTRClub\Core\Events\RegionDirectory::terms();
         foreach ($regions as $term) {
+            if ($term->slug === 'triungsters') continue; // Existing TRiungsters page remains the single editorial source.
             $schema['region-'.$term->slug] = array('title'=>'Region '.$term->name, 'route'=>'#regionen/'.$term->slug, 'fields'=>array(
                 array('key'=>'intro','label'=>'Kurzbeschreibung','type'=>'text','default'=>'Lokale Treffen, persönliche Kontakte und gemeinsame Ausfahrten.'),
                 array('key'=>'body','label'=>'Region, Treffpunkt und Kontakt','type'=>'rich','default'=>EditorialAccess::html(wpautop($term->description ?: 'Informationen zu Treffpunkt und Ansprechperson sind für diese Region noch nicht hinterlegt.'))),

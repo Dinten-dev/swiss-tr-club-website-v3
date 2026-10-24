@@ -111,6 +111,15 @@ final class RoleDefinitionsTest extends TestCase
         self::assertArrayNotHasKey('strc_administrator_editor', RoleDefinitions::assignable());
     }
 
+    public function testAgendaModeratorIsAssignableWithoutUnrelatedPowers(): void
+    {
+        $role=RoleDefinitions::all()['strc_agenda_moderator']['capabilities'];
+        self::assertTrue($role['strc_agenda_moderator']);
+        foreach (['strc_manage_events','strc_edit_website_content','strc_manage_members','strc_manage_finance','strc_access_board_documents','strc_access_member_area'] as $cap) self::assertArrayNotHasKey($cap,$role);
+        self::assertArrayHasKey('strc_agenda_moderator',RoleDefinitions::assignableBy(false,false,true));
+        self::assertArrayNotHasKey('strc_agenda_moderator',RoleDefinitions::assignableBy(true,false,false));
+    }
+
     public function testBoardDocumentsDoNotFollowTechnicalAdministration(): void
     {
         self::assertArrayHasKey('strc_access_board_documents', RoleDefinitions::all()['strc_board_member']['capabilities']);

@@ -7,7 +7,7 @@ type Assignment={role:string;regions:number[];libraryAccess:string;assignedEvent
 type Person={id:number;name:string;city:string;isMember:boolean;revision:string;assignments:Assignment[]};
 type Data={users:Person[];regions:{id:number;name:string}[];roleOptions:Record<string,string>;areas:Record<string,string>;events:{id:number;title:string}[]};
 
-const labels:Record<string,string>={strc_registration_moderator:'Mitgliederverwaltung',strc_event_organiser:'Veranstaltungsorganisator',strc_regional_manager:'Regionalleiter',strc_forum_moderator:'Forum-Moderator',strc_gallery_moderator:'Galerie-Moderator',strc_marketplace_moderator:'Marktplatz-Moderator',strc_library_administrator:'Bibliotheksverwalter',strc_shop_manager:'Shopmanager',strc_treasurer:'Kassier',strc_administrator_editor:'Admin (bisher Redaktor)',strc_administrator:'Admin',strc_superadmin:'Superadmin (Redaktor)',strc_board_member:'Vorstand',strc_developer:'Webmaster',strc_moderator:'Bisherige Bereichszuständigkeit'};
+const labels:Record<string,string>={strc_registration_moderator:'Mitgliederverwaltung',strc_agenda_moderator:'Agenda-Moderator',strc_event_organiser:'Veranstaltungsorganisator',strc_regional_manager:'Regionalleiter',strc_forum_moderator:'Forum-Moderator',strc_gallery_moderator:'Galerie-Moderator',strc_marketplace_moderator:'Marktplatz-Moderator',strc_library_administrator:'Bibliotheksverwalter',strc_shop_manager:'Shopmanager',strc_treasurer:'Kassier',strc_administrator_editor:'Admin (bisher Redaktor)',strc_administrator:'Admin',strc_superadmin:'Superadmin (Redaktor)',strc_board_member:'Vorstand',strc_developer:'Webmaster',strc_moderator:'Bisherige Bereichszuständigkeit'};
 const descriptions:Record<string,string>={
  strc_superadmin:'Alle Admin-Rechte und ernennt die Admins.',
  strc_administrator:'Redaktion, Agenda, Forum, Galerie, Marktplatz, Bibliothek und Shop.',
@@ -16,6 +16,7 @@ const descriptions:Record<string,string>={
  strc_registration_moderator:'Mitgliedsanträge, Paarmitgliedschaften, Willkommensmail.',
  strc_treasurer:'Zahlungen und Abrechnung der Anlässe, Shop-Kontrolle.',
  strc_regional_manager:'Regionalseite und Anlässe der gewählten Region.',
+ strc_agenda_moderator:'Agenda verwalten: gewählte Regionen, ohne Auswahl clubweit. Keine Bearbeitung der Regionalseiten.',
  strc_event_organiser:'Nur die zugewiesenen Anlässe und ihre Anmeldungen.',
  strc_forum_moderator:'Themen prüfen, anheften, zusammenführen, Fachexperten.',
  strc_gallery_moderator:'Fotos prüfen, Alben und Mitgliederporträts pflegen.',
@@ -28,11 +29,11 @@ const groups:{title:string;hint?:string;roles:string[]}[]=[
  {title:'Administration',roles:['strc_superadmin','strc_administrator','strc_developer']},
  {title:'Dokumentzugang',roles:['strc_board_member']},
  {title:'Mitglieder und Finanzen',hint:'Nur mit eigener Rolle, auch für Admins.',roles:['strc_registration_moderator','strc_treasurer']},
- {title:'Agenda und Regionen',roles:['strc_regional_manager','strc_event_organiser']},
+ {title:'Agenda und Regionen',roles:['strc_agenda_moderator','strc_regional_manager','strc_event_organiser']},
  {title:'Community und Shop',roles:['strc_forum_moderator','strc_gallery_moderator','strc_marketplace_moderator','strc_library_administrator','strc_shop_manager']},
 ];
 const order=groups.flatMap(group=>group.roles);
-const regional=(role:string)=>['strc_regional_manager','strc_event_organiser','strc_moderator'].includes(role);
+const regional=(role:string)=>['strc_agenda_moderator','strc_regional_manager','strc_event_organiser','strc_moderator'].includes(role);
 // Dokumentstufe aus der Rolle (siehe RoleAssignments::limited): Vorstand → alle; Regionalleitung, Admin, Superadmin, Bibliothek → Regional; sonst Mitglied.
 const regionalDocs=['strc_regional_manager','strc_administrator','strc_superadmin','strc_library_administrator'];
 const libraryAccess=(role:string)=>role==='strc_board_member'?'restricted':regionalDocs.includes(role)?'limited':'open';

@@ -46,6 +46,7 @@ final class EventPublicEndpoint
                 $youthCount = $membershipsComplete || $youthTotal > 0 ? $youthTotal : null;
                 $regions = array();
                 foreach ($terms as $term) {
+                    if ($term->slug === 'triungsters') continue; // Returned separately with the youth member count.
                     $key = sanitize_title($term->name);
                     $hasCount = array_key_exists($key, $regionCounts);
                     $regions[] = array('name' => $term->name, 'slug' => $term->slug, 'description' => wp_strip_all_tags($term->description), 'memberCount' => $membershipsComplete || $hasCount ? ($regionCounts[$key] ?? 0) : null);

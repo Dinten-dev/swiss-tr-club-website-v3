@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-CkjR6w6D.js";
+import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-Cvs5qAkn.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var l = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -13505,6 +13505,7 @@ function Le({ label: e, value: t, onChange: n, disabled: r = !1 }) {
 //#region app/components/RoleAssignments.tsx
 var Re = {
 	strc_registration_moderator: "Mitgliederverwaltung",
+	strc_agenda_moderator: "Agenda-Moderator",
 	strc_event_organiser: "Veranstaltungsorganisator",
 	strc_regional_manager: "Regionalleiter",
 	strc_forum_moderator: "Forum-Moderator",
@@ -13527,6 +13528,7 @@ var Re = {
 	strc_registration_moderator: "Mitgliedsanträge, Paarmitgliedschaften, Willkommensmail.",
 	strc_treasurer: "Zahlungen und Abrechnung der Anlässe, Shop-Kontrolle.",
 	strc_regional_manager: "Regionalseite und Anlässe der gewählten Region.",
+	strc_agenda_moderator: "Agenda verwalten: gewählte Regionen, ohne Auswahl clubweit. Keine Bearbeitung der Regionalseiten.",
 	strc_event_organiser: "Nur die zugewiesenen Anlässe und ihre Anmeldungen.",
 	strc_forum_moderator: "Themen prüfen, anheften, zusammenführen, Fachexperten.",
 	strc_gallery_moderator: "Fotos prüfen, Alben und Mitgliederporträts pflegen.",
@@ -13554,7 +13556,11 @@ var Re = {
 	},
 	{
 		title: "Agenda und Regionen",
-		roles: ["strc_regional_manager", "strc_event_organiser"]
+		roles: [
+			"strc_agenda_moderator",
+			"strc_regional_manager",
+			"strc_event_organiser"
+		]
 	},
 	{
 		title: "Community und Shop",
@@ -13567,6 +13573,7 @@ var Re = {
 		]
 	}
 ], Ve = Be.flatMap((e) => e.roles), He = (e) => [
+	"strc_agenda_moderator",
 	"strc_regional_manager",
 	"strc_event_organiser",
 	"strc_moderator"
@@ -21535,7 +21542,7 @@ function qn({ item: e, nonce: t, close: n, saved: r, deleted: i }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var Jn = (0, h.lazy)(() => import("./MagazineReader-CTFZ8mmG.js")), Yn = "strc_community", Xn = {
+var Jn = (0, h.lazy)(() => import("./MagazineReader-CuB-V2zw.js")), Yn = "strc_community", Xn = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliedergalerie",
 	restorations: "Fahrzeugrestaurationen",
@@ -25054,7 +25061,7 @@ function Nr() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var Pr = (0, h.lazy)(() => import("./MagazineReader-CTFZ8mmG.js"));
+var Pr = (0, h.lazy)(() => import("./MagazineReader-CuB-V2zw.js"));
 function Fr({ issue: e, loading: t, error: r, retry: i }) {
 	let { text: a } = q(), s = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: c } = n(), l = (e, t) => c === "fr" ? t : e, [u, d] = (0, h.useState)(!1), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(0), [y, b] = (0, h.useState)(!1), x = (0, h.useRef)(null), S = (0, h.useRef)(!1), C = (e?.previewPages || []).slice(0, 6), w = Math.min(m, Math.max(0, C.length - 1)), T = e?.previewCaptions?.[w] || `${l("Vorschau", "Aperçu")} ${w + 1} · ${e?.title || ""}`;
 	(0, h.useEffect)(() => {

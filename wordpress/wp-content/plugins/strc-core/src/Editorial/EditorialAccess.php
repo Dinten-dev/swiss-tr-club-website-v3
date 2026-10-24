@@ -18,7 +18,11 @@ final class EditorialAccess
     {
         if (self::global() && in_array($area, array('news','triungsters'), true)) return true;
         if (! current_user_can('strc_access_member_area')) return false;
-        if ('events' === $area && current_user_can('strc_manage_events')) return true;
+        if ('events' === $area && (current_user_can('strc_manage_events') || (current_user_can('strc_agenda_moderator') && ! \SwissTRClub\Core\Roles\RoleAssignments::agendaRegions(get_current_user_id())))) return true;
+        if ('triungsters' === $area) {
+            $term=get_term_by('slug','triungsters','strc_region');
+            if ($term && in_array((int)$term->term_id, \SwissTRClub\Core\Roles\RoleAssignments::regions(get_current_user_id()), true)) return true;
+        }
         if (in_array($area, array('forum','gallery','library','market'), true) && current_user_can('strc_manage_community')) return true;
         $roleCapabilities = array(
             'forum' => 'strc_forum_moderator',
@@ -34,7 +38,7 @@ final class EditorialAccess
 
     public static function region(int $id): bool
     {
-        return self::global() || (current_user_can('strc_access_member_area') && in_array($id, RegionalEventAccess::regions(), true));
+        return self::global() || (current_user_can('strc_access_member_area') && in_array($id, \SwissTRClub\Core\Roles\RoleAssignments::regions(get_current_user_id()), true));
     }
 
     public static function available(): bool
