@@ -32,10 +32,12 @@ final class FairgateMemberMapping
         $source=$this->value($contact,$this->paths['status']);
         if (!is_scalar($source) || !isset($this->statuses[(string)$source])) throw new FairgateApiException('Unbekannter Mitgliedschaftsstatus; der bisherige Zugang bleibt erhalten.');
         $row=array('status'=>$this->statuses[(string)$source]);
-        foreach (array('region','member_number') as $field) {
+        // Region: leer oder unbekannt → lokale Region bleiben lassen (Fairgate-Feld wird schrittweise befüllt).
+        if (isset($this->paths['region'])) { $region=$this->regionName($contact); if ($region!==null) $row['region']=$region; }
+        foreach (array('member_number') as $field) {
             if (!isset($this->paths[$field])) continue;
             $value=$this->value($contact,$this->paths[$field]);
-            if (!is_string($value) || trim($value)==='' || mb_strlen($value)>($field==='region'?64:32)) throw new FairgateApiException('Ein zugeordnetes Mitgliedsfeld fehlt oder ist ungültig.');
+            if (!is_string($value) || trim($value)==='' || mb_strlen($value)>32) throw new FairgateApiException('Ein zugeordnetes Mitgliedsfeld fehlt oder ist ungültig.');
             $row[$field]=$value;
         }
         return $row;

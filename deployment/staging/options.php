@@ -20,13 +20,16 @@ if(!defined('STRC_FAIRGATE_SYNC_FIELDS'))define('STRC_FAIRGATE_SYNC_FIELDS',[
     'copilotSalutation'=>'/configured_fields/co_pilot_in_anredeart',
     'copilotEmail'=>'/configured_fields/co_pilot_in_email',
     'copilotPhone'=>'/configured_fields/co_pilot_in_handy',
-    // 'region' bewusst noch nicht: /configured_fields/region ist bei allen Kontakten leer und würde lokale Regionen leeren.
+    // Region: wird vom Aktuar befüllt. Leere oder unbekannte Werte lassen die lokale Region stehen.
+    // Erkannt: Zürich, Bern, Ostschweiz, Mittelland, Innerschweiz/Zentralschweiz, Nordwestschweiz, Suisse Romande/Romandie, TRiungsters.
+    'region'=>'/configured_fields/region',
 ]);
-// Fahrzeuge (Import nur über Vorschau → Übernehmen; Normalisierung PR #33). fahrzeug_kennzeichen ist keinem Platz sicher zugeordnet.
+// Fahrzeuge (Import nur über Vorschau → Übernehmen; Normalisierung PR #33).
+// fahrzeug_kennzeichen gehört zum Mitglied (oft Wechselschild) und wird deshalb jedem seiner Fahrzeuge mitgegeben.
 if(!defined('STRC_FAIRGATE_VEHICLE_FIELDS'))define('STRC_FAIRGATE_VEHICLE_FIELDS',[
-    ['model'=>'/configured_fields/fahrzeug1_typ','details'=>'/configured_fields/fahrzeug1_modell_details','year'=>'/configured_fields/fahrzeug1_jahrgang','exteriorColour'=>'/configured_fields/fahrzeug1_farbe','chassisNumber'=>'/configured_fields/fahrzeug1_chassis'],
-    ['model'=>'/configured_fields/fahrzeug2_typ','details'=>'/configured_fields/f_z2_modell_details','year'=>'/configured_fields/f_z2_jahrgang','exteriorColour'=>'/configured_fields/f_z2_farbe','chassisNumber'=>'/configured_fields/f_z2_chassis'],
-    ['model'=>'/configured_fields/fahrzeug3_typ','details'=>'/configured_fields/f_z3_modell_details','year'=>'/configured_fields/f_z3_jahrgang','exteriorColour'=>'/configured_fields/f_z3_farbe','chassisNumber'=>'/configured_fields/f_z3_chassis'],
+    ['model'=>'/configured_fields/fahrzeug1_typ','details'=>'/configured_fields/fahrzeug1_modell_details','year'=>'/configured_fields/fahrzeug1_jahrgang','exteriorColour'=>'/configured_fields/fahrzeug1_farbe','chassisNumber'=>'/configured_fields/fahrzeug1_chassis','registration'=>'/configured_fields/fahrzeug_kennzeichen'],
+    ['model'=>'/configured_fields/fahrzeug2_typ','details'=>'/configured_fields/f_z2_modell_details','year'=>'/configured_fields/f_z2_jahrgang','exteriorColour'=>'/configured_fields/f_z2_farbe','chassisNumber'=>'/configured_fields/f_z2_chassis','registration'=>'/configured_fields/fahrzeug_kennzeichen'],
+    ['model'=>'/configured_fields/fahrzeug3_typ','details'=>'/configured_fields/f_z3_modell_details','year'=>'/configured_fields/f_z3_jahrgang','exteriorColour'=>'/configured_fields/f_z3_farbe','chassisNumber'=>'/configured_fields/f_z3_chassis','registration'=>'/configured_fields/fahrzeug_kennzeichen'],
 ]);
 // Paarmitgliedschaft (Label im Fairgate-Feld «Mitgliedschaft», für beide Partner gleich).
 if(!defined('STRC_FAIRGATE_COUPLE_LABELS'))define('STRC_FAIRGATE_COUPLE_LABELS',['Paarmitglied']);
