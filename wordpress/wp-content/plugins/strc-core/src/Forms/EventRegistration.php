@@ -16,7 +16,15 @@ final class EventRegistration
         $settings=(is_array($saved)?$saved:[])+['guests'=>2,'copilot'=>true,'vehicle'=>true,'waitlist'=>false,'fee'=>0,'guestFee'=>0,'copilotFee'=>0,'guestCopilotFee'=>null,'feeDouble'=>0,'copilotFeeDouble'=>0,'guestFeeDouble'=>0,'guestCopilotFeeDouble'=>0,'weekend'=>false,'meals'=>'','rooms'=>'','conditions'=>'Kostenfreie Abmeldung bis vier Tage vor Veranstaltungsbeginn. Danach bleibt der Teilnahmebeitrag grundsätzlich geschuldet.','cancelAt'=>'','externalUrl'=>'','organiser'=>'','organiserEmail'=>'','organiserMobile'=>'','organiserUserId'=>0,'organiserMemberNumber'=>'','organiserFree'=>false,'program'=>'','agenda'=>'','programImage'=>'','agendaImage'=>''];
         // Ältere Termine kannten nur einen Gästepreis; er gilt dann auch für den Co-Piloten (Gast).
         if($settings['guestCopilotFee']===null)$settings['guestCopilotFee']=(int)$settings['guestFee'];
+        // Meeting (z. B. Weihnachtsessen): «Begleitung» statt Co-Pilot, «Weitere Person» statt Gast-Buchung; ältere Termine leiten es vom Anlasstyp ab.
+        if(!isset($settings['meeting']))$settings['meeting']=function_exists('has_term')&&has_term('meeting','strc_event_type',$id);
+        $settings['meeting']=(bool)$settings['meeting'];
         return $settings;
+    }
+    /** Rollenbezeichnung für Meetings (Teilnehmerliste, Mails, Rechnung). */
+    public static function meetingRole(string $role): string
+    {
+        return ['Co-Pilot Mitglied'=>'Begleitung Mitglied','Co-Pilot Gast'=>'Begleitung Gast','Gast'=>'Weitere Person'][$role]??$role;
     }
     /** Preis pro Person je Buchungsart; bei Weekend-Anlässen je nach Zimmer (single = Einzelzimmer, double = Doppelzimmer). */
     public const ROLE_FEES=['member'=>'fee','copilot'=>'copilotFee','guest'=>'guestFee','guest-copilot'=>'guestCopilotFee'];
@@ -40,6 +48,7 @@ final class EventRegistration
         foreach(['vehicle','copilot','waitlist','organiserFree']as$key)$data[$key]=($input['reg_'.$key]??'')==='1';
         $guests=$input['reg_guests']??'2';if(!ctype_digit($guests)||(int)$guests>2)throw new \InvalidArgumentException('Zusätzliche Gast-Buchungen: 0 bis 2.');$data['guests']=(int)$guests;
         $data['weekend']=in_array($input['eventType']??'',['weekend','weekend-meeting'],true);
+        $data['meeting']=($input['eventType']??'')==='meeting';
         if($data['organiserFree']&&!$data['organiserUserId']&&!$data['organiserMemberNumber'])throw new \InvalidArgumentException('Für den Beitragserlass bitte die Veranstaltungsleitung als Mitglied auswählen.');
         foreach(['fee','copilotFee','guestFee','guestCopilotFee','feeDouble','copilotFeeDouble','guestFeeDouble','guestCopilotFeeDouble']as$key){$value=str_replace(',','.',trim($input['reg_'.$key]??'0'));if(!preg_match('/^\d{1,5}(\.\d{1,2})?$/D',$value))throw new \InvalidArgumentException('Bitte Gebühren als CHF-Betrag mit höchstens zwei Nachkommastellen eingeben.');$data[$key]=(int)round((float)$value*100);}
         foreach(['meals','rooms']as$key)self::options($data[$key]);
@@ -164,7 +173,7 @@ final class EventRegistration
             }
             $participants[]=$person;$total+=$person['fee'];
             if(!$copilot)continue;
-            if(empty($settings['copilot']))throw new \InvalidArgumentException('Für diese Veranstaltung sind keine Co-Piloten vorgesehen.');
+            if(empty($settings['copilot']))throw new \InvalidArgumentException(empty($settings['meeting'])?'Für diese Veranstaltung sind keine Co-Piloten vorgesehen.':'Für diese Veranstaltung ist keine Begleitung vorgesehen.');
             $type=$copilot['type']??'';
             if($own&&$type==='partner'){
                 $partner=$this->copilot();if(!$settings['copilot']||!$partner)throw new \InvalidArgumentException('Kein berechtigter Co-Pilot verknüpft.');
@@ -186,6 +195,7 @@ final class EventRegistration
             $person+=['crew'=>$index+1,'room'=>$room];
             $participants[]=$person;$total+=$person['fee'];
         }
+        if(!empty($settings['meeting']))$participants=array_map(static fn(array $p):array=>['role'=>self::meetingRole((string)$p['role'])]+$p,$participants);
         $selectedIds=array_filter(array_column($participants,'userId'));
         if(count($selectedIds)!==count(array_unique($selectedIds)))throw new \InvalidArgumentException('Eine Person darf nur einmal angemeldet werden.');
         // A linked co-pilot cannot also occupy a separate active registration.
@@ -197,7 +207,7 @@ final class EventRegistration
         $room='';
         if(!empty($settings['weekend'])){$labels=[];foreach($rooms as$i=>$type){$size=count(array_filter($participants,static fn($p)=>($p['crew']??0)===$i+1));$labels[]=($size>1&&$type==='single'?'2 × Einzelzimmer':($type==='double'?'Doppelzimmer':'Einzelzimmer')).(count($rooms)>1?' (Buchung '.($i+1).')':'');}$room=implode(' · ',$labels);}
         elseif($roomOptions){$room=FormFields::choice($input,'room',array_keys($roomOptions));$total+=$roomOptions[$room];}
-        $vehicle=null;if($settings['vehicle']){$selection=$input['vehicle']??'';if(in_array($selection,['other','modern','none'],true))$vehicle=['model'=>['other'=>'Anderes Fahrzeug','modern'=>'Modernes Fahrzeug','none'=>'Ohne Fahrzeug'][$selection]];elseif(str_starts_with($selection,'model:')){$model=substr($selection,6);if(!in_array($model,FormFields::MODELS,true))throw new \InvalidArgumentException('Bitte ein gültiges Triumph-Modell wählen.');$vehicle=['model'=>$model];}else{foreach(FormsEndpoint::vehicles()as$v)if((string)$v['id']===$selection&&$v['status']==='roadworthy'){$vehicle=array_intersect_key($v,array_flip(['id','model','details','year','registration','color']));break;}if(!$vehicle)throw new \InvalidArgumentException('Bitte ein fahrbereites Fahrzeug oder eine Alternative wählen.');}}
+        $vehicle=null;if($settings['vehicle']){$selection=$input['vehicle']??'';if(in_array($selection,['other','guest','none','modern'],true))$vehicle=['model'=>['other'=>'Anderer Triumph','guest'=>'Gastfahrzeug','modern'=>'Gastfahrzeug','none'=>'Ohne Triumph (Co-Pilot)'][$selection]];elseif(str_starts_with($selection,'model:')){$model=substr($selection,6);if(!in_array($model,FormFields::MODELS,true))throw new \InvalidArgumentException('Bitte ein gültiges Triumph-Modell wählen.');$vehicle=['model'=>$model];}else{foreach(FormsEndpoint::vehicles()as$v)if((string)$v['id']===$selection&&$v['status']==='roadworthy'){$vehicle=array_intersect_key($v,array_flip(['id','model','details','year','registration','color']));break;}if(!$vehicle)throw new \InvalidArgumentException('Bitte ein fahrbereites Fahrzeug oder eine Alternative wählen.');}}
         return ['eventTitle'=>get_the_title($event->ID),'eventStart'=>get_post_meta($event->ID,'strc_start_at',true),'participants'=>$participants,'headcount'=>count($participants),'vehicle'=>$vehicle,'room'=>$room,'total'=>$total,'notes'=>FormFields::text($input,'notes',1000)];
     }
     private function guestPerson(mixed $data): array
