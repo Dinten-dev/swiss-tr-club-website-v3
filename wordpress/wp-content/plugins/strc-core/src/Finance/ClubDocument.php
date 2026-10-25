@@ -110,13 +110,15 @@ final class ClubDocument
         $pdf->setPrintHeader(false); $pdf->setPrintFooter(false);
         $pdf->SetMargins(20, 18, 20); $pdf->SetAutoPageBreak(true, 22);
         $pdf->AddPage();
+        // Kopfband im neuen CD: dunkelblau über die ganze Breite, Schrift weiss, roter Abschlussstreifen (wie der Website-Header).
+        $pdf->Rect(0, 0, 210, 38, 'F', array(), array(17, 73, 115));
+        $pdf->Rect(0, 38, 210, 1.6, 'F', array(), array(189, 32, 40));
         $logo = function_exists('get_template_directory') ? get_template_directory() . '/build/strc-logo.png' : '';
-        if ($logo !== '' && is_file($logo)) $pdf->Image($logo, 20, 14, 20, 20, 'PNG');
-        $pdf->SetTextColor(17, 73, 115);
-        $pdf->SetFont('times', 'B', 17); $pdf->SetXY(44, 15); $pdf->Cell(0, 8, 'Swiss TR-Club', 0, 1);
-        $pdf->SetFont('helvetica', '', 8); $pdf->SetTextColor(85, 98, 110); $pdf->SetX(44);
-        $pdf->Cell(0, 5, 'Passion since 1975 · ' . trim($c['street'] . ' ' . $c['house_number']) . ' · ' . trim($c['postcode'] . ' ' . $c['city']), 0, 1);
-        $pdf->SetDrawColor(189, 32, 40); $pdf->SetLineWidth(0.8); $pdf->Line(20, 37, 190, 37);
+        if ($logo !== '' && is_file($logo)) $pdf->Image($logo, 20, 9, 20, 20, 'PNG');
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetFont('times', 'B', 17); $pdf->SetXY(44, 11); $pdf->Cell(0, 8, 'Swiss TR-Club', 0, 1);
+        $pdf->SetFont('helvetica', '', 8); $pdf->SetTextColor(214, 228, 240); $pdf->SetX(44);
+        $pdf->Cell(0, 5, 'PASSION SINCE 1975 · ' . trim($c['street'] . ' ' . $c['house_number']) . ' · ' . trim($c['postcode'] . ' ' . $c['city']), 0, 1);
         // Absenderzeile und Empfänger im Fenster rechts (Schweizer Couvert C5, Fenster rechts).
         $pdf->SetFont('helvetica', '', 7); $pdf->SetTextColor(85, 98, 110); $pdf->SetDrawColor(160, 170, 180); $pdf->SetLineWidth(0.2);
         $pdf->SetXY(118, 47); $pdf->Cell(72, 4, ($c['name'] ?: 'Swiss TR-Club') . ', ' . trim($c['postcode'] . ' ' . $c['city']), 'B', 1);
