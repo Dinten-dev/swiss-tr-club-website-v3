@@ -60,6 +60,8 @@ final class Plugin
         (new MarketplaceEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShopEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShippingPartner())->registerHooks();
+        (new \SwissTRClub\Core\Shop\ShopInvoice())->registerHooks();
+        (new \SwissTRClub\Core\Forms\EventInvoice())->registerHooks();
         (new DashboardShortcode())->registerHooks();
         $fairgate = FairgateConfiguration::fromConstants();
         (new SystemStatusPage($fairgate))->registerHooks();

@@ -162,7 +162,9 @@ final class EventPayments
         }
         $organizer=EventRegistration::settings((int)$post->post_parent)['organiserEmail'];
         if(is_email($organizer))$messages['organizer_'.$row['state']]=['to'=>$organizer,'subject'=>'Anmeldestatus: '.$row['eventTitle'],'body'=>"Anmeldung #".$id."\nTeilnehmende: ".implode(', ',array_column($row['participants'],'name'))."\nStatus: ".$row['state']."\n".$link];
-        if ($review || ($row['paymentMethod']==='invoice'&&$row['state']!=='waiting')) $messages[$review?'review':'invoice']=['to'=>$treasury,'subject'=>($review?'Zahlung prüfen: ':'Rechnung erstellen: ').$row['eventTitle'],'body'=>"Anmeldung #$id\nMitglied: ".$user->display_name."\nE-Mail: ".$user->user_email."\nBetrag: ".$amount."\nZahlungsstand: ".$row['paymentStatus']."\n".($review?'Bitte in zahls.ch prüfen. Keine automatische Rückerstattung.':'Bitte die Rechnung in Fairgate erstellen und versenden.')."\n".$link];
+        // Weg A (25.10.2026): Rechnung mit QR-Zahlteil direkt an das Mitglied, Kopie an die Kasse; die Kasse muss sie nicht mehr selbst erstellen.
+        $invoiced=!$review&&$row['paymentMethod']==='invoice'&&$row['state']==='confirmed'&&(int)$row['total']>0&&in_array($row['paymentStatus']??'',['outstanding','partially_paid'],true)&&EventInvoice::send($id);
+        if ($review || (!$invoiced&&$row['paymentMethod']==='invoice'&&$row['state']!=='waiting')) $messages[$review?'review':'invoice']=['to'=>$treasury,'subject'=>($review?'Zahlung prüfen: ':'Rechnung erstellen: ').$row['eventTitle'],'body'=>"Anmeldung #$id\nMitglied: ".$user->display_name."\nE-Mail: ".$user->user_email."\nBetrag: ".$amount."\nZahlungsstand: ".$row['paymentStatus']."\n".($review?'Bitte in zahls.ch prüfen. Keine automatische Rückerstattung.':'Bitte die Rechnung in Fairgate erstellen und versenden.')."\n".$link];
         foreach ($messages as $kind=>$mail) {
             $key='strc_payment_mail_'.$kind;
             if (get_post_meta($id,$key,true) || !is_email($mail['to'])) continue;

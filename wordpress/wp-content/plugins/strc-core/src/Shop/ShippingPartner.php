@@ -115,33 +115,34 @@ final class ShippingPartner
 
     public static function pdf(\WC_Order $order): string
     {
-        if (! class_exists(TCPDF::class)) throw new \RuntimeException('PDF-Bibliothek fehlt.');
-        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8');
-        $pdf->setPrintHeader(false); $pdf->setPrintFooter(false);
-        $pdf->SetMargins(20, 18, 20); $pdf->SetAutoPageBreak(true, 18);
-        $pdf->AddPage();
-        $logo = get_template_directory() . '/build/strc-logo.png';
-        if (is_file($logo)) $pdf->Image($logo, 170, 14, 22, 22, 'PNG');
-        $pdf->SetFont('helvetica', '', 10);
-        $e = static fn (string $value): string => esc_html($value);
-        $address = array_filter(self::address($order));
         $date = $order->get_date_created() ? $order->get_date_created()->date_i18n('d.m.Y') : wp_date('d.m.Y');
+        $address = self::address($order);
+        if ($order->get_billing_phone()) $address[] = 'Tel. ' . $order->get_billing_phone();
+        $pdf = \SwissTRClub\Core\Finance\ClubDocument::start('Lieferschein', $address, array(
+            'Bestellung' => '#' . $order->get_order_number(),
+            'Datum' => $date,
+            'Versandart' => (string) $order->get_shipping_method(),
+        ));
+        // QR-Code mit der Bestellnummer zum Scannen beim Versandpartner (kein Zahlteil: die Rechnung kommt separat).
+        $top = max($pdf->GetY(), 84);
+        $pdf->write2DBarcode('STRC-ORDER:' . $order->get_order_number(), 'QRCODE,M', 20, $top, 18, 18, array('border' => false, 'padding' => 0, 'fgcolor' => array(17, 73, 115), 'bgcolor' => false), 'N');
+        $pdf->SetFont('helvetica', '', 7.5); $pdf->SetTextColor(85, 98, 110); $pdf->SetXY(41, $top + 6); $pdf->MultiCell(80, 4, "Bestellnummer zum Scannen\nTR-Shop #" . $order->get_order_number(), 0, 'L');
+        $pdf->SetY($top + 24);
+        $e = static fn (string $value): string => esc_html($value);
         $rows = '';
+        $i = 0;
         foreach ($order->get_items() as $item) {
             $product = $item->get_product();
             $meta = array();
             foreach ($item->get_formatted_meta_data() as $entry) $meta[] = wp_strip_all_tags($entry->display_key . ': ' . $entry->display_value);
-            $rows .= '<tr><td width="18%">' . $e($product ? (string) $product->get_sku() : '') . '</td><td width="64%"><strong>' . $e($item->get_name()) . '</strong>' . ($meta ? '<br><span style="color:#555">' . $e(implode(' · ', $meta)) . '</span>' : '') . '</td><td width="18%" align="right">' . (int) $item->get_quantity() . '</td></tr>';
+            $rows .= '<tr style="background-color:' . ($i++ % 2 ? '#f3f6f8' : '#ffffff') . '"><td width="20%">' . $e($product ? (string) $product->get_sku() : '') . '</td><td width="64%"><b>' . $e($item->get_name()) . '</b>' . ($meta ? '<br><span style="color:#55626e">' . $e(implode(' · ', $meta)) . '</span>' : '') . '</td><td width="16%" align="right">' . (int) $item->get_quantity() . '</td></tr>';
         }
         $note = trim((string) $order->get_customer_note());
-        $html = '<h1 style="color:#114973;font-size:20pt">Lieferschein</h1>'
-            . '<p style="font-size:9pt;color:#555">Swiss TR-Club · TR-Shop</p>'
-            . '<table cellpadding="3"><tr><td width="55%"><strong>Lieferadresse</strong><br>' . implode('<br>', array_map($e, $address)) . ($order->get_billing_phone() ? '<br>Tel. ' . $e($order->get_billing_phone()) : '') . '</td>'
-            . '<td width="45%"><strong>Bestellung</strong> #' . $e($order->get_order_number()) . '<br><strong>Datum</strong> ' . $e($date) . '<br><strong>Versandart</strong> ' . $e($order->get_shipping_method()) . '</td></tr></table><br>'
-            . '<table cellpadding="5" border="0" style="border-collapse:collapse"><tr style="background-color:#e7f0f8;font-weight:bold"><td width="18%">Artikel-Nr.</td><td width="64%">Artikel</td><td width="18%" align="right">Anzahl</td></tr>' . $rows . '</table>'
-            . ($note !== '' ? '<p><strong>Bemerkung des Bestellers</strong><br>' . nl2br($e($note)) . '</p>' : '')
-            . '<p style="font-size:9pt;color:#555">Bitte den Versand nach dem Verschicken unter «Mein Konto» &gt; Versandaufträge melden.</p>';
-        $pdf->writeHTML($html);
+        $html = '<table cellpadding="4" style="font-size:9.5pt"><tr style="background-color:#114973;color:#ffffff;font-weight:bold"><td width="20%">Artikel-Nr.</td><td width="64%">Artikel</td><td width="16%" align="right">Anzahl</td></tr>' . $rows . '</table>'
+            . ($note !== '' ? '<p><b>Bemerkung des Bestellers</b><br>' . nl2br($e($note)) . '</p>' : '')
+            . '<p style="font-size:8.5pt;color:#55626e">Bitte den Versand nach dem Verschicken unter «Mein Konto» &gt; Versandaufträge melden.</p>';
+        $pdf->SetTextColor(20, 30, 40);
+        $pdf->writeHTML($html, true, false, true, false, '');
         return $pdf->Output('Lieferschein-' . $order->get_order_number() . '.pdf', 'S');
     }
 
