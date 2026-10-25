@@ -69,7 +69,7 @@ final class EventInvoice
         $rows = array(); $sum = 0;
         $meals = EventRegistration::options((string) ($settings['meals'] ?? ''));
         $rooms = ! empty($settings['weekend']) ? array() : EventRegistration::options((string) ($settings['rooms'] ?? ''));
-        $roles = $lang === 'fr' ? array('Mitglied' => 'membre', 'Gast' => 'invité', 'Co-Pilot Mitglied' => 'copilote membre', 'Co-Pilot (Gast)' => 'copilote invité') : array();
+        $roles = $lang === 'fr' ? array('Mitglied' => 'membre', 'Gast' => 'invité', 'Co-Pilot Mitglied' => 'copilote membre', 'Co-Pilot Gast' => 'copilote invité', 'Co-Pilot (Gast)' => 'copilote invité', 'Begleitung Mitglied' => 'accompagnant·e membre', 'Begleitung Gast' => 'accompagnant·e invité·e', 'Weitere Person' => 'personne supplémentaire') : array();
         foreach ((array) ($row['participants'] ?? array()) as $person) {
             $fee = (int) ($person['fee'] ?? 0); $sum += $fee;
             $role = (string) ($person['role'] ?? '');
