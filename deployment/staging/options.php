@@ -21,11 +21,13 @@ if(!defined('STRC_FAIRGATE_SYNC_FIELDS'))define('STRC_FAIRGATE_SYNC_FIELDS',[
     'copilotEmail'=>'/configured_fields/co_pilot_in_email',
     'copilotPhone'=>'/configured_fields/co_pilot_in_handy',
     // Region: wird vom Aktuar befüllt. Leere oder unbekannte Werte lassen die lokale Region stehen.
-    // Erkannt: Zürich, Bern, Ostschweiz, Mittelland, Innerschweiz/Zentralschweiz, Nordwestschweiz, Suisse Romande/Romandie, TRiungsters.
+    // Erkannt: Zürich, Bern, Ostschweiz, Mittelland, Innerschweiz/Zentralschweiz, Nordwestschweiz, Suisse Romande/Romandie.
+    // TRiungsters ist eine Mitgliedschaftsform (Gruppe), keine Region, und wird hier nicht übernommen.
     'region'=>'/configured_fields/region',
 ]);
 // Fahrzeuge (Import nur über Vorschau → Übernehmen; Normalisierung PR #33).
-// fahrzeug_kennzeichen gehört zum Mitglied (oft Wechselschild) und wird deshalb jedem seiner Fahrzeuge mitgegeben.
+// fahrzeug_kennzeichen gehört zum Mitglied (oft Wechselschild) und wird deshalb jedem seiner Fahrzeuge mitgegeben;
+// im Profil bleibt es pro Fahrzeug editierbar, ein späterer Abgleich überschreibt importierte Fahrzeuge nicht.
 if(!defined('STRC_FAIRGATE_VEHICLE_FIELDS'))define('STRC_FAIRGATE_VEHICLE_FIELDS',[
     ['model'=>'/configured_fields/fahrzeug1_typ','details'=>'/configured_fields/fahrzeug1_modell_details','year'=>'/configured_fields/fahrzeug1_jahrgang','exteriorColour'=>'/configured_fields/fahrzeug1_farbe','chassisNumber'=>'/configured_fields/fahrzeug1_chassis','registration'=>'/configured_fields/fahrzeug_kennzeichen'],
     ['model'=>'/configured_fields/fahrzeug2_typ','details'=>'/configured_fields/f_z2_modell_details','year'=>'/configured_fields/f_z2_jahrgang','exteriorColour'=>'/configured_fields/f_z2_farbe','chassisNumber'=>'/configured_fields/f_z2_chassis','registration'=>'/configured_fields/fahrzeug_kennzeichen'],

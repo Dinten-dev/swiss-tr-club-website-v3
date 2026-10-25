@@ -171,7 +171,9 @@ final class FairgateMemberMapping
         }
 
         $value = $this->value($contact, $path);
-        return is_scalar($value) ? RegionDirectory::canonicalName((string) $value) : null;
+        $region = is_scalar($value) ? RegionDirectory::canonicalName((string) $value) : null;
+        // TRiungsters ist eine Mitgliedschaftsform/Gruppe, keine Region: nur die 7 Regionen werden übernommen.
+        return $region === RegionDirectory::REGIONS['triungsters'] ? null : $region;
     }
 
     private function value(array $data,string $pointer): mixed

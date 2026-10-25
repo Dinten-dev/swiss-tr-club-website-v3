@@ -42,5 +42,6 @@ final class RegionDirectoryTest extends TestCase
         $mapping = new FairgateMemberMapping(array('contactId'=>'/id','status'=>'/status','region'=>'/configured_fields/region'), array('active'=>'active'));
         self::assertSame(array('status'=>'active'), $mapping->map(array('id'=>5,'status'=>'active','configured_fields'=>array('region'=>'')), '5'));
         self::assertSame(array('status'=>'active','region'=>'Innerschweiz'), $mapping->map(array('id'=>5,'status'=>'active','configured_fields'=>array('region'=>'Zentralschweiz')), '5'));
+        self::assertSame(array('status'=>'active'), $mapping->map(array('id'=>5,'status'=>'active','configured_fields'=>array('region'=>'TRiungsters')), '5'));
     }
 }
