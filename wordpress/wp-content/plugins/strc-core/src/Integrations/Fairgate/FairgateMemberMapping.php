@@ -149,6 +149,18 @@ final class FairgateMemberMapping
         }
     }
 
+    /** Offizielle Mitgliedsnummer über STRC_FAIRGATE_SYNC_FIELDS['memberNumber'] (nur der Mitgliederimport liest diesen Schlüssel). */
+    public function memberNumber(array $contact): ?string
+    {
+        $path=$this->paths['memberNumber']??null;
+        if(!is_string($path)||!str_starts_with($path,'/'))return null;
+        $value=$this->value($contact,$path);
+        if(is_int($value)||is_float($value))$value=(string)(int)$value;
+        if(!is_string($value))return null;
+        $value=trim($value);
+        return preg_match('/^[A-Za-z0-9][A-Za-z0-9.\/-]{0,31}$/D',$value)&&!str_starts_with($value,'FG:')?$value:null;
+    }
+
     public function regionName(array $contact): ?string
     {
         $path = $this->paths['region'] ?? null;
