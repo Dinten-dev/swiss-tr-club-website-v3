@@ -12,8 +12,13 @@ final class EventFinance
     {
         [$op,$input]=AjaxRequest::read('strc_event_finance',['reconcile','promote']);
         try {
-            $eventId=absint($input['eventId']??0);
             $finance=current_user_can('strc_manage_finance');
+            // Kasse: Übersicht aller Anlässe mit Anmeldung (Lesezugriff auf Teilnehmerlisten, Vorstandsentscheid 25.10.2026).
+            if($op==='events'){
+                if(!$finance||!current_user_can('strc_access_member_area'))throw new \RuntimeException('Kein Zugriff auf die Anlässe der Kasse.',403);
+                wp_send_json_success(self::events(FormFields::text($input,'search',100),max(1,absint($input['page']??1))));
+            }
+            $eventId=absint($input['eventId']??0);
             if (!$eventId || get_post_type($eventId)!=='strc_event' || (!$finance&&!RegionalEventAccess::canEdit($eventId))) throw new \RuntimeException('Kein Zugriff auf diese Veranstaltung.',403);
             if($op==='promote'){
                 if(!RegionalEventAccess::canEdit($eventId))throw new \RuntimeException('Nur die zuständige Veranstaltungsleitung darf die Warteliste bestätigen.',403);
@@ -57,5 +62,21 @@ final class EventFinance
             wp_send_json_success(['rows'=>$rows,'canPromote'=>RegionalEventAccess::canEdit($eventId),'canReconcile'=>$finance||RegionalEventAccess::canEdit($eventId),'onlineReady'=>\SwissTRClub\Core\Integrations\Zahls\ZahlsClient::ready(),'treasuryReady'=>is_email(defined('STRC_EVENT_TREASURY_EMAIL')?(string)STRC_EVENT_TREASURY_EMAIL:(string)getenv('STRC_EVENT_TREASURY_EMAIL'))!==false,'nonce'=>wp_create_nonce('strc_event_finance')]);
         } catch (\InvalidArgumentException $e) { AjaxRequest::fail($e->getMessage(),422); }
           catch (\RuntimeException $e) { AjaxRequest::fail($e->getMessage(),in_array($e->getCode(),[403,404,409],true)?$e->getCode():503); }
+    }
+
+    /** @return array{events:list<array<string,mixed>>,pages:int} */
+    private static function events(string $search,int $page): array
+    {
+        $query=new \WP_Query(['post_type'=>'strc_event','post_status'=>['publish','trash'],'posts_per_page'=>20,'paged'=>$page,'s'=>$search,'meta_key'=>'strc_start_at','orderby'=>'meta_value','order'=>'DESC','meta_query'=>[['key'=>'strc_registration_required','value'=>'1']],'no_found_rows'=>false]);
+        $events=[];
+        foreach($query->posts as $post){
+            $active=0;$open=0;
+            foreach(FormStore::find('strc_registration',0,(int)$post->ID) as $registration){
+                $row=FormStore::data($registration);if(in_array($row['state']??'',['cancelled','expired'],true))continue;
+                $active++;if(in_array($row['paymentStatus']??'',['outstanding','partially_paid','pending','review_required','refund_pending'],true))$open++;
+            }
+            $events[]=['id'=>(int)$post->ID,'title'=>get_the_title($post),'startAt'=>(string)get_post_meta($post->ID,'strc_start_at',true),'location'=>(string)get_post_meta($post->ID,'strc_location',true),'archived'=>$post->post_status==='trash','registrations'=>$active,'openPayments'=>$open];
+        }
+        return ['events'=>$events,'pages'=>(int)$query->max_num_pages];
     }
 }
