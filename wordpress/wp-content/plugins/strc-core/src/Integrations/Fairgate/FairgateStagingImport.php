@@ -11,6 +11,15 @@ final class FairgateStagingImport
     private const TYPES = ['Einzelmitglied'=>'individual','TRiungster   (Jungmitglied bis 35 Jahre)'=>'youth','Ehrenmitglied'=>'honorary'];
     public function __construct(private readonly FairgateGateway $gateway) {}
 
+    /** Fairgate-Label der Paarmitgliedschaft (für Hauptmitglied und Co-Pilot gleich); per STRC_FAIRGATE_COUPLE_LABELS anpassbar. */
+    public static function isCoupleLabel(string $label): bool
+    {
+        $labels=defined('STRC_FAIRGATE_COUPLE_LABELS')&&is_array(STRC_FAIRGATE_COUPLE_LABELS)?STRC_FAIRGATE_COUPLE_LABELS:['Paarmitglied','Paarmitgliedschaft','Paarmitglieder'];
+        $needle=mb_strtolower(preg_replace('/\s+/u',' ',trim($label)));
+        foreach($labels as $candidate)if(is_string($candidate)&&mb_strtolower(preg_replace('/\s+/u',' ',trim($candidate)))===$needle)return true;
+        return false;
+    }
+
     public static function enabled(): bool
     {
         return defined('STRC_FAIRGATE_IMPORT_ENABLED') && STRC_FAIRGATE_IMPORT_ENABLED===true && defined('STRC_FAIRGATE_READ_ONLY') && STRC_FAIRGATE_READ_ONLY===true;
@@ -71,7 +80,8 @@ final class FairgateStagingImport
             if(trim($label)===''){$plan[]=['id'=>$id,'action'=>'skip','reason'=>'Keine Mitgliedschaft'];continue;}
             $r=['id'=>$id,'name'=>sanitize_text_field(trim(($c['basefields']['first_name']??'').' '.($c['basefields']['last_name']??''))),'label'=>$label,'action'=>'skip'];
             try {
-                if(!isset(self::TYPES[$label]))throw new FairgateApiException('Unbekannte Mitgliedschaft');
+                $couple=self::isCoupleLabel($label);
+                if(!$couple&&!isset(self::TYPES[$label]))throw new FairgateApiException('Unbekannte Mitgliedschaft');
                 if(($c['basefields']['contact_type']??'')!=='singleperson')throw new FairgateApiException('Firmenkontakt: persönliches Login separat klären');
                 $email=trim((string)($c['communication']['primary_email']??''));
                 if(!is_email($email))throw new FairgateApiException('Gültige persönliche E-Mail fehlt');
@@ -80,7 +90,7 @@ final class FairgateStagingImport
                 $first=sanitize_text_field($c['basefields']['first_name']??'');$last=sanitize_text_field($c['basefields']['last_name']??'');
                 if($first===''||$last==='')throw new FairgateApiException('Vorname oder Nachname fehlt');
                 $address=$c['corr_address']??[];$comm=$c['communication']??[];
-                $r+=['email'=>$email,'first_name'=>$first,'last_name'=>$last,'status'=>$status,'type'=>self::TYPES[$label],
+                $r+=['email'=>$email,'first_name'=>$first,'last_name'=>$last,'status'=>$status,'type'=>$couple?'couple':self::TYPES[$label],
                     'profile'=>['phone'=>sanitize_text_field($comm['mobile']??''),'street'=>sanitize_text_field($address['street']??''),'postcode'=>sanitize_text_field($address['postale_code']??''),'city'=>sanitize_text_field($address['city']??''),'country'=>sanitize_text_field($address['country']??'')]];
                 $r['extras']=FairgateMemberMapping::fromConstants()->extras($c);
                 $region=FairgateMemberMapping::fromConstants()->regionName($c);
@@ -139,7 +149,13 @@ final class FairgateStagingImport
         }
         $existing=$wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE user_id=%d",$u->ID),ARRAY_A);
         if($existing && (string)$existing['fairgate_contact_id']!==$r['id'])throw new FairgateApiException('Vorhandene Mitgliedschaft bleibt unverändert');
-        $fields=['membership_type'=>$r['type'],'status'=>$r['status'],'updated_at'=>current_time('mysql')];
+        $type=$r['type'];
+        if($type==='couple'){
+            // Rolle im Paar: bestehende Verknüpfung bleibt; ein neu erfasster Co-Pilot wird über die E-Mail im Paar-Antrag erkannt.
+            $previous=$existing?\SwissTRClub\Core\Members\MembershipTypePolicy::normalize((string)$existing['membership_type']):'';
+            $type=in_array($previous,['couple_primary','couple_partner'],true)?$previous:(\SwissTRClub\Core\Members\MemberProfile::requesterForCopilotEmail($r['email'])?'couple_partner':'couple_primary');
+        }
+        $fields=['membership_type'=>$type,'status'=>$r['status'],'updated_at'=>current_time('mysql')];
         // Until Fairgate households are explicitly mapped, preserve a verified local couple link.
         if($existing&&\SwissTRClub\Core\Members\MembershipTypePolicy::isCouple((string)$existing['membership_type'])&&\SwissTRClub\Core\Members\MemberProfile::household((int)$u->ID)['mode']!=='single')$fields['membership_type']=$existing['membership_type'];
         if(isset($r['region']))$fields['region']=$r['region'];
@@ -161,6 +177,8 @@ final class FairgateStagingImport
         // Existing passwords, names, website preferences, vehicles and roles are retained.
         $verifiedExisting=(string)get_user_meta($u->ID,'strc_fairgate_verified_existing_user',true)===(string)$u->ID;
         if(!$verifiedExisting && !in_array('strc_member',$u->roles,true))$u->add_role('strc_member');
+        // Paar-Antrag: Aktivierung, Verknüpfung und Benachrichtigung von Mitglied und Kassier (einmalig).
+        if($r['type']==='couple'){try{\SwissTRClub\Core\Members\MemberProfile::fairgateSynced((int)$u->ID);}catch(\Throwable $e){error_log('STRC couple activation failed for user '.$u->ID.'.');}}
         return $u->ID;
     }
 }

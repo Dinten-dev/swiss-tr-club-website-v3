@@ -25,7 +25,7 @@ final class ApplicationInbox
                 wp_send_json_success(['items'=>$items,'page'=>$page,'pages'=>(int)$query->max_num_pages,'otherInboxUrl'=>admin_url('admin.php?page=strc-forms')]);
             }
             if($operation==='couples')wp_send_json_success(['items'=>self::couples()]);
-            if($operation==='couple-state'){$informed=self::coupleState($id,sanitize_key($input['state']??''),FormFields::text($input,'note',2000),(string)($input['revision']??''));wp_send_json_success(['items'=>self::couples(),'message'=>$informed?'Bearbeitungsstand gespeichert. Der Kassier wurde über die neue Paarmitgliedschaft informiert.':'Bearbeitungsstand gespeichert.']);}
+            if($operation==='couple-state'){self::coupleState($id,sanitize_key($input['state']??''),FormFields::text($input,'note',2000),(string)($input['revision']??''));wp_send_json_success(['items'=>self::couples(),'message'=>'Bearbeitungsstand gespeichert.']);}
             if($operation==='process')$this->admission->run($id);
             elseif($operation!=='detail')$this->admission->review($id,$input['revision']??'',$operation,FormFields::text($input,'note',2000),['person'=>$input['personId']??'','copilot'=>$input['copilotId']??'']);
             $post=ApplicationAdmission::record($id);$d=FormStore::data($post);
@@ -45,14 +45,13 @@ final class ApplicationInbox
             $row=['id'=>(int)$post->ID,'revision'=>FormStore::revision($post),'date'=>$post->post_date,'state'=>(string)($d['state']??''),'note'=>(string)($d['reviewNote']??''),
                 'member'=>['name'=>(string)($p['member']['name']??''),'memberNumber'=>(string)($p['member']['memberNumber']??''),'email'=>(string)($p['member']['email']??''),'fairgateContactId'=>(string)($p['member']['fairgateContactId']??'')],
                 'copilot'=>array_map('strval',array_intersect_key(is_array($c)?$c:[],array_flip(['salutation','first_name','last_name','gender','birth_date','email','phone','street','postcode','city','country']))),
-                'fee'=>(string)($p['fee']??''),'task'=>(string)($p['task']??'')];
+                'fee'=>(string)($p['fee']??''),'task'=>(string)($p['task']??''),'copilotInFairgate'=>!empty($p['copilotInFairgate'])];
             if(in_array($row['state'],['pending_review','clarification'],true))$open[]=$row;elseif(count($done)<10)$done[]=$row;
         }
         return array_merge($open,$done);
     }
 
-    /** @return bool true, wenn der Kassier jetzt über die freigegebene Paarmitgliedschaft informiert wurde. */
-    private static function coupleState(int $id,string $state,string $note,string $revision): bool
+    private static function coupleState(int $id,string $state,string $note,string $revision): void
     {
         $post=get_post($id);
         if(!$post||$post->post_type!=='strc_form'||$post->post_status!=='private')throw new \RuntimeException('Anfrage nicht gefunden.',404);
@@ -60,11 +59,8 @@ final class ApplicationInbox
         if(($data['kind']??'')!=='couple')throw new \RuntimeException('Anfrage nicht gefunden.',404);
         if(!in_array($state,self::COUPLE_STATES,true))throw new \InvalidArgumentException('Ungültiger Status.');
         if(!in_array($data['state']??'',self::COUPLE_STATES,true))throw new \RuntimeException('Diese Anfrage kann nicht mehr geändert werden.',409);
-        $previous=(string)($data['state']??'');
         $data['state']=$state;$data['reviewedAt']=gmdate(DATE_ATOM);$data['reviewedBy']=get_current_user_id();$data['reviewNote']=$note;
         FormStore::save('strc_form',$data,(int)$post->post_author,0,$post,$revision);
-        // Der Kassier erfährt erst nach Aufnahme und Freigabe durch den Aktuar vom neuen Beitrag (Vorstand 25.10.2026).
-        if($state==='approved_pending_sync'&&$previous!=='approved_pending_sync')return \SwissTRClub\Core\Members\MemberProfile::notifyTreasurer((int)$post->ID);
-        return false;
+        // Mitglied und Kassier werden nicht hier, sondern erst bei der Aktivierung aus dem Fairgate-Abgleich informiert (MemberProfile::activateCouple).
     }
 }

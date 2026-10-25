@@ -117,4 +117,10 @@ final class FairgateClientTest extends TestCase
         $this->expectException(FairgateApiException::class);
         $client->subscribeNotifications('token', ['contact.admin.delete'], 'https://example.test/wp-json/strc/v1/fairgate/events/'.str_repeat('a', 64));
     }
+
+    public function testCopilotWriteExceptionIsOffWithoutExplicitSwitch(): void
+    {
+        self::assertFalse(FairgateClient::copilotWriteAllowed(['configured_fields'=>['copilot_name'=>'Anna Muster']]));
+        self::assertFalse(FairgateClient::copilotWriteAllowed(['basefields'=>['first_name'=>'Anna']]));
+    }
 }

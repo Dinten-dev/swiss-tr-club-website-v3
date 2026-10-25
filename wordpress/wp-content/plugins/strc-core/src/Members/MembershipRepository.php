@@ -207,6 +207,18 @@ final class MembershipRepository
         $this->updatePartner((int) $partner['user_id'], (int) $membership['user_id']);
     }
 
+    /** Paar aus dem Fairgate-Abgleich verknüpfen: Antragsteller = Primary, Co-Pilot = Partner. */
+    public function linkCouple(int $primaryUserId, int $partnerUserId): bool
+    {
+        global $wpdb;
+        if ($primaryUserId === $partnerUserId || ! $this->membershipForUser($primaryUserId) || ! $this->membershipForUser($partnerUserId)) return false;
+        $table = $wpdb->prefix . 'strc_memberships';
+        $now = current_time('mysql');
+        $wpdb->update($table, array('membership_type' => 'couple_primary', 'partner_user_id' => $partnerUserId, 'updated_at' => $now), array('user_id' => $primaryUserId), array('%s', '%d', '%s'), array('%d'));
+        $wpdb->update($table, array('membership_type' => 'couple_partner', 'partner_user_id' => $primaryUserId, 'updated_at' => $now), array('user_id' => $partnerUserId), array('%s', '%d', '%s'), array('%d'));
+        return true;
+    }
+
     /** @return array<string, mixed>|null */
     private function membershipForUser(int $userId): ?array
     {
