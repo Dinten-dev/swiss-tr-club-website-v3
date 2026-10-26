@@ -109,6 +109,7 @@ final class HomepageHighlights
                 $title = get_post_meta($post->ID, 'strc_title_fr', true) ?: $title;
                 $translated = (string)get_post_meta($post->ID, $kind === 'event' ? 'strc_description_fr' : 'strc_body_fr', true);
                 if ($translated !== '') { $body = $translated; $excerpt = ''; }
+                if ($kind === 'event') $excerpt = get_post_meta($post->ID, 'strc_excerpt_fr', true) ?: $excerpt;
                 if ($kind === 'news') $excerpt = get_post_meta($post->ID, 'strc_excerpt_fr', true) ?: $excerpt;
             }
             $items[] = [
@@ -116,6 +117,7 @@ final class HomepageHighlights
                 'excerpt'=>$this->text($excerpt ?: wp_trim_words($body, 24)),
                 'bodyHtml'=>$kind === 'news' ? EditorialAccess::html(wpautop($body)) : '',
                 'date'=>get_post_modified_time(DATE_ATOM, true, $post),
+                'eventDate'=>$kind === 'event' ? (string)get_post_meta($post->ID, 'strc_start_at', true) : '',
                 'image'=>$kind === 'news' ? (get_the_post_thumbnail_url($post, 'large') ?: '') : '',
                 'href'=>['news'=>'#neuigkeiten', 'event'=>'#agenda/', 'forum'=>'#forum/'][$kind] . ($kind === 'news' ? '' : $post->ID),
             ];
