@@ -19,8 +19,10 @@ WooCommerce weist die Bestellung erst nach `setup_locale()` zu. Deshalb erfolgt 
 ## Prüfung und Veröffentlichung
 
 - PHP-Syntax: 120 Dateien fehlerfrei; PHPUnit: 86 Tests, 383 Assertions.
-- Integration: 80 Prüfungen mit isolierten Staging-Datensätzen; 16 Mails abgefangen, keine externen HTTP-Anfragen.
+- Integration: 81 Prüfungen mit isolierten Staging-Datensätzen; 16 Mails abgefangen, keine externen HTTP-Anfragen.
 - DE/FR: echte WooCommerce-Vorlagen für vier Kundennachrichten, Betreff/Inhalt/Abschluss, Regionsrückfall, Co-Pilot-Haushalt, Sprachrücksetzung, Checkout-Snapshot, Rechnungssprache und Versandbestätigung.
 - Fahrzeuge: eindeutige Details, keine Fremdfabrikat-Umdeutung, Chassis-Dublette, fehlender Typ, gemeinsames Kennzeichen, Platzhalter, Wiederholbarkeit und Schutz vorhandener Fahrzeuge/Bildmetadaten.
 - Sicherung: Programmdateien, Prüfsummen, Benutzer/Metadaten, Mitgliedschaften, private Datensätze, Bestellungen, redaktionelle Optionen, Rollen, Konfigurationshashes und alle drei vorhandenen Fahrzeugbilder.
 - Staging-Veröffentlichung nur nach erneutem Prüfsummenvergleich; Rückkehrdateien werden serverseitig aufgezeichnet. Produktion bleibt unverändert.
+
+Die erste Veröffentlichung wurde nach einem Fehler beim frühen WordPress-Boot vollständig per Prüfsummenabgleich zurückgenommen. Die korrigierte Locale-Methode prüft vor dem Zugriff, ob WordPress seinen Locale-Switcher bereits initialisiert hat. Ein zusätzlicher Integrationstest deckt ausdrücklich den Aufruf vor dieser Initialisierung ab. Vor dem erneuten Release sind keine Fahrzeugdaten übernommen worden.

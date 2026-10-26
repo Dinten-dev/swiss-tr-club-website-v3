@@ -499,8 +499,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Plugin.php",
-      "bytes": 5851,
-      "sha256": "c07ebda4541ad3ea78572b2c58834a9f6d943e3f8c5d8632197d52b2f9706e96"
+      "bytes": 6105,
+      "sha256": "3dadbbb8c3a2cd84520cf11bf651e73d1ab9bbafb4fb69ee850421d8cb2cb0ef"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleAssignments.php",
@@ -2259,6 +2259,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-10-26T20:43:40.890Z",
+  "builtOn": "2026-10-26T20:47:48.030Z",
   "baselineCapturedOn": "2026-10-13"
 }
