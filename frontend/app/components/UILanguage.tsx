@@ -28,8 +28,8 @@ const Context=createContext({language:'de',change:(_language:string)=>{void _lan
  * Beim Wechsel auf Deutsch werden die Originale wiederhergestellt.
  */
 const ATTRIBUTES=['placeholder','aria-label','title'];
-const originals=new Map<Node,string>();const written=new WeakMap<Node,string>();const originalAttributes=new Map<Element,Record<string,string>>();
-const SKIP='script,style,textarea,[contenteditable="true"],.rich-content,[data-no-translate]';
+const originals=new Map<Node,string>();const written=new WeakMap<Node,string>();const originalAttributes=new Map<Element,Record<string,{before:string;after:string}>>();
+const SKIP='script,style,textarea,[contenteditable],.rich-content,[data-no-translate]';
 function translated(value:string):string|null{const core=value.trim();if(core.length<2)return null;const result=translations[core];if(!result||result===core)return null;return value.replace(core,result);}
 function translateText(node:Node){
  const value=node.nodeValue||'';if(written.get(node)===value)return;
@@ -38,7 +38,8 @@ function translateText(node:Node){
  originals.set(node,value);written.set(node,next);node.nodeValue=next;
 }
 function translateAttributes(element:Element){
- for(const name of ATTRIBUTES){const value=element.getAttribute(name);if(!value)continue;const next=translated(value);if(next===null)continue;const saved=originalAttributes.get(element)||{};saved[name]=value;originalAttributes.set(element,saved);element.setAttribute(name,next);}
+ if(element.closest(SKIP))return;
+ for(const name of ATTRIBUTES){const value=element.getAttribute(name);if(!value)continue;const next=translated(value);if(next===null)continue;const saved=originalAttributes.get(element)||{};saved[name]={before:value,after:next};originalAttributes.set(element,saved);element.setAttribute(name,next);}
 }
 function translateTree(node:Node){
  if(node.nodeType===Node.TEXT_NODE){translateText(node);return;}
@@ -47,12 +48,13 @@ function translateTree(node:Node){
  const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT,{acceptNode:current=>current.nodeType===Node.ELEMENT_NODE&&(current as Element).matches(SKIP)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
  for(let current=walker.nextNode();current;current=walker.nextNode()){if(current.nodeType===Node.TEXT_NODE)translateText(current);else translateAttributes(current as Element);}
 }
-function restoreOriginals(){originals.forEach((value,node)=>{if(node.isConnected){written.delete(node);node.nodeValue=value;}});originals.clear();originalAttributes.forEach((saved,element)=>{if(element.isConnected)for(const [name,value] of Object.entries(saved))element.setAttribute(name,value);});originalAttributes.clear();}
+function forgetDetached(){for(const node of originals.keys())if(!node.isConnected)originals.delete(node);for(const element of originalAttributes.keys())if(!element.isConnected)originalAttributes.delete(element);}
+function restoreOriginals(){originals.forEach((value,node)=>{if(node.isConnected&&node.nodeValue===written.get(node))node.nodeValue=value;written.delete(node);});originals.clear();originalAttributes.forEach((saved,element)=>{if(element.isConnected)for(const [name,value] of Object.entries(saved))if(element.getAttribute(name)===value.after)element.setAttribute(name,value.before);});originalAttributes.clear();}
 function useDomTranslation(language:string){
  useEffect(()=>{
   if(language!=='fr'||typeof MutationObserver==='undefined')return;
   const root=document.body;translateTree(root);
-  const observer=new MutationObserver(records=>{for(const record of records){if(record.type==='characterData')translateText(record.target);else if(record.type==='attributes')translateAttributes(record.target as Element);else record.addedNodes.forEach(translateTree);}});
+  const observer=new MutationObserver(records=>{for(const record of records){if(record.type==='characterData')translateText(record.target);else if(record.type==='attributes')translateAttributes(record.target as Element);else record.addedNodes.forEach(translateTree);}forgetDetached();});
   observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES});
   return()=>{observer.disconnect();restoreOriginals();};
  },[language]);

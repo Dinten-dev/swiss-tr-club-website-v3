@@ -167,7 +167,7 @@ final class EventManagementEndpoint
         $titleFr = sanitize_text_field($input['titleFr'] ?? ($id ? get_post_meta($id, 'strc_title_fr', true) : ''));
         $descriptionFr = \SwissTRClub\Core\Editorial\EditorialAccess::html($input['descriptionFr'] ?? ($id ? get_post_meta($id, 'strc_description_fr', true) : ''));
         if (mb_strlen($titleFr) > 160 || mb_strlen($descriptionFr) > 10000) AjaxRequest::fail('Die französische Fassung ist zu lang.');
-        $summary = trim(preg_replace('/\s+/u', ' ', sanitize_textarea_field($input['summary'] ?? '')));
+        $summary = trim(preg_replace('/\s+/u', ' ', sanitize_textarea_field($input['summary'] ?? ($id ? get_post_meta($id, 'strc_short_description', true) : ''))));
         $summaryFr = trim(preg_replace('/\s+/u', ' ', sanitize_textarea_field($input['summaryFr'] ?? ($id ? get_post_meta($id, 'strc_excerpt_fr', true) : ''))));
         if (mb_strlen($summary) > 120 || mb_strlen($summaryFr) > 120) AjaxRequest::fail('Der Kurzbeschrieb darf höchstens 120 Zeichen lang sein.', 422);
         if ('' === $title || mb_strlen($title) > 160 || mb_strlen($description) > 10000) {

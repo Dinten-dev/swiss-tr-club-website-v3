@@ -24,6 +24,7 @@ final class SubmissionNotifications
     }
     public static function reviewsAny(\WP_User $user): bool
     {
+        if (self::reviews($user, 'library', true)) return true;
         foreach(['gallery','library','market'] as $area)if(self::reviews($user,$area))return true;
         return false;
     }

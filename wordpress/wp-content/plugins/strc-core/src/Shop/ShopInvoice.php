@@ -30,6 +30,8 @@ final class ShopInvoice
             \SwissTRClub\Core\Forms\FormStore::locked('shop-invoice-' . $orderId, function () use ($orderId): void {
                 $order = wc_get_order($orderId);
                 if (! $order instanceof \WC_Order || $order->get_payment_method() !== self::GATEWAY || $order->get_meta('_strc_invoice_sent')) return;
+                if (!ClubDocument::eligible($order->get_date_created()?->getTimestamp() ?? 0)) return;
+                if ($order->get_currency() !== 'CHF' || (float)$order->get_total() <= 0 || !$order->has_status('on-hold') || !is_email($order->get_billing_email())) return;
                 if (! ClubDocument::ready()) { $order->add_order_note('Rechnung nicht erstellt: Rechnungssteller oder QR-IBAN fehlen.'); return; }
                 if (! $order->get_meta('_strc_invoice_number')) {
                     $sequence = ClubDocument::next('shop');
@@ -40,7 +42,14 @@ final class ShopInvoice
                 }
                 $lang = self::language($order);
                 $number = (string) $order->get_meta('_strc_invoice_number');
-                $file = ClubDocument::temporaryFile(self::pdf($order), 'Rechnung-' . $number . '.pdf');
+                $document = self::pdf($order);
+                if (!$order->get_meta('_strc_invoice_pdf')) {
+                    $archive = ClubDocument::archive('shop', $orderId, $document);
+                    $order->update_meta_data('_strc_invoice_pdf', $archive);
+                    $order->save();
+                    if (wc_get_order($orderId)->get_meta('_strc_invoice_pdf') !== $archive) throw new \RuntimeException('Rechnung konnte nicht archiviert werden.');
+                }
+                $file = ClubDocument::temporaryFile($document, 'Rechnung-' . $number . '.pdf');
                 try {
                     $copies = ClubDocument::treasury();
                     $headers = array('Content-Type: text/plain; charset=UTF-8');
@@ -72,6 +81,9 @@ final class ShopInvoice
 
     public static function pdf(\WC_Order $order): string
     {
+        $stored = $order->get_meta('_strc_invoice_pdf');
+        if ($stored) return ClubDocument::archived((array)$stored);
+        if ($order->get_currency() !== 'CHF' || (float)$order->get_total() <= 0) throw new \InvalidArgumentException('Rechnung erfordert einen positiven CHF-Betrag.');
         $lang = self::language($order);
         $number = (string) $order->get_meta('_strc_invoice_number');
         $reference = (string) $order->get_meta('_strc_invoice_reference');
@@ -98,7 +110,7 @@ final class ShopInvoice
         }
         $shipping = (float) $order->get_shipping_total() + (float) $order->get_shipping_tax();
         if ($shipping > 0) $rows[] = array(ClubDocument::label('Versand', $lang) . ($order->get_shipping_method() ? ': ' . $order->get_shipping_method() : ''), 1, $shipping, $shipping);
-        foreach ($order->get_fees() as $fee) $rows[] = array($fee->get_name(), 1, (float) $fee->get_total(), (float) $fee->get_total());
+        foreach ($order->get_fees() as $fee) $rows[] = array($fee->get_name(), 1, (float) $fee->get_total() + (float)$fee->get_total_tax(), (float) $fee->get_total() + (float)$fee->get_total_tax());
         ClubDocument::table($pdf, $rows, (float) $order->get_total(), $lang,
             ClubDocument::label('Bitte bezahle den Betrag mit dem QR-Einzahlungsschein bis zum Fälligkeitsdatum. Vielen Dank für deinen Einkauf im TR-Shop.', $lang));
         ClubDocument::paymentPart($pdf, array('name' => $order->get_billing_company() ?: $name, 'street' => $street, 'postcode' => $order->get_billing_postcode(), 'city' => $order->get_billing_city(), 'country' => $country),

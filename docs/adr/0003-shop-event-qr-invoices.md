@@ -23,3 +23,10 @@ Shop-Bestellungen und Anlass-Anmeldungen auf Rechnung lösten bisher nur eine Ma
 - Offene Posten für Shop und Anlässe stehen auf der Website (Bestellung bzw. Anmeldung), nicht als Debitoren in Fairgate.
 - Rechnungssteller und QR-IBAN stehen in `STRC_BILLING_CREDITOR` (nicht geheim, sie stehen auf jeder Rechnung).
 - Fehlt die Konfiguration, wird keine Rechnung erstellt; die Kasse erhält wie bisher die Mail «Rechnung erstellen».
+
+## Integrationsschutz (26.10.2026)
+
+- `strc_invoice_automation_from` wird beim Staging-Rollout einmal gesetzt. Ältere Bestellungen und Anmeldungen lösen keine rückwirkenden Rechnungen aus. Ohne Freischaltzeitpunkt bleibt die automatische Rechnungsstellung gesperrt.
+- Ausgestellte PDFs bleiben mit Prüfsumme ausserhalb des Webroots archiviert. Download und Wiederholung verwenden dieselbe Datei, auch nach späteren Bestell- oder Profiländerungen. Bestehende Download-Berechtigungen bleiben erforderlich.
+- Nicht-CHF-Bestellungen und fehlgeschlagene Nummernspeicherung stellen keine Rechnung aus. Wartelisten werden nicht fakturiert.
+- Testrechnungen verwenden ausschliesslich wegwerfbare Daten; alle Nachrichten werden abgefangen. Ein erfolgreicher PDF-Test bestätigt keine Bankbuchung.

@@ -22,23 +22,35 @@ final class MacRomanRepair
 
     public function registerHooks(): void
     {
-        add_action('admin_init', [$this, 'repairStoredOnce']);
+        // Stored records are changed only by an explicitly reviewed preview.
     }
 
-    /** Einmalig: bereits gespeicherte Mitgliederangaben bereinigen (danach erledigt der Fairgate-Abgleich das laufend). */
-    public function repairStoredOnce(): void
+    /** @return array{changes:array,hash:string} */
+    public function preview(): array
     {
-        if (get_option(self::OPTION) || ! current_user_can('manage_options')) return;
-        $fixed = 0;
-        foreach (get_users(['fields' => ['ID', 'display_name']]) as $user) {
-            foreach (self::META as $key) {
-                $value = (string) get_user_meta((int) $user->ID, $key, true);
+        $changes = [];
+        foreach (get_users(['fields' => ['ID', 'display_name'], 'orderby' => 'ID', 'order' => 'ASC']) as $user) {
+            foreach (array_merge(self::META, ['display_name']) as $key) {
+                $value = $key === 'display_name' ? (string)$user->display_name : (string)get_user_meta((int)$user->ID, $key, true);
                 $clean = self::text($value);
-                if ($clean !== $value) { update_user_meta((int) $user->ID, $key, $clean); $fixed++; }
+                if ($value !== $clean) $changes[] = ['userId' => (int)$user->ID, 'field' => $key, 'before' => $value, 'after' => $clean];
             }
-            $clean = self::text((string) $user->display_name);
-            if ($clean !== $user->display_name) { wp_update_user(['ID' => (int) $user->ID, 'display_name' => $clean]); $fixed++; }
         }
-        update_option(self::OPTION, gmdate(DATE_ATOM) . ' · ' . $fixed, false);
+        return ['changes' => $changes, 'hash' => hash('sha256', wp_json_encode($changes))];
+    }
+
+    public function repairStoredOnce(string $reviewedHash = ''): int
+    {
+        if ($reviewedHash === '' || (!current_user_can('manage_options') && !(defined('WP_CLI') && WP_CLI))) return 0;
+        $plan = $this->preview();
+        if (!hash_equals($plan['hash'], $reviewedHash)) throw new \RuntimeException('Mitgliederdaten wurden inzwischen geändert. Neue Vorschau erforderlich.');
+        foreach ($plan['changes'] as $change) {
+            $saved = $change['field'] === 'display_name'
+                ? wp_update_user(['ID' => $change['userId'], 'display_name' => $change['after']])
+                : update_user_meta($change['userId'], $change['field'], $change['after'], $change['before']);
+            if (!$saved || is_wp_error($saved)) throw new \RuntimeException('Textkorrektur konnte nicht gespeichert werden.');
+        }
+        update_option(self::OPTION, gmdate(DATE_ATOM) . ' · ' . count($plan['changes']), false);
+        return count($plan['changes']);
     }
 }

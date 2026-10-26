@@ -42,6 +42,13 @@ final class ClubDocument
         return class_exists(TCPDF::class) && class_exists(QrBill\QrBill::class);
     }
 
+    /** A rollout cutoff prevents retroactive invoices for existing orders/registrations. */
+    public static function eligible(int $createdAt): bool
+    {
+        $from = (int)get_option('strc_invoice_automation_from', 0);
+        return $from > 0 && $createdAt >= $from;
+    }
+
     /** 27-stellige QR-Referenz: Präfix + Dokumentart + laufende Nummer + Prüfziffer (Modulo 10 rekursiv). */
     public static function reference(string $kind, int $sequence): string
     {
@@ -55,17 +62,19 @@ final class ClubDocument
 
     public static function number(string $kind, int $sequence): string
     {
+        if (!isset(self::KINDS[$kind]) || $sequence < 1) throw new \InvalidArgumentException('Ungültige Dokumentart oder Nummer.');
         return self::NUMBER_PREFIX[$kind] . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
     }
 
     /** Nächste laufende Nummer je Dokumentart, unter Sperre (keine Doppelvergabe bei gleichzeitigen Bestellungen). */
     public static function next(string $kind): int
     {
+        if (!isset(self::KINDS[$kind])) throw new \InvalidArgumentException('Ungültige Dokumentart.');
         return (int) \SwissTRClub\Core\Forms\FormStore::locked('strc-document-sequence-' . $kind, static function () use ($kind): int {
             $option = 'strc_document_sequence_' . $kind;
             wp_cache_delete($option, 'options');
             $next = max(1, (int) get_option($option, 0) + 1);
-            update_option($option, $next, false);
+            if (!update_option($option, $next, false)) throw new \RuntimeException('Rechnungsnummer konnte nicht reserviert werden.');
             return $next;
         });
     }
@@ -108,7 +117,7 @@ final class ClubDocument
         $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8');
         $pdf->SetCreator('Swiss TR-Club'); $pdf->SetAuthor($c['name'] ?: 'Swiss TR-Club'); $pdf->SetTitle($title);
         $pdf->setPrintHeader(false); $pdf->setPrintFooter(false);
-        $pdf->SetMargins(20, 18, 20); $pdf->SetAutoPageBreak(true, 22);
+        $pdf->SetMargins(20, 18, 20); $pdf->SetAutoPageBreak(true, $paymentPart ? 115 : 22);
         $pdf->AddPage();
         // Kopfband im neuen CD: dunkelblau über die ganze Breite, Schrift weiss, roter Abschlussstreifen (wie der Website-Header).
         $pdf->Rect(0, 0, 210, 38, 'F', array(), array(17, 73, 115));
@@ -141,11 +150,11 @@ final class ClubDocument
     {
         $c = self::creditor();
         $parts = array_filter(array($c['name'] ?: 'Swiss TR-Club', trim($c['street'] . ' ' . $c['house_number']), trim($c['postcode'] . ' ' . $c['city']), $c['email'], $c['web']));
-        $y = $pdf->GetY(); $x = $pdf->GetX(); $break = $pdf->getAutoPageBreak();
+        $y = $pdf->GetY(); $x = $pdf->GetX(); $break = $pdf->getAutoPageBreak(); $margin = $pdf->getBreakMargin();
         $pdf->SetAutoPageBreak(false);
         $pdf->SetFont('helvetica', '', 7); $pdf->SetTextColor(85, 98, 110);
         $pdf->SetXY(20, $abovePaymentPart ? 186 : 287); $pdf->Cell(170, 4, implode(' · ', $parts), 0, 0, 'C');
-        $pdf->SetAutoPageBreak($break, 22); $pdf->SetXY($x, $y);
+        $pdf->SetAutoPageBreak($break, $margin); $pdf->SetXY($x, $y);
     }
 
     /**
@@ -171,13 +180,14 @@ final class ClubDocument
     /** QR-Zahlteil unten auf der Seite (bei zu wenig Platz auf einer neuen Seite). @param array{name:string,street:string,postcode:string,city:string,country:string} $debtor */
     public static function paymentPart(TCPDF $pdf, array $debtor, float $amount, string $reference, string $message, string $lang = 'de'): void
     {
+        if (!is_finite($amount) || $amount <= 0 || $amount > 999999999.99) throw new \InvalidArgumentException('Ungültiger Rechnungsbetrag.');
         $c = self::creditor();
         $bill = QrBill\QrBill::create();
         $bill->setCreditor(QrBill\DataGroup\Element\StructuredAddress::createWithStreet($c['name'], $c['street'], $c['house_number'] !== '' ? $c['house_number'] : null, $c['postcode'], $c['city'], $c['country']));
         $bill->setCreditorInformation(QrBill\DataGroup\Element\CreditorInformation::create($c['qr_iban']));
         $country = strtoupper(trim($debtor['country'] ?? '')) ?: 'CH';
-        if (! preg_match('/^[A-Z]{2}$/', $country)) $country = 'CH';
-        if (trim($debtor['name']) !== '' && trim($debtor['postcode']) !== '' && trim($debtor['city']) !== '') {
+        if (! preg_match('/^[A-Z]{2}$/D', $country)) $country = '';
+        if ($country !== '' && trim($debtor['name']) !== '' && trim($debtor['postcode']) !== '' && trim($debtor['city']) !== '') {
             $bill->setUltimateDebtor(trim($debtor['street']) !== ''
                 ? QrBill\DataGroup\Element\StructuredAddress::createWithStreet(mb_substr(trim($debtor['name']), 0, 70), mb_substr(trim($debtor['street']), 0, 70), null, trim($debtor['postcode']), trim($debtor['city']), $country)
                 : QrBill\DataGroup\Element\StructuredAddress::createWithoutStreet(mb_substr(trim($debtor['name']), 0, 70), trim($debtor['postcode']), trim($debtor['city']), $country));
@@ -190,13 +200,49 @@ final class ClubDocument
         (new TcPdfOutput($bill, $lang === 'fr' ? 'fr' : 'de', $pdf))->setDisplayOptions($options)->getPaymentPart();
     }
 
+    /** Immutable invoice files stay outside the public document root. */
+    public static function archive(string $kind, int $id, string $pdf): array
+    {
+        if (!isset(self::KINDS[$kind]) || $id < 1 || !str_starts_with($pdf, '%PDF-')) throw new \InvalidArgumentException('Ungültiges Rechnungsarchiv.');
+        $directory = self::archiveDirectory();
+        if (!is_dir($directory) && !wp_mkdir_p($directory)) throw new \RuntimeException('Rechnungsarchiv ist nicht verfügbar.');
+        chmod($directory, 0700);
+        $key = $kind . '-' . $id . '-' . hash('sha256', $pdf) . '.pdf';
+        $file = $directory . '/' . $key;
+        if (!is_file($file)) {
+            $handle = fopen($file, 'xb');
+            if (!$handle) throw new \RuntimeException('Rechnungsarchiv konnte nicht angelegt werden.');
+            chmod($file, 0600);
+            try { $saved = fwrite($handle, $pdf); } finally { fclose($handle); }
+            if ($saved !== strlen($pdf)) { unlink($file); throw new \RuntimeException('Rechnungsarchiv ist unvollständig.'); }
+        }
+        $record = ['key' => $key, 'sha256' => hash('sha256', $pdf)];
+        if (self::archived($record) !== $pdf) throw new \RuntimeException('Rechnungsarchiv ist beschädigt.');
+        return $record;
+    }
+
+    public static function archiveDirectory(): string
+    {
+        return dirname(rtrim(ABSPATH, '/')) . '/private/strc-invoices-' . substr(hash('sha256', home_url()), 0, 16);
+    }
+
+    public static function archived(array $record): string
+    {
+        if (!preg_match('/^(shop|event)-[1-9][0-9]*-[a-f0-9]{64}\.pdf$/D', $record['key'] ?? '') || !preg_match('/^[a-f0-9]{64}$/D', $record['sha256'] ?? '')) throw new \RuntimeException('Ungültiges Rechnungsarchiv.');
+        $file = self::archiveDirectory() . '/' . $record['key'];
+        $content = !is_link($file) && is_file($file) ? file_get_contents($file) : false;
+        if (!is_string($content) || !str_starts_with($content, '%PDF-') || !hash_equals($record['sha256'], hash('sha256', $content))) throw new \RuntimeException('Archivierte Rechnung ist beschädigt.');
+        return $content;
+    }
+
     /** Datei-Anhang für wp_mail: temporäre Datei, die der Aufrufer nach dem Versand löscht. */
     public static function temporaryFile(string $pdf, string $name): string
     {
         $temporary = wp_tempnam($name);
         if (! $temporary) throw new \RuntimeException('Temporärer PDF-Speicher fehlt.');
         $file = $temporary . '.pdf';
-        if (! rename($temporary, $file) || file_put_contents($file, $pdf) === false) { @unlink($temporary); throw new \RuntimeException('PDF konnte nicht gespeichert werden.'); }
+        if (! rename($temporary, $file) || file_put_contents($file, $pdf) === false) { @unlink($temporary); @unlink($file); throw new \RuntimeException('PDF konnte nicht gespeichert werden.'); }
+        chmod($file, 0600);
         return $file;
     }
 }

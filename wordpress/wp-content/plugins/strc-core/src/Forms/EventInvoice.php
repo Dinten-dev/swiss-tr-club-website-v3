@@ -20,11 +20,20 @@ final class EventInvoice
     /** Rechnung erstellen und versenden (einmalig). Wird unter der Anlass-Sperre aus EventPayments::notify aufgerufen. */
     public static function send(int $id): bool
     {
+        try { return (bool)FormStore::locked('event-invoice-' . $id, static fn(): bool => self::sendLocked($id)); }
+        catch (\Throwable) { error_log('STRC event invoice lock failed for registration ' . $id . '.'); return false; }
+    }
+
+    private static function sendLocked(int $id): bool
+    {
         if (get_post_meta($id, 'strc_invoice_sent', true)) return true;
         if (! ClubDocument::ready()) return false;
         $post = get_post($id);
         $user = $post ? get_userdata((int) $post->post_author) : false;
-        if (! $post || ! $user || ! is_email($user->user_email)) return false;
+        if (! $post || $post->post_type !== 'strc_registration' || ! $user || ! is_email($user->user_email)) return false;
+        if (!ClubDocument::eligible((int)strtotime($post->post_date_gmt . ' UTC'))) return false;
+        $row = FormStore::data($post);
+        if (EventPayments::participationState($row) !== 'confirmed' || ($row['paymentMethod'] ?? '') !== 'invoice' || (int)($row['total'] ?? 0) <= 0 || !in_array($row['paymentStatus'] ?? '', ['outstanding', 'partially_paid'], true)) return false;
         try {
             if (! get_post_meta($id, 'strc_invoice_number', true)) {
                 $sequence = ClubDocument::next('event');
@@ -36,7 +45,9 @@ final class EventInvoice
             $lang = \SwissTRClub\Core\Http\UserLanguage::french((int) $user->ID) ? 'fr' : 'de';
             $row = FormStore::data($post);
             $title = self::title($post, $row, $lang);
-            $file = ClubDocument::temporaryFile(self::pdf($id), 'Rechnung-' . $number . '.pdf');
+            $document = self::pdf($id);
+            if (!get_post_meta($id, 'strc_invoice_pdf', true) && !update_post_meta($id, 'strc_invoice_pdf', ClubDocument::archive('event', $id, $document))) throw new \RuntimeException('Rechnung konnte nicht archiviert werden.');
+            $file = ClubDocument::temporaryFile($document, 'Rechnung-' . $number . '.pdf');
             try {
                 $headers = array('Content-Type: text/plain; charset=UTF-8');
                 foreach (ClubDocument::treasury() as $copy) $headers[] = 'Bcc: ' . $copy;
@@ -93,11 +104,13 @@ final class EventInvoice
             'frankreich' => 'FR', 'france' => 'FR', 'österreich' => 'AT', 'autriche' => 'AT', 'austria' => 'AT', 'italien' => 'IT', 'italie' => 'IT', 'italy' => 'IT',
             'liechtenstein' => 'LI', 'niederlande' => 'NL', 'belgien' => 'BE', 'luxemburg' => 'LU', 'grossbritannien' => 'GB', 'vereinigtes königreich' => 'GB');
         if (isset($map[$key])) return $map[$key];
-        return preg_match('/^[a-z]{2}$/', $key) ? strtoupper($key) : 'CH';
+        return preg_match('/^[a-z]{2}$/', $key) ? strtoupper($key) : ($key === '' ? 'CH' : '');
     }
 
     public static function pdf(int $id): string
     {
+        $stored = get_post_meta($id, 'strc_invoice_pdf', true);
+        if ($stored) return ClubDocument::archived((array)$stored);
         $post = get_post($id);
         $user = $post ? get_userdata((int) $post->post_author) : false;
         $number = (string) get_post_meta($id, 'strc_invoice_number', true);
