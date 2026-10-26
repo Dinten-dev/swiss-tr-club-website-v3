@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-3w0hWgJ-.js";
+import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-B6axRZhf.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var l = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -21812,7 +21812,7 @@ function Zn({ item: e, nonce: t, close: n, saved: r, deleted: i }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var Qn = (0, h.lazy)(() => import("./MagazineReader-CGamNY08.js")), $n = "strc_community", er = {
+var Qn = (0, h.lazy)(() => import("./MagazineReader-KV5j3wUY.js")), $n = "strc_community", er = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliedergalerie",
 	restorations: "Fahrzeugrestaurationen",
@@ -25338,7 +25338,7 @@ function Lr() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var Rr = (0, h.lazy)(() => import("./MagazineReader-CGamNY08.js"));
+var Rr = (0, h.lazy)(() => import("./MagazineReader-KV5j3wUY.js"));
 function zr({ issue: e, loading: t, error: r, retry: i }) {
 	let { text: a } = J(), s = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: c } = n(), l = (e, t) => c === "fr" ? t : e, [u, d] = (0, h.useState)(!1), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(0), [y, b] = (0, h.useState)(!1), x = (0, h.useRef)(null), S = (0, h.useRef)(!1), C = e?.previewPages || [], w = !!e?.cover && !C.includes(e.cover), T = [...w && e?.cover ? [e.cover] : [], ...C].slice(0, 6), E = Math.min(m, Math.max(0, T.length - 1)), D = w && E === 0 ? `${l("Titelseite", "Couverture")} · ${e?.title || ""}` : e?.previewCaptions?.[E - +!!w] || `${l("Vorschau", "Aperçu")} ${E + 1} · ${e?.title || ""}`;
 	(0, h.useEffect)(() => {
