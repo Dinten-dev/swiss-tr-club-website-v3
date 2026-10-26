@@ -6,7 +6,7 @@ import Image from 'next/image';
 import {Dialog} from './Marketplace';
 import StrcFlipbook from './StrcFlipbook';
 type MagazineIssue={title:string;cover?:string;previewPages?:string[];fileUrl?:string;canRead?:boolean;loginUrl?:string};
-const moderationIcons:Record<string,string>={'#forum':'◎','#galerie':'▧','#bibliothek':'▤','#marktplatz':'◇','#tr-shop':'▣','#agenda-verwalten':'▦','#antraege':'✉'};
+const moderationIcons:Record<string,string>={'#forum':'◎','#galerie':'▧','#bibliothek':'▤','#marktplatz':'◇','#tr-shop':'▣','#agenda-verwalten':'▦','#antraege':'✉','#kasse':'₣'};
 const moderationIcon=(url?:string)=>moderationIcons[String(url||'').split('/')[0]]||'◉';
 type Entry={id?:number;title:string;url:string;status?:string;state?:string;paymentStatus?:string;total?:string;registered?:boolean;startAt?:string;location?:string;count?:number;at?:string};
 type MyEvent={id:number;title:string;startAt:string;status:string;registrationRequired:boolean;registered:number;capacity:number};
@@ -25,7 +25,7 @@ export default function MemberDashboard({extraTools=[],logoutUrl=''}:{extraTools
  const actions=data.registrations.filter(entry=>!['cancelled','expired','waiting'].includes(entry.state||'')&&['outstanding','partially_paid','pending_payment','failed'].includes(entry.paymentStatus||''));
  const entryDate=(value?:string)=>{if(!value)return '';const date=new Date(value);return Number.isNaN(date.getTime())?'':date.toLocaleDateString(uiLocale());};
  const renderEntries=(entries:Entry[],empty:string)=><>{entries.length?<ul>{entries.map((entry,index)=><li key={entry.id||index}><a href={entry.url}>{entry.title.startsWith('Neue Antwort:')?t('Neue Antwort:')+entry.title.slice('Neue Antwort:'.length):entry.title}</a>{entry.registered&&<strong> · {t("Bereits angemeldet")}</strong>}{entry.location&&<p>{entry.location}</p>}{entryDate(entry.startAt||entry.at)&&<p>{entryDate(entry.startAt||entry.at)}</p>}<p>{[entry.status&&t(states[entry.status]||entry.status),entry.state&&t(states[entry.state]||entry.state),entry.paymentStatus&&t(states[entry.paymentStatus]||entry.paymentStatus),entry.total].filter(Boolean).join(' · ')}</p></li>)}</ul>:empty?<p>{t(empty)}</p>:null}</>;
- const moderationTools=extraTools.filter(tool=>tool.url==='#agenda-verwalten'||tool.url==='#antraege').map(tool=>({url:tool.url,title:tool.url==='#antraege'?'Anträge bearbeiten':'Agenda verwalten'}));const editorialTool=extraTools.find(tool=>tool.url==='#redaktion');
+ const moderationTools=extraTools.filter(tool=>['#agenda-verwalten','#antraege','#kasse'].includes(tool.url)).map(tool=>({url:tool.url,title:tool.url==='#antraege'?'Anträge bearbeiten':tool.url==='#kasse'?'Kasse: Teilnehmerlisten':'Agenda verwalten'}));const editorialTool=extraTools.find(tool=>tool.url==='#redaktion');
  const openMagazine=()=>{if(!magazine)return;if(magazine.canRead&&magazine.fileUrl){setMagazineOpen(true);}else window.location.href=magazine.loginUrl||data.magazine?.url||'#bibliothek';};
  const membership=data.membership||{},subscriptions=data.subscriptions;
  const subscriptionShown=subscriptions?(subscriptions.request?{print:subscriptions.request.print,newsletter:subscriptions.request.newsletter}:{print:subscriptions.print,newsletter:subscriptions.newsletter}):null;

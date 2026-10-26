@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Marketplace, { Dialog, type MarketplaceSession } from './components/Marketplace';
 import AgendaPage from './components/AgendaPage';
 import EventManager, { type EventAdminSession } from './components/EventManager';
+import {FinanceEvents} from './components/EventFinancePanel';
 import {CatalogProvider} from './components/ClubCatalog';
 import MemberDirectory from './components/MemberDirectory';
 import MemberDashboard from './components/MemberDashboard';
@@ -23,10 +24,10 @@ import LandingIntroduction from './components/LandingIntroduction';
 import EditorialDashboard from './components/EditorialDashboard';
 import {ClubLanding, MissionPage, StaticPage} from './components/LandingPages';
 
-type Page = 'history' | 'news' | 'applications' | 'registration' | 'profile' | 'triungsters' | 'organisation' | 'mission' | 'membership' | 'models' | 'shop' | 'home' | 'club' | 'agenda' | 'regions' | 'market' | 'members' | 'forum' | 'gallery' | 'library' | 'clubdocs' | 'directory' | 'contact' | 'privacy' | 'statutes' | 'event-admin' | 'editorial';
+type Page = 'history' | 'news' | 'applications' | 'registration' | 'profile' | 'triungsters' | 'organisation' | 'mission' | 'membership' | 'models' | 'shop' | 'home' | 'club' | 'agenda' | 'regions' | 'market' | 'members' | 'forum' | 'gallery' | 'library' | 'clubdocs' | 'directory' | 'contact' | 'privacy' | 'statutes' | 'event-admin' | 'editorial' | 'finance';
 type MemberSession = MarketplaceSession & EventAdminSession & {
   applicationsNonce?:string|null; communityNonce?: string | null; formsInboxUrl?:string|null;
-  canEditContent?:boolean; canManageRoles?:boolean; editorialNonce?:string; editableDocuments?:string[]; logoutUrl?:string; contact?:{name:string;email:string;phone:string;city?:string}|null;
+  canEditContent?:boolean; canManageRoles?:boolean; canReadFinance?:boolean; editorialNonce?:string; editableDocuments?:string[]; logoutUrl?:string; contact?:{name:string;email:string;phone:string;city?:string}|null;
   authenticated: boolean;
   memberAccess: boolean;
   displayName?: string;
@@ -58,7 +59,7 @@ const wordpressUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL ?? 'http://localhost:
 const frontendUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 type Region = { name:string; slug:string; description:string; memberCount:number|null };
-const routes: Record<Page,string> = {history:'club-geschichte',news:'neuigkeiten',applications:'antraege',registration:'veranstaltung',profile:'profil',triungsters:'triungsters',organisation:'organisation',mission:'leitbild',membership:'anmeldung',models:'tr-modelle',shop:'tr-shop',home:'',club:'club',agenda:'agenda',regions:'regionen',market:'marktplatz',members:'mitglieder',forum:'forum',gallery:'galerie',library:'bibliothek',clubdocs:'clubdokumente',directory:'mitgliederliste',contact:'kontakt',privacy:'datenschutz',statutes:'statuten','event-admin':'agenda-verwalten',editorial:'redaktion'};
+const routes: Record<Page,string> = {history:'club-geschichte',news:'neuigkeiten',applications:'antraege',registration:'veranstaltung',profile:'profil',triungsters:'triungsters',organisation:'organisation',mission:'leitbild',membership:'anmeldung',models:'tr-modelle',shop:'tr-shop',home:'',club:'club',agenda:'agenda',regions:'regionen',market:'marktplatz',members:'mitglieder',forum:'forum',gallery:'galerie',library:'bibliothek',clubdocs:'clubdokumente',directory:'mitgliederliste',contact:'kontakt',privacy:'datenschutz',statutes:'statuten','event-admin':'agenda-verwalten',editorial:'redaktion',finance:'kasse'};
 
 
 export default function Home(){return <UILanguageProvider><SiteContentProvider><CatalogProvider><ClubApp/></CatalogProvider></SiteContentProvider></UILanguageProvider>;}
@@ -127,7 +128,7 @@ function ClubApp() {
         <button className={page==='agenda'?'active':''} onClick={() => navigate('agenda')}>{c('global.navAgenda')}</button>
         <button className={page==='regions'?'active':''} onClick={() => navigate('regions')}>{c('global.navRegions')}</button>
         <button className={['market','shop'].includes(page)?'active':''} onClick={() => navigate('market')}>{c('global.navMarket')}</button>
-        <button className={['members','profile','applications','forum','gallery','library','clubdocs','directory','editorial','event-admin'].includes(page)?'active':''} onClick={() => navigate('members')}>{t(memberSession?.memberAccess?'Mitgliederbereich':'Mitglieder-Login')}</button>
+        <button className={['members','profile','applications','forum','gallery','library','clubdocs','directory','editorial','event-admin','finance'].includes(page)?'active':''} onClick={() => navigate('members')}>{t(memberSession?.memberAccess?'Mitgliederbereich':'Mitglieder-Login')}</button>
         </div>
         <LanguageSwitcher/>
         {memberSession?.logoutUrl&&<a className="nav-logout" href={memberSession.logoutUrl} title={t('Abmelden')} aria-label={t('Abmelden')}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></a>}
@@ -152,6 +153,7 @@ function ClubApp() {
     {page==='news' && <HomepageSections navigate={navigate} memberAccess={!!memberSession?.memberAccess} upcomingEvents={[]} eventPreview={{title:'',text:''}} archive/>}
     {page==='applications' && (memberSession?.applicationsNonce?<ApplicationInbox nonce={memberSession.applicationsNonce}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='directory' && (memberSession?.memberAccess?<MemberDirectory/>:<MembersPage session={memberSession} navigate={navigate}/>)}
+    {page==='finance' && (memberSession?.canReadFinance?<FinanceEvents/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='event-admin' && (memberSession?.canManageEvents?<EventManager session={memberSession} changed={retryEvents}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {['contact','privacy','statutes'].includes(page) && <InformationPage key={page} page={page}/>}
 
@@ -228,6 +230,7 @@ function MembersPage({session,navigate}:{session:MemberSession|null,navigate:(p:
   const extraTools=[];
   if(session.canEditContent&&session.canManageRoles)extraTools.push({url:'#redaktion',label:'Redaktion',icon:'✎'});
   if(session.canManageEvents)extraTools.push({url:'#agenda-verwalten',label:'Agenda verwalten',icon:'A'});
+  if(session.canReadFinance)extraTools.push({url:'#kasse',label:'Kasse',icon:'₣'});
   if(session.formsInboxUrl)extraTools.push({url:'#antraege',label:'Anträge & Anfragen',icon:'✎'});
   return <><section className="page-content dashboard-introduction"><ContentBlock id="members.dashboardIntro"/></section><MemberDashboard extraTools={extraTools} logoutUrl={session.logoutUrl||''}/></>; }
 
