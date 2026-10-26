@@ -109,6 +109,9 @@ final class EventManagementEndpoint
             'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($post->post_content)),
             'titleFr' => (string) get_post_meta($id, 'strc_title_fr', true),
             'descriptionFr' => (string) get_post_meta($id, 'strc_description_fr', true),
+            // null = noch nie gesetzt (älterer Termin); das Formular schlägt dann die bisherige Beschreibung vor.
+            'summary' => metadata_exists('post', $id, 'strc_short_description') ? (string) get_post_meta($id, 'strc_short_description', true) : null,
+            'summaryFr' => (string) get_post_meta($id, 'strc_excerpt_fr', true),
             'startAt' => get_post_meta($id, 'strc_start_at', true),
             'endAt' => get_post_meta($id, 'strc_end_at', true),
             'location' => get_post_meta($id, 'strc_location', true),
@@ -164,6 +167,9 @@ final class EventManagementEndpoint
         $titleFr = sanitize_text_field($input['titleFr'] ?? ($id ? get_post_meta($id, 'strc_title_fr', true) : ''));
         $descriptionFr = \SwissTRClub\Core\Editorial\EditorialAccess::html($input['descriptionFr'] ?? ($id ? get_post_meta($id, 'strc_description_fr', true) : ''));
         if (mb_strlen($titleFr) > 160 || mb_strlen($descriptionFr) > 10000) AjaxRequest::fail('Die französische Fassung ist zu lang.');
+        $summary = trim(preg_replace('/\s+/u', ' ', sanitize_textarea_field($input['summary'] ?? ($id ? get_post_meta($id, 'strc_short_description', true) : ''))));
+        $summaryFr = trim(preg_replace('/\s+/u', ' ', sanitize_textarea_field($input['summaryFr'] ?? ($id ? get_post_meta($id, 'strc_excerpt_fr', true) : ''))));
+        if (mb_strlen($summary) > 120 || mb_strlen($summaryFr) > 120) AjaxRequest::fail('Der Kurzbeschrieb darf höchstens 120 Zeichen lang sein.', 422);
         if ('' === $title || mb_strlen($title) > 160 || mb_strlen($description) > 10000) {
             AjaxRequest::fail('Titel fehlt oder Text ist zu lang.');
         }
@@ -200,7 +206,7 @@ final class EventManagementEndpoint
         if(!$id&&$eventType==='weekend-meeting')AjaxRequest::fail('Bitte Weekend oder Meeting getrennt wählen.',422);
         if($scope==='external'&&$required&&!$registration['externalUrl'])AjaxRequest::fail('Für externe Veranstaltungen bitte den externen Anmeldelink angeben.');
         // Write the region and dates before making a new event public.
-        $post = array('post_type' => 'strc_event', 'post_title' => $title, 'post_content' => $description, 'post_excerpt' => wp_trim_words($description, 35), 'post_status' => 'draft');
+        $post = array('post_type' => 'strc_event', 'post_title' => $title, 'post_content' => $description, 'post_excerpt' => '' !== $summary ? $summary : wp_trim_words($description, 20), 'post_status' => 'draft');
         if ($id) {
             $post['ID'] = $id;
         } else {
@@ -210,6 +216,8 @@ final class EventManagementEndpoint
         if (is_wp_error($saved)) {
             AjaxRequest::fail('Termin konnte nicht gespeichert werden.', 500);
         }
+        update_post_meta((int) $saved, 'strc_short_description', $summary);
+        if ('' !== $summaryFr) update_post_meta((int) $saved, 'strc_excerpt_fr', $summaryFr); else delete_post_meta((int) $saved, 'strc_excerpt_fr');
         if (! $id && RegionalEventAccess::isOrganiser() && ! RegionalEventAccess::isGlobal()) {
             if(!\SwissTRClub\Core\Roles\RoleAssignments::createdEvent(get_current_user_id(),(int)$saved)){wp_delete_post((int)$saved,true);AjaxRequest::fail('Die Funktionszuweisung wurde inzwischen geändert. Bitte neu laden.',409);}
         }

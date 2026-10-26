@@ -135,7 +135,7 @@ final class EventPublicEndpoint
         return array(
             'id' => $postId,
             'title' => html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            'summary' => html_entity_decode(wp_strip_all_tags($language === 'fr' && trim(wp_strip_all_tags($descriptionFr)) !== '' ? wp_trim_words($descriptionFr,35) : (string) get_the_excerpt($postId)), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'summary' => html_entity_decode(wp_strip_all_tags($language === 'fr' && (string) get_post_meta($postId, 'strc_excerpt_fr', true) !== '' ? (string) get_post_meta($postId, 'strc_excerpt_fr', true) : ($language === 'fr' && trim(wp_strip_all_tags($descriptionFr)) !== '' ? wp_trim_words($descriptionFr,20) : (string) get_the_excerpt($postId))), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             'description' => html_entity_decode(wp_strip_all_tags($description), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($description)),
             'startAt' => $startAt,

@@ -21,7 +21,45 @@ let activeLanguage=storedLanguage();
 export function uiLocale(){return activeLanguage==='fr'?'fr-CH':'de-CH';}
 export function t(value:string):string{return activeLanguage==='fr'?(translations[value]||value):value;}
 const Context=createContext({language:'de',change:(_language:string)=>{void _language;}});
-export function UILanguageProvider({children}:{children:ReactNode}){const [language,setLanguage]=useState(storedLanguage);useEffect(()=>{document.documentElement.lang=language;document.cookie='strc_language='+language+';path=/;SameSite=Lax;Secure';},[language]);function change(next:string){if(!['de','fr'].includes(next))return;activeLanguage=next;try{localStorage.setItem('strc_language',next);}catch{ /* The selected language remains usable for this view. */ }setLanguage(next);}return <Context.Provider value={{language,change}}><div className="language-root">{children}</div></Context.Provider>;}
+/**
+ * Sicherheitsnetz für Französisch: Texte, die im Code nicht mit t() markiert sind, werden im DOM ersetzt,
+ * wenn der ganze Text (ohne Leerzeichen am Rand) genau einem Eintrag der Übersetzungsliste entspricht.
+ * Redaktionelle Inhalte (.rich-content), Eingabefelder und [data-no-translate] bleiben unangetastet.
+ * Beim Wechsel auf Deutsch werden die Originale wiederhergestellt.
+ */
+const ATTRIBUTES=['placeholder','aria-label','title'];
+const originals=new Map<Node,string>();const written=new WeakMap<Node,string>();const originalAttributes=new Map<Element,Record<string,{before:string;after:string}>>();
+const SKIP='script,style,textarea,[contenteditable],.rich-content,[data-no-translate]';
+function translated(value:string):string|null{const core=value.trim();if(core.length<2)return null;const result=translations[core];if(!result||result===core)return null;return value.replace(core,result);}
+function translateText(node:Node){
+ const value=node.nodeValue||'';if(written.get(node)===value)return;
+ const parent=node.parentElement;if(!parent||parent.closest(SKIP))return;
+ const next=translated(value);if(next===null){originals.delete(node);return;}
+ originals.set(node,value);written.set(node,next);node.nodeValue=next;
+}
+function translateAttributes(element:Element){
+ if(element.closest(SKIP))return;
+ for(const name of ATTRIBUTES){const value=element.getAttribute(name);if(!value)continue;const next=translated(value);if(next===null)continue;const saved=originalAttributes.get(element)||{};saved[name]={before:value,after:next};originalAttributes.set(element,saved);element.setAttribute(name,next);}
+}
+function translateTree(node:Node){
+ if(node.nodeType===Node.TEXT_NODE){translateText(node);return;}
+ if(node.nodeType!==Node.ELEMENT_NODE||(node as Element).closest(SKIP))return;
+ translateAttributes(node as Element);
+ const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT,{acceptNode:current=>current.nodeType===Node.ELEMENT_NODE&&(current as Element).matches(SKIP)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+ for(let current=walker.nextNode();current;current=walker.nextNode()){if(current.nodeType===Node.TEXT_NODE)translateText(current);else translateAttributes(current as Element);}
+}
+function forgetDetached(){for(const node of originals.keys())if(!node.isConnected)originals.delete(node);for(const element of originalAttributes.keys())if(!element.isConnected)originalAttributes.delete(element);}
+function restoreOriginals(){originals.forEach((value,node)=>{if(node.isConnected&&node.nodeValue===written.get(node))node.nodeValue=value;written.delete(node);});originals.clear();originalAttributes.forEach((saved,element)=>{if(element.isConnected)for(const [name,value] of Object.entries(saved))if(element.getAttribute(name)===value.after)element.setAttribute(name,value.before);});originalAttributes.clear();}
+function useDomTranslation(language:string){
+ useEffect(()=>{
+  if(language!=='fr'||typeof MutationObserver==='undefined')return;
+  const root=document.body;translateTree(root);
+  const observer=new MutationObserver(records=>{for(const record of records){if(record.type==='characterData')translateText(record.target);else if(record.type==='attributes')translateAttributes(record.target as Element);else record.addedNodes.forEach(translateTree);}forgetDetached();});
+  observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES});
+  return()=>{observer.disconnect();restoreOriginals();};
+ },[language]);
+}
+export function UILanguageProvider({children}:{children:ReactNode}){const [language,setLanguage]=useState(storedLanguage);useDomTranslation(language);useEffect(()=>{document.documentElement.lang=language;document.cookie='strc_language='+language+';path=/;SameSite=Lax;Secure';},[language]);function change(next:string){if(!['de','fr'].includes(next))return;activeLanguage=next;try{localStorage.setItem('strc_language',next);}catch{ /* The selected language remains usable for this view. */ }setLanguage(next);}return <Context.Provider value={{language,change}}><div className="language-root">{children}</div></Context.Provider>;}
 export function LanguageSwitcher(){const {language,change}=useContext(Context);return <div className="language-switcher" role="group" aria-label="Sprache / Langue"><button aria-pressed={language==='de'} onClick={()=>change('de')}>DE</button><button aria-pressed={language==='fr'} onClick={()=>change('fr')}>FR</button></div>;}
 
 export function useUILanguage(){return useContext(Context);}

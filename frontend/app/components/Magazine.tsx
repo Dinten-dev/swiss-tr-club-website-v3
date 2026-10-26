@@ -14,8 +14,10 @@ export default function Magazine({issue,loading,error,retry}:{issue:MagazineIssu
  const {language}=useUILanguage();const l=(de:string,fr:string)=>language==='fr'?fr:de;
  const [open,setOpen]=useState(false);const [reading,setReading]=useState(false);const [index,setIndex]=useState(0);const [zoom,setZoom]=useState(false);
  const opener=useRef<HTMLAnchorElement|null>(null);const returned=useRef(false);
- const pages=(issue?.previewPages||[]).slice(0,6);const current=Math.min(index,Math.max(0,pages.length-1));
- const caption=issue?.previewCaptions?.[current]||`${l('Vorschau','Aperçu')} ${current+1} · ${issue?.title||''}`;
+ // Titelseite immer zuerst, danach die ausgewählten Doppelseiten.
+ const spreads=issue?.previewPages||[];const withCover=!!issue?.cover&&!spreads.includes(issue.cover);
+ const pages=[...(withCover&&issue?.cover?[issue.cover]:[]),...spreads].slice(0,6);const current=Math.min(index,Math.max(0,pages.length-1));
+ const caption=withCover&&current===0?`${l('Titelseite','Couverture')} · ${issue?.title||''}`:issue?.previewCaptions?.[current-(withCover?1:0)]||`${l('Vorschau','Aperçu')} ${current+1} · ${issue?.title||''}`;
  useEffect(()=>{if(!issue||returned.current||new URLSearchParams(window.location.search).get('magazine')!==String(issue.id))return;returned.current=true;const frame=requestAnimationFrame(()=>{setOpen(true);setReading(false);});return()=>{cancelAnimationFrame(frame);returned.current=false;};},[issue]);
  function close(){setOpen(false);setZoom(false);setReading(false);const url=new URL(window.location.href);url.searchParams.delete('magazine');window.history.replaceState(null,'',url);requestAnimationFrame(()=>opener.current?.focus({preventScroll:true}));}
  const preview=pages[current]||issue?.cover;

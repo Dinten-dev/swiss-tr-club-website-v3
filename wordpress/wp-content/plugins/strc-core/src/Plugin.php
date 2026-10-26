@@ -52,6 +52,8 @@ final class Plugin
         (new \SwissTRClub\Core\Community\CommunityEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Community\CatalogSettings())->registerHooks();
         (new \SwissTRClub\Core\Community\ForumSettings())->registerHooks();
+        (new \SwissTRClub\Core\Community\ReviewNotificationSettings())->registerHooks();
+        (new \SwissTRClub\Core\Infrastructure\MacRomanRepair())->registerHooks();
         (new \SwissTRClub\Core\Community\GalleryRetention())->registerHooks();
         if(defined('WP_CLI')&&WP_CLI)\SwissTRClub\Core\Community\LibraryImportCommand::register();
         (new ContentPostTypes())->registerHooks();
@@ -60,6 +62,8 @@ final class Plugin
         (new MarketplaceEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShopEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShippingPartner())->registerHooks();
+        (new \SwissTRClub\Core\Shop\ShopInvoice())->registerHooks();
+        (new \SwissTRClub\Core\Forms\EventInvoice())->registerHooks();
         (new DashboardShortcode())->registerHooks();
         $fairgate = FairgateConfiguration::fromConstants();
         (new SystemStatusPage($fairgate))->registerHooks();

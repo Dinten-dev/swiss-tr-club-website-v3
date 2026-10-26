@@ -46,6 +46,10 @@ if(!defined('STRC_FAIRGATE_PROFILE_WRITE'))define('STRC_FAIRGATE_PROFILE_WRITE',
     'phone'=>'co_pilot_in_handy',
 ]]);
 if(!defined('STRC_FAIRGATE_STAGING_COPILOT_WRITE'))define('STRC_FAIRGATE_STAGING_COPILOT_WRITE',true);
+// Rechnungen Shop/Anlässe (ADR 0003): Rechnungssteller und QR-IBAN wie auf den Fairgate-Rechnungen; nicht geheim.
+if(!defined('STRC_BILLING_CREDITOR'))define('STRC_BILLING_CREDITOR',['name'=>'The Swiss TR-Club','street'=>'Sonnenbergstrasse','house_number'=>'24c','postcode'=>'9524','city'=>'Zuzwil','country'=>'CH','qr_iban'=>'CH753000523397351041H','web'=>'www.swisstrclub.ch']);
+// Fairgate-Referenzen: 225480 + 0…; Website: 2254809 + Dokumentart (1 Shop, 2 Anlass) → nie überschneidend.
+if(!defined('STRC_QR_REFERENCE_PREFIX'))define('STRC_QR_REFERENCE_PREFIX','2254809');
 if(!defined('STRC_WHATSAPP_TEMPLATE_DE'))define('STRC_WHATSAPP_TEMPLATE_DE','tr_forum_de');
 if(!defined('STRC_WHATSAPP_TEMPLATE_FR'))define('STRC_WHATSAPP_TEMPLATE_FR','tr_forum_fr');
 if(!defined('STRC_MAKE_WHATSAPP_ENABLED'))define('STRC_MAKE_WHATSAPP_ENABLED',false);
