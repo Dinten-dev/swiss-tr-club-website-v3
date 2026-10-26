@@ -374,13 +374,13 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateVehicleImport.php",
-      "bytes": 5875,
-      "sha256": "cf6e1a756b5cb52e204f803145f655ca94c848e49732dd3f7bad38ae2e4967b0"
+      "bytes": 6760,
+      "sha256": "a8d08c51d018d6568934102fb4191f936c04f6a7b930f027bb09b2f44edd2bca"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateVehicleNormalizer.php",
-      "bytes": 4045,
-      "sha256": "307388a5d42d044dd3fb72ea8aafac8317c2d9754e2990e88df5e9e2c345fd3f"
+      "bytes": 4767,
+      "sha256": "c2d06d0738ec3c3fb1175178c5f6eb324c7fcda9fe82bd310b5c4b8a3f02cc4a"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateWebhook.php",
@@ -499,8 +499,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Plugin.php",
-      "bytes": 5733,
-      "sha256": "7def16444e341795e24099200936ae41f5e2dd4ccf6a00841452d5c4b12d5ad9"
+      "bytes": 5851,
+      "sha256": "c07ebda4541ad3ea78572b2c58834a9f6d943e3f8c5d8632197d52b2f9706e96"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleAssignments.php",
@@ -518,14 +518,19 @@
       "sha256": "378d08a850a7e29cafac5bbea8b4b5a64151160ed50fa3ec4d153e69c1a264ee"
     },
     {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Shop/CustomerLanguage.php",
+      "bytes": 4660,
+      "sha256": "18647d3fa61b6d4b32262ce0246117b21268c4cd3dbf09de6581334466a9040b"
+    },
+    {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/InvoiceGateway.php",
       "bytes": 1770,
       "sha256": "03dd26f5ca98600e4172dbf9122c976fd557d1d765ff29a2b5688f283cb2eb07"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShippingPartner.php",
-      "bytes": 20246,
-      "sha256": "444160fecd7c3c1e012fc796382efc1054d52afc85c0077c447af10ef6e2c3e4"
+      "bytes": 20593,
+      "sha256": "1f1cf0c7abe6552d193394f001b7f9a47ea9e8dc28dc469c7d92b2b5c03c82ce"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopAccessPolicy.php",
@@ -539,8 +544,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopInvoice.php",
-      "bytes": 10578,
-      "sha256": "d6c58f006f51080ecb0f9aae42ee8bde933a3d1643ffdfdfb98cf80f994d6997"
+      "bytes": 10353,
+      "sha256": "7432841f996d01a4fb56af95f775b53d1e73fcef42d89dc11f216dc9fe2ad281"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopOperations.php",
@@ -594,8 +599,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/tests/FairgateVehicleNormalizerTest.php",
-      "bytes": 3090,
-      "sha256": "6b2aa0f7a70f758cd4b0e4f77e6c390237d9b7115f3b971f0bb0b4fe3916f16c"
+      "bytes": 4575,
+      "sha256": "36f30e417ded01cddf00a3c529b557043b2ce7f6edc216d7dd570883e8b65593"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/tests/IntakeFieldsTest.php",
@@ -2253,9 +2258,7 @@
       "sha256": "6355c019a358f34e46406a5dad8f0057bae8d1bd0c530f0420d1d56a37087eb0"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-10-26T20:11:47.517Z",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-26T20:14:33.405239+00:00",
-  "publishedFiles": 4
+  "status": "candidate",
+  "builtOn": "2026-10-26T20:43:40.890Z",
+  "baselineCapturedOn": "2026-10-13"
 }

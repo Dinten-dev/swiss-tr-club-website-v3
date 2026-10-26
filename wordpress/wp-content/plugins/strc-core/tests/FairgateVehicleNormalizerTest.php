@@ -73,4 +73,25 @@ final class FairgateVehicleNormalizerTest extends TestCase
         self::assertSame('review', N::normalize(['model' => 'MGB'])['result']);
         self::assertSame('empty', N::normalize(['model' => '', 'year' => ''])['result']);
     }
+
+    public function testExplicitTriumphDetailsResolveOnlyMissingOrGenericTypes(): void
+    {
+        self::assertSame('Anderer Triumph', self::vehicle(['model'=>'Roadster 1800'])['model']);
+        self::assertSame('Anderer Triumph', self::vehicle(['model'=>'other','details'=>'Dolomite Sprint'])['model']);
+        self::assertSame('Anderer Triumph', self::vehicle(['model'=>'other','details'=>'Vitesse Mk2 Cabriolet'])['model']);
+        $v=self::vehicle(['model'=>'','details'=>'Triumph 2500 MK2 PI']);
+        self::assertSame('2.5 PI',$v['model']);
+        self::assertSame('Triumph 2500 MK2 PI',$v['details']);
+        self::assertSame('Roadster 1800',self::vehicle(['model'=>'','details'=>'Roadster 1800'])['details']);
+        self::assertSame('review',N::normalize(['model'=>'MGB','details'=>'Triumph engine'])['result']);
+        self::assertSame('review',N::normalize(['model'=>'other','details'=>'Mini 1000'])['result']);
+        self::assertSame('review',N::normalize(['model'=>'Swallow Doretti','year'=>'1954'])['result']);
+    }
+
+    public function testSharedPlateAndUnknownPlaceholdersDoNotInventCars(): void
+    {
+        self::assertSame('empty',N::normalize(['model'=>'','registration'=>'BE 123'])['result']);
+        self::assertSame('empty',N::normalize(['model'=>'','year'=>'?','exteriorColour'=>'?','chassisNumber'=>'?'])['result']);
+        self::assertSame('review',N::normalize(['model'=>'','year'=>'1959','chassisNumber'=>'TS 12345 LO'])['result']);
+    }
 }
