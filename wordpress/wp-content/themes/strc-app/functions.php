@@ -125,8 +125,15 @@ add_filter('woocommerce_checkout_get_value', static function ($value, string $in
     );
     return isset($map[$input]) && $map[$input] !== '' ? $map[$input] : $value;
 }, 10, 2);
+// Staging 24.10.: WooCommerce schreibt Pflicht/«(optional)» der Adressfelder nach dem Laden per JavaScript neu
+// (address-i18n, Länder-Locale). Ohne Eintrag für «phone» setzt es das Telefon wieder auf optional.
+add_filter('woocommerce_get_country_locale_default', static function (array $locale): array {
+    $locale['phone'] = array_merge($locale['phone'] ?? array(), array('required' => true, 'label' => get_locale() === 'fr_FR' ? 'Mobile (pour les questions)' : 'Mobilnummer (für Rückfragen)'));
+    return $locale;
+});
 add_filter('woocommerce_get_country_locale', static function (array $locale): array {
     $locale['CH']['state'] = array('required' => false, 'hidden' => true);
+    $locale['CH']['phone'] = array('required' => true, 'label' => get_locale() === 'fr_FR' ? 'Mobile (pour les questions)' : 'Mobilnummer (für Rückfragen)');
     $locale['CH']['postcode'] = array_merge($locale['CH']['postcode'] ?? array(), array('priority' => 60, 'class' => array('form-row-first')));
     $locale['CH']['city'] = array_merge($locale['CH']['city'] ?? array(), array('priority' => 61, 'class' => array('form-row-last')));
     return $locale;
