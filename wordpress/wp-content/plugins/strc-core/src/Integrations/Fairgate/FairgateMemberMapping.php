@@ -32,10 +32,12 @@ final class FairgateMemberMapping
         $source=$this->value($contact,$this->paths['status']);
         if (!is_scalar($source) || !isset($this->statuses[(string)$source])) throw new FairgateApiException('Unbekannter Mitgliedschaftsstatus; der bisherige Zugang bleibt erhalten.');
         $row=array('status'=>$this->statuses[(string)$source]);
-        foreach (array('region','member_number') as $field) {
+        // Region: leer oder unbekannt → lokale Region bleiben lassen (Fairgate-Feld wird schrittweise befüllt).
+        if (isset($this->paths['region'])) { $region=$this->regionName($contact); if ($region!==null) $row['region']=$region; }
+        foreach (array('member_number') as $field) {
             if (!isset($this->paths[$field])) continue;
             $value=$this->value($contact,$this->paths[$field]);
-            if (!is_string($value) || trim($value)==='' || mb_strlen($value)>($field==='region'?64:32)) throw new FairgateApiException('Ein zugeordnetes Mitgliedsfeld fehlt oder ist ungültig.');
+            if (!is_string($value) || trim($value)==='' || mb_strlen($value)>32) throw new FairgateApiException('Ein zugeordnetes Mitgliedsfeld fehlt oder ist ungültig.');
             $row[$field]=$value;
         }
         return $row;
@@ -149,6 +151,18 @@ final class FairgateMemberMapping
         }
     }
 
+    /** Offizielle Mitgliedsnummer über STRC_FAIRGATE_SYNC_FIELDS['memberNumber'] (nur der Mitgliederimport liest diesen Schlüssel). */
+    public function memberNumber(array $contact): ?string
+    {
+        $path=$this->paths['memberNumber']??null;
+        if(!is_string($path)||!str_starts_with($path,'/'))return null;
+        $value=$this->value($contact,$path);
+        if(is_int($value)||is_float($value))$value=(string)(int)$value;
+        if(!is_string($value))return null;
+        $value=trim($value);
+        return preg_match('/^[A-Za-z0-9][A-Za-z0-9.\/-]{0,31}$/D',$value)&&!str_starts_with($value,'FG:')?$value:null;
+    }
+
     public function regionName(array $contact): ?string
     {
         $path = $this->paths['region'] ?? null;
@@ -157,7 +171,9 @@ final class FairgateMemberMapping
         }
 
         $value = $this->value($contact, $path);
-        return is_scalar($value) ? RegionDirectory::canonicalName((string) $value) : null;
+        $region = is_scalar($value) ? RegionDirectory::canonicalName((string) $value) : null;
+        // TRiungsters ist eine Mitgliedschaftsform/Gruppe, keine Region: nur die 7 Regionen werden übernommen.
+        return $region === RegionDirectory::REGIONS['triungsters'] ? null : $region;
     }
 
     private function value(array $data,string $pointer): mixed

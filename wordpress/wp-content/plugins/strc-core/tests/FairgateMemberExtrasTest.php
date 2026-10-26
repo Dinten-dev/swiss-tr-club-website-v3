@@ -55,4 +55,14 @@ final class FairgateMemberExtrasTest extends TestCase
         self::assertSame('', FairgateMemberMapping::normalize('birth_date','2990-01-01'));
         self::assertSame('1960-02-29', FairgateMemberMapping::normalize('birth_date','29.02.1960'));
     }
+
+    public function testMemberNumberIsReadOnlyWhenMappedAndPlausible(): void
+    {
+        $mapping = new FairgateMemberMapping(array('contactId'=>'/id','status'=>'/status','memberNumber'=>'/configured_fields/mitglieder_nummer'), array('Aktiv'=>'active'));
+        self::assertSame('1234', $mapping->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>' 1234 '))));
+        self::assertSame('1234', $mapping->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>1234))));
+        self::assertSame(null, $mapping->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>''))));
+        self::assertSame(null, $mapping->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>'FG:12'))));
+        self::assertSame(null, (new FairgateMemberMapping(array(), array()))->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>'1234'))));
+    }
 }

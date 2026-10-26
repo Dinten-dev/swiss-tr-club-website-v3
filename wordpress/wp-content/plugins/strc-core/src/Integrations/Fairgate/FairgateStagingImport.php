@@ -93,6 +93,8 @@ final class FairgateStagingImport
                 $r+=['email'=>$email,'first_name'=>$first,'last_name'=>$last,'status'=>$status,'type'=>$couple?'couple':self::TYPES[$label],
                     'profile'=>['phone'=>sanitize_text_field($comm['mobile']??''),'street'=>sanitize_text_field($address['street']??''),'postcode'=>sanitize_text_field($address['postale_code']??''),'city'=>sanitize_text_field($address['city']??''),'country'=>sanitize_text_field($address['country']??'')]];
                 $r['extras']=FairgateMemberMapping::fromConstants()->extras($c);
+                $number=FairgateMemberMapping::fromConstants()->memberNumber($c);
+                if($number!==null)$r['member_number']=$number;
                 $region=FairgateMemberMapping::fromConstants()->regionName($c);
                 if($region!==null)$r['region']=$region;
                 $r['action']=$this->target($r)?'update':($status==='active'?'create':'skip');
@@ -159,13 +161,15 @@ final class FairgateStagingImport
         // Until Fairgate households are explicitly mapped, preserve a verified local couple link.
         if($existing&&\SwissTRClub\Core\Members\MembershipTypePolicy::isCouple((string)$existing['membership_type'])&&\SwissTRClub\Core\Members\MemberProfile::household((int)$u->ID)['mode']!=='single')$fields['membership_type']=$existing['membership_type'];
         if(isset($r['region']))$fields['region']=$r['region'];
+        // Offizielle Fairgate-Mitgliedsnummer (Feld mitglieder_nummer) statt Platzhalter, sofern eindeutig.
+        if(isset($r['member_number'])&&!$wpdb->get_var($wpdb->prepare("SELECT user_id FROM {$table} WHERE member_number=%s AND user_id<>%d",$r['member_number'],$u->ID)))$fields['member_number']=$r['member_number'];
         if(isset($r['extras']['started_on']))$fields['started_on']=$r['extras']['started_on'];
         if(!$existing){
             // Internal unique key only. Never present it as an official member number.
             $fields+=['user_id'=>$u->ID,'fairgate_contact_id'=>$r['id'],'member_number'=>'FG:'.$r['id'],'region'=>$r['region']??'','created_at'=>current_time('mysql')];
             $saved=$wpdb->insert($table,$fields);
-            if($saved!==false)update_user_meta($u->ID,'strc_fairgate_number_pending','1');
-        }else $saved=$wpdb->update($table,$fields,['user_id'=>$u->ID]);
+            if($saved!==false&&!isset($fields['member_number']))update_user_meta($u->ID,'strc_fairgate_number_pending','1');
+        }else{$saved=$wpdb->update($table,$fields,['user_id'=>$u->ID]);if($saved!==false&&isset($fields['member_number']))delete_user_meta($u->ID,'strc_fairgate_number_pending');}
         if($saved===false){
             if($new){require_once ABSPATH.'wp-admin/includes/user.php';wp_delete_user($u->ID);}
             throw new FairgateApiException('Mitgliedschaft konnte nicht gespeichert werden');
