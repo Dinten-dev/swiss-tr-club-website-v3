@@ -44,6 +44,11 @@ try {
     p37check($result[0]['action']==='update'&&$row['member_number']==='QA37-'.$owner&&$row['region']==='Bern','Previewed official number and region persist');
     p37check(get_user_meta($owner,'strc_subscription_print',true)==='0'&&get_user_meta($owner,'strc_birth_date',true)==='1980-02-29','Mapped subscription and birthday persist');
     foreach([$base+2,$base+3]as$fixtureContact){$login='strc_fg_'.$fixtureContact;if(username_exists($login))throw new RuntimeException('Fixture import login exists');$fixtureImportLogins[]=$login;}
+    $subscriptionRequest=['print'=>true,'newsletter'=>true,'at'=>gmdate(DATE_ATOM)];update_user_meta($owner,'strc_subscription_request',$subscriptionRequest);
+    SwissTRClub\Core\Integrations\Fairgate\FairgateMemberMapping::storeExtras($owner,['print'=>true]);
+    p37check(get_user_meta($owner,'strc_subscription_request',true)===$subscriptionRequest,'Unknown newsletter does not acknowledge an outstanding subscription request');
+    SwissTRClub\Core\Integrations\Fairgate\FairgateMemberMapping::storeExtras($owner,['print'=>true,'newsletter'=>true]);
+    p37check(!get_user_meta($owner,'strc_subscription_request',true),'Subscription request completes only when both official values are confirmed');
     $new=p37contact($base+2,$prefix.'_import@example.invalid','Paarmitglied','');
     $new['basefields']['contact_id']=$base+2;
     $newResult=$import->apply([$new]);$newId=(int)$newResult[0]['userId'];$users['imported']=$newId;

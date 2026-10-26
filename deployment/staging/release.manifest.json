@@ -314,8 +314,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateClient.php",
-      "bytes": 10276,
-      "sha256": "4397c183036f205d17e6826bf3d6fb071c601d277b65f98e054baef5d4987236"
+      "bytes": 10419,
+      "sha256": "435863a8022056ac8495c7ae5e29b9f4d8624098d771d7875dc2a6726f56f9b0"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateConfiguration.php",
@@ -329,8 +329,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateMemberMapping.php",
-      "bytes": 10590,
-      "sha256": "f3f4cea442e40423a66b23427dca64d7af5fe1b4efe9aa8fd06d49b313d89759"
+      "bytes": 10640,
+      "sha256": "663de8eaabbe8d1094d7f54967f6d79ba2b959b58cada15a1de3ba2666f618e1"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateMemberSync.php",
@@ -544,8 +544,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/tests/FairgateClientTest.php",
-      "bytes": 5587,
-      "sha256": "db29a76640f3adf185244a38ee242ba88068fd4c8556dc4d89276c87c655bfec"
+      "bytes": 7608,
+      "sha256": "b1dc443bc1e0b4b2b7a426377d98d4f3fae0b708df368d166c4670ffbfe378ae"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/tests/FairgateConfigurationTest.php",
@@ -2199,6 +2199,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-10-26T18:52:20.016Z",
+  "builtOn": "2026-10-26T19:06:11.183Z",
   "baselineCapturedOn": "2026-10-13"
 }
