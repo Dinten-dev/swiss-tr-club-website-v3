@@ -3289,3 +3289,8 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 /* Fachexperten: «Alle»-Knopf je Gruppe */
 .role-scope-chips .role-scope-all{display:inline-flex;align-items:center;padding:4px 12px;border:1px dashed #114973;border-radius:999px;background:#fff;color:#114973;font:inherit;font-size:13px;font-weight:600;cursor:pointer;min-height:30px}
 .role-scope-chips .role-scope-all.is-on{background:#0b2f4d;border-style:solid;color:#fff}
+/* Dashboard: Benachrichtigungen für Prüfende */
+.review-notifications{margin-top:18px;padding-top:16px;border-top:1px solid #dbe5ee}
+.review-notifications h3{font-size:16px;margin:0 0 6px}
+.review-notifications label{display:block;margin-top:10px}
+.review-notifications input[type=email]{width:100%;font-size:16px}
