@@ -53,6 +53,8 @@ export function ForumSubscribe({area,forum}:{area:string;forum:ReturnType<typeof
 }
 
 /** Moderation: Fachexperten zuteilen (Mehrfachauswahl Fahrzeuge × Technikbereiche). */
+/** Karosserie & Ausstattung: in der Expertenzuteilung als eigene Gruppe «Sonstiges» neben den Technikbereichen. */
+const OTHER_COMPONENTS=['Chassis','Karosserie','Räder / Reifen','Innenausstattung','Verdecke','Instrumente','Sonstiges'];
 export function ExpertAssignment({forum}:{forum:ReturnType<typeof useForumSettings>}){
   const catalog=useCatalog();
   // Gleiche Bedienung wie «Rollen und Zuständigkeiten»: links suchen und ankreuzen, rechts «Wer ist Experte wofür».
@@ -74,7 +76,8 @@ export function ExpertAssignment({forum}:{forum:ReturnType<typeof useForumSettin
   const toggle=(list:string[],value:string)=>list.includes(value)?list.filter(item=>item!==value):[...list,value];
   const summary=(member:ForumSettings['members'][number])=>{const m=[...new Set(member.expertise.map(row=>row.model).filter(Boolean))];const c=[...new Set(member.expertise.map(row=>row.component).filter(Boolean))];return {m,c};};
   const shown=experts.filter(member=>!filter||member.expertise.some(row=>row.model===filter||row.component===filter));
-  const chips=(values:string[],list:string[],set:(next:string[])=>void,label:(v:string)=>string)=><div className="role-scope-chips">{values.map(value=><label key={value} className={list.includes(value)?'is-on':''}><input type="checkbox" checked={list.includes(value)} onChange={()=>set(toggle(list,value))}/>{label(value)}</label>)}</div>;
+  const chips=(values:string[],list:string[],set:(next:string[])=>void,label:(v:string)=>string)=>{const all=values.length>0&&values.every(value=>list.includes(value));return <div className="role-scope-chips"><button type="button" className={'role-scope-all'+(all?' is-on':'')} aria-pressed={all} onClick={()=>set(all?list.filter(item=>!values.includes(item)):[...new Set([...list,...values])])}>{t('Alle')}</button>{values.map(value=><label key={value} className={list.includes(value)?'is-on':''}><input type="checkbox" checked={list.includes(value)} onChange={()=>set(toggle(list,value))}/>{label(value)}</label>)}</div>;};
+  const otherComponents=catalog.components.filter(value=>OTHER_COMPONENTS.includes(value));const techComponents=catalog.components.filter(value=>!OTHER_COMPONENTS.includes(value));
   return <><WhatsAppStatus/><section className="role-assignment-panel forum-experts">
     <header className="role-head"><div><h2>{t('Fachexperten zuteilen')}</h2><p className="club-hint">{t('Mitglied suchen, Fahrzeuge und Technikbereiche ankreuzen, speichern. Ohne Fahrzeug gilt der Bereich für alle Modelle. Fachexperte ist keine Rolle, sondern eine Einstufung für Benachrichtigungen.')}</p></div></header>
     <div className="role-layout">
@@ -85,7 +88,8 @@ export function ExpertAssignment({forum}:{forum:ReturnType<typeof useForumSettin
       {!selected?<div className="role-empty"><p>{t('Wähle ein Mitglied über die Suche oder rechts in der Übersicht.')}</p></div>:<div className="role-person">
        <div className="role-person-head"><span className="role-avatar" aria-hidden="true">{selected.name.split(/\s+/).slice(0,2).map(part=>part[0]).join('')}</span><div><h3>{selected.name}</h3><p>{models.length||components.length?`${models.length} ${t('Fahrzeuge')} · ${components.length} ${t('Technikbereiche')}`:t('Noch keine Zuteilung')}</p></div><button type="button" className="market-text-button" onClick={()=>{if(!dirty||window.confirm(t('Ungespeicherte Änderungen verwerfen?'))){setSelected(null);setMessage('');}}}>{t('Schliessen')}</button></div>
        <section className="role-group"><h4>{t('Fahrzeuge')}</h4>{chips(vehicleModels,models,setModels,value=>value)}</section>
-       <section className="role-group"><h4>{t('Technikbereiche')}</h4>{chips(catalog.components,components,setComponents,value=>t(value))}</section>
+       <section className="role-group"><h4>{t('Technikbereiche')}</h4>{chips(techComponents,components,setComponents,value=>t(value))}</section>
+       {otherComponents.length>0&&<section className="role-group"><h4>{t('Sonstiges')}</h4>{chips(otherComponents,components,setComponents,value=>t(value))}</section>}
        <div className="role-actions"><span role="status">{message?'✓ '+message:dirty?t('Ungespeicherte Änderungen'):''}</span>{(models.length>0||components.length>0)&&<button type="button" className="club-secondary" disabled={busy} onClick={()=>{setModels([]);setComponents([]);}}>{t('Alle entfernen')}</button>}<button type="button" className="market-primary" disabled={busy||!dirty} onClick={()=>void save()}>{busy?t('Wird gespeichert …'):t('Speichern')}</button></div>
       </div>}
      </div>

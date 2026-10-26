@@ -9,7 +9,16 @@ final class CatalogSettings
 {
     public static function parts(): array {return get_option('strc_parts_categories')?:['Motor','Getriebe / Overdrive','Antrieb','Fahrwerk / Lenkung','Bremsen','Elektrik','Karosserie','Innenausstattung','Räder / Reifen','Zubehör','Literatur / Automobilia','Werkzeug / Werkstatt','Verschiedenes','Garagenräumung'];}
     public static function areas(): array {return get_option('strc_forum_areas')?:['Fahrzeuge','Technik','Restaurationen','Teile gesucht','Garagen / Spezialisten','Events & Reisen','Clubleben'];}
-    public static function components(): array {return get_option('strc_forum_components')?:['Motor','Kraftstoff / Vergaser','Einspritzung','Kühlung','Auspuff','Getriebe','Overdrive','Getriebe / Overdrive','Kupplung','Antrieb','Fahrwerk','Lenkung','Bremsen','Elektrik','Zündung','Chassis','Karosserie','Innenausstattung','Räder / Reifen','Instrumente','Sonstiges'];}
+    public static function components(): array
+    {
+        $saved=get_option('strc_forum_components');
+        // Einmalig «Verdecke» in eine bereits gespeicherte Liste aufnehmen (danach in «Kategorien verwalten» frei änderbar).
+        if(is_array($saved)&&$saved&&!get_option('strc_forum_components_verdecke')){
+            if(!in_array('Verdecke',$saved,true)){$at=array_search('Innenausstattung',$saved,true);array_splice($saved,$at===false?count($saved):(int)$at+1,0,['Verdecke']);update_option('strc_forum_components',$saved,false);}
+            update_option('strc_forum_components_verdecke','1',false);
+        }
+        return $saved?:['Motor','Kraftstoff / Vergaser','Einspritzung','Kühlung','Auspuff','Getriebe','Overdrive','Getriebe / Overdrive','Kupplung','Antrieb','Fahrwerk','Lenkung','Bremsen','Elektrik','Zündung','Chassis','Karosserie','Innenausstattung','Verdecke','Räder / Reifen','Instrumente','Sonstiges'];
+    }
     public function registerHooks(): void
     {
         add_action('wp_ajax_strc_catalog',[$this,'respond']);
