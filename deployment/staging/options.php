@@ -36,16 +36,16 @@ if(!defined('STRC_FAIRGATE_VEHICLE_FIELDS'))define('STRC_FAIRGATE_VEHICLE_FIELDS
 // Paarmitgliedschaft (Label im Fairgate-Feld «Mitgliedschaft», für beide Partner gleich).
 if(!defined('STRC_FAIRGATE_COUPLE_LABELS'))define('STRC_FAIRGATE_COUPLE_LABELS',['Paarmitglied']);
 if(!defined('STRC_FAIRGATE_STATUS_VALUES'))define('STRC_FAIRGATE_STATUS_VALUES',['active'=>'active','archived'=>'inactive']);
-// Schreiben nach Fairgate: nur Co-Pilot-Textfelder für den Paar-Antrag (Vorstandsfreigabe 25.10.2026).
+// Co-Pilot-Zuordnung vorbereitet; die bestehende Staging-Lesesperre bleibt ohne gesonderte Betreiberfreigabe aktiv.
 // Geschlecht, Geburtsdatum und Anrede erst ergänzen, wenn das Werteformat der Fairgate-Felder bestätigt ist.
 // Mitgliederfelder ('fields') bleiben aus: Profiländerungen der Tester gehen weiter ins Postfach der Mitgliederverwaltung.
-if(!defined('STRC_FAIRGATE_PROFILE_WRITE'))define('STRC_FAIRGATE_PROFILE_WRITE',['enabled'=>true,'copilot'=>[
+if(!defined('STRC_FAIRGATE_PROFILE_WRITE'))define('STRC_FAIRGATE_PROFILE_WRITE',['enabled'=>false,'copilot'=>[
     'first_name'=>'co_pilot_in_vorname',
     'last_name'=>'co_pilot_in_nachname',
     'email'=>'co_pilot_in_email',
     'phone'=>'co_pilot_in_handy',
 ]]);
-if(!defined('STRC_FAIRGATE_STAGING_COPILOT_WRITE'))define('STRC_FAIRGATE_STAGING_COPILOT_WRITE',true);
+if(!defined('STRC_FAIRGATE_STAGING_COPILOT_WRITE'))define('STRC_FAIRGATE_STAGING_COPILOT_WRITE',false);
 if(!defined('STRC_WHATSAPP_TEMPLATE_DE'))define('STRC_WHATSAPP_TEMPLATE_DE','tr_forum_de');
 if(!defined('STRC_WHATSAPP_TEMPLATE_FR'))define('STRC_WHATSAPP_TEMPLATE_FR','tr_forum_fr');
 if(!defined('STRC_MAKE_WHATSAPP_ENABLED'))define('STRC_MAKE_WHATSAPP_ENABLED',false);

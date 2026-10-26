@@ -61,6 +61,7 @@ final class FairgateMemberExtrasTest extends TestCase
         $mapping = new FairgateMemberMapping(array('contactId'=>'/id','status'=>'/status','memberNumber'=>'/configured_fields/mitglieder_nummer'), array('Aktiv'=>'active'));
         self::assertSame('1234', $mapping->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>' 1234 '))));
         self::assertSame('1234', $mapping->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>1234))));
+        self::assertNull($mapping->memberNumber(['configured_fields'=>['mitglieder_nummer'=>1234.5]]));
         self::assertSame(null, $mapping->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>''))));
         self::assertSame(null, $mapping->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>'FG:12'))));
         self::assertSame(null, (new FairgateMemberMapping(array(), array()))->memberNumber(array('configured_fields'=>array('mitglieder_nummer'=>'1234'))));

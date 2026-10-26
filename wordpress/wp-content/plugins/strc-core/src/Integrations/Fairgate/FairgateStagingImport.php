@@ -37,7 +37,7 @@ final class FairgateStagingImport
     public function refresh(): void
     {
         if(!wp_doing_cron() || !self::enabled())return;
-        try{$this->apply($this->fetch());delete_option('strc_fairgate_import_error');}
+        try{$this->apply($this->fetch(), true);delete_option('strc_fairgate_import_error');}
         catch(\Throwable $e){update_option('strc_fairgate_import_error',['at'=>gmdate(DATE_ATOM),'message'=>'Fairgate-Abgleich fehlgeschlagen; bestehende Konten wurden nicht pauschal gesperrt.'],false);}
     }
 
@@ -102,6 +102,19 @@ final class FairgateStagingImport
             }catch(FairgateApiException $e){$r['reason']=$e->getMessage();}
             $plan[]=$r;
         }
+        // Detect duplicate official numbers before the first write, independent of contact order.
+        $numbers=[];
+        foreach($plan as $row)if(isset($row['member_number']))$numbers[$row['member_number']]=($numbers[$row['member_number']]??0)+1;
+        global $wpdb;
+        $owners=[];
+        foreach($wpdb->get_results("SELECT member_number,fairgate_contact_id FROM {$wpdb->prefix}strc_memberships", ARRAY_A) as $stored)$owners[$stored['member_number']]=(string)$stored['fairgate_contact_id'];
+        foreach($plan as &$row)if(isset($row['member_number'])){
+            $number=$row['member_number'];
+            if($numbers[$number]>1 || (isset($owners[$number]) && $owners[$number]!==$row['id'])){
+                unset($row['member_number']);$row['memberNumberIssue']='Mitgliedsnummer doppelt oder bereits einem anderen Kontakt zugeordnet; bisherige Nummer bleibt.';
+            }
+        }
+        unset($row);
         return $plan;
     }
 
@@ -168,7 +181,7 @@ final class FairgateStagingImport
             // Internal unique key only. Never present it as an official member number.
             $fields+=['user_id'=>$u->ID,'fairgate_contact_id'=>$r['id'],'member_number'=>'FG:'.$r['id'],'region'=>$r['region']??'','created_at'=>current_time('mysql')];
             $saved=$wpdb->insert($table,$fields);
-            if($saved!==false&&!isset($fields['member_number']))update_user_meta($u->ID,'strc_fairgate_number_pending','1');
+            if($saved!==false){if(str_starts_with((string)$fields['member_number'],'FG:'))update_user_meta($u->ID,'strc_fairgate_number_pending','1');else delete_user_meta($u->ID,'strc_fairgate_number_pending');}
         }else{$saved=$wpdb->update($table,$fields,['user_id'=>$u->ID]);if($saved!==false&&isset($fields['member_number']))delete_user_meta($u->ID,'strc_fairgate_number_pending');}
         if($saved===false){
             if($new){require_once ABSPATH.'wp-admin/includes/user.php';wp_delete_user($u->ID);}

@@ -195,7 +195,7 @@ final class MemberProfile
     public static function fairgateSynced(int $userId): void
     {
         $request=get_user_meta($userId,'strc_couple_request',true);
-        if(is_array($request)&&($request['state']??'')==='pending'){self::activateCouple($userId,$request);return;}
+        if(is_array($request)&&($request['state']??'')==='pending'){if(self::coupleRequest($userId)['state']==='pending')self::activateCouple($userId,$request);return;}
         $user=get_userdata($userId);if(!$user)return;
         $requester=self::requesterForCopilotEmail((string)$user->user_email);
         if(!$requester||$requester===$userId)return;
@@ -207,14 +207,25 @@ final class MemberProfile
     /** f)+g) Paarmitgliedschaft aktiv: Antrag abschliessen, Co-Pilot-Konto verknüpfen (falls vorhanden), Mitglied und Kassier informieren. */
     public static function activateCouple(int $userId,array $request): array
     {
-        $request['state']='active';$request['activatedAt']=gmdate(DATE_ATOM);update_user_meta($userId,'strc_couple_request',$request);
+        return FormStore::locked('couple-activation-'.$userId,static function()use($userId,$request):array {
+        $current=get_user_meta($userId,'strc_couple_request',true);
+        if(is_array($current)&&($current['state']??'')==='active')return $current;
+        $membership=(new MembershipRepository())->findForUser($userId);
+        $formId=(int)($request['formId']??0);$requestPost=$formId?get_post($formId):null;
+        $requestData=$requestPost?FormStore::data($requestPost):[];
+        if(!$membership||!MembershipAccessPolicy::grantsMemberAccess((string)$membership['status'])
+            ||!MembershipTypePolicy::isCouple((string)$membership['membership_type'])
+            ||!$requestPost||(int)$requestPost->post_author!==$userId||$requestPost->post_type!=='strc_form'
+            ||($requestData['kind']??'')!=='couple'||!in_array($requestData['state']??'',self::PENDING,true))return $request;
+        $request['state']='active';$request['activatedAt']=gmdate(DATE_ATOM);
         $form=(int)($request['formId']??0);$post=$form?get_post($form):null;
         if($post&&$post->post_type==='strc_form'){
             $data=FormStore::data($post);
             if(in_array($data['state']??'',['pending_review','clarification','approved_pending_sync'],true)){
                 $data['state']='completed';$data['completedAt']=gmdate(DATE_ATOM);$data['reviewNote']=trim(((string)($data['reviewNote']??''))."\nIn Fairgate als Paarmitglied verbunden (Abgleich).");
-                try{FormStore::save('strc_form',$data,(int)$post->post_author,0,$post,FormStore::revision($post));}catch(\Throwable $e){}
+                FormStore::save('strc_form',$data,(int)$post->post_author,0,$post,FormStore::revision($post));
             }
+            update_user_meta($userId,'strc_couple_request',$request);
             $email=(string)($data['payload']['copilot']['email']??'');$partner=$email!==''?get_user_by('email',$email):false;
             if($partner&&(int)$partner->ID!==$userId&&self::household($userId)['mode']==='single'){
                 $pm=(new MembershipRepository())->findForUser((int)$partner->ID);
@@ -224,13 +235,14 @@ final class MemberProfile
             self::notifyTreasurer($form);
         }
         return $request;
+        });
     }
 
     /** g) Bestätigung nur an das antragstellende Mitglied (einmalig). */
     public static function notifyMember(int $form): bool
     {
         $previous=get_post_meta($form,'strc_couple_member_notification',true);
-        if(is_array($previous)&&in_array($previous['state']??'',['accepted','sending'],true))return false;
+        if(is_array($previous)&&in_array($previous['state']??'',['accepted','sending','uncertain'],true))return false;
         $post=get_post($form);$user=$post?get_userdata((int)$post->post_author):false;if(!$user||!is_email($user->user_email))return false;
         $data=FormStore::data($post);$p=$data['payload']??[];$c=$p['copilot']??[];
         $copilot=trim((string)($c['first_name']??'').' '.(string)($c['last_name']??''));
@@ -249,7 +261,7 @@ final class MemberProfile
     public static function notifyTreasurer(int $form): bool
     {
         $previous=get_post_meta($form,'strc_couple_treasurer_notification',true);
-        if(is_array($previous)&&in_array($previous['state']??'',['accepted','sending'],true))return false;
+        if(is_array($previous)&&in_array($previous['state']??'',['accepted','sending','uncertain'],true))return false;
         $post=get_post($form);if(!$post)return false;
         $data=FormStore::data($post);$p=$data['payload']??[];$c=$p['copilot']??[];
         $status=['state'=>'sending','attemptedAt'=>gmdate(DATE_ATOM),'recipients'=>self::treasurerRecipients()];
