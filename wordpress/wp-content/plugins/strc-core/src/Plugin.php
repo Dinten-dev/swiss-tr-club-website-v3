@@ -52,6 +52,7 @@ final class Plugin
         (new \SwissTRClub\Core\Community\CommunityEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Community\CatalogSettings())->registerHooks();
         (new \SwissTRClub\Core\Community\ForumSettings())->registerHooks();
+        (new \SwissTRClub\Core\Infrastructure\MacRomanRepair())->registerHooks();
         (new \SwissTRClub\Core\Community\GalleryRetention())->registerHooks();
         if(defined('WP_CLI')&&WP_CLI)\SwissTRClub\Core\Community\LibraryImportCommand::register();
         (new ContentPostTypes())->registerHooks();

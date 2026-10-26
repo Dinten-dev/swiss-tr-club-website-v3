@@ -77,11 +77,11 @@ final class FairgateStagingImport
                 if(!is_email($email))throw new FairgateApiException('Gültige persönliche E-Mail fehlt');
                 if(($emails[strtolower($email)]??0)!==1)throw new FairgateApiException('E-Mail gehört zu mehreren Fairgate-Kontakten');
                 $status=match($c['status']??''){'active'=>'active','archived'=>'inactive',default=>throw new FairgateApiException('Unbekannter Kontaktstatus')};
-                $first=sanitize_text_field($c['basefields']['first_name']??'');$last=sanitize_text_field($c['basefields']['last_name']??'');
+                $first=\SwissTRClub\Core\Infrastructure\MacRomanRepair::text(sanitize_text_field($c['basefields']['first_name']??''));$last=\SwissTRClub\Core\Infrastructure\MacRomanRepair::text(sanitize_text_field($c['basefields']['last_name']??''));
                 if($first===''||$last==='')throw new FairgateApiException('Vorname oder Nachname fehlt');
                 $address=$c['corr_address']??[];$comm=$c['communication']??[];
                 $r+=['email'=>$email,'first_name'=>$first,'last_name'=>$last,'status'=>$status,'type'=>self::TYPES[$label],
-                    'profile'=>['phone'=>sanitize_text_field($comm['mobile']??''),'street'=>sanitize_text_field($address['street']??''),'postcode'=>sanitize_text_field($address['postale_code']??''),'city'=>sanitize_text_field($address['city']??''),'country'=>sanitize_text_field($address['country']??'')]];
+                    'profile'=>array_map([\SwissTRClub\Core\Infrastructure\MacRomanRepair::class,'text'],['phone'=>sanitize_text_field($comm['mobile']??''),'street'=>sanitize_text_field($address['street']??''),'postcode'=>sanitize_text_field($address['postale_code']??''),'city'=>sanitize_text_field($address['city']??''),'country'=>sanitize_text_field($address['country']??'')])];
                 $r['extras']=FairgateMemberMapping::fromConstants()->extras($c);
                 $region=FairgateMemberMapping::fromConstants()->regionName($c);
                 if($region!==null)$r['region']=$region;
