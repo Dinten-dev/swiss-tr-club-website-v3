@@ -654,13 +654,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 294930,
-      "sha256": "40cec5a8f201c35d443f383bbec3ed0194926548f08dceceddb69438aa2896d3"
+      "bytes": 296780,
+      "sha256": "75f3002fca7628fdf8067d8b5946022216f7044c18fe08bc1e49bedf1aa9fb50"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
       "bytes": 916024,
-      "sha256": "49722cae69193838b05733eccd1c7915df477f4eb75c3ad04c1fa749d537b40c"
+      "sha256": "db475473c66d2f0b002e80746c1aab86bb9618387e6f1688c05c633e401da2fa"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -891,6 +891,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DGDcPB2N.js",
       "bytes": 5552,
       "sha256": "96bda537c6563beb5f0269ec83e579291abc7bde0089c439b3867a3694225bf0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DLxlC4rl.js",
+      "bytes": 9784,
+      "sha256": "2c0d4c3e0ae87b4801b589064373cc56b50c5dd4856f970742fe13aba55d5c07"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DnlZ1knC.js",
@@ -2143,6 +2148,11 @@
       "sha256": "2eb93b8d9f7dac5a87e2b828831ab6f1cef6f92e7ac09f9dc60c1009e5162b32"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-B6axRZhf.js",
+      "bytes": 133924,
+      "sha256": "a0a78ea9cfa76e8f2bbea8c54a5dea074d5983b02a72998b93aa2ae6e867b0cd"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-BjrP63Nt.js",
       "bytes": 69732,
       "sha256": "7dde0e21240829b948db6c415e75c12f0d5ed8e9319fcc3ce5718f25bc1a59c0"
@@ -2243,9 +2253,7 @@
       "sha256": "6355c019a358f34e46406a5dad8f0057bae8d1bd0c530f0420d1d56a37087eb0"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-10-26T19:37:43.575Z",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-26T19:40:23.989780+00:00",
-  "publishedFiles": 28
+  "status": "candidate",
+  "builtOn": "2026-10-26T20:11:47.517Z",
+  "baselineCapturedOn": "2026-10-13"
 }
