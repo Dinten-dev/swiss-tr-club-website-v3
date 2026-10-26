@@ -3294,3 +3294,18 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .review-notifications h3{font-size:16px;margin:0 0 6px}
 .review-notifications label{display:block;margin-top:10px}
 .review-notifications input[type=email]{width:100%;font-size:16px}
+/* PDF-Leser: kompakte Leiste, Seite bekommt den Platz (Testfeedback 26.10.) */
+.magazine-reader-toolbar{gap:6px 14px;padding:8px 12px}
+.magazine-reader-toolbar .reader-group{display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap}
+.magazine-reader .magazine-reader-toolbar button,.magazine-reader .magazine-reader-toolbar select{min-height:34px;padding:4px 10px;font-size:14px;line-height:1.2;border-radius:6px}
+.magazine-reader .magazine-reader-toolbar button[aria-label]{min-width:34px;font-size:18px;padding:2px 8px}
+.magazine-reader-toolbar .reader-page,.magazine-reader-toolbar .reader-zoom{min-width:0;padding:0 6px;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.magazine-reader-toolbar .reader-zoom{min-width:48px}
+.magazine-reader-toolbar .reader-search input{width:min(200px,40vw);min-height:34px;padding:4px 8px;font-size:16px;border:1px solid #a5bac8;border-radius:6px}
+.magazine-reader-toolbar .reader-search select{border:1px solid #a5bac8;background:#fff;color:#123c58}
+.magazine-reader-toolbar button[aria-pressed="true"]{background:#123c58;color:#fff;border-color:#123c58}
+.magazine-reader.is-fullscreen{padding:0}
+.magazine-reader.is-fullscreen .magazine-reader-page{padding:8px}
+.magazine-reader.is-fullscreen .magazine-reader-footer{padding:8px 12px}
+.magazine-reader.is-fullscreen .magazine-reader-footer button,.magazine-reader.is-fullscreen .magazine-reader-footer a{min-height:34px;padding:4px 12px;font-size:14px}
+@media (max-width:699px){.magazine-reader-toolbar{gap:6px 8px;padding:6px 8px}.magazine-reader .magazine-reader-toolbar button,.magazine-reader .magazine-reader-toolbar select{min-height:40px}.magazine-reader-toolbar .reader-zoom{display:none}.magazine-reader-toolbar .reader-search{order:9;flex:1 1 100%;justify-content:center}.magazine-reader-toolbar .reader-search{min-width:0}.magazine-reader-toolbar .reader-search input{flex:1 1 0;width:auto;min-width:0}.magazine-reader-toolbar .reader-search select{max-width:42%}}
