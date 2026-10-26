@@ -13,9 +13,9 @@ type Field={key:string;label:string;type:string;adminOnly?:boolean;translationOf
 type Doc={key:string;schema:{title:string;route:string;fields:Field[]};revision:number;values:ContentValues;hasDraft:boolean;canAdminister?:boolean};
 type Editing={doc:Doc;values:ContentValues;nonce:string};
 // Felder, die direkt im jeweiligen Kasten der Regionalseite bearbeitet werden; alle übrigen Admin-Felder stehen im Kasten «Administration».
-const inlineKeys=['contactName','contactRole','contactImage','contactImageFrame','contactPhone','contactEmail','meetName','meetAddress','meetSchedule','meetDates','whatsappUrl','whatsappQr','body','news','eventBody'];
+const inlineKeys=['contactName','contactRole','contactImage','contactImageFrame','contactPhone','contactEmail','meetName','meetAddress','meetSchedule','meetDates','whatsappUrl','whatsappQr','body','news','eventBody','eventEmpty'];
 
-export default function RegionalContent({documentKey,values={},events,canEdit=false}:{documentKey:string;values?:ContentValues;events?:ReactNode;canEdit?:boolean}) {
+export default function RegionalContent({documentKey,values={},events,eventCount,canEdit=false}:{documentKey:string;values?:ContentValues;events?:ReactNode;eventCount?:number;canEdit?:boolean}) {
  const {refresh}=useSiteContent();
  const [edit,setEdit]=useState<Editing|null>(null);const [busy,setBusy]=useState(false);const [uploading,setUploading]=useState(false);const [error,setError]=useState('');const [notice,setNotice]=useState('');const [confirmCancel,setConfirmCancel]=useState(false);
  const shown=edit?edit.values:values;
@@ -70,7 +70,7 @@ export default function RegionalContent({documentKey,values={},events,canEdit=fa
  </div>
  <section className="regional-panel"><h2>{t(tri?'Über die TRiungsters':'Weitere Termine')}</h2>{edit?richInput('body',tri?'Über die TRiungsters':'Weitere Termine'):rich('body','Informationen zu unserer Gemeinschaft folgen.')}</section>
  <section className="regional-panel"><h2>{t(tri?'TRiungsters-News':'Neuigkeiten')}</h2>{edit?richInput('news',tri?'TRiungsters-News':'Neuigkeiten'):rich('news','Noch keine Neuigkeiten veröffentlicht.')}</section>
- <section className="regional-panel regional-events-panel"><h2>{t(tri?'Veranstaltungen':'Unsere Anlässe')}</h2>{edit?richInput('eventBody','Text über der Terminliste'):text('eventBody')&&<RichHtml html={text('eventBody')}/>} {events||<p className="regional-empty">{t("Neue Veranstaltungen werden hier angekündigt. Alle Termine findest du in der")} <a href="#agenda">{t('Agenda')}</a>.</p>}</section>
+ <section className="regional-panel regional-events-panel"><h2>{t(tri?'Veranstaltungen':'Unsere Anlässe')}</h2>{edit?<div className="regional-edit-group">{richInput('eventBody','Einleitung (immer sichtbar)')}{richInput('eventEmpty','Hinweis, wenn keine Anlässe geplant sind')}</div>:text('eventBody')&&<RichHtml html={text('eventBody')}/>} {!edit&&eventCount===0&&text('eventEmpty')?<RichHtml html={text('eventEmpty')}/>:events||<p className="regional-empty">{t("Neue Veranstaltungen werden hier angekündigt. Alle Termine findest du in der")} <a href="#agenda">{t('Agenda')}</a>.</p>}</section>
  {edit?<section className="regional-panel regional-documents"><h2>{t('Dokumente')}</h2><PublicDocuments docKey={documentKey} nonce={edit.nonce} disabled={locked} uploadState={setUploading} regional/></section>:<RegionalDocuments documentKey={documentKey}/>}
  {edit&&<p className="regional-edit-hint">{t('Französische Texte und frühere Fassungen:')} <a href={'#redaktion/'+documentKey}>{t('im Redaktionsbereich öffnen')}</a></p>}
  </div>;

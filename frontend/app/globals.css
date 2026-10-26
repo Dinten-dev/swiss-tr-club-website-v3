@@ -3283,3 +3283,6 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
  .event-details .detail-box{grid-template-columns:minmax(84px,max-content) minmax(0,1fr);gap:8px 14px;padding:14px}
  .event-details .detail-box strong{text-align:left}
 }
+/* Shop footer logo: WooCommerce img rules (height:auto, max-width) and flex stretch distorted the round logo */
+.strc-store-footer .footer-brand{align-items:flex-start}
+.strc-store-footer .footer-logo,footer .footer-logo{flex:0 0 64px;width:64px!important;height:64px!important;max-width:none!important;min-width:64px;aspect-ratio:1/1;object-fit:contain;border-radius:50%;background:#fff;align-self:flex-start}

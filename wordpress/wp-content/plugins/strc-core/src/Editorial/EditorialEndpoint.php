@@ -78,7 +78,8 @@ final class EditorialEndpoint
             'meetDates' => array('a', 'Nächste Treffen'),
             'body' => array('b', $triungsters ? 'Über die TRiungsters' : 'Weitere Termine'),
             'news' => array('c', 'Neuigkeiten'),
-            'eventBody' => array('d', 'Unsere Anlässe: Text über der Terminliste'),
+            'eventBody' => array('d', 'Unsere Anlässe: Einleitung (immer sichtbar)'),
+            'eventEmpty' => array('d', 'Unsere Anlässe: Hinweis, wenn keine Anlässe geplant sind'),
         );
         $ordered = array();
         foreach ($moderated as $key => [$section, $label]) {
