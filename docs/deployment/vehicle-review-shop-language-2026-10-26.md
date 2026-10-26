@@ -26,3 +26,13 @@ WooCommerce weist die Bestellung erst nach `setup_locale()` zu. Deshalb erfolgt 
 - Staging-Veröffentlichung nur nach erneutem Prüfsummenvergleich; Rückkehrdateien werden serverseitig aufgezeichnet. Produktion bleibt unverändert.
 
 Die erste Veröffentlichung wurde nach einem Fehler beim frühen WordPress-Boot vollständig per Prüfsummenabgleich zurückgenommen. Die korrigierte Locale-Methode prüft vor dem Zugriff, ob WordPress seinen Locale-Switcher bereits initialisiert hat. Ein zusätzlicher Integrationstest deckt ausdrücklich den Aufruf vor dieser Initialisierung ab. Vor dem erneuten Release sind keine Fahrzeugdaten übernommen worden.
+
+## Bestätigtes Ergebnis auf Staging
+
+PR #50 und Frühstart-Korrektur #51 sind zusammengeführt. Sieben geänderte/neue Programmdateien wurden nach erneutem Abgleich aller 445 Ausgangsdateien veröffentlicht. Danach stimmen alle 446 aktuellen Programmdateien mit dem Veröffentlichungsmanifest überein. Der vollständige WordPress-Start registriert die Sprachauflösung bei zwölf Kundennachrichtentypen. Zwölf HTTP-Prüfungen für Website, Login, Shop und Ressourcen bestehen; der gemeinsame Testschutz bleibt aktiv.
+
+Die unmittelbar vor Übernahme frisch abgerufene Fairgate-Vorschau bestätigte genau die fünf geprüften Ergänzungen. Alle fünf wurden additiv gespeichert: jetzt 313 Fahrzeuge, darunter 310 Fairgate-Importe. Wiederholungsvorschau: keine weiteren Ergänzungen; 19 Einträge bleiben zur fachlichen Prüfung sichtbar (zwölf fehlende Typen, sieben andere Fabrikate). Beim Import wurden keine E-Mails oder externen Anfragen ausgelöst.
+
+Nachvergleich: alle 288 Benutzer, 287 Mitgliedschaften mit Mitgliederzugriff, 334 bisherigen privaten Datensätze, eine bestehende Bestellung, 35 redaktionellen Optionen sowie Rollen, Passwörter, Einstellungen, Konfiguration und Bilddateien erhalten. Ein bestehender WooCommerce-Aktivitätszeitstempel wurde während der Prüfung regulär fortgeschrieben; sämtliche anderen Benutzer-Metadaten sind unverändert. Alle drei vorhandenen Fahrzeugbilder sind anhand SHA-256 identisch.
+
+Privater Einzelfallbericht und Importbelege: `.private/vehicle-review-2026-10-26/` (nicht versioniert). Rückkehrpaket serverseitig: `/private/strc-rollback-20261026-vehicles-mail.tar.gz`, SHA-256 `4cc34b844183b75475ed2c4408cf3237158d0a1bd3d1112fc2fbcd8746b9c761`. Programm-Rückkehrumfang: `/private/strc-peter-release-20261026204951`. Fahrzeug-Rückkehrumfang enthält ausschliesslich die fünf neuen IDs samt Quellen und Inhaltsprüfsummen; spätere Änderungen müssen vor einer Rücknahme erhalten werden.
