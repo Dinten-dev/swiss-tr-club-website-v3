@@ -165,7 +165,7 @@ function ClubApp() {
 function HomePage({navigate,events,eventsState,openEvent,memberAccess}:{memberAccess:boolean,navigate:(p:Page)=>void,events:ClubEvent[],eventsState:'loading'|'ready'|'error',openEvent:(event:ClubEvent)=>void}) {
   const next=events[0];
   const eventPreview=eventsState==='loading'?{title:t('Termine werden geladen …'),text:t('Die nächsten Treffen findest du hier.')}:eventsState==='error'?{title:t('Agenda derzeit nicht erreichbar'),text:t('Bitte versuche es in der Terminübersicht erneut.')}:next?{title:next.title,text:`${eventDateTime(next.startAt)} · ${next.location||eventContext(next)}`}:{title:t('Das nächste Wiedersehen'),text:t('Aktuell sind noch keine kommenden Termine veröffentlicht. Die Regionen ergänzen ihre Treffen hier.')};
-  return <HomepageSections eventPreview={eventPreview} upcomingEvents={events.slice(0,5)} eventsState={eventsState} openEvent={openEvent} memberAccess={memberAccess} navigate={navigate}/>;
+  return <HomepageSections eventPreview={eventPreview} upcomingEvents={events.slice(0,5)} allEvents={events} eventsState={eventsState} openEvent={openEvent} memberAccess={memberAccess} navigate={navigate}/>;
 }
 
 function PageHero({eyebrow,title,text,landscape}:{eyebrow:string,title:string,text:string,landscape?:string}) { return <section className={`page-hero${landscape?' regional-hero':''}`} style={landscape?{backgroundImage:`linear-gradient(90deg,rgba(10,37,63,.91),rgba(10,37,63,.66)),url("${regionalLandscape(landscape)}")`,backgroundSize:'cover',backgroundPosition:'center'}:undefined}><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{text}</p></section>; }

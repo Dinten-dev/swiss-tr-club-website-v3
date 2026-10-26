@@ -1103,5 +1103,14 @@
   "Verkauf am Anlass oder manuelle Bestellung erfassen; der Lagerbestand wird automatisch angepasst.": "Saisir une vente lors d’un événement ou une commande manuelle ; le stock est ajusté automatiquement.",
   "Aktueller Bestand pro Artikel und Variante.": "Stock actuel par article et variante.",
   "Agenda-Moderator": "Modérateur de l’agenda",
-  "Agenda verwalten: gewählte Regionen, ohne Auswahl clubweit. Keine Bearbeitung der Regionalseiten.": "Gérer l’agenda des régions sélectionnées, ou de tout le club sans sélection. Ne permet pas de modifier les pages régionales."
+  "Agenda verwalten: gewählte Regionen, ohne Auswahl clubweit. Keine Bearbeitung der Regionalseiten.": "Gérer l’agenda des régions sélectionnées, ou de tout le club sans sélection. Ne permet pas de modifier les pages régionales.",
+  "Benachrichtigungen zu neuen Mitgliederbeiträgen": "Notifications des nouvelles contributions",
+  "Neue Einreichungen (Galerie, Bibliothek, Marktplatz) erscheinen immer hier im Dashboard. Die E-Mail dazu kannst du ausschalten oder an eine andere Adresse senden lassen.": "Les nouvelles contributions (galerie, bibliothèque, marché) apparaissent toujours ici. Tu peux désactiver l’e-mail correspondant ou le faire envoyer à une autre adresse.",
+  "E-Mail-Benachrichtigung senden": "Envoyer une notification par e-mail",
+  "E-Mail-Adresse für diese Benachrichtigungen (optional)": "Adresse e-mail pour ces notifications (facultatif)",
+  "Leer = Adresse deines Kontos": "Vide = adresse de ton compte",
+  "Kurzbeschrieb (für Anzeigen)": "Description courte (pour les annonces)",
+  "Erscheint in «Das Neueste», in der Agenda und auf den Regionsseiten. Leer = Anfang der Beschreibung.": "Apparaît dans « Les dernières nouvelles », dans l’agenda et sur les pages régionales. Vide = début de la description.",
+  "Beschreibung (Programm, Details)": "Description (programme, détails)",
+  "Kurzbeschrieb (FR)": "Description courte (FR)"
 }

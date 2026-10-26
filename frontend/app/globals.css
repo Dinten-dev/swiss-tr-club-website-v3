@@ -3225,3 +3225,8 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 @media(max-width:640px){.album-view-head{flex-direction:column;align-items:stretch}.album-view-head .market-primary{width:100%}}
 .album-carousel .album-slide{min-width:0;width:100%;overflow:hidden}
 .role-assignment-panel .role-search input[type=search]{border:1px solid #9fb3c2;border-radius:6px;min-height:44px;padding:8px 12px;background:#fff;font:inherit}
+/* Dashboard: Benachrichtigungen für Prüfende */
+.review-notifications{margin-top:18px;padding-top:16px;border-top:1px solid #dbe5ee}
+.review-notifications h3{font-size:16px;margin:0 0 6px}
+.review-notifications label{display:block;margin-top:10px}
+.review-notifications input[type=email]{width:100%;font-size:16px}
