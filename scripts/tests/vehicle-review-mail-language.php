@@ -14,11 +14,15 @@ function vmcheck(bool $ok,string $label): void {global $checks;if(!$ok)throw new
 add_filter('pre_wp_mail',static function($return,$args)use(&$mails){$mails[]=$args;return true;},10,2);
 add_filter('pre_http_request',static function()use(&$network){$network++;return new WP_Error('qa','Blocked');});
 // Reproduce the public site's browser-locale filter without booting migrations.
-add_filter('determine_locale',static fn($locale)=>is_locale_switched()?get_locale():(($_COOKIE['strc_language']??'')==='fr'?'fr_FR':'de_CH'));
+add_filter('determine_locale',[SwissTRClub\Core\Plugin::class,'locale']);
 $language=new CustomerLanguage();$language->registerHooks();
 $emails=WC()->mailer()->get_emails();$language->emails($emails);
 FormStore::register();
 try {
+    $switcher=$GLOBALS['wp_locale_switcher'];
+    try { unset($GLOBALS['wp_locale_switcher']);$earlyLocale=SwissTRClub\Core\Plugin::locale('de_DE'); }
+    finally { $GLOBALS['wp_locale_switcher']=$switcher; }
+    vmcheck($earlyLocale==='de_CH','Locale filter is safe before WordPress constructs its locale switcher');
     foreach(['de','fr','romandie','bern','fallback','guest']as$name){
         $id=wp_insert_user(['user_login'=>$prefix.'_'.$name,'user_email'=>$prefix.'_'.$name.'@example.invalid','user_pass'=>wp_generate_password(40),'first_name'=>'QA','last_name'=>'Fixture','role'=>'strc_member']);
         if(is_wp_error($id))throw new RuntimeException('Fixture creation');$users[$name]=(int)$id;(new MembershipRepository())->syncUser($id);

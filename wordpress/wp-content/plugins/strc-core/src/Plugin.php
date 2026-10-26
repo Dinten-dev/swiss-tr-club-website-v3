@@ -21,6 +21,14 @@ use SwissTRClub\Core\Roles\RoleManager;
 
 final class Plugin
 {
+    public static function locale(string $locale): string
+    {
+        // plugins_loaded runs before WordPress constructs its locale switcher.
+        if (($GLOBALS['wp_locale_switcher'] ?? null) instanceof \WP_Locale_Switcher && is_locale_switched()) return get_locale();
+        if (!is_admin() || wp_doing_ajax()) return ($_COOKIE['strc_language'] ?? '') === 'fr' ? 'fr_FR' : 'de_CH';
+        return $locale;
+    }
+
     private static bool $booted = false;
 
     public static function boot(): void
@@ -31,7 +39,7 @@ final class Plugin
 
         self::$booted = true;
         \SwissTRClub\Core\Infrastructure\StagingAccessLoopback::registerHooks();
-        add_filter('determine_locale',static function(string $locale):string{if(is_locale_switched())return get_locale();if(!is_admin()||wp_doing_ajax())return ($_COOKIE['strc_language']??'')==='fr'?'fr_FR':'de_CH';return $locale;});
+        add_filter('determine_locale',array(self::class,'locale'));
         add_action('init', array(\SwissTRClub\Core\Http\UserLanguage::class, 'rememberSelection'));
 
         if ('20260926-2' !== get_option('strc_core_schema_version')) {
