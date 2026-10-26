@@ -74,9 +74,7 @@ final class ShopInvoice
 
     private static function language(\WC_Order $order): string
     {
-        $user = (int) $order->get_customer_id();
-        if ($user && class_exists(\SwissTRClub\Core\Http\UserLanguage::class)) return \SwissTRClub\Core\Http\UserLanguage::french($user) ? 'fr' : 'de';
-        return str_starts_with((string) get_locale(), 'fr') ? 'fr' : 'de';
+        return CustomerLanguage::language($order);
     }
 
     public static function pdf(\WC_Order $order): string

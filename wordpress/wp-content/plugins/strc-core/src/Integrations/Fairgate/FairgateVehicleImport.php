@@ -51,7 +51,14 @@ final class FairgateVehicleImport
                 $normalized=FairgateVehicleNormalizer::normalize($input);
                 if($normalized['result']==='empty')continue;
                 if($normalized['result']==='no-tr'){$out[]=$base+['action'=>'no-tr'];continue;}
-                if($normalized['result']==='review'){$out[]=$base+['action'=>'review','reason'=>$normalized['reason'],'fairgate'=>$input];continue;}
+                if($normalized['result']==='review'){
+                    // Only an exact, non-placeholder chassis match in this household resolves a missing type.
+                    $vin=(string)($input['chassisNumber']??'');
+                    $key=static fn($v)=>preg_replace('/[^A-Z0-9]/','',strtoupper((string)$v));
+                    $matches=!str_contains($vin,'?')&&strlen($key($vin))>=6?array_filter($existing,static fn($r)=>$key($r['chassisNumber']??'')===$key($vin)):[];
+                    if(($input['model']??'')===''&&count($matches)===1){$out[]=$base+['action'=>'matching-existing'];continue;}
+                    $out[]=$base+['action'=>'review','reason'=>$normalized['reason'],'fairgate'=>$input];continue;
+                }
                 try{$vehicle=FormFields::vehicle($normalized['input']);}catch(\InvalidArgumentException$e){$out[]=$base+['action'=>'invalid','reason'=>$e->getMessage(),'fairgate'=>$input];continue;}
                 $action='create';
                 foreach($existing as$row){
@@ -65,17 +72,19 @@ final class FairgateVehicleImport
         return $out;
     }
 
-    public function apply(array $contacts): array
+    public function apply(array $contacts, ?array $reviewedSources = null): array
     {
         FairgateStagingImport::guard();
-        return FormStore::locked('fairgate-additive-vehicles',function()use($contacts){
+        return FormStore::locked('fairgate-additive-vehicles',function()use($contacts,$reviewedSources){
             $plan=$this->plan($contacts);
             // Fehlende API-Felder brechen ab. Einzelne nicht erkannte Einträge («review»/«invalid») werden nur aufgelistet
             // und blockieren die übrigen Fahrzeuge nicht mehr; die Mitgliederverwaltung klärt sie von Hand.
             if(array_filter($plan,static fn($r)=>$r['action']==='missing-fields'))throw new FairgateApiException('Fahrzeugfelder fehlen in der Fairgate-Antwort; keine Fahrzeuge importiert.');
             foreach($plan as&$row){
+                // A reviewed partial import may only append its explicit sources, without member-meta writes.
+                if($reviewedSources!==null&&!in_array($row['source'],$reviewedSources,true))continue;
                 if($row['action']==='create')$row['postId']=FormStore::save('strc_vehicle',$row['vehicle']+['fairgateSource'=>$row['source'],'fairgateImportedAt'=>gmdate(DATE_ATOM),'requestId'=>wp_generate_uuid4()],$row['userId']);
-                if($row['action']==='no-tr')update_user_meta($row['userId'],'strc_fairgate_no_tr',gmdate(DATE_ATOM));
+                if($reviewedSources===null&&$row['action']==='no-tr')update_user_meta($row['userId'],'strc_fairgate_no_tr',gmdate(DATE_ATOM));
             }
             unset($row);return $plan;
         });

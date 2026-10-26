@@ -31,7 +31,7 @@ final class Plugin
 
         self::$booted = true;
         \SwissTRClub\Core\Infrastructure\StagingAccessLoopback::registerHooks();
-        add_filter('determine_locale',static function(string $locale):string{if(!is_admin()||wp_doing_ajax())return ($_COOKIE['strc_language']??'')==='fr'?'fr_FR':'de_CH';return $locale;});
+        add_filter('determine_locale',static function(string $locale):string{if(is_locale_switched())return get_locale();if(!is_admin()||wp_doing_ajax())return ($_COOKIE['strc_language']??'')==='fr'?'fr_FR':'de_CH';return $locale;});
         add_action('init', array(\SwissTRClub\Core\Http\UserLanguage::class, 'rememberSelection'));
 
         if ('20260926-2' !== get_option('strc_core_schema_version')) {
@@ -61,6 +61,7 @@ final class Plugin
         (new \SwissTRClub\Core\Content\MagazineEndpoint())->registerHooks();
         (new MarketplaceEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShopEndpoint())->registerHooks();
+        (new \SwissTRClub\Core\Shop\CustomerLanguage())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShippingPartner())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShopInvoice())->registerHooks();
         (new \SwissTRClub\Core\Forms\EventInvoice())->registerHooks();

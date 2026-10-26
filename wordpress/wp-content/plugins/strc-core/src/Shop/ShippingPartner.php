@@ -211,15 +211,21 @@ final class ShippingPartner
     private static function notifyCustomer(\WC_Order $order, string $tracking): void
     {
         $email = $order->get_billing_email();
+        $fr = CustomerLanguage::language($order) === 'fr';
+        $subject = ($fr ? 'Ta commande #' : 'Deine Bestellung #') . $order->get_order_number() . ($fr ? ' est en route' : ' ist unterwegs');
         $lines = array();
         foreach ($order->get_items() as $item) $lines[] = '<li>' . esc_html($item->get_name()) . ' × ' . (int) $item->get_quantity() . '</li>';
-        $body = '<p>' . esc_html(sprintf('Hallo %s', $order->get_billing_first_name())) . '</p><p>Deine Bestellung #' . esc_html($order->get_order_number()) . ' ist unterwegs.</p><ul>' . implode('', $lines) . '</ul>'
-            . ($tracking !== '' ? '<p><strong>Sendungsnummer:</strong> ' . esc_html($tracking) . '</p>' : '')
-            . '<p>Vielen Dank für deine Bestellung im TR-Shop.<br>Swiss TR-Club</p>';
+        $body = '<p>' . esc_html(($fr ? 'Bonjour ' : 'Hallo ') . $order->get_billing_first_name()) . '</p><p>' . esc_html($subject) . '.</p><ul>' . implode('', $lines) . '</ul>'
+            . ($tracking !== '' ? '<p><strong>' . ($fr ? 'Numéro de suivi :' : 'Sendungsnummer:') . '</strong> ' . esc_html($tracking) . '</p>' : '')
+            . '<p>' . ($fr ? 'Merci pour ta commande au TR-Shop.' : 'Vielen Dank für deine Bestellung im TR-Shop.') . '<br>Swiss TR-Club</p>';
         if (is_email($email)) {
             $mailer = function_exists('WC') ? WC()->mailer() : null;
-            $subject = 'Deine Bestellung #' . $order->get_order_number() . ' ist unterwegs';
-            $accepted = $mailer ? $mailer->send($email, $subject, $mailer->wrap_message('Deine Bestellung ist unterwegs', $body), ['Content-Type: text/html; charset=UTF-8']) : wp_mail($email, $subject, wp_strip_all_tags($body));
+            $switched = switch_to_locale($fr ? 'fr_FR' : 'de_CH');
+            try {
+                $accepted = $mailer ? $mailer->send($email, $subject, $mailer->wrap_message($fr ? 'Ta commande est en route' : 'Deine Bestellung ist unterwegs', $body), ['Content-Type: text/html; charset=UTF-8']) : wp_mail($email, $subject, wp_strip_all_tags($body));
+            } finally {
+                if ($switched) restore_previous_locale();
+            }
             if ($accepted) {
                 $order->update_meta_data('_strc_shipping_mail_sent', gmdate(DATE_ATOM));
                 $order->save();
@@ -228,7 +234,7 @@ final class ShippingPartner
         $user = (int) $order->get_customer_id();
         if ($user > 0) {
             $notifications = (array) get_user_meta($user, 'strc_notifications', true);
-            $notifications[] = array('id' => 'shipped-' . $order->get_id(), 'title' => 'Deine Bestellung #' . $order->get_order_number() . ' ist unterwegs' . ($tracking !== '' ? ' (Sendung ' . $tracking . ')' : ''), 'url' => $order->get_view_order_url(), 'at' => gmdate(DATE_ATOM));
+            $notifications[] = array('id' => 'shipped-' . $order->get_id(), 'title' => $subject . ($tracking !== '' ? ($fr ? ' (suivi ' : ' (Sendung ') . $tracking . ')' : ''), 'url' => $order->get_view_order_url(), 'at' => gmdate(DATE_ATOM));
             update_user_meta($user, 'strc_notifications', array_slice($notifications, -50));
         }
     }
