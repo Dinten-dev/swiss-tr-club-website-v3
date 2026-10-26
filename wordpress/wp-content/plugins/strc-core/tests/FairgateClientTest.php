@@ -123,4 +123,28 @@ final class FairgateClientTest extends TestCase
         self::assertFalse(FairgateClient::copilotWriteAllowed(['configured_fields'=>['copilot_name'=>'Anna Muster']]));
         self::assertFalse(FairgateClient::copilotWriteAllowed(['basefields'=>['first_name'=>'Anna']]));
     }
+    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
+    #[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
+    public function testStagingExceptionPermitsOnlyFourCopilotFields(): void
+    {
+        define('STRC_FAIRGATE_STAGING_COPILOT_WRITE', true);
+        define('STRC_FAIRGATE_READ_ONLY', true);
+        define('STRC_FAIRGATE_PROFILE_WRITE', ['enabled'=>true,'copilot'=>[
+            'first_name'=>'cp_first','last_name'=>'cp_last','email'=>'cp_email','phone'=>'cp_phone',
+            'birth_date'=>'cp_birth',
+        ]]);
+        self::assertTrue(FairgateClient::copilotWriteAllowed(['configured_fields'=>['cp_email'=>'qa@example.invalid']]));
+        self::assertFalse(FairgateClient::copilotWriteAllowed(['configured_fields'=>['cp_birth'=>'1980-01-01']]));
+        self::assertFalse(FairgateClient::copilotWriteAllowed(['configured_fields'=>['cp_first'=>'QA','member_email'=>'qa@example.invalid']]));
+        self::assertFalse(FairgateClient::copilotWriteAllowed(['configured_fields'=>['cp_first'=>'QA'],'correspondence_lang'=>'fr']));
+        $requests=[];
+        $client=new FairgateClient(new FairgateConfiguration('fixture','fixture-key'),static function($method,$url,$options)use(&$requests){
+            $requests[]=[$method,$url,$options];return ['status'=>200,'body'=>'{"success":true,"data":{}}'];
+        });
+        $client->updateContact('fixture-token','123',['configured_fields'=>['cp_first'=>'QA','cp_last'=>'Fixture','cp_email'=>'qa@example.invalid','cp_phone'=>'+41790000000']]);
+        self::assertCount(1,$requests);
+        self::assertSame('PUT',$requests[0][0]);
+        try {$client->updateContact('fixture-token','123',['configured_fields'=>['cp_birth'=>'1980-01-01']]);self::fail('Birthday write allowed');}catch(FairgateApiException $e){self::assertCount(1,$requests);}
+        try {$client->createContact('fixture-token',['basefields'=>['first_name'=>'QA']]);self::fail('Contact creation allowed');}catch(FairgateApiException $e){self::assertCount(1,$requests);}
+    }
 }

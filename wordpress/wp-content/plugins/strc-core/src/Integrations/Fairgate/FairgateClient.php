@@ -105,7 +105,8 @@ final class FairgateClient
     {
         if (!(defined('STRC_FAIRGATE_STAGING_COPILOT_WRITE') && STRC_FAIRGATE_STAGING_COPILOT_WRITE === true)) return false;
         $config = defined('STRC_FAIRGATE_PROFILE_WRITE') && is_array(STRC_FAIRGATE_PROFILE_WRITE) ? STRC_FAIRGATE_PROFILE_WRITE : [];
-        $allowed = array_values(array_filter((array) ($config['copilot'] ?? []), 'is_string'));
+        $map = array_intersect_key((array)($config['copilot'] ?? []), array_flip(['first_name','last_name','email','phone']));
+        $allowed = ($config['enabled'] ?? false) === true ? array_values(array_filter($map, 'is_string')) : [];
         $fields = $payload['configured_fields'] ?? null;
         if (!$allowed || array_keys($payload) !== ['configured_fields'] || !is_array($fields) || !$fields) return false;
         return !array_diff(array_map('strval', array_keys($fields)), $allowed);

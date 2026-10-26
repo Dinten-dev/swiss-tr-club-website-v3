@@ -145,7 +145,7 @@ final class FairgateMemberMapping
         if (isset($extras['copilot'])) update_user_meta($userId,'strc_copilot_fairgate',$extras['copilot']);
         // Gemeldete Änderung ist erledigt, sobald Fairgate denselben Stand liefert.
         $request=get_user_meta($userId,'strc_subscription_request',true);
-        if (is_array($request)) {
+        if (is_array($request) && isset($extras['print'], $extras['newsletter'])) {
             $current=static fn(string $name):bool=>get_user_meta($userId,'strc_subscription_'.$name,true)!=='0';
             if (($request['print']??null)===$current('print') && ($request['newsletter']??null)===$current('newsletter')) delete_user_meta($userId,'strc_subscription_request');
         }
