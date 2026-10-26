@@ -55,7 +55,7 @@ final class FairgateClient
 
     public function updateContact(string $accessToken, string $contactId, array $payload): array
     {
-        $this->requireWrites();
+        if (!self::copilotWriteAllowed($payload)) $this->requireWrites();
         $this->requireConfiguration();
         if (!preg_match('/^[1-9][0-9]*$/D', $contactId)) throw new FairgateApiException('Ungültige Fairgate Contact ID.');
         return $this->request('PUT', '/fsa/v2.0/contact/'.rawurlencode($this->configuration->organisationId()).'/data/'.$contactId, ['token'=>$accessToken, 'json'=>$payload]);
@@ -95,6 +95,20 @@ final class FairgateClient
         $this->requireConfiguration();
         if ($page < 1 || $page > 100) throw new FairgateApiException('Ungültige Importseite.');
         return $this->request('GET', '/fsa/v2.0/contact/'.rawurlencode($this->configuration->organisationId()).'/contacts/extended?pageNo='.$page.'&pageLimit=100', ['token'=>$accessToken]);
+    }
+
+    /**
+     * Einzige Ausnahme vom Schreibschutz (auch auf Staging): STRC_FAIRGATE_STAGING_COPILOT_WRITE===true erlaubt,
+     * beim Mitglied ausschliesslich die in STRC_FAIRGATE_PROFILE_WRITE['copilot'] zugeordneten Co-Pilot-Felder zu setzen.
+     */
+    public static function copilotWriteAllowed(array $payload): bool
+    {
+        if (!(defined('STRC_FAIRGATE_STAGING_COPILOT_WRITE') && STRC_FAIRGATE_STAGING_COPILOT_WRITE === true)) return false;
+        $config = defined('STRC_FAIRGATE_PROFILE_WRITE') && is_array(STRC_FAIRGATE_PROFILE_WRITE) ? STRC_FAIRGATE_PROFILE_WRITE : [];
+        $allowed = array_values(array_filter((array) ($config['copilot'] ?? []), 'is_string'));
+        $fields = $payload['configured_fields'] ?? null;
+        if (!$allowed || array_keys($payload) !== ['configured_fields'] || !is_array($fields) || !$fields) return false;
+        return !array_diff(array_map('strval', array_keys($fields)), $allowed);
     }
 
     private function requireWrites(): void

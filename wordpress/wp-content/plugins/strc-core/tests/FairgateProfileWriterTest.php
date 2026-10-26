@@ -23,4 +23,11 @@ final class FairgateProfileWriterTest extends TestCase
         self::assertSame(['configured_fields'=>['copilot_name'=>'Anna Maria Beispiel']], $writer->payload('copilot',['last_name'=>'Beispiel']));
         self::assertSame([], $writer->payload('copilot',['last_name'=>'Beispiel','phone'=>'+41790000000']));
     }
+
+    public function testMappedOnlyKeepsAssignedNonEmptyCopilotValues(): void
+    {
+        $writer=new FairgateProfileWriter(['copilot'=>['full_name'=>'copilot_name','email'=>'copilot_email']]);
+        self::assertSame(['first_name'=>'Anna','last_name'=>'Muster','email'=>'anna@example.test'], $writer->mappedOnly('copilot',['first_name'=>'Anna','last_name'=>'Muster','email'=>'anna@example.test','phone'=>'+41790000000','city'=>'']));
+        self::assertSame([], $writer->mappedOnly('copilot',['phone'=>'+41790000000']));
+    }
 }

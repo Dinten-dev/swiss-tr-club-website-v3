@@ -73,9 +73,7 @@ final class MemberProfile
         $request=get_user_meta($userId,'strc_couple_request',true);
         if(!is_array($request))return ['state'=>''];
         if(($request['state']??'')==='pending'&&!empty($request['formId'])){$post=get_post((int)$request['formId']);if($post&&(FormStore::data($post)['state']??'')==='rejected'){$request['state']='rejected';update_user_meta($userId,'strc_couple_request',$request);}}
-        if(($request['state']??'')==='pending'&&self::household($userId)['mode']==='primary'){
-            $request['state']='active';$request['activatedAt']=gmdate(DATE_ATOM);update_user_meta($userId,'strc_couple_request',$request);
-        }
+        if(($request['state']??'')==='pending'&&self::household($userId)['mode']==='primary')$request=self::activateCouple($userId,$request);
         return ['state'=>(string)($request['state']??''),'at'=>(string)($request['at']??''),'activatedAt'=>(string)($request['activatedAt']??'')];
     }
 
@@ -147,26 +145,136 @@ final class MemberProfile
         $copilot=self::guestCopilot($actor)['values'];
         foreach(['first_name','last_name','email','phone','street','postcode','city','country'] as $field)if(trim($copilot[$field])==='')throw new \InvalidArgumentException('Bitte zuerst die Angaben des Co-Piloten vollständig erfassen und speichern.');
         $user=get_userdata($actor);$number=(string)$m['member_number'];if(str_starts_with($number,'FG:'))$number='';
-        $payload=['member'=>['name'=>$user->display_name,'memberNumber'=>$number,'email'=>$user->user_email,'fairgateContactId'=>(string)($m['fairgate_contact_id']??'')],'copilot'=>$copilot,'newMembership'=>'Paarmitgliedschaft','fee'=>'CHF 160.–','task'=>'In Fairgate über «Haushalt» verbinden und beide als Paarmitglied führen.'];
+        // c) Co-Pilot-Angaben in die vorbereiteten Fairgate-Felder beim Mitglied übertragen, damit der Aktuar sie dort findet.
+        $contactId=(string)($m['fairgate_contact_id']??'');
+        $mapped=$this->writer->mappedOnly('copilot',$copilot);
+        $inFairgate=$mapped&&$this->writer->withCurrent($copilot)->write($contactId,'copilot',$mapped);
+        if($inFairgate){$local=get_user_meta($actor,'strc_copilot',true);$local=is_array($local)?$local:['values'=>$copilot];$local['pendingSync']=false;$local['updatedAt']=gmdate(DATE_ATOM);update_user_meta($actor,'strc_copilot',$local);}
+        $payload=['member'=>['name'=>$user->display_name,'memberNumber'=>$number,'email'=>$user->user_email,'fairgateContactId'=>(string)($m['fairgate_contact_id']??'')],'copilot'=>$copilot,'newMembership'=>'Paarmitgliedschaft','fee'=>'CHF 160.–','task'=>self::COUPLE_TASK,'copilotInFairgate'=>$inFairgate];
         $form=FormStore::intake('couple',$payload,wp_generate_uuid4(),$actor);
         update_user_meta($actor,'strc_couple_request',['state'=>'pending','at'=>gmdate(DATE_ATOM),'formId'=>$form]);
-        self::notifyAktuar($form,$user->display_name,trim($copilot['first_name'].' '.$copilot['last_name']));
-        return ['message'=>'Wechsel zur Paarmitgliedschaft beantragt. Der Aktuar verbindet euch in Fairgate; danach ist die Paarmitgliedschaft hier aktiv.'];
+        self::notifyAktuar($form,$user->display_name,trim($copilot['first_name'].' '.$copilot['last_name']),$inFairgate);
+        return ['message'=>'Wechsel zur Paarmitgliedschaft beantragt. Der Aktuar verbindet euch in Fairgate; sobald die Paarmitgliedschaft aktiv ist, erhältst du eine Bestätigung.'];
     }
+
+    public const COUPLE_TASK='In Fairgate beim Mitglied unter «Haushalt/Partner» die Co-Pilot-Angaben prüfen und den Co-Piloten als Paarmitglied verbinden.';
 
     public static function aktuarRecipients(): array
     {
-        $list=[defined('STRC_AKTUAR_EMAIL')&&is_email((string)STRC_AKTUAR_EMAIL)?(string)STRC_AKTUAR_EMAIL:'aktuar@swisstrclub.ch'];
-        foreach(get_users(['role'=>'strc_registration_moderator','fields'=>['user_email']]) as $user)if(is_email($user->user_email))$list[]=$user->user_email;
-        return array_values(array_unique(array_map('strtolower',$list)));
+        $aktuar=strtolower(defined('STRC_AKTUAR_EMAIL')&&is_email((string)STRC_AKTUAR_EMAIL)?(string)STRC_AKTUAR_EMAIL:'aktuar@swisstrclub.ch');
+        $list=[$aktuar];
+        // Inhaber der Kassier-Rolle erhalten den Antrag nicht: sie werden erst nach der Freigabe informiert (notifyTreasurer).
+        foreach(get_users(['role'=>'strc_registration_moderator']) as $user)if(is_email($user->user_email)&&!user_can($user,'strc_manage_finance'))$list[]=strtolower($user->user_email);
+        return array_values(array_unique($list));
     }
 
-    private static function notifyAktuar(int $form,string $member,string $copilot): void
+    /** Kasse: konfigurierte Adresse (STRC_TREASURY_EMAIL, sonst STRC_EVENT_TREASURY_EMAIL) und alle Konten mit Kassier-Rolle. */
+    public static function treasurerRecipients(): array
+    {
+        $list=[];
+        foreach(['STRC_TREASURY_EMAIL','STRC_EVENT_TREASURY_EMAIL'] as $name){$value=defined($name)?(string)constant($name):(string)getenv($name);if(is_email($value)){$list[]=strtolower($value);break;}}
+        foreach(get_users(['capability'=>'strc_manage_finance']) as $user)if(is_email($user->user_email))$list[]=strtolower($user->user_email);
+        return array_values(array_unique($list));
+    }
+
+    /** Paar-Antrag eines Mitglieds, dessen Co-Pilot diese E-Mail-Adresse hat (offen oder bereits aktiv, neuester zuerst). */
+    public static function requesterForCopilotEmail(string $email): int
+    {
+        $email=strtolower(trim($email));if($email==='')return 0;
+        foreach(get_posts(['post_type'=>'strc_form','post_status'=>'private','posts_per_page'=>300,'orderby'=>'ID','order'=>'DESC']) as $post){
+            $data=FormStore::data($post);if(($data['kind']??'')!=='couple'||in_array($data['state']??'',['rejected','superseded'],true))continue;
+            if(strtolower(trim((string)($data['payload']['copilot']['email']??'')))===$email&&(int)$post->post_author>0)return (int)$post->post_author;
+        }
+        return 0;
+    }
+
+    /**
+     * Fairgate-Abgleich hat ein Konto als Paarmitglied geliefert:
+     * Antragsteller → Paar-Antrag aktivieren; neu erfasster Co-Pilot → mit dem Antragsteller verknüpfen.
+     */
+    public static function fairgateSynced(int $userId): void
+    {
+        $request=get_user_meta($userId,'strc_couple_request',true);
+        if(is_array($request)&&($request['state']??'')==='pending'){self::activateCouple($userId,$request);return;}
+        $user=get_userdata($userId);if(!$user)return;
+        $requester=self::requesterForCopilotEmail((string)$user->user_email);
+        if(!$requester||$requester===$userId)return;
+        $req=get_user_meta($requester,'strc_couple_request',true);
+        $primary=(new MembershipRepository())->findForUser($requester);
+        if(is_array($req)&&($req['state']??'')==='active'&&$primary&&MembershipTypePolicy::isCouple((string)$primary['membership_type'])&&self::household($requester)['mode']==='single')(new MembershipRepository())->linkCouple($requester,$userId);
+    }
+
+    /** f)+g) Paarmitgliedschaft aktiv: Antrag abschliessen, Co-Pilot-Konto verknüpfen (falls vorhanden), Mitglied und Kassier informieren. */
+    public static function activateCouple(int $userId,array $request): array
+    {
+        $request['state']='active';$request['activatedAt']=gmdate(DATE_ATOM);update_user_meta($userId,'strc_couple_request',$request);
+        $form=(int)($request['formId']??0);$post=$form?get_post($form):null;
+        if($post&&$post->post_type==='strc_form'){
+            $data=FormStore::data($post);
+            if(in_array($data['state']??'',['pending_review','clarification','approved_pending_sync'],true)){
+                $data['state']='completed';$data['completedAt']=gmdate(DATE_ATOM);$data['reviewNote']=trim(((string)($data['reviewNote']??''))."\nIn Fairgate als Paarmitglied verbunden (Abgleich).");
+                try{FormStore::save('strc_form',$data,(int)$post->post_author,0,$post,FormStore::revision($post));}catch(\Throwable $e){}
+            }
+            $email=(string)($data['payload']['copilot']['email']??'');$partner=$email!==''?get_user_by('email',$email):false;
+            if($partner&&(int)$partner->ID!==$userId&&self::household($userId)['mode']==='single'){
+                $pm=(new MembershipRepository())->findForUser((int)$partner->ID);
+                if($pm&&MembershipTypePolicy::isCouple((string)$pm['membership_type']))(new MembershipRepository())->linkCouple($userId,(int)$partner->ID);
+            }
+            self::notifyMember($form);
+            self::notifyTreasurer($form);
+        }
+        return $request;
+    }
+
+    /** g) Bestätigung nur an das antragstellende Mitglied (einmalig). */
+    public static function notifyMember(int $form): bool
+    {
+        $previous=get_post_meta($form,'strc_couple_member_notification',true);
+        if(is_array($previous)&&in_array($previous['state']??'',['accepted','sending'],true))return false;
+        $post=get_post($form);$user=$post?get_userdata((int)$post->post_author):false;if(!$user||!is_email($user->user_email))return false;
+        $data=FormStore::data($post);$p=$data['payload']??[];$c=$p['copilot']??[];
+        $copilot=trim((string)($c['first_name']??'').' '.(string)($c['last_name']??''));
+        $status=['state'=>'sending','attemptedAt'=>gmdate(DATE_ATOM),'recipients'=>[$user->user_email]];update_post_meta($form,'strc_couple_member_notification',$status);
+        $fr=(string)get_user_meta($user->ID,'strc_language',true)==='fr';
+        $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
+        $body=$fr?"Bonjour {$user->first_name}\n\nVotre affiliation en couple avec {$copilot} est désormais active. Nouvelle cotisation annuelle : ".(string)($p['fee']??'CHF 160.–').". La facture suit séparément.\n\nProfil : {$base}/#profil\n\nSwiss TR-Club\n"
+            :"Hallo {$user->first_name}\n\nEure Paarmitgliedschaft mit {$copilot} ist jetzt aktiv. Neuer Jahresbeitrag: ".(string)($p['fee']??'CHF 160.–').". Die Rechnung folgt separat.\n\nProfil: {$base}/#profil\n\nSwiss TR-Club\n";
+        try{$accepted=wp_mail($user->user_email,$fr?'Swiss TR-Club : affiliation en couple active':'Swiss TR-Club: Paarmitgliedschaft aktiv',$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
+        catch(\Throwable $error){$status['state']='uncertain';}
+        update_post_meta($form,'strc_couple_member_notification',$status);
+        return $status['state']==='accepted';
+    }
+
+    /** g) Kassier über die neue Paarmitgliedschaft und den Beitrag informieren (einmalig). */
+    public static function notifyTreasurer(int $form): bool
+    {
+        $previous=get_post_meta($form,'strc_couple_treasurer_notification',true);
+        if(is_array($previous)&&in_array($previous['state']??'',['accepted','sending'],true))return false;
+        $post=get_post($form);if(!$post)return false;
+        $data=FormStore::data($post);$p=$data['payload']??[];$c=$p['copilot']??[];
+        $status=['state'=>'sending','attemptedAt'=>gmdate(DATE_ATOM),'recipients'=>self::treasurerRecipients()];
+        if(!$status['recipients']){$status['state']='no_recipient';update_post_meta($form,'strc_couple_treasurer_notification',$status);return false;}
+        update_post_meta($form,'strc_couple_treasurer_notification',$status);
+        $member=(string)($p['member']['name']??'');$copilot=trim((string)($c['first_name']??'').' '.(string)($c['last_name']??''));
+        $lines=["Neue Paarmitgliedschaft","","Der Aktuar hat den Co-Piloten in Fairgate als Paarmitglied verbunden; die Paarmitgliedschaft ist jetzt aktiv.","","Hauptmitglied: {$member}"];
+        if(!empty($p['member']['memberNumber']))$lines[]='Mitgliedsnummer: '.$p['member']['memberNumber'];
+        if(!empty($p['member']['fairgateContactId']))$lines[]='Fairgate-ID: '.$p['member']['fairgateContactId'];
+        $lines[]="Co-Pilot (neues Paarmitglied): {$copilot}";
+        $lines[]='Neuer Jahresbeitrag: '.(string)($p['fee']??'CHF 160.–');
+        $lines[]='Aktiv seit: '.wp_date('d.m.Y');
+        $lines=array_merge($lines,["","Bitte den Beitrag für die Rechnungsstellung berücksichtigen.","","Swiss TR-Club"]);
+        try{$accepted=wp_mail($status['recipients'],'Swiss TR-Club: Neue Paarmitgliedschaft – Beitrag anpassen',implode("\n",$lines)."\n",['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
+        catch(\Throwable $error){$status['state']='uncertain';}
+        update_post_meta($form,'strc_couple_treasurer_notification',$status);
+        return $status['state']==='accepted';
+    }
+
+    private static function notifyAktuar(int $form,string $member,string $copilot,bool $inFairgate=false): void
     {
         $status=['state'=>'sending','attemptedAt'=>gmdate(DATE_ATOM),'recipients'=>self::aktuarRecipients()];
         update_post_meta($form,'strc_couple_notification',$status);
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
-        $body="Neuer Antrag: Wechsel zur Paarmitgliedschaft\n\nMitglied: {$member}\nCo-Pilot: {$copilot}\n\nBitte die beiden in Fairgate über den Eintrag «Haushalt» verbinden und als Paarmitglied führen. Nach dem nächsten Abgleich ist die Paarmitgliedschaft auf der Website aktiv.\n\nBearbeiten unter «Anträge bearbeiten» → Paarmitgliedschaften:\n{$base}/#antraege/paar\n\nSwiss TR-Club\n";
+        $body="Neuer Antrag: Wechsel zur Paarmitgliedschaft\n\nMitglied: {$member}\nCo-Pilot: {$copilot}\n\n".($inFairgate?"Die Angaben des Co-Piloten stehen in Fairgate beim Mitglied unter «Haushalt/Partner» (Co-Pilot-Felder) bereit. Bitte dort prüfen und den Co-Piloten als Paarmitglied verbinden.":"Die Angaben des Co-Piloten konnten nicht automatisch nach Fairgate übertragen werden; sie stehen auf der Website unter «Anträge bearbeiten». Bitte in Fairgate erfassen und den Co-Piloten als Paarmitglied verbinden.")." Beim nächsten Abgleich wird die Paarmitgliedschaft auf der Website aktiv; das Mitglied und der Kassier werden dann automatisch informiert.\n\nAlle Angaben und Rückfragen unter «Anträge bearbeiten» → Paarmitgliedschaften:\n{$base}/#antraege/paar\n\nSwiss TR-Club\n";
         try{$accepted=wp_mail($status['recipients'],'Swiss TR-Club: Wechsel zur Paarmitgliedschaft',$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
         catch(\Throwable $error){$status['state']='uncertain';}
         update_post_meta($form,'strc_couple_notification',$status);
