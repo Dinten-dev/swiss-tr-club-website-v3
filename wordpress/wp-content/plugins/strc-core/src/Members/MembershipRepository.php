@@ -207,6 +207,36 @@ final class MembershipRepository
         $this->updatePartner((int) $partner['user_id'], (int) $membership['user_id']);
     }
 
+    /** Paar aus dem Fairgate-Abgleich verknüpfen: Antragsteller = Primary, Co-Pilot = Partner. */
+    public function linkCouple(int $primaryUserId, int $partnerUserId): bool
+    {
+        return \SwissTRClub\Core\Forms\FormStore::locked('couple-link', function () use ($primaryUserId, $partnerUserId): bool {
+            global $wpdb;
+            if ($primaryUserId === $partnerUserId) return false;
+            $table = $wpdb->prefix . 'strc_memberships';
+            $wpdb->query('START TRANSACTION');
+            try {
+                $members = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE user_id IN (%d,%d) ORDER BY user_id FOR UPDATE", $primaryUserId, $partnerUserId), ARRAY_A);
+                $rows = array_column($members, null, 'user_id');
+                foreach ([$primaryUserId=>$partnerUserId, $partnerUserId=>$primaryUserId] as $id=>$other) {
+                    $row = $rows[$id] ?? null;
+                    if (! $row || ! MembershipAccessPolicy::grantsMemberAccess((string)$row['status'])
+                        || ! MembershipTypePolicy::isCouple((string)$row['membership_type'])
+                        || (!empty($row['partner_user_id']) && (int)$row['partner_user_id'] !== $other)) {
+                        $wpdb->query('ROLLBACK'); return false;
+                    }
+                }
+                if ((int)$rows[$primaryUserId]['partner_user_id'] === $partnerUserId && (int)$rows[$partnerUserId]['partner_user_id'] === $primaryUserId) {
+                    $wpdb->query('COMMIT'); return true;
+                }
+                foreach ([$primaryUserId=>['couple_primary',$partnerUserId],$partnerUserId=>['couple_partner',$primaryUserId]] as $id=>$pair) {
+                    if ($wpdb->update($table, ['membership_type'=>$pair[0],'partner_user_id'=>$pair[1],'updated_at'=>current_time('mysql')], ['user_id'=>$id]) === false) throw new \RuntimeException('Paarverknüpfung konnte nicht gespeichert werden.');
+                }
+                $wpdb->query('COMMIT'); return true;
+            } catch (\Throwable $error) { $wpdb->query('ROLLBACK'); throw $error; }
+        });
+    }
+
     /** @return array<string, mixed>|null */
     private function membershipForUser(int $userId): ?array
     {

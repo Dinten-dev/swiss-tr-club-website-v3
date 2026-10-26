@@ -1,12 +1,12 @@
 'use client';
 import {t} from './UILanguage';
 import {useSiteContent} from './SiteContent';
-const names:Record<string,string>={history:'Club-Geschichte',news:'Neuigkeiten',applications:'Anträge',registration:'Anmeldung',profile:'Mitgliedschafts-Profil',triungsters:'TRiungsters',organisation:'Organisation',mission:'Leitbild',membership:'Mitglied werden',models:'TR-Modelle',shop:'TR-Shop',club:'Club',agenda:'Agenda',regions:'Regionen',market:'Marktplatz',members:'Mitgliederbereich',forum:'Forum',gallery:'Galerie',library:'Bibliothek',clubdocs:'Clubdokumente',directory:'Mitgliederverzeichnis',contact:'Kontakt',privacy:'Datenschutz',statutes:'Statuten','event-admin':'Agenda verwalten',editorial:'Redaktion'};
+const names:Record<string,string>={history:'Club-Geschichte',news:'Neuigkeiten',applications:'Anträge',registration:'Anmeldung',profile:'Mitgliedschafts-Profil',triungsters:'TRiungsters',organisation:'Organisation',mission:'Leitbild',membership:'Mitglied werden',models:'TR-Modelle',shop:'TR-Shop',club:'Club',agenda:'Agenda',regions:'Regionen',market:'Marktplatz',members:'Mitgliederbereich',forum:'Forum',gallery:'Galerie',library:'Bibliothek',clubdocs:'Clubdokumente',directory:'Mitgliederverzeichnis',contact:'Kontakt',privacy:'Datenschutz',statutes:'Statuten','event-admin':'Agenda verwalten',finance:'Kasse',editorial:'Redaktion'};
 const routes:Record<string,string>={regions:'regionen',models:'tr-modelle',editorial:'redaktion',market:'marktplatz',shop:'tr-shop'};
 const marketSections:Record<string,string>={fahrzeuge:'Fahrzeuge',ersatzteile:'Ersatzteile',meine:'Meine Inserate',pruefung:'In Prüfung'};
 const shopSections:Record<string,string>={artikel:'Artikel erfassen',lager:'Lager',abrechnung:'Abrechnung'};
 const regionNames:Record<string,string>={zuerich:'Zürich','suisse-romande':'Suisse romande'};
-const memberPages=['profile','applications','forum','gallery','library','clubdocs','directory','editorial','event-admin'];
+const memberPages=['profile','applications','forum','gallery','library','clubdocs','directory','editorial','event-admin','finance'];
 export default function Breadcrumbs({page,subroute}:{page:string;subroute:string}) {
  const {text}=useSiteContent();
  if(page==='home')return null;

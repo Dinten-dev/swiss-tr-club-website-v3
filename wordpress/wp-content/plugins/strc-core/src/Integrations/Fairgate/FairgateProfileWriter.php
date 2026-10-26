@@ -10,6 +10,7 @@ namespace SwissTRClub\Core\Integrations\Fairgate;
  * und die Umgebung Schreibzugriffe erlaubt (nicht Staging, nicht STRC_FAIRGATE_READ_ONLY).
  * Feldschlüssel sind die Fairgate-«configured_fields»; 'language' wird als correspondence_lang gesendet.
  * Ohne Freigabe gehen Änderungen als Anfrage ins Formularpostfach.
+ * Ausnahme: STRC_FAIRGATE_STAGING_COPILOT_WRITE===true erlaubt (auch auf Staging) nur den Teil 'copilot'.
  *
  * Beispiel:
  * define('STRC_FAIRGATE_PROFILE_WRITE',['enabled'=>true,
@@ -36,12 +37,25 @@ final class FairgateProfileWriter
     public function available(string $part='fields'): bool
     {
         if(($this->config['enabled']??false)!==true)return false;
-        if((function_exists('wp_get_environment_type')&&wp_get_environment_type()==='staging')||(defined('STRC_FAIRGATE_READ_ONLY')&&STRC_FAIRGATE_READ_ONLY))return false;
+        // Ausnahme nur für die Co-Pilot-Felder (Paar-Antrag), siehe FairgateClient::copilotWriteAllowed().
+        $copilotException=$part==='copilot'&&defined('STRC_FAIRGATE_STAGING_COPILOT_WRITE')&&STRC_FAIRGATE_STAGING_COPILOT_WRITE===true;
+        if(!$copilotException&&((function_exists('wp_get_environment_type')&&wp_get_environment_type()==='staging')||(defined('STRC_FAIRGATE_READ_ONLY')&&STRC_FAIRGATE_READ_ONLY)))return false;
         if(!FairgateConfiguration::fromConstants()->isConfigured())return false;
         $fields=$this->config[$part]??null;
         if(!is_array($fields)||!$fields)return false;
         foreach($fields as $key=>$name)if(!is_string($key)||!is_string($name)||!preg_match('/^[a-zA-Z0-9_.-]+$/D',$name))return false;
         return true;
+    }
+
+    /** Nur die Werte, für die in Fairgate ein Feld zugeordnet ist (leere Werte werden nicht gesendet). */
+    public function mappedOnly(string $part,array $values): array
+    {
+        $map=$this->config[$part]??[];$out=[];
+        foreach($values as $field=>$value){
+            if((string)$value==='')continue;
+            if(isset($map[$field])||($part==='copilot'&&isset($map['full_name'])&&in_array($field,['first_name','last_name'],true)))$out[$field]=$value;
+        }
+        return $out;
     }
 
     /** Nur Felder, die geändert wurden und zugeordnet sind. */

@@ -45,7 +45,7 @@ final class ApplicationInbox
             $row=['id'=>(int)$post->ID,'revision'=>FormStore::revision($post),'date'=>$post->post_date,'state'=>(string)($d['state']??''),'note'=>(string)($d['reviewNote']??''),
                 'member'=>['name'=>(string)($p['member']['name']??''),'memberNumber'=>(string)($p['member']['memberNumber']??''),'email'=>(string)($p['member']['email']??''),'fairgateContactId'=>(string)($p['member']['fairgateContactId']??'')],
                 'copilot'=>array_map('strval',array_intersect_key(is_array($c)?$c:[],array_flip(['salutation','first_name','last_name','gender','birth_date','email','phone','street','postcode','city','country']))),
-                'fee'=>(string)($p['fee']??''),'task'=>(string)($p['task']??'')];
+                'fee'=>(string)($p['fee']??''),'task'=>(string)($p['task']??''),'copilotInFairgate'=>!empty($p['copilotInFairgate'])];
             if(in_array($row['state'],['pending_review','clarification'],true))$open[]=$row;elseif(count($done)<10)$done[]=$row;
         }
         return array_merge($open,$done);
@@ -61,5 +61,6 @@ final class ApplicationInbox
         if(!in_array($data['state']??'',self::COUPLE_STATES,true))throw new \RuntimeException('Diese Anfrage kann nicht mehr geändert werden.',409);
         $data['state']=$state;$data['reviewedAt']=gmdate(DATE_ATOM);$data['reviewedBy']=get_current_user_id();$data['reviewNote']=$note;
         FormStore::save('strc_form',$data,(int)$post->post_author,0,$post,$revision);
+        // Mitglied und Kassier werden nicht hier, sondern erst bei der Aktivierung aus dem Fairgate-Abgleich informiert (MemberProfile::activateCouple).
     }
 }

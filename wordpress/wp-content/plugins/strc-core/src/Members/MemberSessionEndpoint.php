@@ -43,6 +43,7 @@ final class MemberSessionEndpoint
             'editorialNonce' => \SwissTRClub\Core\Editorial\EditorialAccess::available() ? wp_create_nonce('strc_editorial') : null,
             'editableDocuments' => array_values(array_filter(array_keys(\SwissTRClub\Core\Editorial\EditorialEndpoint::schema()), array(\SwissTRClub\Core\Editorial\EditorialAccess::class, 'document'))),
             'logoutUrl' => html_entity_decode(wp_logout_url(home_url('/')), ENT_QUOTES, 'UTF-8'),
+            'canReadFinance' => $memberAccess && current_user_can('strc_manage_finance'),
             'canManageEvents' => \SwissTRClub\Core\Events\RegionalEventAccess::canManage(),
             'eventsNonce' => \SwissTRClub\Core\Events\RegionalEventAccess::canManage() ? wp_create_nonce('strc_events') : null,
             'canAssignRegions' => \SwissTRClub\Core\Events\RegionalEventAccess::isGlobal() && current_user_can('edit_users'),
