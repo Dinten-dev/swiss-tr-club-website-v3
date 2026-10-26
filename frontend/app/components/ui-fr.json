@@ -1142,5 +1142,7 @@
   "Buchung Begleitung Gast": "Réservation accompagnant·e invité·e",
   "Begleitung zulassen (Mitglied oder Gast)": "Autoriser un·e accompagnant·e (membre ou invité·e)",
   "Weitere Personen pro Anmeldung": "Personnes supplémentaires par inscription",
-  "Weitere Person (Gast), optional mit Begleitung. 0 = keine weiteren Personen.": "Personne supplémentaire (invitée), éventuellement accompagnée. 0 = aucune personne supplémentaire."
+  "Weitere Person (Gast), optional mit Begleitung. 0 = keine weiteren Personen.": "Personne supplémentaire (invitée), éventuellement accompagnée. 0 = aucune personne supplémentaire.",
+  "Sonstiges": "Divers",
+  "Verdecke": "Capotes"
 }

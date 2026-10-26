@@ -48,7 +48,7 @@ final class ForumSettings
             if(!$manage)AjaxRequest::fail('Keine Forumsmoderation.',403);
             $target=absint($input['id']??0);$member=(new MembershipRepository())->findForUser($target);
             if(!$member||!in_array($member['status'],['active','grace'],true)||!user_can($target,'strc_access_member_area'))AjaxRequest::fail('Aktives Mitglied nicht gefunden.',404);
-            update_user_meta($target,'strc_forum_expertise',self::combinations($input['expertise']??'[]',200));
+            update_user_meta($target,'strc_forum_expertise',self::combinations($input['expertise']??'[]',2000));
         }elseif($op==='whatsapp-status'||$op==='whatsapp-test'){
             if(!$manage)AjaxRequest::fail('Keine Forumsmoderation.',403);
             $result=$op==='whatsapp-test'?['test'=>self::notifyWhatsApp($id,'test-'.wp_generate_uuid4(),'Testnachricht des Swiss TR-Club',home_url('/#forum'),\SwissTRClub\Core\Http\UserLanguage::french($id))]:[];

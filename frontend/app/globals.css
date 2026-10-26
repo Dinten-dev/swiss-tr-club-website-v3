@@ -3286,3 +3286,6 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 /* Shop footer logo: WooCommerce img rules (height:auto, max-width) and flex stretch distorted the round logo */
 .strc-store-footer .footer-brand{align-items:flex-start}
 .strc-store-footer .footer-logo,footer .footer-logo{flex:0 0 64px;width:64px!important;height:64px!important;max-width:none!important;min-width:64px;aspect-ratio:1/1;object-fit:contain;border-radius:50%;background:#fff;align-self:flex-start}
+/* Fachexperten: «Alle»-Knopf je Gruppe */
+.role-scope-chips .role-scope-all{display:inline-flex;align-items:center;padding:4px 12px;border:1px dashed #114973;border-radius:999px;background:#fff;color:#114973;font:inherit;font-size:13px;font-weight:600;cursor:pointer;min-height:30px}
+.role-scope-chips .role-scope-all.is-on{background:#0b2f4d;border-style:solid;color:#fff}
