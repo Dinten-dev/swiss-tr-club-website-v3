@@ -59,7 +59,7 @@ export default function MagazineReader({url,title,back,initialFullscreen=false}:
       try {
         while(!disposed){const chunk=await reader.read();if(chunk.done)break;pageText+=chunk.value.items.map((item:{str?:string;hasEOL?:boolean})=>item.str?(item.str+(item.hasEOL?'\n':' ')):'').join('');}
         if(!disposed)setText(pageText);
-      } finally {await reader.cancel();reader.releaseLock();}
+      } finally {await reader.cancel(new Error('PDF view changed.')).catch(()=>{});reader.releaseLock();}
     })().catch(()=>{if(!disposed){setError(t('Diese Seite konnte nicht angezeigt werden. Bitte erneut versuchen oder die PDF herunterladen.'));setBusy(false);}});
     return()=>{disposed=true;rendering?.cancel();};
   },[document,page,zoom,width,height,fit]);

@@ -54,7 +54,7 @@ function o({ url: e, title: n, back: o, initialFullscreen: s = !1 }) {
 				}
 				e || k(l);
 			} finally {
-				await c.cancel(), c.releaseLock();
+				await c.cancel(/* @__PURE__ */ Error("PDF view changed.")).catch(() => {}), c.releaseLock();
 			}
 		})().catch(() => {
 			e || (C(t("Diese Seite konnte nicht angezeigt werden. Bitte erneut versuchen oder die PDF herunterladen.")), T(!1));
