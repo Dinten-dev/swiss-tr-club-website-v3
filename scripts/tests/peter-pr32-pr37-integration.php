@@ -50,10 +50,10 @@ try {
     SwissTRClub\Core\Integrations\Fairgate\FairgateMemberMapping::storeExtras($owner,['print'=>true,'newsletter'=>true]);
     p37check(!get_user_meta($owner,'strc_subscription_request',true),'Subscription request completes only when both official values are confirmed');
     $new=p37contact($base+2,$prefix.'_import@example.invalid','Paarmitglied','');
-    $new['basefields']['contact_id']=$base+2;
+    $new['basefields']['contact_id']=$base+2;$new['basefields']['first_name']="J\u{9F}rg";
     $newResult=$import->apply([$new]);$newId=(int)$newResult[0]['userId'];$users['imported']=$newId;
     update_user_meta($newId,'strc_fairgate_import_source','fairgate-readonly');update_user_meta($newId,'strc_fairgate_contact_id',(string)($base+2));
-    p37check($repo->findForUser($newId)['membership_type']==='couple_primary'&&MemberProfile::household($newId)['mode']==='single','Unlinked Fairgate couple contact receives no guessed partner');
+    p37check($repo->findForUser($newId)['membership_type']==='couple_primary'&&MemberProfile::household($newId)['mode']==='single'&&get_userdata($newId)->display_name==='Jürg Fixture','Repaired new account name and unlinked Fairgate couple contact receives no guessed partner');
     p37check(get_user_meta($newId,'strc_fairgate_number_pending',true)==='1','Missing official number retains pending marker');
     $newNumber=p37contact($base+3,$prefix.'_number@example.invalid','Einzelmitglied','QA37-NEW-'.$owner);$r=$import->apply([$newNumber]);$users['numbered']=(int)$r[0]['userId'];
     p37check($repo->findForUser($users['numbered'])['member_number']==='QA37-NEW-'.$owner,'New official number is used instead of placeholder');

@@ -78,7 +78,7 @@ final class FairgateStagingImport
             $label=(string)($c['membership']['membership']??'');
             // Explicit user boundary: contacts without a membership are not imported or updated.
             if(trim($label)===''){$plan[]=['id'=>$id,'action'=>'skip','reason'=>'Keine Mitgliedschaft'];continue;}
-            $r=['id'=>$id,'name'=>sanitize_text_field(trim(($c['basefields']['first_name']??'').' '.($c['basefields']['last_name']??''))),'label'=>$label,'action'=>'skip'];
+            $r=['id'=>$id,'name'=>\SwissTRClub\Core\Infrastructure\MacRomanRepair::text(sanitize_text_field(trim(($c['basefields']['first_name']??'').' '.($c['basefields']['last_name']??'')))),'label'=>$label,'action'=>'skip'];
             try {
                 $couple=self::isCoupleLabel($label);
                 if(!$couple&&!isset(self::TYPES[$label]))throw new FairgateApiException('Unbekannte Mitgliedschaft');
