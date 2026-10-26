@@ -28,6 +28,20 @@ final class QrReference
         return $payload . (string) ((10 - $carry) % 10);
     }
 
+    /** 26 Ziffern + Prüfziffer (Modulo 10 rekursiv). */
+    public static function withCheckDigit(string $payload): string
+    {
+        if (! preg_match('/^\d{26}$/D', $payload)) {
+            throw new InvalidArgumentException('QR reference payload must have 26 digits.');
+        }
+        $carry = 0;
+        foreach (str_split($payload) as $digit) {
+            $carry = self::TABLE[($carry + (int) $digit) % 10];
+        }
+
+        return $payload . (string) ((10 - $carry) % 10);
+    }
+
     public static function normalize(string $reference): string
     {
         return preg_replace('/\D/', '', $reference) ?? '';
