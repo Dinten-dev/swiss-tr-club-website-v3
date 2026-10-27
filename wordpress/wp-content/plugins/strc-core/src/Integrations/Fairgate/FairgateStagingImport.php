@@ -8,16 +8,41 @@ use SwissTRClub\Core\Integrations\Fairgate\FairgateMemberMapping;
 /** One-way import, enabled in server configuration. No Fairgate writes or mail. */
 final class FairgateStagingImport
 {
-    private const TYPES = ['Einzelmitglied'=>'individual','TRiungster   (Jungmitglied bis 35 Jahre)'=>'youth','Ehrenmitglied'=>'honorary'];
+    /** Kernbegriffe der Fairgate-Mitgliedschaften; Gross-/Kleinschreibung, Leerzeichen und Klammerzusätze spielen keine Rolle. */
+    private const TYPES = [
+        'ehrenmitglied'=>'honorary','ehrenmitgliedschaft'=>'honorary','membre d honneur'=>'honorary',
+        'einzelmitglied'=>'individual','einzelmitgliedschaft'=>'individual','membre individuel'=>'individual',
+        'paarmitglied'=>'couple','paarmitgliedschaft'=>'couple','paarmitglieder'=>'couple','membre couple'=>'couple','couple'=>'couple',
+        'triungster'=>'youth','triungsters'=>'youth','jungmitglied'=>'youth','jungmitgliedschaft'=>'youth','jeune membre'=>'youth',
+    ];
     public function __construct(private readonly FairgateGateway $gateway) {}
 
-    /** Fairgate-Label der Paarmitgliedschaft (für Hauptmitglied und Co-Pilot gleich); per STRC_FAIRGATE_COUPLE_LABELS anpassbar. */
+    /** Vereinheitlicht ein Fairgate-Label: Klammerzusatz weg, Satzzeichen und mehrfache Leerzeichen zu einem Leerzeichen, klein. */
+    private static function normalizeLabel(string $label): string
+    {
+        $label=preg_replace('/\([^)]*\)/u',' ',$label)??$label;
+        $label=preg_replace('/[^\p{L}\p{N}]+/u',' ',$label)??$label;
+        return mb_strtolower(trim($label));
+    }
+
+    /** Website-Mitgliedschaft für ein Fairgate-Label (individual, couple, honorary, youth) oder null, wenn unbekannt. */
+    public static function membershipType(string $label): ?string
+    {
+        $key=self::normalizeLabel($label);
+        if($key==='')return null;
+        if(defined('STRC_FAIRGATE_COUPLE_LABELS')&&is_array(STRC_FAIRGATE_COUPLE_LABELS)){
+            foreach(STRC_FAIRGATE_COUPLE_LABELS as $candidate)if(is_string($candidate)&&self::normalizeLabel($candidate)===$key)return 'couple';
+        }
+        if(isset(self::TYPES[$key]))return self::TYPES[$key];
+        // Zusätze nach dem Kernbegriff erlauben, z. B. «TRiungster Jungmitglied bis 35 Jahre» oder «Einzelmitglied Schweiz».
+        foreach(self::TYPES as $term=>$type)if(str_starts_with($key,$term.' '))return $type;
+        return null;
+    }
+
+    /** Fairgate-Label der Paarmitgliedschaft (für Hauptmitglied und Co-Pilot gleich); per STRC_FAIRGATE_COUPLE_LABELS ergänzbar. */
     public static function isCoupleLabel(string $label): bool
     {
-        $labels=defined('STRC_FAIRGATE_COUPLE_LABELS')&&is_array(STRC_FAIRGATE_COUPLE_LABELS)?STRC_FAIRGATE_COUPLE_LABELS:['Paarmitglied','Paarmitgliedschaft','Paarmitglieder'];
-        $needle=mb_strtolower(preg_replace('/\s+/u',' ',trim($label)));
-        foreach($labels as $candidate)if(is_string($candidate)&&mb_strtolower(preg_replace('/\s+/u',' ',trim($candidate)))===$needle)return true;
-        return false;
+        return self::membershipType($label)==='couple';
     }
 
     public static function enabled(): bool
@@ -80,8 +105,8 @@ final class FairgateStagingImport
             if(trim($label)===''){$plan[]=['id'=>$id,'action'=>'skip','reason'=>'Keine Mitgliedschaft'];continue;}
             $r=['id'=>$id,'name'=>\SwissTRClub\Core\Infrastructure\MacRomanRepair::text(sanitize_text_field(trim(($c['basefields']['first_name']??'').' '.($c['basefields']['last_name']??'')))),'label'=>$label,'action'=>'skip'];
             try {
-                $couple=self::isCoupleLabel($label);
-                if(!$couple&&!isset(self::TYPES[$label]))throw new FairgateApiException('Unbekannte Mitgliedschaft');
+                $type=self::membershipType($label);
+                if($type===null)throw new FairgateApiException('Unbekannte Mitgliedschaft: '.mb_substr(sanitize_text_field($label),0,60));
                 if(($c['basefields']['contact_type']??'')!=='singleperson')throw new FairgateApiException('Firmenkontakt: persönliches Login separat klären');
                 $email=trim((string)($c['communication']['primary_email']??''));
                 if(!is_email($email))throw new FairgateApiException('Gültige persönliche E-Mail fehlt');
@@ -90,7 +115,7 @@ final class FairgateStagingImport
                 $first=\SwissTRClub\Core\Infrastructure\MacRomanRepair::text(sanitize_text_field($c['basefields']['first_name']??''));$last=\SwissTRClub\Core\Infrastructure\MacRomanRepair::text(sanitize_text_field($c['basefields']['last_name']??''));
                 if($first===''||$last==='')throw new FairgateApiException('Vorname oder Nachname fehlt');
                 $address=$c['corr_address']??[];$comm=$c['communication']??[];
-                $r+=['email'=>$email,'first_name'=>$first,'last_name'=>$last,'status'=>$status,'type'=>$couple?'couple':self::TYPES[$label],
+                $r+=['email'=>$email,'first_name'=>$first,'last_name'=>$last,'status'=>$status,'type'=>$type,
                     'profile'=>array_map([\SwissTRClub\Core\Infrastructure\MacRomanRepair::class,'text'],['phone'=>sanitize_text_field($comm['mobile']??''),'street'=>sanitize_text_field($address['street']??''),'postcode'=>sanitize_text_field($address['postale_code']??''),'city'=>sanitize_text_field($address['city']??''),'country'=>sanitize_text_field($address['country']??'')])];
                 $r['extras']=FairgateMemberMapping::fromConstants()->extras($c);
                 $number=FairgateMemberMapping::fromConstants()->memberNumber($c);
