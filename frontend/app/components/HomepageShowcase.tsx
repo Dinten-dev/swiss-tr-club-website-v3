@@ -10,7 +10,7 @@ import {trModels,Placeholder} from './VehicleModels';
 import {swissOutline,regionPins} from './swissOutline';
 import type {ClubEvent} from '../page';
 
-export type HomeStats={members:number|null;vehicles:number|null;regions:{name:string;slug:string}[]};
+export type HomeStats={members:number|null;vehicles:number|null;youth?:number|null;regions:{name:string;slug:string}[]};
 
 /** Reduced-motion preference, updated live. The server snapshot counts as "reduced" so nothing moves before hydration. */
 const motionQuery='(prefers-reduced-motion: reduce)';
@@ -89,6 +89,23 @@ export function HomeStatsBand({stats}:{stats:HomeStats|null|undefined}){
  if(stats?.regions.length)items.push([stats.regions.length,'Regionen','mit eigenem Stamm',0]);
  if(items.length<2)return null;
  return <section className="hx-stats" ref={ref} aria-label={t('Der Club in Zahlen')}><div className="home-width"><ul>{items.map(([value,label,note,from])=><li key={label}><b><CountUp value={value} from={from} run={run}/></b><span>{t(label)}</span><small>{t(note)}</small></li>)}</ul></div></section>;
+}
+
+/* TRiungsters · eigener Bereich für die junge Zielgruppe */
+export function HomeTRiungsters({count}:{count?:number|null}){
+ const {text:c}=useSiteContent();
+ const image=c('home.triungstersImage').trim()||c('triungsters.image').trim();
+ const title=c('home.triungstersTitle');
+ if(!title)return null;
+ return <section className="hx-triungsters" aria-labelledby="hx-triungsters-title"><div className="home-width hx-triungsters-inner">
+  <div className="hx-triungsters-image"><Image src={image?assetUrl(image):regionalLandscape('triungsters')} alt="" width={900} height={675}/>{count?<p className="hx-triungsters-count"><b>{count}</b><span>{t('TRiungsters im Club')}</span></p>:null}</div>
+  <div className="hx-triungsters-copy">
+   <p className="hx-eyebrow">{c('home.triungstersLabel')}</p>
+   <h2 id="hx-triungsters-title">{title}</h2>
+   {c('home.triungstersText')&&<p>{c('home.triungstersText')}</p>}
+   <div className="hx-hero-actions"><a className="hx-button hx-button-red" href="#triungsters">{t('Mehr über die TRiungsters')} <span aria-hidden="true">→</span></a><a className="hx-button hx-button-ghost" href="#anmeldung">{t('Als TRiungster beitreten')}</a></div>
+  </div>
+ </div></section>;
 }
 
 /* Vorschlag 4 · Modellreihe */
