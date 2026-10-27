@@ -60,6 +60,7 @@ final class Plugin
         (new \SwissTRClub\Core\Community\CommunityEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Community\CatalogSettings())->registerHooks();
         (new \SwissTRClub\Core\Community\ForumSettings())->registerHooks();
+        (new \SwissTRClub\Core\Infrastructure\PublicNamePrivacy())->registerHooks();
         (new \SwissTRClub\Core\Community\ReviewNotificationSettings())->registerHooks();
         (new \SwissTRClub\Core\Infrastructure\MacRomanRepair())->registerHooks();
         (new \SwissTRClub\Core\Community\GalleryRetention())->registerHooks();

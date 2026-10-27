@@ -49,8 +49,9 @@ final class HomepageActivity
 
     private function item(int $id, string $kind, string $title, string $date, int $authorId, int $count): array
     {
-        $author = get_userdata($authorId);
+        // Keine Mitgliedernamen auf der (öffentlichen) Startseite.
+        unset($authorId);
         $route = ['forum'=>'forum/', 'reply'=>'forum/', 'gallery'=>'galerie/', 'library'=>'bibliothek/', 'market'=>'marktplatz'];
-        return ['id'=>$id, 'kind'=>$kind, 'title'=>html_entity_decode(wp_strip_all_tags($title), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'date'=>$date, 'author'=>$author ? wp_strip_all_tags($author->display_name) : '', 'photoCount'=>$count, 'href'=>'#'.$route[$kind].($kind === 'market' ? '' : $id)];
+        return ['id'=>$id, 'kind'=>$kind, 'title'=>html_entity_decode(wp_strip_all_tags($title), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'date'=>$date, 'author'=>'', 'photoCount'=>$count, 'href'=>'#'.$route[$kind].($kind === 'market' ? '' : $id)];
     }
 }

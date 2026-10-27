@@ -75,6 +75,7 @@ final class HomepageEndpoint
             }, $news),
             'memberAccess' => $member, 'activities' => $operation === 'overview' ? (new HomepageActivity())->latest() : $activities, 'latestForum' => $latestForum,
             'highlights' => $overview,
+            'stats' => $operation === 'overview' ? (new HomepageStats())->summary() : null,
             'newsPage' => $page, 'newsPages' => (int) $query->max_num_pages,
             'magazine' => (new MagazineEndpoint())->preview($language),
             'staging' => 'staging' === wp_get_environment_type(),
