@@ -1,7 +1,7 @@
 'use client';
 import {t,uiLocale,UILanguageProvider,LanguageSwitcher,useUILanguage} from './components/UILanguage';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Marketplace, { Dialog, type MarketplaceSession } from './components/Marketplace';
 import AgendaPage from './components/AgendaPage';
@@ -76,6 +76,7 @@ function ClubApp() {
   const [toast, setToast] = useState('');
   const {text:c}=useSiteContent();
   const [eventsRevision, setEventsRevision] = useState(0);
+  const currentPage=useRef<Page|null>(null);const [previousPage,setPreviousPage]=useState<Page|null>(null);
   function retryEvents() { setEventsState('loading'); setEventsRevision(value => value + 1); }
 
   useEffect(() => {
@@ -83,7 +84,10 @@ function ClubApp() {
       const [slug,detail=''] = window.location.hash.slice(1).split('/');
       setSubroute(detail);
       const target = (Object.keys(routes) as Page[]).find(key => routes[key] === slug);
-      setPage(!slug && new URLSearchParams(window.location.search).has('member') ? 'members' : target ?? 'home');
+      const next:Page=!slug && new URLSearchParams(window.location.search).has('member') ? 'members' : target ?? 'home';
+      // Herkunft merken, damit «zurück» dorthin führt, woher man kam (z. B. Agenda statt Mitgliederbereich).
+      if(next!==currentPage.current){setPreviousPage(currentPage.current);currentPage.current=next;}
+      setPage(next);
       setSelectedEvent(null);
       window.scrollTo({top:0, behavior:'instant'});
     };
@@ -148,7 +152,7 @@ function ClubApp() {
     {page==='market' && <Marketplace key={subroute} section={subroute} session={memberSession} notify={notify}/>}
     {page==='profile' && (memberSession?.memberAccess?<MemberForms/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='members' && <><MembersPage session={memberSession} navigate={navigate}/></>}
-    {page==='registration'&&<section className="page-content"><a href="#mitglieder">{t("← Mitgliederbereich")}</a><RegistrationForm eventId={Number(subroute)} memberAccess={!!memberSession?.memberAccess}/></section>}
+    {page==='registration'&&<section className="page-content">{previousPage==='agenda'||previousPage==='regions'||previousPage==='home'?<a href={'#'+routes[previousPage]}>{'← '+t(previousPage==='agenda'?'Agenda':previousPage==='regions'?'Regionen':'Startseite')}</a>:<a href="#mitglieder">{t("← Mitgliederbereich")}</a>}<RegistrationForm eventId={Number(subroute)} memberAccess={!!memberSession?.memberAccess}/></section>}
     {(['forum','gallery','library','clubdocs'] as Page[]).includes(page) && (memberSession?.memberAccess?<Community key={`${page}:${subroute}`} kind={page==='clubdocs'?'library':page as 'forum'|'gallery'|'library'} nonce={memberSession.communityNonce||''} selectedId={Number(subroute)||undefined} initialGroup={page==='clubdocs'?'club':''} section={subroute} title={page==='clubdocs'?'Clubdokumente':undefined}/>:page==='gallery'?<PublicGallery/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='news' && <HomepageSections navigate={navigate} memberAccess={!!memberSession?.memberAccess} upcomingEvents={[]} eventPreview={{title:'',text:''}} archive/>}
     {page==='applications' && (memberSession?.applicationsNonce?<ApplicationInbox nonce={memberSession.applicationsNonce}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
@@ -157,7 +161,7 @@ function ClubApp() {
     {page==='event-admin' && (memberSession?.canManageEvents?<EventManager session={memberSession} changed={retryEvents}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {['contact','privacy','statutes'].includes(page) && <InformationPage key={page} page={page}/>}
 
-    <footer className="site-footer"><div className="footer-brand"><Image className="footer-logo" src={assetUrl(c('global.logo'))} width={954} height={954} alt={t("Swiss TR-Club Logo")}/><div><strong>{c('global.name')}</strong><p>{c('global.footer')}</p></div></div><div><strong>{t('Kontakt & Recht')}</strong><button onClick={() => navigate('contact')}>{t('Kontakt & Impressum')}</button><button onClick={() => navigate('privacy')}>{t('Datenschutz')}</button><button onClick={() => navigate('statutes')}>{t('Statuten')}</button></div></footer>
+    <footer className="site-footer"><div className="footer-brand"><Image className="footer-logo" src={assetUrl(c('global.logo'))} width={954} height={954} alt={t("Swiss TR-Club Logo")}/><div><strong>{c('global.name')}</strong><p className="footer-tagline">{c('global.tagline')}</p>{c('global.footer').replace(/[^\p{L}\p{N}]+/gu,'').toLowerCase()!==c('global.tagline').replace(/[^\p{L}\p{N}]+/gu,'').toLowerCase()&&<p>{c('global.footer')}</p>}</div></div><div><strong>{t('Kontakt & Recht')}</strong><button onClick={() => navigate('contact')}>{t('Kontakt & Impressum')}</button><button onClick={() => navigate('privacy')}>{t('Datenschutz')}</button><button onClick={() => navigate('statutes')}>{t('Statuten')}</button></div></footer>
 
     {(selectedEvent||linkedEvent) && <EventDialog event={(selectedEvent||linkedEvent)!} memberAccess={!!memberSession?.memberAccess} close={() => {setSelectedEvent(null);if(linkedEvent)window.location.hash='#agenda';}}/>}
     {toast && <div className="toast" role="status">✓ {toast}</div>}
@@ -246,7 +250,8 @@ function EventDialog({event,close,memberAccess}:{event:ClubEvent,close:()=>void;
         {event.registrationCloseAt&&<><span>{t("Anmeldung bis")}</span><strong>{eventDateTime(event.registrationCloseAt)}</strong></>}
       </div>
       {event.registrationRequired&&(event.externalRegistrationUrl?<a className="market-primary" href={event.externalRegistrationUrl} target="_blank" rel="noopener noreferrer">{t("Extern anmelden (neuer Tab) →")}</a>:<RegistrationForm eventId={event.id} memberAccess={memberAccess} hideTitle/>)}
-      <button className="modal-action" onClick={close}>{t("Schliessen")}</button>
+      {/* Mit Anmeldeformular ist «Schliessen» bewusst zurückhaltend, damit es nicht mit «Anmeldung prüfen» verwechselt wird. */}
+      <button className={`modal-action${event.registrationRequired&&!event.externalRegistrationUrl?' is-secondary':''}`} onClick={close}>{t(event.registrationRequired&&!event.externalRegistrationUrl?'Fenster schliessen (ohne Anmeldung)':'Schliessen')}</button>
     </div>
   </Dialog>;
 }
