@@ -3290,10 +3290,7 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .role-scope-chips .role-scope-all{display:inline-flex;align-items:center;padding:4px 12px;border:1px dashed #114973;border-radius:999px;background:#fff;color:#114973;font:inherit;font-size:13px;font-weight:600;cursor:pointer;min-height:30px}
 .role-scope-chips .role-scope-all.is-on{background:#0b2f4d;border-style:solid;color:#fff}
 /* Dashboard: Benachrichtigungen für Prüfende */
-.review-notifications{margin-top:18px;padding-top:16px;border-top:1px solid #dbe5ee}
-.review-notifications h3{font-size:16px;margin:0 0 6px}
-.review-notifications label{display:block;margin-top:10px}
-.review-notifications input[type=email]{width:100%;font-size:16px}
+
 /* PDF-Leser: kompakte Leiste, Seite bekommt den Platz (Testfeedback 26.10.) */
 .magazine-reader-toolbar{gap:6px 14px;padding:8px 12px}
 .magazine-reader-toolbar .reader-group{display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap}
@@ -3309,3 +3306,27 @@ details.form-section.is-collapsible>.form-section-body{padding:0 16px 16px}
 .magazine-reader.is-fullscreen .magazine-reader-footer{padding:8px 12px}
 .magazine-reader.is-fullscreen .magazine-reader-footer button,.magazine-reader.is-fullscreen .magazine-reader-footer a{min-height:34px;padding:4px 12px;font-size:14px}
 @media (max-width:699px){.magazine-reader-toolbar{gap:6px 8px;padding:6px 8px}.magazine-reader .magazine-reader-toolbar button,.magazine-reader .magazine-reader-toolbar select{min-height:40px}.magazine-reader-toolbar .reader-zoom{display:none}.magazine-reader-toolbar .reader-search{order:9;flex:1 1 100%;justify-content:center}.magazine-reader-toolbar .reader-search{min-width:0}.magazine-reader-toolbar .reader-search input{flex:1 1 0;width:auto;min-width:0}.magazine-reader-toolbar .reader-search select{max-width:42%}}
+/* Fachexperten-Übersicht: pro Person zugeklappt (Testfeedback 26.10.) */
+.expert-overview li{border-bottom:1px solid #e6edf3;padding:2px 0 6px}
+.expert-overview li.is-selected{background:#eef4f9;border-radius:6px}
+.expert-overview .expert-row{display:flex;align-items:center;gap:4px}
+.expert-overview .expert-toggle{flex:0 0 32px;width:32px;height:32px;padding:0;border:0;background:none;color:#123c58;font-size:16px;cursor:pointer;align-items:center;justify-content:center}
+.expert-overview .expert-name{flex:1;display:flex;flex-direction:row;align-items:baseline;justify-content:space-between;gap:10px;padding:6px 8px}
+.expert-overview .expert-name small{color:#526775;font-size:13px;white-space:nowrap}
+.expert-overview .role-chips{display:flex;flex-wrap:wrap;gap:6px;padding:4px 8px 4px 40px}
+
+/* Dashboard: Benachrichtigungen im Fenster (Testfeedback 26.10.) */
+.review-notifications{display:grid;gap:14px}
+.review-notifications .application-consent{display:flex;align-items:center;gap:10px;margin:0}
+.review-notifications .application-consent input{width:20px;height:20px;margin:0;flex:0 0 20px}
+.review-notifications .review-address{display:grid;gap:6px}
+.review-notifications .review-address input{width:100%;font-size:16px}
+.review-notifications .club-actions{justify-content:flex-end}
+.db-badge-off{color:#8a5a00;font-weight:400}
+/* Fusszeile schlank (Entscheid 26.10.): nur Logo/Slogan und «Kontakt & Recht»; einheitliche Linkgrösse */
+footer.site-footer,.strc-store-footer.is-full{grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:start}
+footer.site-footer>div:last-child,.strc-store-footer.is-full>div:last-child{min-width:200px}
+footer.site-footer div button,.strc-store-footer.is-full a{font-size:14px;padding:4px 0}
+@media(max-width:640px){footer.site-footer,.strc-store-footer.is-full{grid-template-columns:1fr;gap:24px}footer.site-footer .footer-brand{grid-column:auto}}
+/* Bibliothek: Archiv und Ersatz */
+.lib-replaced{margin:4px 0 0;font-size:13px;color:#526775}

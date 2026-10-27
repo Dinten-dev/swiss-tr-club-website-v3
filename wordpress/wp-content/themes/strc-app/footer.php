@@ -1,8 +1,6 @@
 <?php
 $strcFr=get_locale()==='fr_FR';$strcBase=rtrim(defined('STRC_FRONTEND_ORIGIN')?(string)STRC_FRONTEND_ORIGIN:home_url(),'/');
 $strcCols=[
-    [$strcFr?'Découvrir':'Entdecken',[['club',$strcFr?'À propos du club':'Über den Club'],['agenda',$strcFr?'Événements':'Veranstaltungen'],['regionen',$strcFr?'Régions':'Regionen']]],
-    [$strcFr?'Membres':'Mitglieder',[['mitglieder',$strcFr?'Tableau de bord':'Dashboard'],['marktplatz',$strcFr?'Marché':'Marktplatz'],['forum','Forum'],['bibliothek',$strcFr?'Bibliothèque':'Bibliothek']]],
     [$strcFr?'Contact & mentions légales':'Kontakt & Recht',[['kontakt',$strcFr?'Contact & impressum':'Kontakt & Impressum'],['datenschutz',$strcFr?'Protection des données':'Datenschutz'],['statuten',$strcFr?'Statuts':'Statuten']]],
 ];
 ?>
