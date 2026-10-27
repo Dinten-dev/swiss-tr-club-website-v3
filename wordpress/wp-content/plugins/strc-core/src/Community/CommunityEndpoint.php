@@ -243,7 +243,7 @@ final class CommunityEndpoint
     private function link(int $id): ?array
     {
         if($id<1)return null;$post=get_post($id);
-        return $post&&$post->post_type==='strc_document'?['id'=>$id,'title'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8')]:null;
+        return $post&&$post->post_type==='strc_document'&&LibraryPolicy::canRead($id)&&($post->post_status==='publish'||$this->canReview($post))?['id'=>$id,'title'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8')]:null;
     }
 
     private function present(\WP_Post $post): array
@@ -306,6 +306,7 @@ final class CommunityEndpoint
             AjaxRequest::fail('Ungültiger Bereich.');
         }
         $trash = '1' === ($input['trash'] ?? '');
+        if($type==='strc_document'&&$trash&&!\SwissTRClub\Core\Editorial\EditorialAccess::area('library')&&!current_user_can('strc_access_board_documents'))AjaxRequest::fail('Nur die Bibliotheks-Moderation kann das Archiv einsehen.',403);
         $search=sanitize_text_field($input['search']??'');
         $args=['post_type'=>$type,'post_status'=>$trash?'trash':['publish','pending','draft'],'posts_per_page'=>24,'paged'=>max(1,absint($input['page']??1)),
             's'=>'',
@@ -473,6 +474,8 @@ final class CommunityEndpoint
         if($request&&!empty($requests[$request])){ $existing=$this->post((int)$requests[$request]);if($kind==='gallery')return $this->append($input+['id'=>(string)$existing->ID]);return $this->present($existing); }
         list($title, $description) = $this->texts($input);
         $classification=$this->classification($input,$kind);
+        $replaces=$kind==='library'?absint($input['replaces']??0):0;
+        if($replaces){$old=get_post($replaces);if(!$old||$old->post_type!=='strc_document'||$old->post_status!=='publish'||!LibraryPolicy::canRead($replaces)||!$this->canReview($old))AjaxRequest::fail('Das zu ersetzende Dokument ist nicht verfügbar oder nicht freigegeben.',403);}
         if(($kind!=='forum'||!empty($_FILES['files']['name']))&&($input['rights']??'')!=='1')AjaxRequest::fail('Bitte die Berechtigung zum Teilen des Materials bestätigen.',422);
         if ('forum' === $kind && '' === $description) {
             AjaxRequest::fail('Bitte einen Beitragstext eingeben.');
@@ -497,7 +500,7 @@ final class CommunityEndpoint
         if($kind==='gallery')update_post_meta($id,'strc_album_date',$classification['date']?:substr(get_post($id)->post_date,0,10));
         if($kind==='library')LibraryPolicy::index((int)$id,$classification,$title,$description,$savedFiles);
         // «Ersetzt Dokument …» (nur Prüfende): das alte Dokument wird bei der Freigabe des neuen archiviert.
-        if($kind==='library'&&($replaces=absint($input['replaces']??0))){$old=get_post($replaces);if($old&&$old->post_type==='strc_document'&&$old->post_status==='publish'&&$this->canReview($old))update_post_meta($id,'strc_replaces',$replaces);}
+        if($replaces)update_post_meta($id,'strc_replaces',$replaces);
         update_post_meta($id,'strc_material_rights_at',gmdate(DATE_ATOM));
         $published = wp_update_post(array('ID' => $id, 'post_status' => $kind==='forum'?'publish':'pending'), true);
         if($kind==='forum'){$this->setSubscription((int)$id,true);if(!is_wp_error($published))ForumSettings::notifyNewTopic(get_post((int)$id));}
@@ -610,7 +613,7 @@ final class CommunityEndpoint
         return array('id' => (int) $id);
     }
 
-    private function status(string $operation, int $id): array
+    private function status(string $operation, int $id, bool $locked = false): array
     {
         $post = $this->post($id, true);
         if (! $this->canEdit($post)) {
@@ -618,12 +621,18 @@ final class CommunityEndpoint
         }
         if(in_array($operation,['approve','reject'],true)){
             if(!$this->canReview($post))AjaxRequest::fail('Keine Freigabeberechtigung.',403);
+            $oldId=$operation==='approve'&&$post->post_type==='strc_document'?absint(get_post_meta($id,'strc_replaces',true)):0;
+            if($oldId&&!$locked)return \SwissTRClub\Core\Forms\FormStore::locked('library-replacement-'.$oldId,fn()=>$this->status($operation,$id,true));
+            if($oldId){$old=get_post($oldId);if(!$old||$oldId===$id||$old->post_type!=='strc_document'||!LibraryPolicy::canRead($oldId)||!$this->canReview($old))AjaxRequest::fail('Keine Berechtigung zum Ersetzen dieses Dokuments.',403);if($old->post_status!=='publish'&&!($old->post_status==='trash'&&(int)get_post_meta($oldId,'strc_replaced_by',true)===$id))AjaxRequest::fail('Das ursprüngliche Dokument wurde inzwischen archiviert. Bitte die Zuordnung prüfen.',409);}
             if($post->post_type==='strc_album'){$files=$this->files($id);foreach($files as &$file){$file['reviewStatus']=$operation==='approve'?'approved':'rejected';if($operation==='reject')$file['public']=false;}unset($file);update_post_meta($id,'strc_private_files',$files);}
             $result=wp_update_post(['ID'=>$id,'post_status'=>$operation==='approve'?'publish':'draft'],true);
             if(is_wp_error($result))AjaxRequest::fail('Freigabe konnte nicht gespeichert werden.',503);
             if($post->post_type==='strc_album')$this->albumState(get_post($id),$this->files($id));
+            if($oldId&&$old->post_status==='publish'){
+                if(!wp_trash_post($oldId)){wp_update_post(['ID'=>$id,'post_status'=>$post->post_status]);AjaxRequest::fail('Das bisherige Dokument konnte nicht archiviert werden. Die Freigabe wurde zurückgenommen.',503);}
+                update_post_meta($oldId,'strc_replaced_by',$id);
+            }
             update_post_meta($id,'strc_review',['by'=>get_current_user_id(),'at'=>gmdate(DATE_ATOM),'state'=>$operation]);
-            if($operation==='approve'&&$post->post_type==='strc_document'&&($oldId=absint(get_post_meta($id,'strc_replaces',true)))){$old=get_post($oldId);if($old&&$old->post_type==='strc_document'&&$old->post_status==='publish'){update_post_meta($oldId,'strc_replaced_by',$id);wp_trash_post($oldId);}}
             return ['id'=>$id];
         }
         if($operation==='trash'&&$post->post_type==='strc_album')AjaxRequest::fail('Galeriealben bleiben in der Galerie erhalten.',422);

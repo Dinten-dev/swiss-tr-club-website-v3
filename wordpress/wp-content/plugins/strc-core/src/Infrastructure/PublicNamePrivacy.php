@@ -12,7 +12,7 @@ final class PublicNamePrivacy
     public function registerHooks(): void
     {
         add_filter('rest_endpoints', [$this, 'restEndpoints']);
-        add_action('template_redirect', [$this, 'authorArchives']);
+        add_action('template_redirect', [$this, 'authorArchives'], 0);
     }
 
     /** @param array<string,mixed> $endpoints */
@@ -28,6 +28,8 @@ final class PublicNamePrivacy
         if ((is_author() || isset($_GET['author'])) && ! current_user_can('list_users')) {
             global $wp_query;
             $wp_query->set_404();
+            // Run before WordPress can redirect ?author=ID to a revealing author slug.
+            add_filter('redirect_canonical', '__return_false');
             status_header(404);
             nocache_headers();
         }

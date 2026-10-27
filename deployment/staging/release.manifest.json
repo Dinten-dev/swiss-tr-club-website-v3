@@ -79,8 +79,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/CommunityEndpoint.php",
-      "bytes": 59918,
-      "sha256": "9f38c95cf1dba2adbbb647b585e8b060dcec14c8afc91bb160ce0c8f63ee8e78"
+      "bytes": 62836,
+      "sha256": "d7f4ac8644caa9a99af28b9cd28f2ede60120f94f186471dc03dbe378480e035"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/ForumSettings.php",
@@ -129,18 +129,23 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Content/HomepageActivity.php",
-      "bytes": 3669,
-      "sha256": "052155e3b170e2cfe23b18b1e01399cbb46b2606f5324e827d6165d406b4ef9d"
+      "bytes": 3668,
+      "sha256": "f2f614640e120c2be2e01e89aa430ce0bc8d027c6596fee5da12f843eab3750a"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Content/HomepageEndpoint.php",
-      "bytes": 4645,
-      "sha256": "f7d61f66f8d892b5853f3b2164a6e6f4c9301cbdd76d0fa46e11be837187931f"
+      "bytes": 4737,
+      "sha256": "e047830628f09a3b8789c2698e093b1663ca94d0ec38d0b8a03ad70198e1ef88"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Content/HomepageHighlights.php",
-      "bytes": 7155,
-      "sha256": "48cf1b5140a67046714b5a75a57e0572fbdb34367310ad645b38c9c31d465298"
+      "bytes": 7481,
+      "sha256": "00d36b97984098a0ae5681a86176c71d09b5fd17c78947b63828a858de22e8b5"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Content/HomepageStats.php",
+      "bytes": 1497,
+      "sha256": "2dd29214788bf8a179e2ba7e633ac9ab0bb1eab5f89d1a944cbd46a7b4b8f29a"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Content/MagazineEndpoint.php",
@@ -194,8 +199,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventManagementEndpoint.php",
-      "bytes": 19112,
-      "sha256": "288bfc2df23cbe7e6ad88fce653123377cf92417e34f7f00604d3ff2b23dfc9b"
+      "bytes": 19333,
+      "sha256": "7c76c9203e74e3cc3a47547e166fbf476ae8df16b3e2fae50d6bc155ae7f1e88"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventPostType.php",
@@ -306,6 +311,11 @@
       "path": "wordpress/wp-content/plugins/strc-core/src/Infrastructure/MacRomanRepair.php",
       "bytes": 2910,
       "sha256": "9d621e879d1a6003b593132f7fe6878eb336b7b0e46372efba0bfb1df2892cdc"
+    },
+    {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Infrastructure/PublicNamePrivacy.php",
+      "bytes": 1326,
+      "sha256": "71671a4f1ddaf0cb261d65bc2b7207116d7abdd8220ce0324fc21b8673eaeda1"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Infrastructure/Schema.php",
@@ -424,8 +434,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Marketplace/MarketplaceEndpoint.php",
-      "bytes": 34051,
-      "sha256": "fe40be0a2ac0ca838137ced39e586bef2e10f2c6ba783f74a20c8a40ca179a6a"
+      "bytes": 34290,
+      "sha256": "2e07fd644846483da6361c24e7221c79596ffb9ce32ba360f7a6f0927df2b332"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/ApplicationAdmission.php",
@@ -499,8 +509,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Plugin.php",
-      "bytes": 6105,
-      "sha256": "3dadbbb8c3a2cd84520cf11bf651e73d1ab9bbafb4fb69ee850421d8cb2cb0ef"
+      "bytes": 6190,
+      "sha256": "4e0866c7577a8aa21b80de50a93122a5987ff4a6baf55849c2bf09cfc26f16cf"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleAssignments.php",
@@ -659,13 +669,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 296780,
-      "sha256": "75f3002fca7628fdf8067d8b5946022216f7044c18fe08bc1e49bedf1aa9fb50"
+      "bytes": 309222,
+      "sha256": "3dc08d7c0507df0d55bb7e74cefcdc1252057870dab949bf382bd2832499c7fa"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 916024,
-      "sha256": "db475473c66d2f0b002e80746c1aab86bb9618387e6f1688c05c633e401da2fa"
+      "bytes": 934583,
+      "sha256": "c70e4470b5441c8926760d80340608d72e94c8ea8e282298b045183886627fbe"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -871,6 +881,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-C5EqHhMj.js",
       "bytes": 8199,
       "sha256": "2214b02cce500c8daec939e136b5d08e017532862e78d414522166e3ae0de68b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CdRtFEeR.js",
+      "bytes": 9784,
+      "sha256": "ab5e167662c3cd7a550f75584c69f8a6384d0c8e43f43693f130cc4c5c8e61da"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-CGamNY08.js",
@@ -2208,6 +2223,11 @@
       "sha256": "4f759c817fb67fafc59dc68dc8167f22bf77cc40391fab4cbf4206353971e8fd"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-d9duiMTk.js",
+      "bytes": 136046,
+      "sha256": "45e8eb08dfba2637408c068667d936ea516fa509b70c7c46170d5cf23be1bcdf"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-Dog8d5kH.js",
       "bytes": 62104,
       "sha256": "45ba35d9cfa0cc59f88634ddf0f4bee871d170982c5aa523162599ca19cf06cd"
@@ -2229,8 +2249,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/footer.php",
-      "bytes": 1334,
-      "sha256": "cd18266852cce945308cd82b46cad45f4263d57bfb20ea7474dc2b931f8588a0"
+      "bytes": 934,
+      "sha256": "91229d473e0b44ab8119524d3f60d5fd51e7478810a8ce34d375bdedae9816f2"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/functions.php",
@@ -2258,9 +2278,7 @@
       "sha256": "6355c019a358f34e46406a5dad8f0057bae8d1bd0c530f0420d1d56a37087eb0"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-10-26T20:47:48.030Z",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-26T20:49:55.496399+00:00",
-  "publishedFiles": 7
+  "status": "candidate",
+  "builtOn": "2026-10-27T12:45:26.977Z",
+  "baselineCapturedOn": "2026-10-13"
 }
