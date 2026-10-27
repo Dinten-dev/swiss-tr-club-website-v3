@@ -27,10 +27,13 @@ final class HomepageHighlights
         return $start !== false && $start >= time();
     }
 
-    private function candidates(int $limit): array
+    private function candidates(int $limit, bool $newsOnly = false): array
     {
         $posts = [];
         foreach (self::TYPES as $type => $kind) {
+            // Automatische Auswahl: nur Clubnews (Entscheid 26.10.); Anlässe stehen unter «Nächste Events», Forum unter «Aus dem Clubleben».
+            // Die Redaktion kann Anlässe oder Forumsthemen weiterhin gezielt auswählen.
+            if ($newsOnly && $kind !== 'news') continue;
             if ($kind === 'forum' && !current_user_can('strc_access_member_area')) continue;
             $args = ['post_type'=>$type, 'post_status'=>'publish', 'has_password'=>false, 'numberposts'=>$limit, 'orderby'=>['modified'=>'DESC', 'ID'=>'DESC']];
             if ($kind === 'news') $args['category_name'] = 'club-news';
@@ -95,7 +98,7 @@ final class HomepageHighlights
                 if ($post && $this->allowed($post)) $posts[$post->ID] = $post;
             }
             uasort($posts, static fn($a, $b) => [$b->post_modified_gmt, $b->ID] <=> [$a->post_modified_gmt, $a->ID]);
-        } else $posts = array_slice($this->candidates(12), 0, 12);
+        } else $posts = array_slice($this->candidates(12, true), 0, 12);
         $posts = array_values($posts);
         $count = count($posts);
         $items = [];

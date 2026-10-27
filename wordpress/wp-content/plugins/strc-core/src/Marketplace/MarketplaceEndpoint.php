@@ -423,7 +423,8 @@ final class MarketplaceEndpoint
             'documents'=>AdDocuments::present($id),
             'imageIds'=>array_values(array_map('intval',is_array($imageIds)?$imageIds:[])),
             'images' => array_values(array_filter(array_map(static fn ($imageId) => wp_get_attachment_image_url((int) $imageId, 'large'), is_array($imageIds) ? $imageIds : array()))),
-            'seller' => $seller ? $seller->display_name : 'Clubmitglied',
+            // Name nur für das Prüfteam und den Inserenten selbst – nie öffentlich ausliefern.
+            'seller' => (\SwissTRClub\Core\Editorial\EditorialAccess::area('market') || (get_current_user_id() > 0 && (int) $post->post_author === get_current_user_id())) && $seller ? $seller->display_name : '',
             'createdAt' => get_post_time(DATE_ATOM, true, $id),
             'status'=>$post->post_status,'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area('market'),'expiresAt'=>get_post_meta($id,'strc_ad_expires_at',true)?gmdate(DATE_ATOM,(int)get_post_meta($id,'strc_ad_expires_at',true)):'',
             'mine' => get_current_user_id() > 0 && (int) $post->post_author === get_current_user_id(),

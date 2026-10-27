@@ -1463,5 +1463,17 @@
   "Im PDF suchen": "Rechercher dans le PDF",
   "Treffer": "résultats",
   "Keine Treffer": "Aucun résultat",
-  "Vollbild": "Plein écran"
+  "Vollbild": "Plein écran",
+  "Zuklappen": "Replier",
+  "Aufklappen": "Déplier",
+  "Benachrichtigungen": "Notifications",
+  "aus": "désactivées",
+  "Archivieren": "Archiver",
+  "Ersetzt Dokument (optional)": "Remplace le document (facultatif)",
+  "Ersetzt kein bestehendes Dokument": "Ne remplace aucun document existant",
+  "Bei der Freigabe des neuen Dokuments wird das gewählte automatisch archiviert und verweist auf die neue Fassung.": "Lors de l’approbation du nouveau document, celui choisi est archivé automatiquement et renvoie à la nouvelle version.",
+  "Ersetzt durch": "Remplacé par",
+  "Ersetzt bei Freigabe": "Remplace après approbation",
+  "Nur die Bibliotheks-Moderation kann Dokumente archivieren.": "Seule la modération de la bibliothèque peut archiver des documents.",
+  "Technikbereich": "Domaine technique"
 }

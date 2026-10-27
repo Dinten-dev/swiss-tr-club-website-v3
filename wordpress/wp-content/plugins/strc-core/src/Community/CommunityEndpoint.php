@@ -239,10 +239,17 @@ final class CommunityEndpoint
         }
     }
 
+    /** Verweis auf ein anderes Bibliotheksdokument (Ersatz/Vorgänger), nur Titel und ID. */
+    private function link(int $id): ?array
+    {
+        if($id<1)return null;$post=get_post($id);
+        return $post&&$post->post_type==='strc_document'?['id'=>$id,'title'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8')]:null;
+    }
+
     private function present(\WP_Post $post): array
     {
         $author = get_userdata((int) $post->post_author);
-        return array('id' => (int) $post->ID, 'kind' => array_search($post->post_type, self::TYPES, true), 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'description' => html_entity_decode(wp_strip_all_tags($post->post_content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($post->post_content)), 'author' => $author ? $author->display_name : 'Clubmitglied', 'createdAt' => get_post_time(DATE_ATOM, true, $post), 'canEdit' => $this->canEdit($post), 'canReview'=>$this->canReview($post),'subscribed'=>in_array((int)$post->ID,(array)get_user_meta(get_current_user_id(),'strc_topic_subscriptions',true),true),'pinned'=>(bool)get_post_meta($post->ID,'strc_topic_pinned',true),'mergedInto'=>(int)get_post_meta($post->ID,'strc_topic_merged_into',true),'closed'=>(bool)get_post_meta($post->ID,'strc_topic_closed',true),'status' => $post->post_status, 'classification'=>get_post_meta($post->ID,'strc_form_classification',true)?:[], 'replyCount' => (int) get_comments(array('post_id' => $post->ID, 'status' => 'approve', 'count' => true)), 'files' => array_map(fn ($file): array => array('key' => $file['key'], 'name' => $file['name'], 'mime' => $file['mime'], 'size' => $file['size'], 'caption' => $file['caption'] ?? '', 'photographer' => $file['photographer'] ?? '', 'public'=>(bool)($file['public']??false),'retainOriginal'=>(bool)($file['retainOriginal']??false),'reviewStatus'=>$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending'),'canCaption'=>$this->canReview($post)||(int)($file['submittedBy']??$post->post_author)===get_current_user_id(),'originalUrl'=>get_post_type($post->ID)==='strc_album'&&$this->originals()?add_query_arg(['action'=>'strc_community','operation'=>'file','id'=>$post->ID,'key'=>$file['key'],'original'=>'1'],admin_url('admin-ajax.php')):'', 'url' => add_query_arg(array('action' => 'strc_community', 'operation' => 'file', 'id' => $post->ID, 'key' => $file['key']), admin_url('admin-ajax.php'))), $this->visibleFiles($post)), 'coverKey'=>(string)get_post_meta($post->ID,'strc_album_cover',true),'portrait'=>self::portrait((int)$post->ID))+('strc_topic'===$post->post_type?$this->topicStats($post):array());
+        return array('id' => (int) $post->ID, 'kind' => array_search($post->post_type, self::TYPES, true), 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'description' => html_entity_decode(wp_strip_all_tags($post->post_content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($post->post_content)), 'author' => $author ? $author->display_name : 'Clubmitglied', 'createdAt' => get_post_time(DATE_ATOM, true, $post), 'canEdit' => $this->canEdit($post), 'canReview'=>$this->canReview($post),'replacedBy'=>$this->link((int)get_post_meta($post->ID,'strc_replaced_by',true)),'replaces'=>$this->link((int)get_post_meta($post->ID,'strc_replaces',true)),'subscribed'=>in_array((int)$post->ID,(array)get_user_meta(get_current_user_id(),'strc_topic_subscriptions',true),true),'pinned'=>(bool)get_post_meta($post->ID,'strc_topic_pinned',true),'mergedInto'=>(int)get_post_meta($post->ID,'strc_topic_merged_into',true),'closed'=>(bool)get_post_meta($post->ID,'strc_topic_closed',true),'status' => $post->post_status, 'classification'=>get_post_meta($post->ID,'strc_form_classification',true)?:[], 'replyCount' => (int) get_comments(array('post_id' => $post->ID, 'status' => 'approve', 'count' => true)), 'files' => array_map(fn ($file): array => array('key' => $file['key'], 'name' => $file['name'], 'mime' => $file['mime'], 'size' => $file['size'], 'caption' => $file['caption'] ?? '', 'photographer' => $file['photographer'] ?? '', 'public'=>(bool)($file['public']??false),'retainOriginal'=>(bool)($file['retainOriginal']??false),'reviewStatus'=>$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending'),'canCaption'=>$this->canReview($post)||(int)($file['submittedBy']??$post->post_author)===get_current_user_id(),'originalUrl'=>get_post_type($post->ID)==='strc_album'&&$this->originals()?add_query_arg(['action'=>'strc_community','operation'=>'file','id'=>$post->ID,'key'=>$file['key'],'original'=>'1'],admin_url('admin-ajax.php')):'', 'url' => add_query_arg(array('action' => 'strc_community', 'operation' => 'file', 'id' => $post->ID, 'key' => $file['key']), admin_url('admin-ajax.php'))), $this->visibleFiles($post)), 'coverKey'=>(string)get_post_meta($post->ID,'strc_album_cover',true),'portrait'=>self::portrait((int)$post->ID))+('strc_topic'===$post->post_type?$this->topicStats($post):array());
     }
 
     /** Forum-Statistik wie in einem klassischen Forum: Aufrufe, letzte Antwort und Beitragszahl des Autors. */
@@ -489,6 +496,8 @@ final class CommunityEndpoint
         update_post_meta($id,'strc_form_classification',$classification);
         if($kind==='gallery')update_post_meta($id,'strc_album_date',$classification['date']?:substr(get_post($id)->post_date,0,10));
         if($kind==='library')LibraryPolicy::index((int)$id,$classification,$title,$description,$savedFiles);
+        // «Ersetzt Dokument …» (nur Prüfende): das alte Dokument wird bei der Freigabe des neuen archiviert.
+        if($kind==='library'&&($replaces=absint($input['replaces']??0))){$old=get_post($replaces);if($old&&$old->post_type==='strc_document'&&$old->post_status==='publish'&&$this->canReview($old))update_post_meta($id,'strc_replaces',$replaces);}
         update_post_meta($id,'strc_material_rights_at',gmdate(DATE_ATOM));
         $published = wp_update_post(array('ID' => $id, 'post_status' => $kind==='forum'?'publish':'pending'), true);
         if($kind==='forum'){$this->setSubscription((int)$id,true);if(!is_wp_error($published))ForumSettings::notifyNewTopic(get_post((int)$id));}
@@ -614,15 +623,19 @@ final class CommunityEndpoint
             if(is_wp_error($result))AjaxRequest::fail('Freigabe konnte nicht gespeichert werden.',503);
             if($post->post_type==='strc_album')$this->albumState(get_post($id),$this->files($id));
             update_post_meta($id,'strc_review',['by'=>get_current_user_id(),'at'=>gmdate(DATE_ATOM),'state'=>$operation]);
+            if($operation==='approve'&&$post->post_type==='strc_document'&&($oldId=absint(get_post_meta($id,'strc_replaces',true)))){$old=get_post($oldId);if($old&&$old->post_type==='strc_document'&&$old->post_status==='publish'){update_post_meta($oldId,'strc_replaced_by',$id);wp_trash_post($oldId);}}
             return ['id'=>$id];
         }
         if($operation==='trash'&&$post->post_type==='strc_album')AjaxRequest::fail('Galeriealben bleiben in der Galerie erhalten.',422);
+        // Bibliothek: archivieren und wiederherstellen nur durch Admin bzw. Bibliotheks-Moderation.
+        if($post->post_type==='strc_document'&&!$this->canReview($post))AjaxRequest::fail('Nur die Bibliotheks-Moderation kann Dokumente archivieren.',403);
         $result = 'trash' === $operation ? wp_trash_post($id) : wp_untrash_post($id);
         if (! $result) {
             AjaxRequest::fail('Status konnte nicht geändert werden.', 409);
         }
         if ('restore' === $operation) {
-            wp_update_post(array('ID' => $id, 'post_status' => $post->post_type==='strc_topic'?'publish':'pending'));
+            wp_update_post(array('ID' => $id, 'post_status' => $post->post_type==='strc_topic'||($post->post_type==='strc_document'&&$this->canReview($post))?'publish':'pending'));
+            if($post->post_type==='strc_document')delete_post_meta($id,'strc_replaced_by');
         }
         return array('id' => $id);
     }
