@@ -1,9 +1,7 @@
 'use client';
 import {t} from './UILanguage';
 
-import Image from 'next/image';
-import {ContentBlock,useSiteContent,assetUrl,type ContentImage} from './SiteContent';
-import {imageFrameStyle} from './ImageFrame';
+import {ContentBlock,useSiteContent} from './SiteContent';
 import {LandingCard} from './LandingPages';
 
 export function scrollToHomeSection(id:string) {
@@ -25,20 +23,9 @@ export function HomeDirectLinks({memberAccess}:{memberAccess:boolean}) {
 }
 
 export default function HomepageOverview() {
-  const {text:c,values}=useSiteContent();
-  const available=((values.home?.photos??[]) as ContentImage[]).filter(photo=>photo.url);
-  const photos=available.slice(0,12);
-  const left=photos.slice(0,6);
-  const right=photos.slice(6,12);
-  const half=(list:ContentImage[],side:'left'|'right')=><div key={side} className={`home-reference-half is-${side}`}><div className={`home-reference-track${list.length>1?' is-moving':''} ${side==='left'?'to-right':'to-left'}`}>{(list.length>1?[0,1]:[0]).map(copy=><div className="home-reference-photo-set" key={copy} aria-hidden={copy===1}>{list.map((photo,index)=><figure key={photo.url+index}><Image src={assetUrl(photo.url)} alt={copy===0?photo.alt:''} width={640} height={480} priority={copy===0&&index<2} style={imageFrameStyle(photo.frame,'cover')}/></figure>)}</div>)}</div></div>;
-  return <section className="home-arrival" aria-labelledby="home-arrival-title"><div className="home-width">
-    <div className="home-reference-intro">
-      <div><p className="eyebrow">{c('home.eyebrow','Willkommen beim Swiss TR-Club')}</p><h1 id="home-arrival-title">{c('home.title')}</h1></div>
-      <ContentBlock id="home.intro" className="home-reference-description"/>
-    </div>
-    {photos.length>0&&<div className={`home-reference-photos${right.length?' is-split':''}`} role="region" aria-label={t("Einblicke ins Clubleben")} tabIndex={0}>
-      {right.length?[half(left,'left'),half(right,'right')]:half(left,'left')}
-    </div>}
+  const {text:c}=useSiteContent();
+  if(!c('home.mission').replace(/<[^>]*>/g,'').trim())return null;
+  return <section className="home-arrival hx-mission" aria-label={t("Über den Club")}><div className="home-width">
     <ContentBlock id="home.mission" className="home-reference-story"/>
   </div></section>;
 }

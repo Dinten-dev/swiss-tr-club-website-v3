@@ -7,13 +7,14 @@ import { Dialog } from './Marketplace';
 import { query } from './ClubApi';
 import {useSiteContent,RichHtml,assetUrl,type ContentPartner} from './SiteContent';
 import HomepageOverview from './HomepageOverview';
+import {HomeHero,HomeNextEvent,HomeStatsBand,HomeModels,HomeRegionMap,HomePhotoWall,type HomeStats} from './HomepageShowcase';
 import HomepageFeed,{homepageCycle,type HomeFeed,type Highlight} from './HomepageFeed';
 import type { MagazineIssue } from './Magazine';
 import type {ClubEvent} from '../page';
 
 type Destination = 'club'|'agenda'|'regions'|'members'|'forum'|'gallery'|'library'|'market'|'contact'|'privacy'|'statutes';
 type News = { id:number; title:string; excerpt:string; body:string; bodyHtml?:string; date:string; image:string };
-type Content = HomeFeed & { news:News[]; newsPage:number; newsPages:number; magazine:MagazineIssue|null; memberAccess:boolean; staging:boolean; latestForum?:{id:number;title:string;excerpt:string}|null };
+type Content = HomeFeed & { news:News[]; newsPage:number; newsPages:number; magazine:MagazineIssue|null; memberAccess:boolean; staging:boolean; latestForum?:{id:number;title:string;excerpt:string}|null; stats?:HomeStats|null };
 const date = (value:string) => new Date(value).toLocaleDateString(uiLocale(),{day:'numeric',month:'long',year:'numeric'});
 
 export default function HomepageSections({memberAccess,archive=false,upcomingEvents,allEvents,eventsState='ready',openEvent}:{allEvents?:ClubEvent[];archive?:boolean;eventPreview:{title:string;text:string};navigate:(page:Destination)=>void;upcomingEvents:ClubEvent[];eventsState?:'loading'|'ready'|'error';openEvent?:(event:ClubEvent)=>void;memberAccess:boolean}) {
@@ -43,15 +44,18 @@ export default function HomepageSections({memberAccess,archive=false,upcomingEve
     finally{setLoadingMore(false);}
   };
   const openNews=(item:News,button:HTMLButtonElement)=>{button.focus({preventScroll:true});setNews(item);};
+  const [now]=useState(()=>Date.now());
+  const nextEvent=upcomingEvents.filter(event=>Date.parse(event.startAt)>=now).sort((a,b)=>Date.parse(a.startAt)-Date.parse(b.startAt))[0];
   return <div className="home-editorial">
-    {!archive&&<HomepageOverview/>}
+    {!archive&&<><HomeHero nextEvent={nextEvent}/><HomeNextEvent event={nextEvent} open={openEvent}/><HomeStatsBand stats={content?.stats}/><HomepageOverview/></>}
     {!archive&&<HomepageFeed content={content} loading={!content&&!error} error={Boolean(error)} retry={retry} events={upcomingEvents} allEvents={allEvents} eventsState={eventsState} openEvent={openEvent} openNews={(item:Highlight,button)=>openNews({...item,body:''},button)}/>}
+    {!archive&&<><HomeModels/>{content?.stats?.regions&&<HomeRegionMap regions={content.stats.regions}/>}<HomePhotoWall/></>}
     {archive&&<section className="home-width home-news" id="home-news" tabIndex={-1} aria-labelledby="home-news-title">
       <div className="home-section-heading"><div><p className="eyebrow">{t("Latest News · Neuigkeiten")}</p><h1 id="home-news-title">{c('home.newsTitle')}</h1></div><p>{c('home.newsIntro')}</p></div>
       {error?<div className="collection-state error" role="alert">{t("Die Neuigkeiten konnten nicht geladen werden.")}<button className="home-text-link" onClick={retry}>{t('Erneut versuchen')}</button></div>:!content?<p className="collection-state" role="status">{t("Neuigkeiten werden geladen …")}</p>:content.news.length===0?<div className="home-empty"><p>{t("Aktuell sind noch keine Neuigkeiten veröffentlicht.")}</p></div>:<><div className="home-news-grid">{content.news.map(item=><article className="home-news-card" key={item.id}>{item.image&&<button className="home-news-image" aria-label={`${item.title} ${t('lesen')}`} onClick={event=>openNews(item,event.currentTarget)}><Image src={item.image} alt="" width={1080} height={720}/><span aria-hidden="true">↗</span></button>}<div className="home-news-copy"><p className="home-meta"><time dateTime={item.date}>{date(item.date)}</time></p><h3><button id={`home-news-${item.id}`} onClick={event=>openNews(item,event.currentTarget)}>{item.title}</button></h3><p>{item.excerpt}</p><button className="home-text-link" onClick={event=>openNews(item,event.currentTarget)}>{t("Weiterlesen →")}</button></div></article>)}</div>{moreError&&<p role="alert">{moreError}</p>}{content.newsPage<content.newsPages&&<button className="home-button home-news-more" onClick={more} disabled={loadingMore}>{t(loadingMore?'Neuigkeiten werden geladen …':content.newsPage===1?'Alle Neuigkeiten anzeigen ↓':'Weitere Neuigkeiten laden ↓')}</button>}</>}
     </section>}
 
-    {!archive&&<section className="home-sponsors" id="home-sponsors" tabIndex={-1} aria-label={t("Unsere Partner")}><div className="home-width"><div className="home-section-heading"><div><p className="eyebrow">{t("Unsere Partner")}</p></div>{c('home.sponsorsIntro')&&<p>{c('home.sponsorsIntro')}</p>}</div><div className="home-sponsor-logos">{sponsors.map(sponsor=><a key={sponsor.name} href={sponsor.url} target="_blank" rel="noopener noreferrer" aria-label={`${sponsor.name} – ${t('Website in neuem Tab')}`}><Image src={assetUrl(sponsor.image)} alt={sponsor.name} width={150} height={90}/></a>)}</div></div></section>}
+    {!archive&&<section className="home-sponsors" id="home-sponsors" tabIndex={-1} aria-label={t("Unsere Partner")}><div className="home-width"><div className="home-section-heading"><div><p className="eyebrow">{t("Unsere Partner")}</p></div>{c('home.sponsorsIntro')&&<p>{c('home.sponsorsIntro')}</p>}</div><div className={`home-sponsor-logos hx-marquee${sponsors.length>3?' is-moving':''}`}><div className="hx-marquee-track">{(sponsors.length>3?[0,1]:[0]).map(copy=><div className="hx-marquee-set" key={copy} aria-hidden={copy===1||undefined}>{sponsors.map(sponsor=><a key={sponsor.name} href={sponsor.url} target="_blank" rel="noopener noreferrer" tabIndex={copy===1?-1:undefined} aria-label={`${sponsor.name} – ${t('Website in neuem Tab')}`}><Image src={assetUrl(sponsor.image)} alt={copy===1?'':sponsor.name} width={150} height={90}/></a>)}</div>)}</div></div></div></section>}
     {news&&<Dialog title={news.title} close={()=>setNews(null)}><article className="home-news-detail"><p className="home-meta">{t("Clubnews ·")} {date(news.date)}</p>{news.image&&<Image src={news.image} alt="" width={1200} height={800}/>}{news.bodyHtml?<RichHtml html={news.bodyHtml}/>:<p>{news.body}</p>}</article></Dialog>}
   </div>;
 }
