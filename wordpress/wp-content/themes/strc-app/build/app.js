@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-d9duiMTk.js";
+import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-BE9LLbXr.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var l = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -8808,6 +8808,30 @@ var re = {
 				label: "Kachel Clubgeschichte – Jahreszahl",
 				type: "text",
 				default: "1975"
+			},
+			{
+				key: "triungstersLabel",
+				label: "TRiungsters – Oberzeile",
+				type: "text",
+				default: "TRiungsters · bis 35 Jahre"
+			},
+			{
+				key: "triungstersTitle",
+				label: "TRiungsters – Überschrift",
+				type: "text",
+				default: "Die nächste Generation am Steuer."
+			},
+			{
+				key: "triungstersText",
+				label: "TRiungsters – Kurztext",
+				type: "textarea",
+				default: "Du bist unter 35 und begeisterst dich für klassische Triumph? Bei den TRiungsters triffst du Gleichgesinnte, fährst an Ausfahrten und Treffen mit und gestaltest die Zukunft des Clubs mit."
+			},
+			{
+				key: "triungstersImage",
+				label: "TRiungsters – Bild (leer: Bild der TRiungsters-Seite)",
+				type: "image",
+				default: ""
 			},
 			{
 				key: "dashboardTitle",
@@ -21837,7 +21861,7 @@ function Qn({ item: e, nonce: t, close: n, saved: r, deleted: i }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var $n = (0, h.lazy)(() => import("./MagazineReader-CdRtFEeR.js")), er = "strc_community", tr = {
+var $n = (0, h.lazy)(() => import("./MagazineReader-DlDZahpQ.js")), er = "strc_community", tr = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliedergalerie",
 	restorations: "Fahrzeugrestaurationen",
@@ -25659,8 +25683,75 @@ function Zr({ stats: e }) {
 		})
 	});
 }
-var Qr = (e, t) => typeof e[t] == "string" ? e[t].trim() : "";
-function $r() {
+function Qr({ count: e }) {
+	let { text: t } = q(), n = t("home.triungstersImage").trim() || t("triungsters.image").trim(), r = t("home.triungstersTitle");
+	return r ? /* @__PURE__ */ (0, _.jsx)("section", {
+		className: "hx-triungsters",
+		"aria-labelledby": "hx-triungsters-title",
+		children: /* @__PURE__ */ (0, _.jsxs)("div", {
+			className: "home-width hx-triungsters-inner",
+			children: [/* @__PURE__ */ (0, _.jsxs)("div", {
+				className: "hx-triungsters-image",
+				children: [/* @__PURE__ */ (0, _.jsx)(v, {
+					src: n ? de(n) : fe("triungsters"),
+					alt: "",
+					width: 900,
+					height: 675
+				}), e ? /* @__PURE__ */ (0, _.jsxs)("p", {
+					className: "hx-triungsters-count",
+					children: [/* @__PURE__ */ (0, _.jsx)("b", { children: e }), /* @__PURE__ */ (0, _.jsx)("span", { children: o("TRiungsters im Club") })]
+				}) : null]
+			}), /* @__PURE__ */ (0, _.jsxs)("div", {
+				className: "hx-triungsters-copy",
+				children: [
+					/* @__PURE__ */ (0, _.jsx)("p", {
+						className: "hx-eyebrow",
+						children: t("home.triungstersLabel")
+					}),
+					/* @__PURE__ */ (0, _.jsx)("h2", {
+						id: "hx-triungsters-title",
+						children: r
+					}),
+					t("home.triungstersText") && /* @__PURE__ */ (0, _.jsx)("p", { children: t("home.triungstersText") }),
+					/* @__PURE__ */ (0, _.jsxs)("div", {
+						className: "hx-hero-actions",
+						children: [/* @__PURE__ */ (0, _.jsxs)("a", {
+							className: "hx-button hx-button-red",
+							href: "#triungsters",
+							children: [
+								o("Mehr über die TRiungsters"),
+								" ",
+								/* @__PURE__ */ (0, _.jsx)("span", {
+									"aria-hidden": "true",
+									children: "→"
+								})
+							]
+						}), /* @__PURE__ */ (0, _.jsx)("a", {
+							className: "hx-button hx-button-ghost",
+							href: "#anmeldung",
+							children: o("Als TRiungster beitreten")
+						})]
+					})
+				]
+			})]
+		})
+	}) : null;
+}
+var $r = (e, t) => {
+	let n = typeof e[t] == "string" ? e[t].trim() : "";
+	return /^(?:beispiel|exemple|example)\b/i.test(n) ? "" : n;
+}, ei = (e) => e.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&#8217;|&rsquo;/g, "’").replace(/&#039;|&#39;/g, "'").replace(/\s+/g, " ").trim();
+function ti(e, t) {
+	let n = typeof e.factsBody == "string" ? e.factsBody : "";
+	for (let e of n.split(/<\/p>/i)) {
+		let n = e.match(/<strong>([\s\S]*?)<\/strong>([\s\S]*)/i);
+		if (!n || !t.some((e) => ei(n[1]).toLowerCase() === e.toLowerCase())) continue;
+		let r = n[2].split(/<br\s*\/?>/i).map(ei).find(Boolean) || "";
+		return /^(?:beispiel|exemple|example)\b/i.test(r) ? "" : r;
+	}
+	return "";
+}
+function ni() {
 	let { values: e, published: t } = q(), n = (0, h.useRef)(null), r = (n) => {
 		let r = "model-" + n.toLowerCase();
 		return t[r] && e[r] || {};
@@ -25705,7 +25796,7 @@ function $r() {
 				className: "hx-model-track",
 				ref: n,
 				children: ot.map((e) => {
-					let t = r(e), n = Qr(t, "image"), i = Qr(t, "years"), a = [Qr(t, "engine"), Qr(t, "displacement")].filter(Boolean).join(" · ");
+					let t = r(e), n = $r(t, "image"), i = ti(t, ["Bauzeit", "Période de production"]) || $r(t, "years"), a = ti(t, ["Motor", "Moteur"]) || [$r(t, "engine"), $r(t, "displacement")].filter(Boolean).join(" · ");
 					return /* @__PURE__ */ (0, _.jsxs)("a", {
 						className: "hx-model",
 						href: `#tr-modelle/${e.toLowerCase()}`,
@@ -25720,7 +25811,7 @@ function $r() {
 									style: me(t.imageFrame)
 								}) : /* @__PURE__ */ (0, _.jsx)(ut, { model: e })
 							}),
-							/* @__PURE__ */ (0, _.jsx)("strong", { children: Qr(t, "title") || e }),
+							/* @__PURE__ */ (0, _.jsx)("strong", { children: $r(t, "title") || e }),
 							i && /* @__PURE__ */ (0, _.jsx)("span", {
 								className: "hx-model-years",
 								children: i
@@ -25733,11 +25824,11 @@ function $r() {
 		})
 	});
 }
-var ei = [
+var ri = [
 	"start",
 	14,
 	5
-], ti = {
+], ii = {
 	nordwestschweiz: [
 		"end",
 		-14,
@@ -25754,7 +25845,7 @@ var ei = [
 		30
 	]
 };
-function ni({ regions: e }) {
+function ai({ regions: e }) {
 	let { text: t } = q(), n = e.filter((e) => Vr[e.slug]), [r, i] = (0, h.useState)(""), a = n.find((e) => e.slug === r) || n[0];
 	if (!a) return null;
 	let s = (e) => t(`region-${e}.intro`, t("regions.intro"));
@@ -25797,7 +25888,7 @@ function ni({ regions: e }) {
 						className: "hx-map-land",
 						d: Br.path
 					}), n.map((e) => {
-						let [t, n] = Vr[e.slug], [r, s, c] = ti[e.slug] ?? ei;
+						let [t, n] = Vr[e.slug], [r, s, c] = ii[e.slug] ?? ri;
 						return /* @__PURE__ */ (0, _.jsxs)("g", {
 							className: `hx-pin${e.slug === a.slug ? " is-active" : ""}`,
 							onClick: () => i(e.slug),
@@ -25867,7 +25958,7 @@ function ni({ regions: e }) {
 		})
 	});
 }
-function ri() {
+function oi() {
 	let { values: e } = q(), { language: t } = n(), r = (e.home?.photos ?? []).filter((e) => e.url).slice(0, 6);
 	return r.length < 3 ? null : /* @__PURE__ */ (0, _.jsx)("section", {
 		className: "hx-wall-section",
@@ -25919,8 +26010,8 @@ function ri() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var ii = (0, h.lazy)(() => import("./MagazineReader-CdRtFEeR.js"));
-function ai({ issue: e, loading: t, error: r, retry: i }) {
+var si = (0, h.lazy)(() => import("./MagazineReader-DlDZahpQ.js"));
+function ci({ issue: e, loading: t, error: r, retry: i }) {
 	let { text: a } = q(), s = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: c } = n(), l = (e, t) => c === "fr" ? t : e, [u, d] = (0, h.useState)(!1), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(0), [y, b] = (0, h.useState)(!1), x = (0, h.useRef)(null), S = (0, h.useRef)(!1), C = e?.previewPages || [], w = !!e?.cover && !C.includes(e.cover), T = [...w && e?.cover ? [e.cover] : [], ...C].slice(0, 6), E = Math.min(m, Math.max(0, T.length - 1)), D = w && E === 0 ? `${l("Titelseite", "Couverture")} · ${e?.title || ""}` : e?.previewCaptions?.[E - +!!w] || `${l("Vorschau", "Aperçu")} ${E + 1} · ${e?.title || ""}`;
 	(0, h.useEffect)(() => {
 		if (!e || S.current || new URLSearchParams(window.location.search).get("magazine") !== String(e.id)) return;
@@ -26042,7 +26133,7 @@ function ai({ issue: e, loading: t, error: r, retry: i }) {
 						role: "status",
 						children: l("Leseansicht wird geladen …", "Chargement du lecteur…")
 					}),
-					children: /* @__PURE__ */ (0, _.jsx)(ii, {
+					children: /* @__PURE__ */ (0, _.jsx)(si, {
 						url: e.fileUrl,
 						title: e.title,
 						initialFullscreen: !0,
@@ -26089,15 +26180,15 @@ function ai({ issue: e, loading: t, error: r, retry: i }) {
 }
 //#endregion
 //#region app/components/HomepageFeed.tsx
-var oi;
-function si() {
+var li;
+function ui() {
 	let e = new Intl.DateTimeFormat("en", {
 		timeZone: "Europe/Zurich",
 		year: "numeric",
 		month: "numeric",
 		day: "numeric"
 	}).formatToParts(/* @__PURE__ */ new Date()), t = (t) => Number(e.find((e) => e.type === t)?.value), n = Math.floor(Date.UTC(t("year"), t("month") - 1, t("day")) / 864e5);
-	if (oi?.day === n) return oi.cycle;
+	if (li?.day === n) return li.cycle;
 	let r = 0;
 	try {
 		let e = JSON.parse(sessionStorage.getItem("strc_home_cycle") || "null");
@@ -26106,12 +26197,12 @@ function si() {
 			cycle: r
 		}));
 	} catch {}
-	return oi = {
+	return li = {
 		day: n,
 		cycle: r
 	}, r;
 }
-function ci({ content: e, loading: t, error: i, retry: a, events: o, allEvents: s, eventsState: c, openNews: l, openEvent: u }) {
+function di({ content: e, loading: t, error: i, retry: a, events: o, allEvents: s, eventsState: c, openNews: l, openEvent: u }) {
 	let { language: d } = n(), f = (e, t) => d === "fr" ? t : e, [p] = (0, h.useState)(() => Date.now()), m = o.filter((e) => new Date(e.startAt).getTime() >= p).sort((e, t) => Date.parse(e.startAt) - Date.parse(t.startAt)).slice(0, 3), g = (e) => new Date(e).toLocaleDateString(r(), {
 		day: "numeric",
 		month: "long",
@@ -26313,7 +26404,7 @@ function ci({ content: e, loading: t, error: i, retry: a, events: o, allEvents: 
 						})
 					]
 				}),
-				/* @__PURE__ */ (0, _.jsx)(ai, {
+				/* @__PURE__ */ (0, _.jsx)(ci, {
 					issue: e?.magazine ?? null,
 					loading: t,
 					error: i,
@@ -26325,13 +26416,13 @@ function ci({ content: e, loading: t, error: i, retry: a, events: o, allEvents: 
 }
 //#endregion
 //#region app/components/HomepageSections.tsx
-var li = (e) => new Date(e).toLocaleDateString(r(), {
+var fi = (e) => new Date(e).toLocaleDateString(r(), {
 	day: "numeric",
 	month: "long",
 	year: "numeric"
 });
-function ui({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i, eventsState: a = "ready", openEvent: s }) {
-	let { text: c, values: l } = q(), { language: u } = n(), d = l.home?.partners ?? [], [f, p] = (0, h.useState)(null), [m, g] = (0, h.useState)(""), [y, b] = (0, h.useState)(0), [x, S] = (0, h.useState)(null), [w, T] = (0, h.useState)(!1), [E, D] = (0, h.useState)(""), [O] = (0, h.useState)(si);
+function pi({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i, eventsState: a = "ready", openEvent: s }) {
+	let { text: c, values: l } = q(), { language: u } = n(), d = l.home?.partners ?? [], [f, p] = (0, h.useState)(null), [m, g] = (0, h.useState)(""), [y, b] = (0, h.useState)(0), [x, S] = (0, h.useState)(null), [w, T] = (0, h.useState)(!1), [E, D] = (0, h.useState)(""), [O] = (0, h.useState)(ui);
 	(0, h.useEffect)(() => {
 		let e = new AbortController();
 		return C("strc_homepage", {
@@ -26388,9 +26479,10 @@ function ui({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 					open: s
 				}),
 				/* @__PURE__ */ (0, _.jsx)(Zr, { stats: f?.stats }),
+				/* @__PURE__ */ (0, _.jsx)(Qr, { count: f?.stats?.youth }),
 				/* @__PURE__ */ (0, _.jsx)(zr, {})
 			] }),
-			!t && /* @__PURE__ */ (0, _.jsx)(ci, {
+			!t && /* @__PURE__ */ (0, _.jsx)(di, {
 				content: f,
 				loading: !f && !m,
 				error: !!m,
@@ -26405,9 +26497,9 @@ function ui({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 				}, t)
 			}),
 			!t && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
-				/* @__PURE__ */ (0, _.jsx)($r, {}),
-				f?.stats?.regions && /* @__PURE__ */ (0, _.jsx)(ni, { regions: f.stats.regions }),
-				/* @__PURE__ */ (0, _.jsx)(ri, {})
+				/* @__PURE__ */ (0, _.jsx)(ni, {}),
+				f?.stats?.regions && /* @__PURE__ */ (0, _.jsx)(ai, { regions: f.stats.regions }),
+				/* @__PURE__ */ (0, _.jsx)(oi, {})
 			] }),
 			t && /* @__PURE__ */ (0, _.jsxs)("section", {
 				className: "home-width home-news",
@@ -26459,7 +26551,7 @@ function ui({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 										className: "home-meta",
 										children: /* @__PURE__ */ (0, _.jsx)("time", {
 											dateTime: e.date,
-											children: li(e.date)
+											children: fi(e.date)
 										})
 									}),
 									/* @__PURE__ */ (0, _.jsx)("h3", { children: /* @__PURE__ */ (0, _.jsx)("button", {
@@ -26542,7 +26634,7 @@ function ui({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 							children: [
 								o("Clubnews ·"),
 								" ",
-								li(x.date)
+								fi(x.date)
 							]
 						}),
 						x.image && /* @__PURE__ */ (0, _.jsx)(v, {
@@ -26560,7 +26652,7 @@ function ui({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 }
 //#endregion
 //#region app/page.tsx
-var di = window.strcSettings.wordpressUrl ?? "http://localhost:8080", fi = window.strcSettings.siteUrl ?? "http://localhost:3000", pi = {
+var mi = window.strcSettings.wordpressUrl ?? "http://localhost:8080", hi = window.strcSettings.siteUrl ?? "http://localhost:3000", gi = {
 	history: "club-geschichte",
 	news: "neuigkeiten",
 	applications: "antraege",
@@ -26590,10 +26682,10 @@ var di = window.strcSettings.wordpressUrl ?? "http://localhost:8080", fi = windo
 	editorial: "redaktion",
 	finance: "kasse"
 };
-function mi() {
-	return /* @__PURE__ */ (0, _.jsx)(i, { children: /* @__PURE__ */ (0, _.jsx)(se, { children: /* @__PURE__ */ (0, _.jsx)(F, { children: /* @__PURE__ */ (0, _.jsx)(hi, {}) }) }) });
+function _i() {
+	return /* @__PURE__ */ (0, _.jsx)(i, { children: /* @__PURE__ */ (0, _.jsx)(se, { children: /* @__PURE__ */ (0, _.jsx)(F, { children: /* @__PURE__ */ (0, _.jsx)(vi, {}) }) }) });
 }
-function hi() {
+function vi() {
 	let { language: e } = n(), [t, r] = (0, h.useState)("home"), [i, a] = (0, h.useState)(""), [s, l] = (0, h.useState)(!1), [u, d] = (0, h.useState)(null), [f, p] = (0, h.useState)([]), [m, g] = (0, h.useState)("loading"), [y, b] = (0, h.useState)(null), [x, S] = (0, h.useState)(""), { text: C } = q(), [w, T] = (0, h.useState)(0);
 	function E() {
 		g("loading"), T((e) => e + 1);
@@ -26602,7 +26694,7 @@ function hi() {
 		let e = () => {
 			let [e, t = ""] = window.location.hash.slice(1).split("/");
 			a(t);
-			let n = Object.keys(pi).find((t) => pi[t] === e);
+			let n = Object.keys(gi).find((t) => gi[t] === e);
 			r(!e && new URLSearchParams(window.location.search).has("member") ? "members" : n ?? "home"), b(null), window.scrollTo({
 				top: 0,
 				behavior: "instant"
@@ -26613,7 +26705,7 @@ function hi() {
 		};
 	}, []), (0, h.useEffect)(() => {
 		let e = !0;
-		return fetch(`${di}/wp-admin/admin-ajax.php?action=strc_session`, { credentials: "include" }).then((e) => e.ok ? e.json() : Promise.reject()).then((t) => {
+		return fetch(`${mi}/wp-admin/admin-ajax.php?action=strc_session`, { credentials: "include" }).then((e) => e.ok ? e.json() : Promise.reject()).then((t) => {
 			e && d(t);
 		}).catch(() => {
 			e && d({
@@ -26628,7 +26720,7 @@ function hi() {
 		async function n() {
 			let n = [], r = 1, i = 1;
 			do {
-				let a = await fetch(`${di}/?rest_route=/strc/v1/events&view=upcoming&limit=100&page=${r}&language=${e}`, {
+				let a = await fetch(`${mi}/?rest_route=/strc/v1/events&view=upcoming&limit=100&page=${r}&language=${e}`, {
 					cache: "no-store",
 					signal: t.signal
 				});
@@ -26648,7 +26740,7 @@ function hi() {
 	]);
 	let D = t === "agenda" && /^\d+$/.test(i) ? f.find((e) => e.id === Number(i)) ?? null : null;
 	function O(e) {
-		r(e), b(null), window.location.hash = pi[e], window.scrollTo({
+		r(e), b(null), window.location.hash = gi[e], window.scrollTo({
 			top: 0,
 			behavior: "instant"
 		});
@@ -26803,11 +26895,11 @@ function hi() {
 		t === "editorial" && (u?.canEditContent ? /* @__PURE__ */ (0, _.jsx)(Mt, {
 			nonce: u.editorialNonce || "",
 			canManageEvents: !!u.canManageEvents
-		}) : /* @__PURE__ */ (0, _.jsx)(J, {
+		}) : /* @__PURE__ */ (0, _.jsx)(Oi, {
 			session: u,
 			navigate: O
 		})),
-		t === "home" && /* @__PURE__ */ (0, _.jsx)(gi, {
+		t === "home" && /* @__PURE__ */ (0, _.jsx)(yi, {
 			memberAccess: !!u?.memberAccess,
 			navigate: O,
 			events: f,
@@ -26840,7 +26932,7 @@ function hi() {
 			retryEvents: E,
 			openEvent: b
 		}) }),
-		t === "regions" && /* @__PURE__ */ (0, _.jsx)(wi, {
+		t === "regions" && /* @__PURE__ */ (0, _.jsx)(Ei, {
 			editableDocuments: u?.editableDocuments || [],
 			events: f,
 			eventsState: m,
@@ -26852,11 +26944,11 @@ function hi() {
 			session: u,
 			notify: k
 		}, i),
-		t === "profile" && (u?.memberAccess ? /* @__PURE__ */ (0, _.jsx)(Ar, {}) : /* @__PURE__ */ (0, _.jsx)(J, {
+		t === "profile" && (u?.memberAccess ? /* @__PURE__ */ (0, _.jsx)(Ar, {}) : /* @__PURE__ */ (0, _.jsx)(Oi, {
 			session: u,
 			navigate: O
 		})),
-		t === "members" && /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: /* @__PURE__ */ (0, _.jsx)(J, {
+		t === "members" && /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: /* @__PURE__ */ (0, _.jsx)(Oi, {
 			session: u,
 			navigate: O
 		}) }),
@@ -26882,11 +26974,11 @@ function hi() {
 			initialGroup: t === "clubdocs" ? "club" : "",
 			section: i,
 			title: t === "clubdocs" ? "Clubdokumente" : void 0
-		}, `${t}:${i}`) : t === "gallery" ? /* @__PURE__ */ (0, _.jsx)(On, {}) : /* @__PURE__ */ (0, _.jsx)(J, {
+		}, `${t}:${i}`) : t === "gallery" ? /* @__PURE__ */ (0, _.jsx)(On, {}) : /* @__PURE__ */ (0, _.jsx)(Oi, {
 			session: u,
 			navigate: O
 		})),
-		t === "news" && /* @__PURE__ */ (0, _.jsx)(ui, {
+		t === "news" && /* @__PURE__ */ (0, _.jsx)(pi, {
 			navigate: O,
 			memberAccess: !!u?.memberAccess,
 			upcomingEvents: [],
@@ -26896,22 +26988,22 @@ function hi() {
 			},
 			archive: !0
 		}),
-		t === "applications" && (u?.applicationsNonce ? /* @__PURE__ */ (0, _.jsx)(Fr, { nonce: u.applicationsNonce }) : /* @__PURE__ */ (0, _.jsx)(J, {
+		t === "applications" && (u?.applicationsNonce ? /* @__PURE__ */ (0, _.jsx)(Fr, { nonce: u.applicationsNonce }) : /* @__PURE__ */ (0, _.jsx)(Oi, {
 			session: u,
 			navigate: O
 		})),
-		t === "directory" && (u?.memberAccess ? /* @__PURE__ */ (0, _.jsx)(vn, {}) : /* @__PURE__ */ (0, _.jsx)(J, {
+		t === "directory" && (u?.memberAccess ? /* @__PURE__ */ (0, _.jsx)(vn, {}) : /* @__PURE__ */ (0, _.jsx)(Oi, {
 			session: u,
 			navigate: O
 		})),
-		t === "finance" && (u?.canReadFinance ? /* @__PURE__ */ (0, _.jsx)(Ht, {}) : /* @__PURE__ */ (0, _.jsx)(J, {
+		t === "finance" && (u?.canReadFinance ? /* @__PURE__ */ (0, _.jsx)(Ht, {}) : /* @__PURE__ */ (0, _.jsx)(Oi, {
 			session: u,
 			navigate: O
 		})),
 		t === "event-admin" && (u?.canManageEvents ? /* @__PURE__ */ (0, _.jsx)(fn, {
 			session: u,
 			changed: E
-		}) : /* @__PURE__ */ (0, _.jsx)(J, {
+		}) : /* @__PURE__ */ (0, _.jsx)(Oi, {
 			session: u,
 			navigate: O
 		})),
@@ -26919,7 +27011,7 @@ function hi() {
 			"contact",
 			"privacy",
 			"statutes"
-		].includes(t) && /* @__PURE__ */ (0, _.jsx)(Ti, { page: t }, t),
+		].includes(t) && /* @__PURE__ */ (0, _.jsx)(Di, { page: t }, t),
 		/* @__PURE__ */ (0, _.jsxs)("footer", {
 			className: "site-footer",
 			children: [/* @__PURE__ */ (0, _.jsxs)("div", {
@@ -26947,7 +27039,7 @@ function hi() {
 				})
 			] })]
 		}),
-		(y || D) && /* @__PURE__ */ (0, _.jsx)(Ei, {
+		(y || D) && /* @__PURE__ */ (0, _.jsx)(ki, {
 			event: y || D,
 			memberAccess: !!u?.memberAccess,
 			close: () => {
@@ -26961,9 +27053,9 @@ function hi() {
 		})
 	] });
 }
-function gi({ navigate: e, events: t, eventsState: n, openEvent: r, memberAccess: i }) {
+function yi({ navigate: e, events: t, eventsState: n, openEvent: r, memberAccess: i }) {
 	let a = t[0];
-	return /* @__PURE__ */ (0, _.jsx)(ui, {
+	return /* @__PURE__ */ (0, _.jsx)(pi, {
 		eventPreview: n === "loading" ? {
 			title: o("Termine werden geladen …"),
 			text: o("Die nächsten Treffen findest du hier.")
@@ -26972,7 +27064,7 @@ function gi({ navigate: e, events: t, eventsState: n, openEvent: r, memberAccess
 			text: o("Bitte versuche es in der Terminübersicht erneut.")
 		} : a ? {
 			title: a.title,
-			text: `${yi(a.startAt)} · ${a.location || bi(a)}`
+			text: `${Si(a.startAt)} · ${a.location || Ci(a)}`
 		} : {
 			title: o("Das nächste Wiedersehen"),
 			text: o("Aktuell sind noch keine kommenden Termine veröffentlicht. Die Regionen ergänzen ihre Treffen hier.")
@@ -26985,7 +27077,7 @@ function gi({ navigate: e, events: t, eventsState: n, openEvent: r, memberAccess
 		navigate: e
 	});
 }
-function _i({ eyebrow: e, title: t, text: n, landscape: r }) {
+function bi({ eyebrow: e, title: t, text: n, landscape: r }) {
 	return /* @__PURE__ */ (0, _.jsxs)("section", {
 		className: `page-hero${r ? " regional-hero" : ""}`,
 		style: r ? {
@@ -27003,7 +27095,7 @@ function _i({ eyebrow: e, title: t, text: n, landscape: r }) {
 		]
 	});
 }
-function vi(e) {
+function xi(e) {
 	let t = new Date(e);
 	return Number.isNaN(t.getTime()) ? {
 		day: "–",
@@ -27015,17 +27107,17 @@ function vi(e) {
 		year: new Intl.DateTimeFormat(r(), { year: "numeric" }).format(t)
 	};
 }
-function yi(e) {
+function Si(e) {
 	let t = new Date(e);
 	return Number.isNaN(t.getTime()) ? o("Wird bekanntgegeben") : new Intl.DateTimeFormat(r(), {
 		dateStyle: "long",
 		timeStyle: "short"
 	}).format(t);
 }
-function bi(e) {
+function Ci(e) {
 	return o(e.region?.name || e.scope?.name || e.eventType?.name || "Swiss TR-Club");
 }
-function xi(e) {
+function wi(e) {
 	return o({
 		information: "Keine Anmeldung erforderlich",
 		scheduled: "Anmeldung öffnet später",
@@ -27035,7 +27127,7 @@ function xi(e) {
 		waiting: "Warteliste offen"
 	}[e]);
 }
-function Si({ state: e, count: t, retry: n }) {
+function Ti({ state: e, count: t, retry: n }) {
 	return e === "loading" ? /* @__PURE__ */ (0, _.jsx)("p", {
 		className: "collection-state",
 		role: "status",
@@ -27053,8 +27145,8 @@ function Si({ state: e, count: t, retry: n }) {
 		children: o("Momentan sind keine kommenden Veranstaltungen veröffentlicht.")
 	}) : null;
 }
-function Ci({ event: e, open: t }) {
-	let n = vi(e.startAt);
+function J({ event: e, open: t }) {
+	let n = xi(e.startAt);
 	return /* @__PURE__ */ (0, _.jsxs)("article", {
 		className: "event-card",
 		children: [
@@ -27063,12 +27155,12 @@ function Ci({ event: e, open: t }) {
 				children: [/* @__PURE__ */ (0, _.jsx)("strong", { children: n.day }), /* @__PURE__ */ (0, _.jsx)("span", { children: n.month })]
 			}),
 			/* @__PURE__ */ (0, _.jsxs)("div", { children: [
-				/* @__PURE__ */ (0, _.jsx)("p", { children: bi(e) }),
+				/* @__PURE__ */ (0, _.jsx)("p", { children: Ci(e) }),
 				/* @__PURE__ */ (0, _.jsx)("h3", { children: e.title }),
 				/* @__PURE__ */ (0, _.jsxs)("span", { children: [
 					e.location || e.eventType?.name,
 					" · ",
-					xi(e.registrationStatus)
+					wi(e.registrationStatus)
 				] })
 			] }),
 			/* @__PURE__ */ (0, _.jsx)("button", {
@@ -27079,7 +27171,7 @@ function Ci({ event: e, open: t }) {
 		]
 	});
 }
-function wi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableDocuments: i }) {
+function Ei({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableDocuments: i }) {
 	let { text: a, values: s } = q(), [c, l] = (0, h.useState)([]), [u, d] = (0, h.useState)(""), [f, p] = (0, h.useState)("loading"), [m, g] = (0, h.useState)(0);
 	(0, h.useEffect)(() => {
 		let e = () => d(decodeURIComponent(window.location.hash.split("/")[1] || "")), t = requestAnimationFrame(e);
@@ -27091,7 +27183,7 @@ function wi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableD
 			if (document.visibilityState === "hidden") return;
 			n?.abort();
 			let r = new AbortController();
-			n = r, fetch(`${di}/?rest_route=/strc/v1/regions`, {
+			n = r, fetch(`${mi}/?rest_route=/strc/v1/regions`, {
 				signal: r.signal,
 				cache: "no-store"
 			}).then((e) => e.ok ? e.json() : Promise.reject()).then((n) => {
@@ -27115,7 +27207,7 @@ function wi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableD
 	}, [m]);
 	let v = c.find((e) => e.slug === u), y = e.filter((e) => e.region?.slug === u);
 	return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
-		/* @__PURE__ */ (0, _.jsx)(_i, {
+		/* @__PURE__ */ (0, _.jsx)(bi, {
 			eyebrow: o("Lokal präsent – lokal aktiv"),
 			title: v ? `${o("Region")} ${o(v.name)}` : a("regions.title"),
 			text: v ? a(`region-${v.slug}.intro`, a("regions.intro")) : a("regions.intro"),
@@ -27149,13 +27241,13 @@ function wi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableD
 					values: s["region-" + v.slug] || { body: v.description },
 					canEdit: i.includes("region-" + v.slug),
 					eventCount: t === "ready" ? y.length : void 0,
-					events: /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(Si, {
+					events: /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(Ti, {
 						state: t,
 						count: y.length,
 						retry: n
 					}), /* @__PURE__ */ (0, _.jsx)("div", {
 						className: "events",
-						children: y.map((e) => /* @__PURE__ */ (0, _.jsx)(Ci, {
+						children: y.map((e) => /* @__PURE__ */ (0, _.jsx)(J, {
 							event: e,
 							open: () => r(e)
 						}, e.id))
@@ -27190,9 +27282,9 @@ function wi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableD
 		})
 	] });
 }
-function Ti({ page: e }) {
+function Di({ page: e }) {
 	let { text: t, error: n, refresh: r } = q();
-	return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(_i, {
+	return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(bi, {
 		eyebrow: o("Swiss TR-Club"),
 		title: t(`${e}.title`),
 		text: o("Informationen des Clubs")
@@ -27210,7 +27302,7 @@ function Ti({ page: e }) {
 		}), e === "contact" && /* @__PURE__ */ (0, _.jsx)(Sr, {})]
 	})] });
 }
-function J({ session: e, navigate: t }) {
+function Oi({ session: e, navigate: t }) {
 	let { text: n } = q();
 	if (e === null) return /* @__PURE__ */ (0, _.jsx)("section", {
 		className: "page-content",
@@ -27219,7 +27311,7 @@ function J({ session: e, navigate: t }) {
 			children: o("Mitgliederzugang wird geprüft …")
 		})
 	});
-	if (!e.memberAccess) return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(_i, {
+	if (!e.memberAccess) return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(bi, {
 		eyebrow: o("Geschützter Bereich"),
 		title: n("members.title"),
 		text: n("members.intro")
@@ -27227,7 +27319,7 @@ function J({ session: e, navigate: t }) {
 		className: "login-panel",
 		children: [/* @__PURE__ */ (0, _.jsxs)("form", {
 			method: "post",
-			action: `${di}/wp-login.php`,
+			action: `${mi}/wp-login.php`,
 			children: [
 				/* @__PURE__ */ (0, _.jsx)("p", {
 					className: "secure-label",
@@ -27253,14 +27345,14 @@ function J({ session: e, navigate: t }) {
 				/* @__PURE__ */ (0, _.jsx)("input", {
 					type: "hidden",
 					name: "redirect_to",
-					value: `${fi}/${window.location.hash || "#mitglieder"}`
+					value: `${hi}/${window.location.hash || "#mitglieder"}`
 				}),
 				/* @__PURE__ */ (0, _.jsx)("button", {
 					type: "submit",
 					children: o("Sicher anmelden →")
 				}),
 				/* @__PURE__ */ (0, _.jsx)("a", {
-					href: `${di}/wp-login.php?action=lostpassword`,
+					href: `${mi}/wp-login.php?action=lostpassword`,
 					children: o("Passwort vergessen?")
 				})
 			]
@@ -27302,7 +27394,7 @@ function J({ session: e, navigate: t }) {
 		logoutUrl: e.logoutUrl || ""
 	})] });
 }
-function Ei({ event: e, close: t, memberAccess: n }) {
+function ki({ event: e, close: t, memberAccess: n }) {
 	return /* @__PURE__ */ (0, _.jsx)(Te, {
 		title: e.title,
 		close: t,
@@ -27312,7 +27404,7 @@ function Ei({ event: e, close: t, memberAccess: n }) {
 				/* @__PURE__ */ (0, _.jsxs)("p", {
 					className: "eyebrow",
 					children: [
-						bi(e),
+						Ci(e),
 						" · ",
 						e.eventType?.name
 					]
@@ -27322,14 +27414,14 @@ function Ei({ event: e, close: t, memberAccess: n }) {
 					className: "detail-box",
 					children: [
 						/* @__PURE__ */ (0, _.jsx)("span", { children: o("Beginn") }),
-						/* @__PURE__ */ (0, _.jsx)("strong", { children: e.startAt ? yi(e.startAt) : "Wird bekanntgegeben" }),
-						e.endAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Ende") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: yi(e.endAt) })] }),
+						/* @__PURE__ */ (0, _.jsx)("strong", { children: e.startAt ? Si(e.startAt) : "Wird bekanntgegeben" }),
+						e.endAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Ende") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Si(e.endAt) })] }),
 						/* @__PURE__ */ (0, _.jsx)("span", { children: o("Ort") }),
 						/* @__PURE__ */ (0, _.jsx)("strong", { children: e.location || o("Wird bekanntgegeben") }),
 						/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung") }),
-						/* @__PURE__ */ (0, _.jsx)("strong", { children: xi(e.registrationStatus) }),
-						e.registrationOpenAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung ab") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: yi(e.registrationOpenAt) })] }),
-						e.registrationCloseAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung bis") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: yi(e.registrationCloseAt) })] })
+						/* @__PURE__ */ (0, _.jsx)("strong", { children: wi(e.registrationStatus) }),
+						e.registrationOpenAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung ab") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Si(e.registrationOpenAt) })] }),
+						e.registrationCloseAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung bis") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Si(e.registrationCloseAt) })] })
 					]
 				}),
 				e.registrationRequired && (e.externalRegistrationUrl ? /* @__PURE__ */ (0, _.jsx)("a", {
@@ -27354,6 +27446,6 @@ function Ei({ event: e, close: t, memberAccess: n }) {
 }
 //#endregion
 //#region wordpress/main.tsx
-var Di = document.getElementById("strc-app");
-Di && (0, g.createRoot)(Di).render(/* @__PURE__ */ (0, _.jsx)(mi, {}));
+var Ai = document.getElementById("strc-app");
+Ai && (0, g.createRoot)(Ai).render(/* @__PURE__ */ (0, _.jsx)(_i, {}));
 //#endregion

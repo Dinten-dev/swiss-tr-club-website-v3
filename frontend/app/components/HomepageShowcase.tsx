@@ -110,7 +110,7 @@ export function HomeTRiungsters({count}:{count?:number|null}){
 
 /* Vorschlag 4 · Modellreihe */
 // Platzhalterwerte der Redaktion («Beispiel: …») erscheinen nicht auf der Startseite.
-const modelText=(values:ContentValues,key:string)=>{const value=typeof values[key]==='string'?(values[key] as string).trim():'';return /^beispiel\b/i.test(value)?'':value;};
+const modelText=(values:ContentValues,key:string)=>{const value=typeof values[key]==='string'?(values[key] as string).trim():'';return /^(?:beispiel|exemple|example)\b/i.test(value)?'':value;};
 const decode=(html:string)=>html.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&#8217;|&rsquo;/g,'’').replace(/&#039;|&#39;/g,"'").replace(/\s+/g,' ').trim();
 /** Erste Zeile nach einer fett gesetzten Bezeichnung im freien Datenfeld («<strong>Bauzeit</strong><br>1953 bis 1955»). */
 function factFromBody(values:ContentValues,labels:string[]):string{
@@ -119,7 +119,7 @@ function factFromBody(values:ContentValues,labels:string[]):string{
   const match=paragraph.match(/<strong>([\s\S]*?)<\/strong>([\s\S]*)/i);
   if(!match||!labels.some(label=>decode(match[1]).toLowerCase()===label.toLowerCase()))continue;
   const line=match[2].split(/<br\s*\/?>/i).map(decode).find(Boolean)||'';
-  return /^beispiel\b/i.test(line)?'':line;
+  return /^(?:beispiel|exemple|example)\b/i.test(line)?'':line;
  }
  return '';
 }
