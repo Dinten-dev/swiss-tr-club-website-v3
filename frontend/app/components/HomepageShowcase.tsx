@@ -92,7 +92,8 @@ export function HomeStatsBand({stats}:{stats:HomeStats|null|undefined}){
 }
 
 /* Vorschlag 4 · Modellreihe */
-const modelText=(values:ContentValues,key:string)=>typeof values[key]==='string'?(values[key] as string).trim():'';
+// Platzhalterwerte der Redaktion («Beispiel: …») erscheinen nicht auf der Startseite.
+const modelText=(values:ContentValues,key:string)=>{const value=typeof values[key]==='string'?(values[key] as string).trim():'';return /^beispiel\b/i.test(value)?'':value;};
 export function HomeModels(){
  const {values,published}=useSiteContent();const track=useRef<HTMLDivElement>(null);
  // Nur veröffentlichte Modellporträts liefern Bild und Daten; Beispielwerte erscheinen nicht auf der Startseite.
