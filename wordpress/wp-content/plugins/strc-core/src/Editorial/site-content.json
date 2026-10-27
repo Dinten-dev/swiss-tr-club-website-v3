@@ -292,6 +292,30 @@
         "default": "1975"
       },
       {
+        "key": "triungstersLabel",
+        "label": "TRiungsters – Oberzeile",
+        "type": "text",
+        "default": "TRiungsters · bis 35 Jahre"
+      },
+      {
+        "key": "triungstersTitle",
+        "label": "TRiungsters – Überschrift",
+        "type": "text",
+        "default": "Die nächste Generation am Steuer."
+      },
+      {
+        "key": "triungstersText",
+        "label": "TRiungsters – Kurztext",
+        "type": "textarea",
+        "default": "Du bist unter 35 und begeisterst dich für klassische Triumph? Bei den TRiungsters triffst du Gleichgesinnte, fährst an Ausfahrten und Treffen mit und gestaltest die Zukunft des Clubs mit."
+      },
+      {
+        "key": "triungstersImage",
+        "label": "TRiungsters – Bild (leer: Bild der TRiungsters-Seite)",
+        "type": "image",
+        "default": ""
+      },
+      {
         "key": "dashboardTitle",
         "label": "Dashboard-Verweis – Titel",
         "type": "text",
