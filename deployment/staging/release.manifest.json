@@ -144,8 +144,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Content/HomepageStats.php",
-      "bytes": 1497,
-      "sha256": "2dd29214788bf8a179e2ba7e633ac9ab0bb1eab5f89d1a944cbd46a7b4b8f29a"
+      "bytes": 1717,
+      "sha256": "2cec6a6ccae4c227d3af3b04c52decebe7551fdd7c530b1a8bf7a18928661801"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Content/MagazineEndpoint.php",
@@ -189,8 +189,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/site-content.json",
-      "bytes": 78484,
-      "sha256": "2846d6f45db70685bb27fefeb22e7b7ed4076309261e33e59d5d0f3d91363b9a"
+      "bytes": 79346,
+      "sha256": "de42761d7d545671c128720066f3571893daafda5c5379915bb5617c20bae5d9"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventArchiveRetention.php",
@@ -379,8 +379,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateStagingImport.php",
-      "bytes": 15637,
-      "sha256": "da433a78aadccb23cbd14e36819fbe7d7692f8a88d2233f436f479e361d9a322"
+      "bytes": 16995,
+      "sha256": "5d5441d0f95f4ad8c86207e58d801ffc903826afcf5db4e7a79afd690379c2ce"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Fairgate/FairgateVehicleImport.php",
@@ -603,6 +603,11 @@
       "sha256": "a95e94e4ea0e7ecb50c3c973fce0805a596f821d88c4971106f6e7afbcb98597"
     },
     {
+      "path": "wordpress/wp-content/plugins/strc-core/tests/FairgateMembershipLabelTest.php",
+      "bytes": 1750,
+      "sha256": "6ed3d21c5a41ef5b8f0526be23ef8cbc61929e2428cd8d3b03b5b496ea51eda4"
+    },
+    {
       "path": "wordpress/wp-content/plugins/strc-core/tests/FairgateProfileWriterTest.php",
       "bytes": 1776,
       "sha256": "ec19dcc7190f1b84175266009a98c2c1a6470166a0a9493de30678d66afb1059"
@@ -669,13 +674,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 309222,
-      "sha256": "3dc08d7c0507df0d55bb7e74cefcdc1252057870dab949bf382bd2832499c7fa"
+      "bytes": 310677,
+      "sha256": "c7a73f8aa2f130777752236514ad46be8e575e058e083690bc4d522ba83bebcb"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 934583,
-      "sha256": "c70e4470b5441c8926760d80340608d72e94c8ea8e282298b045183886627fbe"
+      "bytes": 938026,
+      "sha256": "fc71f502fdbeea67ee115053fdc2c68583c72f8dbfd1e6482db73178296f8215"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -911,6 +916,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DGDcPB2N.js",
       "bytes": 5552,
       "sha256": "96bda537c6563beb5f0269ec83e579291abc7bde0089c439b3867a3694225bf0"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DlDZahpQ.js",
+      "bytes": 9784,
+      "sha256": "c150f2dad845eeff4dd2d025f45c7c68427d9c67ad76cf8d29be47844cb83fcf"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DLxlC4rl.js",
@@ -2173,6 +2183,11 @@
       "sha256": "a0a78ea9cfa76e8f2bbea8c54a5dea074d5983b02a72998b93aa2ae6e867b0cd"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-BE9LLbXr.js",
+      "bytes": 136754,
+      "sha256": "eb9fc197e023b23d59de42713d0b8d0df00c2979e4de1faf4e55c3c1a2a6eeed"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-BjrP63Nt.js",
       "bytes": 69732,
       "sha256": "7dde0e21240829b948db6c415e75c12f0d5ed8e9319fcc3ce5718f25bc1a59c0"
@@ -2278,9 +2293,7 @@
       "sha256": "6355c019a358f34e46406a5dad8f0057bae8d1bd0c530f0420d1d56a37087eb0"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-10-27T12:45:26.977Z",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-27T12:48:15.513277+00:00",
-  "publishedFiles": 14
+  "status": "candidate",
+  "builtOn": "2026-10-27T19:11:17.859Z",
+  "baselineCapturedOn": "2026-10-13"
 }

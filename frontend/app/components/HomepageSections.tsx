@@ -7,7 +7,7 @@ import { Dialog } from './Marketplace';
 import { query } from './ClubApi';
 import {useSiteContent,RichHtml,assetUrl,type ContentPartner} from './SiteContent';
 import HomepageOverview from './HomepageOverview';
-import {HomeHero,HomeNextEvent,HomeStatsBand,HomeModels,HomeRegionMap,HomePhotoWall,type HomeStats} from './HomepageShowcase';
+import {HomeHero,HomeNextEvent,HomeStatsBand,HomeTRiungsters,HomeModels,HomeRegionMap,HomePhotoWall,type HomeStats} from './HomepageShowcase';
 import HomepageFeed,{homepageCycle,type HomeFeed,type Highlight} from './HomepageFeed';
 import type { MagazineIssue } from './Magazine';
 import type {ClubEvent} from '../page';
@@ -47,7 +47,7 @@ export default function HomepageSections({memberAccess,archive=false,upcomingEve
   const [now]=useState(()=>Date.now());
   const nextEvent=upcomingEvents.filter(event=>Date.parse(event.startAt)>=now).sort((a,b)=>Date.parse(a.startAt)-Date.parse(b.startAt))[0];
   return <div className="home-editorial">
-    {!archive&&<><HomeHero nextEvent={nextEvent}/><HomeNextEvent event={nextEvent} open={openEvent}/><HomeStatsBand stats={content?.stats}/><HomepageOverview/></>}
+    {!archive&&<><HomeHero nextEvent={nextEvent}/><HomeNextEvent event={nextEvent} open={openEvent}/><HomeStatsBand stats={content?.stats}/><HomeTRiungsters count={content?.stats?.youth}/><HomepageOverview/></>}
     {!archive&&<HomepageFeed content={content} loading={!content&&!error} error={Boolean(error)} retry={retry} events={upcomingEvents} allEvents={allEvents} eventsState={eventsState} openEvent={openEvent} openNews={(item:Highlight,button)=>openNews({...item,body:''},button)}/>}
     {!archive&&<><HomeModels/>{content?.stats?.regions&&<HomeRegionMap regions={content.stats.regions}/>}<HomePhotoWall/></>}
     {archive&&<section className="home-width home-news" id="home-news" tabIndex={-1} aria-labelledby="home-news-title">

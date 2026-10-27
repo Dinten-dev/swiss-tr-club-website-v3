@@ -10,7 +10,7 @@ import {trModels,Placeholder} from './VehicleModels';
 import {swissOutline,regionPins} from './swissOutline';
 import type {ClubEvent} from '../page';
 
-export type HomeStats={members:number|null;vehicles:number|null;regions:{name:string;slug:string}[]};
+export type HomeStats={members:number|null;vehicles:number|null;youth?:number|null;regions:{name:string;slug:string}[]};
 
 /** Reduced-motion preference, updated live. The server snapshot counts as "reduced" so nothing moves before hydration. */
 const motionQuery='(prefers-reduced-motion: reduce)';
@@ -91,8 +91,38 @@ export function HomeStatsBand({stats}:{stats:HomeStats|null|undefined}){
  return <section className="hx-stats" ref={ref} aria-label={t('Der Club in Zahlen')}><div className="home-width"><ul>{items.map(([value,label,note,from])=><li key={label}><b><CountUp value={value} from={from} run={run}/></b><span>{t(label)}</span><small>{t(note)}</small></li>)}</ul></div></section>;
 }
 
+/* TRiungsters · eigener Bereich für die junge Zielgruppe */
+export function HomeTRiungsters({count}:{count?:number|null}){
+ const {text:c}=useSiteContent();
+ const image=c('home.triungstersImage').trim()||c('triungsters.image').trim();
+ const title=c('home.triungstersTitle');
+ if(!title)return null;
+ return <section className="hx-triungsters" aria-labelledby="hx-triungsters-title"><div className="home-width hx-triungsters-inner">
+  <div className="hx-triungsters-image"><Image src={image?assetUrl(image):regionalLandscape('triungsters')} alt="" width={900} height={675}/>{count?<p className="hx-triungsters-count"><b>{count}</b><span>{t('TRiungsters im Club')}</span></p>:null}</div>
+  <div className="hx-triungsters-copy">
+   <p className="hx-eyebrow">{c('home.triungstersLabel')}</p>
+   <h2 id="hx-triungsters-title">{title}</h2>
+   {c('home.triungstersText')&&<p>{c('home.triungstersText')}</p>}
+   <div className="hx-hero-actions"><a className="hx-button hx-button-red" href="#triungsters">{t('Mehr über die TRiungsters')} <span aria-hidden="true">→</span></a><a className="hx-button hx-button-ghost" href="#anmeldung">{t('Als TRiungster beitreten')}</a></div>
+  </div>
+ </div></section>;
+}
+
 /* Vorschlag 4 · Modellreihe */
-const modelText=(values:ContentValues,key:string)=>typeof values[key]==='string'?(values[key] as string).trim():'';
+// Platzhalterwerte der Redaktion («Beispiel: …») erscheinen nicht auf der Startseite.
+const modelText=(values:ContentValues,key:string)=>{const value=typeof values[key]==='string'?(values[key] as string).trim():'';return /^(?:beispiel|exemple|example)\b/i.test(value)?'':value;};
+const decode=(html:string)=>html.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&#8217;|&rsquo;/g,'’').replace(/&#039;|&#39;/g,"'").replace(/\s+/g,' ').trim();
+/** Erste Zeile nach einer fett gesetzten Bezeichnung im freien Datenfeld («<strong>Bauzeit</strong><br>1953 bis 1955»). */
+function factFromBody(values:ContentValues,labels:string[]):string{
+ const body=typeof values.factsBody==='string'?values.factsBody:'';
+ for(const paragraph of body.split(/<\/p>/i)){
+  const match=paragraph.match(/<strong>([\s\S]*?)<\/strong>([\s\S]*)/i);
+  if(!match||!labels.some(label=>decode(match[1]).toLowerCase()===label.toLowerCase()))continue;
+  const line=match[2].split(/<br\s*\/?>/i).map(decode).find(Boolean)||'';
+  return /^(?:beispiel|exemple|example)\b/i.test(line)?'':line;
+ }
+ return '';
+}
 export function HomeModels(){
  const {values,published}=useSiteContent();const track=useRef<HTMLDivElement>(null);
  // Nur veröffentlichte Modellporträts liefern Bild und Daten; Beispielwerte erscheinen nicht auf der Startseite.
@@ -100,7 +130,7 @@ export function HomeModels(){
  const step=(direction:number)=>{const node=track.current;if(node)node.scrollBy({left:direction*node.clientWidth*.8,behavior:scrollBehavior()});};
  return <section className="hx-models" aria-labelledby="hx-models-title"><div className="home-width">
   <div className="hx-head"><div><p className="eyebrow">{t('Die Triumph TR-Familie')}</p><h2 id="hx-models-title"><a href="#tr-modelle">{t('Vom TR2 bis zum TR8')}</a></h2></div><div className="hx-track-controls"><button type="button" aria-label={t('Vorherige Modelle')} onClick={()=>step(-1)}>←</button><button type="button" aria-label={t('Weitere Modelle')} onClick={()=>step(1)}>→</button></div></div>
-  <div className="hx-model-track" ref={track}>{trModels.map(model=>{const data=content(model);const image=modelText(data,'image');const years=modelText(data,'years');const detail=[modelText(data,'engine'),modelText(data,'displacement')].filter(Boolean).join(' · ');return <a key={model} className="hx-model" href={`#tr-modelle/${model.toLowerCase()}`}>
+  <div className="hx-model-track" ref={track}>{trModels.map(model=>{const data=content(model);const image=modelText(data,'image');const years=factFromBody(data,['Bauzeit','Période de production'])||modelText(data,'years');const detail=factFromBody(data,['Motor','Moteur'])||[modelText(data,'engine'),modelText(data,'displacement')].filter(Boolean).join(' · ');return <a key={model} className="hx-model" href={`#tr-modelle/${model.toLowerCase()}`}>
    <span className="hx-model-image">{image?<Image src={assetUrl(image)} alt="" width={420} height={250} style={imageFrameStyle(data.imageFrame)}/>:<Placeholder model={model}/>}</span>
    <strong>{modelText(data,'title')||model}</strong>{years&&<span className="hx-model-years">{years}</span>}{detail&&<small>{detail}</small>}
   </a>;})}</div>

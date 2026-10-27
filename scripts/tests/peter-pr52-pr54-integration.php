@@ -8,7 +8,7 @@ use SwissTRClub\Core\Community\{CommunityEndpoint,LibraryPolicy};
 use SwissTRClub\Core\Content\{HomepageStats,HomepageActivity,HomepageHighlights};
 use SwissTRClub\Core\Infrastructure\PublicNamePrivacy;
 use SwissTRClub\Core\Events\{EventPostType,EventManagementEndpoint};
-global $wpdb,$checks;$checks=[];$users=[];$posts=[];$mails=0;$network=0;$prefix='strc5254qa_'.bin2hex(random_bytes(5));$cache=get_transient('strc_homepage_stats_v1');
+global $wpdb,$checks;$checks=[];$users=[];$posts=[];$mails=0;$network=0;$prefix='strc5254qa_'.bin2hex(random_bytes(5));$cache=get_transient('strc_homepage_stats_v2');
 final class P54Stop extends Error {}
 function p54check(bool $ok,string $label):void{global$checks;if(!$ok)throw new RuntimeException($label);$checks[]=$label;}
 function p54call(object $object,string $method,mixed ...$args):mixed{return(new ReflectionMethod($object,$method))->invoke($object,...$args);}
@@ -38,12 +38,12 @@ try{
  $privacy=new PublicNamePrivacy();$routes=['/wp/v2/users'=>[],'/wp/v2/users/(?P<id>[\\d]+)'=>[],'/strc/v1/example'=>[]];wp_set_current_user(0);p54check(array_keys($privacy->restEndpoints($routes))===['/strc/v1/example'],'Public WordPress user routes removed');wp_set_current_user($users['member']);p54check(array_keys($privacy->restEndpoints($routes))===['/strc/v1/example'],'Member cannot enumerate WordPress users');wp_set_current_user($users['admin']);p54check($privacy->restEndpoints($routes)===$routes,'Authorized user administration retains REST routes');
  wp_set_current_user(0);$previousAuthor=$_GET['author']??null;$previousQuery=$GLOBALS['wp_query'];$GLOBALS['wp_query']=new WP_Query();$_GET['author']='1';try{$privacy->authorArchives();p54check(is_404()&&apply_filters('redirect_canonical','https://example.invalid/author/qa','https://example.invalid/?author=1')===false,'Author enumeration is blocked before canonical slug redirect');}finally{$GLOBALS['wp_query']=$previousQuery;if($previousAuthor===null)unset($_GET['author']);else $_GET['author']=$previousAuthor;remove_filter('redirect_canonical','__return_false');}
  $event=wp_insert_post(['post_type'=>'strc_event','post_status'=>'draft','post_title'=>$prefix.' meeting','post_author'=>$users['library']]);$posts[]=$event;wp_set_object_terms($event,'meeting','strc_event_type');$payload=p54call(new EventManagementEndpoint(),'present',$event);p54check($payload['eventType']==='meeting','Meeting retains its own event type when editing');wp_set_object_terms($event,$payload['eventType'],'strc_event_type');p54check(wp_get_object_terms($event,'strc_event_type',['fields'=>'slugs'])===['meeting'],'Roundtrip never changes Meeting to Weekend Meeting');
- wp_set_current_user(0);delete_transient('strc_homepage_stats_v1');$stats=(new HomepageStats())->summary();p54check(array_keys($stats)===['members','vehicles','regions'],'Homepage statistics expose only aggregate fields');p54check(!in_array('triungsters',array_column($stats['regions'],'slug'),true)&&count($stats['regions'])===7,'Homepage map lists seven geographic club regions');
+ wp_set_current_user(0);delete_transient('strc_homepage_stats_v2');$stats=(new HomepageStats())->summary();p54check(array_keys($stats)===['members','vehicles','youth','regions'],'Homepage statistics expose only aggregate fields');p54check(!in_array('triungsters',array_column($stats['regions'],'slug'),true)&&count($stats['regions'])===7,'Homepage map lists seven geographic club regions');
  $item=p54call(new HomepageActivity(),'item',$event,'gallery','QA','2026-10-27',$users['member'],2);p54check(($item['author']??'')==='','Homepage activity never includes member names');
  p54check($network===0&&$mails===0,'No external calls or messages during focused PR checks');echo wp_json_encode(['passed'=>count($checks),'checks'=>$checks]);
 }finally{
  if(isset($file)&&is_file($file))unlink($file);
  foreach(array_reverse($posts)as$id)wp_delete_post($id,true);
  require_once ABSPATH.'wp-admin/includes/user.php';foreach($users as$id)wp_delete_user($id);
- if($cache!==false)set_transient('strc_homepage_stats_v1',$cache,30*MINUTE_IN_SECONDS);else delete_transient('strc_homepage_stats_v1');wp_set_current_user(0);
+ if($cache!==false)set_transient('strc_homepage_stats_v2',$cache,30*MINUTE_IN_SECONDS);else delete_transient('strc_homepage_stats_v2');wp_set_current_user(0);
 }
