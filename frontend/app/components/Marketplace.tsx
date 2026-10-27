@@ -43,7 +43,7 @@ export function Dialog({ title, close, busy = false, children }: { title: string
     document.body.style.overflow = 'hidden';
     return () => { dialog?.close(); document.body.style.overflow = overflow; previousFocus?.focus(); };
   }, []);
-  return <dialog ref={ref} className="market-dialog" aria-labelledby={titleId} onCancel={event => { event.preventDefault(); if (!busy) close(); }}>
+  return <dialog ref={ref} className="market-dialog" aria-labelledby={titleId} onCancel={event => { if (event.target !== event.currentTarget) return; /* «Abbrechen» im Dateidialog löst ebenfalls cancel aus */ event.preventDefault(); if (!busy) close(); }}>
     <div className="market-dialog-heading"><h2 id={titleId}>{title}</h2><button type="button" className="market-close" aria-label={t("Fenster schliessen")} disabled={busy} onClick={close}>×</button></div>
     {children}
   </dialog>;
