@@ -96,7 +96,9 @@ final class EventManagementEndpoint
         $archivedAt = 'trash' === $post->post_status ? (int) get_post_meta($id, '_wp_trash_meta_time', true) : 0;
         $deleteAfter = EventArchiveRetention::deleteAfter($archivedAt);
         $eventType = wp_get_object_terms($id, 'strc_event_type', array('fields' => 'slugs'))[0] ?? '';
-        $typeAliases = array('run' => 'tagesausfahrt', 'meeting' => 'weekend-meeting', 'multi-day-tour' => 'weekend-meeting', 'workshop' => 'workshops', 'agm' => 'andere', 'other-club-event' => 'andere', 'external-event' => 'andere');
+        // «meeting» ist seit dem Testfeedback eine eigene Art (Begleitung statt Co-Pilot, ohne Fahrzeugauswahl) und wird nicht mehr
+        // auf «weekend-meeting» umgeschrieben; sonst setzte ein erneutes Speichern den Termin auf Weekend zurück.
+        $typeAliases = array('run' => 'tagesausfahrt', 'multi-day-tour' => 'weekend-meeting', 'workshop' => 'workshops', 'agm' => 'andere', 'other-club-event' => 'andere', 'external-event' => 'andere');
         $editorId = absint(get_post_meta($id, 'strc_event_editor_id', true)) ?: (int) $post->post_author;
         $editorName = (string) get_the_author_meta('display_name', $editorId);
         if ('' === $editorName) {
