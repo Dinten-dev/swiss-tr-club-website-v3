@@ -105,6 +105,18 @@ final class PrivateUploadStore
         };
     }
 
+    /** Eigenständige Kopie einer gespeicherten Datei (z. B. Fahrzeugbild als Porträtbild). */
+    public function duplicate(array $file): array|WP_Error
+    {
+        $key=$file['key']??'';if(!is_string($key)||!preg_match('/^[a-f0-9]{40}$/D',$key))return new WP_Error('image','Bild nicht gefunden.');
+        $source=$this->directory().'/'.$key;$mime=(string)($file['mime']??'image/jpeg');if(!is_file($source)||is_link($source)){$web=get_option('strc_web_image_'.$key);$source=is_array($web)?$this->directory().'/'.$web['key']:'';$mime='image/jpeg';}
+        if($source===''||!is_file($source))return new WP_Error('image','Fahrzeugbild nicht mehr verfügbar.');
+        $copyKey=bin2hex(random_bytes(20));$destination=$this->directory().'/'.$copyKey;
+        if(!copy($source,$destination))return new WP_Error('storage','Bild konnte nicht übernommen werden.');
+        chmod($destination,0600);
+        return [['key'=>$copyKey,'name'=>sanitize_file_name((string)($file['name']??'fahrzeug.jpg')),'mime'=>$mime,'size'=>(int)filesize($destination)]];
+    }
+
     public function remove(array $files): void
     {
         foreach ($files as $file) {
@@ -156,32 +168,36 @@ final class PrivateUploadStore
         if(!is_string($key)||!preg_match('/^[a-f0-9]{40}$/D',$key))return new WP_Error('image','Bild nicht gefunden.');
         return \SwissTRClub\Core\Forms\FormStore::locked('gallery-copy-'.$key,function()use($key,$original){
             $saved=get_option('strc_web_image_'.$key);
-            if(is_array($saved)&&is_file($this->directory().'/'.$saved['key'])&&filesize($this->directory().'/'.$saved['key'])<=2000000)return $saved;
+            // Webfassung v2: bis 2560 px, Ziel 1.2–1.9 MB. Ältere, kleinere Fassungen werden neu gerechnet, solange das Original noch da ist.
+            $savedValid=is_array($saved)&&is_file($this->directory().'/'.$saved['key']);
+            if($savedValid&&(int)($saved['v']??1)>=2)return $saved;
+            if($savedValid&&!is_file($this->directory().'/'.$key))return $saved;
             $source=$this->directory().'/'.$key;if(!is_file($source)&&is_array($saved)&&is_file($this->directory().'/'.$saved['key']))$source=$this->directory().'/'.$saved['key'];
             if(!is_file($source)||is_link($source))return new WP_Error('image','Originalbild nicht verfügbar.');
             $editor=wp_get_image_editor($source);
             if(is_wp_error($editor))return new WP_Error('image','Bildansicht konnte nicht erstellt werden.');
             $dimensions=$editor->get_size();
-            if($dimensions["width"]>1920||$dimensions["height"]>1920){$result=$editor->resize(1920,1920,false);if(is_wp_error($result))return $result;}
+            if($dimensions["width"]>2560||$dimensions["height"]>2560){$result=$editor->resize(2560,2560,false);if(is_wp_error($result))return $result;}
             $copyKey=bin2hex(random_bytes(20));$destination=$this->directory().'/'.$copyKey;
-            for($quality=85;$quality>=35;$quality-=10){
+            for($quality=92;$quality>=40;$quality-=6){
                 $editor->set_quality($quality);
                 $result=$editor->save($destination,'image/jpeg');
                 if(is_wp_error($result))return $result;
                 // Some WP editors append the image extension to a key-only path.
                 $actual=$result['path'];
                 clearstatcache(true,$actual);
-                if(filesize($actual)<=2000000)break; // Galerie- und Downloadgrösse höchstens 2 MB
+                if(filesize($actual)<=1900000)break; // Galerie- und Downloadgrösse höchstens 1.9 MB
             }
-            for($edge=1600;filesize($actual)>2000000&&$edge>=400;$edge-=200){
+            for($edge=2200;filesize($actual)>1900000&&$edge>=400;$edge-=200){
                 $resized=$editor->resize($edge,$edge,false);if(is_wp_error($resized)){@unlink($actual);return $resized;}
                 $result=$editor->save($destination,'image/jpeg');if(is_wp_error($result)){@unlink($actual);return $result;}$actual=$result['path'];clearstatcache(true,$actual);
             }
-            if(filesize($actual)>2000000){@unlink($actual);return new WP_Error('image','Bildansicht überschreitet 2 MB.');}
+            if(filesize($actual)>1900000){@unlink($actual);return new WP_Error('image','Bildansicht überschreitet 1.9 MB.');}
             if($actual!==$destination&&!rename($actual,$destination)){@unlink($actual);return new WP_Error('image','Bildansicht konnte nicht gespeichert werden.');}
             chmod($destination,0600);
-            $copy=['key'=>$copyKey,'name'=>pathinfo($original['name'],PATHINFO_FILENAME).'.jpg','mime'=>'image/jpeg','size'=>filesize($destination)];
+            $copy=['key'=>$copyKey,'name'=>pathinfo($original['name'],PATHINFO_FILENAME).'.jpg','mime'=>'image/jpeg','size'=>filesize($destination),'v'=>2];
             if(!update_option('strc_web_image_'.$key,$copy,false)){@unlink($destination);return new WP_Error('image','Bildansicht konnte nicht gespeichert werden.');}
+            if($savedValid&&$saved['key']!==$copyKey)@unlink($this->directory().'/'.$saved['key']);
             return $copy;
         });
     }

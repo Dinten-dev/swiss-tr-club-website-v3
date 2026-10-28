@@ -22,6 +22,21 @@ final class CommunityEndpoint
                 update_post_meta($post->ID,'strc_album_date',!empty($data['date'])?$data['date']:substr($post->post_date,0,10));
             }
         });
+        add_action('init',static function():void{
+            if(get_option('strc_portrait_filters_v1'))return;
+            foreach(get_posts(['post_type'=>'strc_album','post_status'=>['publish','draft','pending'],'posts_per_page'=>-1,'meta_key'=>'strc_portrait'])as$post){$portrait=self::portrait((int)$post->ID);if(!$portrait)continue;update_post_meta($post->ID,'strc_portrait_model',self::portraitModel((string)($portrait['vehicle']??'')));update_post_meta($post->ID,'strc_portrait_region',(string)($portrait['region']??''));}
+            update_option('strc_portrait_filters_v1',1,false);
+        });
+        // Galerie ohne Vorabprüfung (28.10.2026): wartende Fotos einmalig freigeben.
+        add_action('init',function():void{
+            if(get_option('strc_gallery_no_review_v1'))return;
+            foreach(get_posts(['post_type'=>'strc_album','post_status'=>['publish','pending','draft'],'posts_per_page'=>-1])as$post){
+                $files=$this->files((int)$post->ID);$changed=false;
+                foreach($files as &$file)if(($file['reviewStatus']??'pending')==='pending'){$file['reviewStatus']='approved';$changed=true;}unset($file);
+                if($changed){update_post_meta($post->ID,'strc_private_files',$files);$this->albumState($post,$files);}
+            }
+            update_option('strc_gallery_no_review_v1',1,false);
+        });
         add_action('wp_ajax_strc_community', array($this, 'respond'));
         add_action('wp_ajax_nopriv_strc_community', array($this, 'respond'));
         add_action('before_delete_post', array($this, 'deleteFiles'));
@@ -125,6 +140,8 @@ final class CommunityEndpoint
             'image-policy'=>$this->imagePolicy($input),
             'portrait'=>\SwissTRClub\Core\Forms\FormStore::locked('community-portrait',fn()=>$this->savePortrait($input)),
             'portrait-delete'=>$this->deletePortrait(absint($input['id']??0)),
+            'portrait-member'=>$this->portraitMembers((string)($input['search']??'')),
+            'portrait-vehicle-photo'=>$this->portraitVehiclePhoto(absint($input['vehicle']??0)),
             'pin','merge','reply-edit','reply-hide'=>$this->moderateTopic($operation,$input),
             'subscribe', 'close' => $this->topicAction($operation, $input),
             'file' => $this->file(absint($input['id'] ?? 0), $input['key'] ?? ''),
@@ -256,10 +273,23 @@ final class CommunityEndpoint
         return $post&&$post->post_type==='strc_document'&&LibraryPolicy::canRead($id)&&($post->post_status==='publish'||$this->canReview($post))?['id'=>$id,'title'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8')]:null;
     }
 
+    /** Alle, die sichtbare Bilder zum Album beigetragen haben (Ersteller/in zuerst). */
+    private function albumAuthors(\WP_Post $post,string $creator): string
+    {
+        $names=[$creator];
+        foreach($this->files((int)$post->ID) as $file){
+            if(!$this->approved($file,$post))continue;
+            $name=(string)($file['photographer']??'');
+            if($name===''&&!empty($file['submittedBy'])){$user=get_userdata((int)$file['submittedBy']);$name=$user?$user->display_name:'';}
+            if($name!==''&&!in_array($name,$names,true))$names[]=$name;
+        }
+        return implode(', ',$names);
+    }
+
     private function present(\WP_Post $post): array
     {
         $author = get_userdata((int) $post->post_author);
-        return array('id' => (int) $post->ID, 'kind' => array_search($post->post_type, self::TYPES, true), 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'description' => html_entity_decode(wp_strip_all_tags($post->post_content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($post->post_content)), 'author' => $author ? $author->display_name : 'Clubmitglied', 'createdAt' => get_post_time(DATE_ATOM, true, $post), 'canEdit' => $this->canEdit($post), 'canReview'=>$this->canReview($post),'replacedBy'=>$this->link((int)get_post_meta($post->ID,'strc_replaced_by',true)),'replaces'=>$this->link((int)get_post_meta($post->ID,'strc_replaces',true)),'subscribed'=>in_array((int)$post->ID,(array)get_user_meta(get_current_user_id(),'strc_topic_subscriptions',true),true),'pinned'=>(bool)get_post_meta($post->ID,'strc_topic_pinned',true),'mergedInto'=>(int)get_post_meta($post->ID,'strc_topic_merged_into',true),'closed'=>(bool)get_post_meta($post->ID,'strc_topic_closed',true),'status' => $post->post_status, 'classification'=>get_post_meta($post->ID,'strc_form_classification',true)?:[], 'replyCount' => (int) get_comments(array('post_id' => $post->ID, 'status' => 'approve', 'count' => true)), 'files' => array_map(fn ($file): array => array('key' => $file['key'], 'name' => $file['name'], 'mime' => $file['mime'], 'size' => $file['size'], 'caption' => $file['caption'] ?? '', 'photographer' => $file['photographer'] ?? '', 'public'=>(bool)($file['public']??false),'retainOriginal'=>(bool)($file['retainOriginal']??false),'reviewStatus'=>$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending'),'canCaption'=>$this->canReview($post)||(int)($file['submittedBy']??$post->post_author)===get_current_user_id(),'originalUrl'=>get_post_type($post->ID)==='strc_album'&&$this->originals()?add_query_arg(['action'=>'strc_community','operation'=>'file','id'=>$post->ID,'key'=>$file['key'],'original'=>'1'],admin_url('admin-ajax.php')):'', 'url' => add_query_arg(array('action' => 'strc_community', 'operation' => 'file', 'id' => $post->ID, 'key' => $file['key']), admin_url('admin-ajax.php'))), $this->visibleFiles($post)), 'coverKey'=>(string)get_post_meta($post->ID,'strc_album_cover',true),'portrait'=>self::portrait((int)$post->ID))+('strc_topic'===$post->post_type?$this->topicStats($post):array());
+        return array('id' => (int) $post->ID, 'kind' => array_search($post->post_type, self::TYPES, true), 'title' => html_entity_decode($post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'description' => html_entity_decode(wp_strip_all_tags($post->post_content), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'descriptionHtml' => \SwissTRClub\Core\Editorial\EditorialAccess::html(wpautop($post->post_content)), 'author' => $post->post_type==='strc_album'?$this->albumAuthors($post,$author?$author->display_name:'Clubmitglied'):($author ? $author->display_name : 'Clubmitglied'), 'createdAt' => get_post_time(DATE_ATOM, true, $post), 'canEdit' => $this->canEdit($post), 'canReview'=>$this->canReview($post),'replacedBy'=>$this->link((int)get_post_meta($post->ID,'strc_replaced_by',true)),'replaces'=>$this->link((int)get_post_meta($post->ID,'strc_replaces',true)),'subscribed'=>in_array((int)$post->ID,(array)get_user_meta(get_current_user_id(),'strc_topic_subscriptions',true),true),'pinned'=>(bool)get_post_meta($post->ID,'strc_topic_pinned',true),'mergedInto'=>(int)get_post_meta($post->ID,'strc_topic_merged_into',true),'closed'=>(bool)get_post_meta($post->ID,'strc_topic_closed',true),'status' => $post->post_status, 'classification'=>get_post_meta($post->ID,'strc_form_classification',true)?:[], 'replyCount' => (int) get_comments(array('post_id' => $post->ID, 'status' => 'approve', 'count' => true)), 'files' => array_map(fn ($file): array => array('key' => $file['key'], 'name' => $file['name'], 'mime' => $file['mime'], 'size' => $file['size'], 'caption' => $file['caption'] ?? '', 'photographer' => $file['photographer'] ?? '', 'public'=>(bool)($file['public']??false),'retainOriginal'=>(bool)($file['retainOriginal']??false),'reviewStatus'=>$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending'),'canCaption'=>$this->canReview($post)||(int)($file['submittedBy']??$post->post_author)===get_current_user_id(),'originalUrl'=>get_post_type($post->ID)==='strc_album'&&$this->originals()&&empty($file['originalExpired'])?add_query_arg(['action'=>'strc_community','operation'=>'file','id'=>$post->ID,'key'=>$file['key'],'original'=>'1'],admin_url('admin-ajax.php')):'', 'url' => add_query_arg(array('action' => 'strc_community', 'operation' => 'file', 'id' => $post->ID, 'key' => $file['key']), admin_url('admin-ajax.php'))), $this->visibleFiles($post)), 'coverKey'=>(string)get_post_meta($post->ID,'strc_album_cover',true),'portrait'=>self::portrait((int)$post->ID))+('strc_topic'===$post->post_type?$this->topicStats($post):array());
     }
 
     /** Forum-Statistik wie in einem klassischen Forum: Aufrufe, letzte Antwort und Beitragszahl des Autors. */
@@ -358,6 +388,10 @@ final class CommunityEndpoint
             }
         }
         if($type==='strc_album'&&!empty($input['galleryCategory']))$args['meta_query']=[['key'=>'strc_form_classification','value'=>'"galleryCategory";s:'.strlen(sanitize_text_field($input['galleryCategory'])).':"'.sanitize_text_field($input['galleryCategory']).'";','compare'=>'LIKE']];
+        if($type==='strc_album'&&($input['galleryCategory']??'')==='portraits'){
+            if(!empty($input['portraitRegion']))$args['meta_query'][]=['key'=>'strc_portrait_region','value'=>sanitize_text_field($input['portraitRegion'])];
+            if(!empty($input['portraitModel']))$args['meta_query'][]=['key'=>'strc_portrait_model','value'=>sanitize_text_field($input['portraitModel'])];
+        }
         if($type==='strc_topic'){
             $args['meta_query']=['relation'=>'AND'];
             foreach(['area','model','component'] as $key)if(!empty($input[$key]))$args['meta_query'][]=['key'=>'strc_form_classification','value'=>'"'.$key.'";s:'.strlen(sanitize_text_field($input[$key])).':"'.sanitize_text_field($input[$key]).'";','compare'=>'LIKE'];
@@ -390,11 +424,15 @@ final class CommunityEndpoint
         if($type==='strc_topic'&&empty($input['area'])&&!$trash){
             foreach(CatalogSettings::areas() as $areaName){$countQuery=new WP_Query(['post_type'=>'strc_topic','post_status'=>'publish','posts_per_page'=>1,'fields'=>'ids','no_found_rows'=>false,'meta_query'=>[['key'=>'strc_form_classification','value'=>'"area";s:'.strlen($areaName).':"'.$areaName.'";','compare'=>'LIKE']]]);$areaCounts[$areaName]=(int)$countQuery->found_posts;}
         }
+        $galleryCounts=[];
+        if($type==='strc_album'&&empty($input['galleryCategory'])&&!$trash){
+            foreach(['events','portraits','restorations','history'] as $category){$countQuery=new WP_Query(['post_type'=>'strc_album','post_status'=>'publish','posts_per_page'=>1,'fields'=>'ids','meta_query'=>[['key'=>'strc_form_classification','value'=>'"galleryCategory";s:'.strlen($category).':"'.$category.'";','compare'=>'LIKE']]]);$galleryCounts[$category]=(int)$countQuery->found_posts;}
+        }
         remove_filter('posts_orderby',$pinnedOrder,10);
         remove_filter('posts_where',$visibility,10);
         if($searchFilter)remove_filter('posts_where',$searchFilter,10);
         $posts=$type==='strc_document'?array_filter($query->posts,static fn($p)=>LibraryPolicy::canRead((int)$p->ID)):$query->posts;
-        return ['areaCounts'=>$areaCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
+        return ['areaCounts'=>$areaCounts,'galleryCounts'=>$galleryCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
     }
 
     private function detail(int $id, int $page): array
@@ -425,9 +463,9 @@ final class CommunityEndpoint
         // Neue Albumtexte begrenzen; unveränderte ältere Beschreibungen bleiben bearbeitbar.
         $existing = ($input['operation'] ?? '') === 'edit' ? get_post(absint($input['id'] ?? 0)) : null;
         $album = ($input['kind'] ?? '') === 'gallery' || ($existing && $existing->post_type === 'strc_album');
-        if ($album && ($input['operation'] ?? '') !== 'portrait' && mb_strlen(trim(wp_strip_all_tags($description))) > 250) {
+        if ($album && ($input['operation'] ?? '') !== 'portrait' && mb_strlen(trim(wp_strip_all_tags($description))) > 800) {
             if (! $existing || $existing->post_type !== 'strc_album' || $description !== \SwissTRClub\Core\Editorial\EditorialAccess::html($existing->post_content)) {
-                AjaxRequest::fail('Die Albumbeschreibung darf höchstens 250 Zeichen lang sein.');
+                AjaxRequest::fail('Der Albumtext darf höchstens 800 Zeichen lang sein.');
             }
         }
         return array($title, $description);
@@ -492,7 +530,7 @@ final class CommunityEndpoint
         }
         $magazine=$kind==='library'&&$classification['documentType']==='magazine';
         if($magazine&&(!is_array($_FILES['files']['name']??null)||count($_FILES['files']['name'])!==1||!is_uploaded_file($_FILES['files']['tmp_name'][0]??'')||(new \finfo(FILEINFO_MIME_TYPE))->file($_FILES['files']['tmp_name'][0])!=='application/pdf'))AjaxRequest::fail('Bitte ein PDF-Dokument bis 25 MB auswählen.',422);
-        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 'gallery' === $kind ? 2000000 : 0, 'gallery' === $kind ? 10485760 : 20971520, $magazine ? 25*1024*1024 : 100*1024*1024);
+        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 'gallery' === $kind ? 2000000 : 0, 'gallery' === $kind ? 16777216 : 20971520, $magazine ? 25*1024*1024 : 100*1024*1024);
         if (is_wp_error($savedFiles)) {
             AjaxRequest::fail($savedFiles->get_error_message());
         }
@@ -504,7 +542,7 @@ final class CommunityEndpoint
             (new PrivateUploadStore())->remove($savedFiles);
             AjaxRequest::fail('Beitrag konnte nicht gespeichert werden.', 500);
         }
-        if($kind==='gallery')foreach($savedFiles as &$file){$file['caption']=sanitize_text_field($input['caption']??'');$file['photographer']=$classification['photographer'];$file['uploadedAt']=gmdate(DATE_ATOM);$file['submittedBy']=get_current_user_id();$file['reviewStatus']='pending';}unset($file);
+        if($kind==='gallery')foreach($savedFiles as &$file){$file['caption']=sanitize_text_field($input['caption']??'');$file['photographer']=$classification['photographer'];$file['uploadedAt']=gmdate(DATE_ATOM);$file['submittedBy']=get_current_user_id();$file['reviewStatus']='approved';}unset($file); // Galerie ohne Vorabprüfung; die Moderation kann Bilder nachträglich ausblenden.
         update_post_meta($id, 'strc_private_files', $savedFiles);
         update_post_meta($id,'strc_form_classification',$classification);
         if($kind==='gallery')update_post_meta($id,'strc_album_date',$classification['date']?:substr(get_post($id)->post_date,0,10));
@@ -519,7 +557,7 @@ final class CommunityEndpoint
             AjaxRequest::fail('Veröffentlichung fehlgeschlagen.', 500);
         }
         if($request){$requests[$request]=(int)$id;update_user_meta(get_current_user_id(),'strc_upload_requests',array_slice($requests,-50,null,true));}
-        if(in_array($kind,['gallery','library'],true))SubmissionNotifications::send((int)$id,$kind);
+        if($kind==='library')SubmissionNotifications::send((int)$id,$kind);
         if($kind==='gallery')$this->albumState(get_post((int)$id),$savedFiles);
         if($kind==='gallery'&&$request&&!empty($input['fileToken']))update_post_meta($id,'strc_upload_tokens',[$input['fileToken']=>$request]);
         return $this->present(get_post($id));
@@ -563,7 +601,7 @@ final class CommunityEndpoint
         }
         // Fotograf/in ist immer die hochladende Person.
         $photographer = wp_get_current_user()->display_name;
-        $uploads = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), true, false, 20, 2000000, 10485760);
+        $uploads = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), true, false, 20, 2000000, 16777216);
         if (is_wp_error($uploads)) {
             AjaxRequest::fail($uploads->get_error_message());
         }
@@ -572,10 +610,10 @@ final class CommunityEndpoint
         }
         foreach ($uploads as &$upload) {
             $upload['caption']=sanitize_text_field($input['caption']??'');$upload['photographer'] = $photographer;
-            $upload['uploadedAt']=gmdate(DATE_ATOM);$upload['submittedBy']=get_current_user_id();$upload['reviewStatus']='pending';
+            $upload['uploadedAt']=gmdate(DATE_ATOM);$upload['submittedBy']=get_current_user_id();$upload['reviewStatus']='approved';
         }
         unset($upload);
-        $existing=$this->files((int)$post->ID);foreach($existing as &$file){$file['reviewStatus']=$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending');$file['submittedBy']=$file['submittedBy']??(int)$post->post_author;}unset($file);$next=array_merge($existing,$uploads);update_post_meta($post->ID,'strc_private_files',$next);$this->albumState($post,$next);SubmissionNotifications::send((int)$post->ID,'gallery');
+        $existing=$this->files((int)$post->ID);foreach($existing as &$file){$file['reviewStatus']=$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending');$file['submittedBy']=$file['submittedBy']??(int)$post->post_author;}unset($file);$next=array_merge($existing,$uploads);update_post_meta($post->ID,'strc_private_files',$next);$this->albumState($post,$next);
         if($token){$tokens[$token]=$request;update_post_meta($post->ID,'strc_upload_tokens',$tokens);}
         update_post_meta($post->ID, 'strc_material_rights_at', gmdate(DATE_ATOM));
         
@@ -598,7 +636,6 @@ final class CommunityEndpoint
             if (is_string($file['key'] ?? null) && hash_equals($file['key'], $key)) {
                 if(!$this->canReview($post)&&(int)($file['submittedBy']??$post->post_author)!==get_current_user_id())AjaxRequest::fail('Keine Bildberechtigung.',403);
                 $files[$index]['caption'] = $caption;
-                if(!$this->canReview($post)){$files[$index]['reviewStatus']='pending';$files[$index]['public']=false;}
                 update_post_meta($post->ID, 'strc_private_files', $files);$this->albumState($post,$files);
                 return array('id' => (int) $post->ID, 'key' => $key, 'caption' => $caption);
             }
@@ -718,7 +755,7 @@ final class CommunityEndpoint
     }
 
     /** Steckbrief der Mitgliedergalerie (leer = normales Album). */
-    public const PORTRAIT_FIELDS=['vehicle'=>60,'chassis'=>40,'year'=>4,'note'=>60,'features'=>300,'owner'=>80,'place'=>80];
+    public const PORTRAIT_FIELDS=['vehicle'=>60,'chassis'=>40,'year'=>4,'note'=>60,'features'=>300,'owner'=>80,'place'=>80,'region'=>40];
     public static function portrait(int $id): array
     {
         $data=get_post_meta($id,'strc_portrait',true);
@@ -737,6 +774,7 @@ final class CommunityEndpoint
             $portrait[$key]=$value;
         }
         if($portrait['vehicle']===''||$portrait['owner']==='')AjaxRequest::fail('Bitte Fahrzeug und Besitzer/in angeben.',422);
+        if($portrait['region']!==''){$region=\SwissTRClub\Core\Events\RegionDirectory::canonicalName($portrait['region']);if($region===null||$region==='TRiungsters')AjaxRequest::fail('Bitte eine gültige Region wählen.',422);$portrait['region']=$region;}
         if($portrait['year']!==''&&!preg_match('/^(19|20)\d{2}$/D',$portrait['year']))AjaxRequest::fail('Bitte ein vierstelliges Baujahr angeben.',422);
         $text=trim(str_replace("\r",'',sanitize_textarea_field((string)($input['text']??''))));
         if(mb_strlen($text)>800)AjaxRequest::fail('Der Text darf höchstens 800 Zeichen lang sein.',422);
@@ -745,12 +783,14 @@ final class CommunityEndpoint
         $id=absint($input['id']??0);$post=$id?$this->post($id):null;
         if($post&&!self::portrait((int)$post->ID))AjaxRequest::fail('Dieser Beitrag ist kein Mitgliederporträt.',422);
         $hasFile=!empty($_FILES['files']['name'][0]??'');
-        if(!$post&&!$hasFile)AjaxRequest::fail('Bitte ein Bild auswählen.',422);
+        // Ohne eigenes Bild: Fahrzeugbild aus dem Mitgliederprofil übernehmen (Kopie, das Profilbild bleibt unverändert).
+        $vehicleFile=!$hasFile?$this->portraitVehicleFile(absint($input['vehiclePhoto']??0)):null;
+        if(!$post&&!$hasFile&&!$vehicleFile)AjaxRequest::fail('Bitte ein Bild auswählen.',422);
         $saved=[];
-        if($hasFile){
-            $saved=(new PrivateUploadStore())->save($_FILES['files'],true,false,1,0,20971520);
+        if($hasFile||$vehicleFile){
+            $saved=$hasFile?(new PrivateUploadStore())->save($_FILES['files'],true,false,1,0,20971520):(new PrivateUploadStore())->duplicate($vehicleFile);
             if(is_wp_error($saved))AjaxRequest::fail($saved->get_error_message(),422);
-            foreach($saved as &$file){$file['caption']=$title;$file['photographer']=wp_get_current_user()->display_name;$file['uploadedAt']=gmdate(DATE_ATOM);$file['submittedBy']=get_current_user_id();$file['reviewStatus']='approved';$file['reviewedBy']=get_current_user_id();$file['reviewedAt']=gmdate(DATE_ATOM);$file['retainOriginal']=true;}unset($file);
+            foreach($saved as &$file){$file['caption']=$title;$file['photographer']=wp_get_current_user()->display_name;$file['uploadedAt']=gmdate(DATE_ATOM);$file['submittedBy']=get_current_user_id();$file['reviewStatus']='approved';$file['reviewedBy']=get_current_user_id();$file['reviewedAt']=gmdate(DATE_ATOM);}unset($file);
         }
         $content=wp_slash(['post_title'=>$title,'post_content'=>esc_html($text),'post_status'=>'publish']);
         if($post){$result=wp_update_post($content+['ID'=>$post->ID],true);$id=(int)$post->ID;}
@@ -760,11 +800,54 @@ final class CommunityEndpoint
         update_post_meta($id,'strc_form_classification',$classification);
         update_post_meta($id,'strc_album_date',$classification['date']);
         update_post_meta($id,'strc_portrait',$portrait);
+        update_post_meta($id,'strc_portrait_region',$portrait['region']);update_post_meta($id,'strc_portrait_model',self::portraitModel($portrait['vehicle']));
         update_post_meta($id,'strc_material_rights_at',gmdate(DATE_ATOM));
         if($saved){$old=$this->files($id);update_post_meta($id,'strc_private_files',$saved);update_post_meta($id,'strc_album_cover',$saved[0]['key']);if($old)(new PrivateUploadStore())->remove($old);}
         update_post_meta($id,'strc_gallery_pending_count',0);
         update_post_meta($id,'strc_album_submitters','|'.get_current_user_id().'|');
         return $this->present(get_post($id));
+    }
+
+    /** Modell für den Filter der Mitgliedergalerie: längster passender Modellname («TR6 PI» vor «TR6»). */
+    public static function portraitModel(string $vehicle): string
+    {
+        $vehicle=mb_strtoupper(trim($vehicle));$best='';
+        foreach(\SwissTRClub\Core\Forms\FormFields::MODELS as $model){$upper=mb_strtoupper($model);if(($vehicle===$upper||str_starts_with($vehicle,$upper.' '))&&mb_strlen($model)>mb_strlen($best))$best=$model;}
+        return $best;
+    }
+
+    /** Mitgliedersuche für das Porträtformular (nur Redaktion Galerie): Name, Region, Ort und erfasste Fahrzeuge. */
+    private function portraitMembers(string $search): array
+    {
+        if(!\SwissTRClub\Core\Editorial\EditorialAccess::area('gallery'))AjaxRequest::fail('Die Mitgliedergalerie wird von der Redaktion gepflegt.',403);
+        $search=trim(sanitize_text_field($search));if(mb_strlen($search)<2)return ['members'=>[]];
+        $users=array_merge(get_users(['search'=>'*'.$search.'*','search_columns'=>['display_name'],'number'=>30]),get_users(['number'=>30,'meta_query'=>['relation'=>'OR',['key'=>'first_name','value'=>$search,'compare'=>'LIKE'],['key'=>'last_name','value'=>$search,'compare'=>'LIKE']]]));
+        $repo=new \SwissTRClub\Core\Members\MembershipRepository();$rows=[];
+        foreach($users as $user){
+            if(isset($rows[$user->ID])||!user_can($user,'strc_access_member_area'))continue;
+            $membership=$repo->findForUser((int)$user->ID);if(!$membership||!in_array($membership['status'],['active','grace'],true))continue;
+            $owner=(int)(\SwissTRClub\Core\Members\MemberProfile::household((int)$user->ID)['primary']?:$user->ID);
+            $vehicles=array_map(static function($post):array{$data=\SwissTRClub\Core\Forms\FormStore::data($post);return ['id'=>(int)$post->ID,'model'=>(string)($data['model']??''),'details'=>(string)($data['details']??''),'year'=>(string)($data['year']??''),'chassis'=>(string)($data['chassisNumber']??''),'notes'=>(string)($data['notes']??''),'photo'=>!empty($data['file'])?add_query_arg(['action'=>'strc_community','operation'=>'portrait-vehicle-photo','vehicle'=>$post->ID],admin_url('admin-ajax.php')):''];},\SwissTRClub\Core\Forms\FormStore::find('strc_vehicle',$owner));
+            $place=trim((string)get_user_meta($user->ID,'strc_postcode',true).' '.(string)get_user_meta($user->ID,'strc_city',true));
+            $rows[$user->ID]=['id'=>(int)$user->ID,'name'=>$user->display_name,'region'=>(string)(\SwissTRClub\Core\Events\RegionDirectory::canonicalName($membership['region']??'')??''),'place'=>$place,'vehicles'=>$vehicles];
+            if(count($rows)>=15)break;
+        }
+        return ['members'=>array_values($rows)];
+    }
+
+    /** Gespeicherte Bilddatei eines Mitgliederfahrzeugs (nur für die Redaktion Galerie). */
+    private function portraitVehicleFile(int $vehicleId): ?array
+    {
+        if($vehicleId<1||!\SwissTRClub\Core\Editorial\EditorialAccess::area('gallery'))return null;
+        $post=get_post($vehicleId);if(!$post||$post->post_type!=='strc_vehicle')return null;
+        $file=\SwissTRClub\Core\Forms\FormStore::data($post)['file']??null;
+        return is_array($file)&&!empty($file['key'])?$file:null;
+    }
+
+    private function portraitVehiclePhoto(int $vehicleId): never
+    {
+        $file=$this->portraitVehicleFile($vehicleId);if(!$file)AjaxRequest::fail('Bild nicht gefunden.',404);
+        $store=new PrivateUploadStore();$copy=$store->webCopy($file);if(is_wp_error($copy))AjaxRequest::fail($copy->get_error_message(),503);$store->stream($copy);
     }
 
     private function deletePortrait(int $id): array
