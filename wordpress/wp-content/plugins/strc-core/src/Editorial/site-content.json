@@ -552,6 +552,44 @@
         "default": "Clubausfahrten, regionale Treffen und internationale Begegnungen."
       },
       {
+        "key": "slides",
+        "label": "Kopfbereich – Slider mit Anlass-Plakaten (Reihenfolge = Anzeige; Plakate werden vollständig gezeigt)",
+        "type": "images",
+        "maxItems": 12,
+        "default": [
+          {
+            "url": "/club/agenda/warmup-2027.jpg",
+            "alt": "Warmup 2027 – Sonntag, 25. April 2027",
+            "altFr": "Warmup 2027 – dimanche 25 avril 2027"
+          },
+          {
+            "url": "/club/agenda/fruehlingsausfahrt-2027.jpg",
+            "alt": "TR-Frühlingsausfahrt 2027 – Sonntag, 9. Mai 2027",
+            "altFr": "Sortie de printemps TR 2027 – dimanche 9 mai 2027"
+          },
+          {
+            "url": "/club/agenda/grilltag-2027.jpg",
+            "alt": "Grilltag 2027 – Sonntag, 4. Juli 2027, ab 11 Uhr, beim Pontonierhaus in 5326 Schwaderloch",
+            "altFr": "Journée grillades 2027 – dimanche 4 juillet 2027, dès 11 h, au Pontonierhaus à 5326 Schwaderloch"
+          },
+          {
+            "url": "/club/agenda/mondscheinfahrt-2027.jpg",
+            "alt": "TR-Mondscheinfahrt 2027 – Weekend, 17.–18. Juli 2027",
+            "altFr": "Sortie au clair de lune TR 2027 – week-end des 17 et 18 juillet 2027"
+          },
+          {
+            "url": "/club/agenda/sommerausfahrt-2027.jpg",
+            "alt": "TR-Sommerausfahrt 2027 – Sonntag, 8. August 2027",
+            "altFr": "Sortie d’été TR 2027 – dimanche 8 août 2027"
+          },
+          {
+            "url": "/club/agenda/herbstausfahrt-2027.jpg",
+            "alt": "TR-Herbstausfahrt 2027 – Sonntag, 3. Oktober 2027",
+            "altFr": "Sortie d’automne TR 2027 – dimanche 3 octobre 2027"
+          }
+        ]
+      },
+      {
         "key": "clubTitle",
         "label": "Clubkachel – Titel",
         "type": "text",
