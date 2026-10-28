@@ -56,6 +56,9 @@ final class PrivateUploadStore
                 if (! $dimensions || ($dimensions['mime'] ?? '') !== $mime || $dimensions[0] * $dimensions[1] > 40000000) {
                     return new WP_Error('image', 'Bild ist ungültig oder überschreitet 40 Megapixel.');
                 }
+                if (! self::completeImage($tmp, $mime, (int) $size)) {
+                    return new WP_Error('image', 'Das Bild ist unvollständig übertragen oder beschädigt. Bitte erneut hochladen, wenn möglich über WLAN.');
+                }
             } elseif (file_get_contents($tmp, false, null, 0, 5) !== '%PDF-') {
                 return new WP_Error('pdf', 'Die PDF-Datei ist ungültig.');
             }
@@ -81,6 +84,38 @@ final class PrivateUploadStore
             $saved[] = $file;
         }
         return $saved;
+    }
+
+    /** Erkennt abgebrochene Übertragungen: Ein vollständiges Bild endet mit der Schlussmarke seines Formats. */
+    public static function completeImage(string $path, string $mime, int $size): bool
+    {
+        if($size<16)return false;
+        $handle = @fopen($path, 'rb');
+        if (! $handle) return false;
+        $head = (string) fread($handle, 12);
+        fseek($handle, max(0, $size - 4096));
+        $tail = (string) fread($handle, 4096);
+        fclose($handle);
+        return match ($mime) {
+            // JPEG: Endmarke FF D9; manche Kameras hängen danach noch Füllbytes an.
+            'image/jpeg' => str_contains($tail, "\xFF\xD9"),
+            'image/png' => str_contains($tail, "IEND\xAE\x42\x60\x82"),
+            // WebP: Die RIFF-Längenangabe muss zur Dateigrösse passen (plus 8 Byte Kopf, ggf. ein Füllbyte).
+            'image/webp' => str_starts_with($head, 'RIFF') && in_array($size - (unpack('V', substr($head, 4, 4))[1] ?? -1) - 8, [0, 1], true),
+            default => true,
+        };
+    }
+
+    /** Eigenständige Kopie einer gespeicherten Datei (z. B. Fahrzeugbild als Porträtbild). */
+    public function duplicate(array $file): array|WP_Error
+    {
+        $key=$file['key']??'';if(!is_string($key)||!preg_match('/^[a-f0-9]{40}$/D',$key))return new WP_Error('image','Bild nicht gefunden.');
+        $source=$this->directory().'/'.$key;$mime=(string)($file['mime']??'image/jpeg');if(!is_file($source)||is_link($source)){$web=get_option('strc_web_image_'.$key);$source=is_array($web)?$this->directory().'/'.$web['key']:'';$mime='image/jpeg';}
+        if($source===''||!is_file($source))return new WP_Error('image','Fahrzeugbild nicht mehr verfügbar.');
+        $copyKey=bin2hex(random_bytes(20));$destination=$this->directory().'/'.$copyKey;
+        if(!copy($source,$destination))return new WP_Error('storage','Bild konnte nicht übernommen werden.');
+        chmod($destination,0600);
+        return [['key'=>$copyKey,'name'=>sanitize_file_name((string)($file['name']??'fahrzeug.jpg')),'mime'=>$mime,'size'=>(int)filesize($destination)]];
     }
 
     public function remove(array $files): void

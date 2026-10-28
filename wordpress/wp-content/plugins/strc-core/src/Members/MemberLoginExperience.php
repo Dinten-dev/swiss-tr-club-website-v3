@@ -15,6 +15,7 @@ final class MemberLoginExperience
         add_filter('woocommerce_login_redirect',[$this,'shopLoginRedirect'],30,2);
         add_action('template_redirect',[$this,'accountDashboard']);
         add_action('login_enqueue_scripts',[$this,'loginStyles']);
+        add_action('login_enqueue_scripts',[$this,'resetPasswordField']);
         add_filter('login_headerurl',static fn():string=>self::dashboard(false));
         add_filter('login_headertext',static fn():string=>'Swiss TR-Club');
         add_filter('login_message',[$this,'loginMessage']);
@@ -62,6 +63,33 @@ final class MemberLoginExperience
         $action=sanitize_key($_REQUEST['action']??'login');
         if(!in_array($action,['login',''],true)||!empty($_GET['checkemail']))return $message;
         return $message.'<div class="strc-login-intro"><h2>Mitglieder-Login</h2><p>Melde dich mit deiner E-Mail-Adresse an. Beim ersten Mal wählst du «Passwort vergessen?» und setzt ein eigenes Passwort.</p></div>';
+    }
+
+
+    /** Disable automatic generation before WordPress binds its asynchronous strength checker. */
+    public function resetPasswordField(): void
+    {
+        if(!in_array(sanitize_key($_REQUEST['action']??''),['rp','resetpass'],true))return;
+        wp_add_inline_script('user-profile', <<<'JS'
+(function(){
+ const pass=document.getElementById('pass1');if(!pass)return;
+ pass.value='';pass.type='password';pass.setAttribute('autocomplete','new-password');pass.setAttribute('data-reveal','0');
+ const second=document.getElementById('pass2');if(second)second.value='';
+ const toggle=document.querySelector('.wp-hide-pw');if(toggle){toggle.setAttribute('aria-label','Passwort anzeigen');const icon=toggle.querySelector('.dashicons');if(icon){icon.classList.remove('dashicons-hidden');icon.classList.add('dashicons-visibility');}}
+ if(window.jQuery){
+  window.jQuery(pass).data('reveal',0);
+  // Core triggers this button on DOM ready; native mouse/keyboard clicks remain available.
+  window.jQuery('#resetpassform .wp-generate-pw').on('click.strcInitialPassword',function(event){if(!event.originalEvent)event.stopImmediatePropagation();});
+ }
+})();
+JS, 'before');
+        wp_add_inline_script('user-profile', <<<'JS'
+window.jQuery(function(){
+ const pass=document.getElementById('pass1');if(!pass)return;
+ const submit=document.getElementById('wp-submit');if(submit&&!pass.value)submit.disabled=true;
+ window.jQuery(pass).trigger('pwupdate');
+});
+JS, 'after');
     }
 
     public function loginStyles(): void

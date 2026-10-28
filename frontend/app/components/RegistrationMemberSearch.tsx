@@ -1,0 +1,10 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {query} from './ClubApi';
+import {t} from './UILanguage';
+type Member={name:string;firstName:string;lastName:string;memberNumber:string};
+export default function RegistrationMemberSearch({eventId,selected,onSelect}:{eventId:number;selected:string;onSelect:(member:Member)=>void}){
+ const [search,setSearch]=useState(''),[members,setMembers]=useState<Member[]>([]),[error,setError]=useState(''),[loading,setLoading]=useState(false),[complete,setComplete]=useState(false);
+ useEffect(()=>{const abort=new AbortController();if(search.trim().length<2)return;const timer=setTimeout(()=>{setError('');setComplete(false);setLoading(true);query<{members:Member[]}>('strc_registration',{operation:'members',eventId:String(eventId),q:search},abort.signal).then(result=>{if(!abort.signal.aborted){setMembers(result.members);setComplete(true);}}).catch(reason=>{if(!abort.signal.aborted)setError(reason.message);}).finally(()=>{if(!abort.signal.aborted)setLoading(false);});},250);return()=>{clearTimeout(timer);abort.abort();};},[search,eventId]);
+ return <div className="registration-member-search"><label>{t('Mitglied suchen')}<input type="search" value={search} maxLength={80} placeholder={t('Name oder Mitgliedsnummer')} onChange={event=>{setSearch(event.target.value);setMembers([]);setError('');setComplete(false);setLoading(false);}}/></label>{loading&&<p role="status">{t('Mitglieder werden gesucht …')}</p>}{members.length>0&&<ul aria-label={t('Gefundene Mitglieder')}>{members.map(member=><li key={member.memberNumber}><button type="button" className="club-secondary" onClick={()=>{onSelect(member);setSearch('');setMembers([]);setComplete(false);setLoading(false);}}>{member.name} · {t('Mitgliedsnummer')}: {member.memberNumber}</button></li>)}</ul>}{complete&&!loading&&!members.length&&<p role="status">{t('Keine passenden Mitglieder gefunden.')}</p>}{selected&&<p className="club-hint">{t('Gewählte Mitgliedsnummer')}: {selected}</p>}{error&&<p role="alert">{error}</p>}</div>;
+}

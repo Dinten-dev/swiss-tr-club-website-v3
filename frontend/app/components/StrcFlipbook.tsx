@@ -1,7 +1,8 @@
 'use client';
 import {t} from './UILanguage';
-import {useEffect,useRef,useState} from 'react';
+import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {PDFDocumentProxy} from 'pdfjs-dist';
+const MagazineReader=lazy(()=>import('./MagazineReader'));
 
 // Blätter-Ansicht für das TR-Magazin im Mitglieder-Dashboard.
 // Querformat-PDF-Seiten werden in zwei Magazinseiten geteilt; Titel- und Rückseite
@@ -15,6 +16,7 @@ type Turn={under:number[];front:number;back:number;side:'left'|'right';reverse?:
 // `download`: Download-Link anzeigen (Standard: PDF-Adresse); `search`: Volltextsuche im Flipbook.
 type Hit={v:number;text:string};
 export default function StrcFlipbook({url,title,classic,pages,download,search=true}:{url:string;title:string;classic?:()=>void;pages?:number[];download?:string|false;search?:boolean}){
+  const [reading,setReading]=useState(false);
   const selection=(pages||[]).join(',');
   const root=useRef<HTMLDivElement>(null);const [fullscreen,setFullscreen]=useState(false);const [fullscreenError,setFullscreenError]=useState('');const searchRequest=useRef(0);
   const [query,setQuery]=useState('');const [hits,setHits]=useState<Hit[]|null>(null);const [searching,setSearching]=useState(false);const texts=useRef<Record<number,{str:string;x:number}[]>>({});const pageWidth=useRef<Record<number,number>>({});
@@ -26,6 +28,9 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
   const [anim,setAnim]=useState<Turn|null>(null);
   const [narrow,setNarrow]=useState(()=>typeof window!=='undefined'&&window.innerWidth<760);
   const [userSingle,setUserSingle]=useState<boolean|null>(null);
+  // Lesezoom: vergrösserte Seiten lassen sich im Rahmen verschieben (Scrollen, Ziehen); Blättern dann über die Knöpfe.
+  const [zoom,setZoom]=useState(1);const zoomBox=useRef<HTMLDivElement>(null);const drag=useRef<{x:number;y:number;left:number;top:number}|null>(null);
+  const zoomTo=(next:number)=>{const box=zoomBox.current;const value=Math.max(1,Math.min(3,Math.round(next*4)/4));const cx=box?(box.scrollLeft+box.clientWidth/2)/Math.max(1,box.scrollWidth):.5,cy=box?(box.scrollTop+box.clientHeight/2)/Math.max(1,box.scrollHeight):.5;setZoom(value);requestAnimationFrame(()=>{const el=zoomBox.current;if(!el)return;el.scrollLeft=cx*el.scrollWidth-el.clientWidth/2;el.scrollTop=cy*el.scrollHeight-el.clientHeight/2;});};
   const store=useRef<Record<string,string>>({});
   const busy=useRef(new Set<number>());
   const touch=useRef<number|'swiped'|null>(null);
@@ -174,6 +179,7 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
   const label=total?numbers?shown.map(number).join('–'):`${shown.length>1?shown.join('–'):String(shown[0]||1)} ${t('von')} ${total}`:'';
 
   const downloadUrl=download===false?'':download||url;
+  if(reading)return <Suspense fallback={<p role="status">{t('Leseansicht wird geladen …')}</p>}><MagazineReader url={url} title={title} initialPage={layout?.[page-1]?.p||1} download={download!==false} backLabel="Zur Blätteransicht" back={()=>setReading(false)}/></Suspense>;
   return <div ref={root} className={'strc-flipbook'+(one?' is-single':'')+(fullscreen?' is-fullscreen':'')}>
     <div className="fb-toolbar">
       <button type="button" className="club-secondary" onClick={()=>turn(-1)} disabled={!hasPrev||!!anim}>← {t('Zurück')}</button>
@@ -182,21 +188,26 @@ export default function StrcFlipbook({url,title,classic,pages,download,search=tr
       <button type="button" className="club-secondary fb-mode" onClick={()=>setUserSingle(!one)}>{one?t('Doppelseite'):t('Einzelseite')}</button>
       <button type="button" className="club-secondary fb-mode" onClick={toggleFullscreen} aria-pressed={fullscreen}>{fullscreen?t('Vollbild beenden'):'⛶ '+t('Vollbild')}</button>
       {downloadUrl&&<a className="club-secondary fb-mode" href={downloadUrl} download>{t('Download')}</a>}
-      {classic&&<button type="button" className="club-secondary fb-mode" onClick={classic}>{t('Textansicht')}</button>}
+      {!selection&&<button type="button" className="club-secondary" disabled={!doc} onClick={()=>setReading(true)}>{t('Lesen und zoomen')}</button>}{classic&&<button type="button" className="club-secondary fb-mode" onClick={classic}>{t('Textansicht')}</button>}
+      <span className="fb-zoom-controls" role="group" aria-label={t('Zoom')}><button type="button" className="club-secondary" onClick={()=>zoomTo(zoom-.5)} disabled={zoom<=1} aria-label={t('Verkleinern')}>−</button><span aria-live="polite">{Math.round(zoom*100)} %</span><button type="button" className="club-secondary" onClick={()=>zoomTo(zoom+.5)} disabled={zoom>=3} aria-label={t('Vergrössern')}>+</button></span>
     </div>
     {search&&!selection&&<form className="fb-search" role="search" onSubmit={e=>{e.preventDefault();void runSearch();}}><label className="sr-only" htmlFor={title+'-search'}>{t('Im Magazin suchen')}</label><input id={title+'-search'} type="search" placeholder={t('Im Magazin suchen …')} value={query} onChange={e=>{searchRequest.current++;setQuery(e.target.value);setHits(null);setSearching(false);}}/><button type="submit" className="club-secondary" disabled={!doc||searching||query.trim().length<2}>{searching?t('Suche läuft …'):t('Suchen')}</button>
       {hits&&<div className="fb-hits" aria-live="polite">{hits.length?<><span>{hits.length} {t(hits.length===1?'Treffer':'Treffer')}:</span>{hits.slice(0,40).map(hit=><button type="button" key={hit.v} className={current.includes(hit.v)?'is-current':''} onClick={()=>jump(hit.v)} title={hit.text}>{t('Seite')} {hit.v}</button>)}</>:<span>{t('Keine Treffer.')}</span>}</div>}
     </form>}
-    {error?<p role="alert">{error}</p>:<div className="fb-book" style={{aspectRatio:String((one?1:2)*ratio),['--fb-ratio' as string]:(one?1:2)*ratio}} tabIndex={0} role="group" aria-label={`${title} – ${t('Blättern mit Pfeiltasten, Klick oder Wischen')}`}
-      onKeyDown={e=>{if(e.key==='ArrowRight'){e.preventDefault();turn(1);}else if(e.key==='ArrowLeft'){e.preventDefault();turn(-1);}}}
-      onClick={e=>{if(touch.current==='swiped'){touch.current=null;return;}const r=e.currentTarget.getBoundingClientRect();turn(e.clientX-r.left>r.width/2?1:-1);}}
+    {error?<p role="alert">{error}</p>:<div ref={zoomBox} className={`fb-zoom${zoom>1?' is-zoomed':''}`}
+      onPointerDown={e=>{if(zoom<=1||e.pointerType==='touch')return;const box=e.currentTarget;drag.current={x:e.clientX,y:e.clientY,left:box.scrollLeft,top:box.scrollTop};box.setPointerCapture(e.pointerId);}}
+      onPointerMove={e=>{const d=drag.current;if(!d)return;e.currentTarget.scrollLeft=d.left-(e.clientX-d.x);e.currentTarget.scrollTop=d.top-(e.clientY-d.y);}}
+      onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}}>
+    <div className="fb-book" style={{aspectRatio:String((one?1:2)*ratio),['--fb-ratio' as string]:(one?1:2)*ratio,['--fb-zoom' as string]:zoom}} tabIndex={0} role="group" aria-label={`${title} – ${t('Blättern mit Pfeiltasten, Klick oder Wischen')}`}
+      onKeyDown={e=>{if(e.key==='+'||e.key==='='){e.preventDefault();zoomTo(zoom+.5);return;}if(e.key==='-'){e.preventDefault();zoomTo(zoom-.5);return;}if(e.key==='ArrowRight'){e.preventDefault();turn(1);}else if(e.key==='ArrowLeft'){e.preventDefault();turn(-1);}}}
+      onClick={e=>{if(zoom>1)return;if(touch.current==='swiped'){touch.current=null;return;}const r=e.currentTarget.getBoundingClientRect();turn(e.clientX-r.left>r.width/2?1:-1);}}
       onPointerDown={e=>{touch.current=e.clientX;}}
-      onPointerUp={e=>{const s=touch.current;touch.current=null;if(typeof s==='number'&&Math.abs(e.clientX-s)>50){touch.current='swiped';turn(e.clientX<s?1:-1);}}}>
+      onPointerUp={e=>{const s=touch.current;touch.current=null;if(zoom>1)return;if(typeof s==='number'&&Math.abs(e.clientX-s)>50){touch.current='swiped';turn(e.clientX<s?1:-1);}}}>
       {one?face(under[0],'fb-single'):<>{face(under[0],'fb-left')}{face(under[1],'fb-right')}</>}
       {anim&&<div className={`fb-leaf fb-leaf-${one?'single':anim.side}${anim.reverse?' is-reverse':''}${anim.go?' is-turning':''}`}>{face(anim.front,'fb-front')}{face(anim.back,'fb-back')}</div>}
       {!one&&<span className="fb-spine" aria-hidden="true"/>}
-    </div>}
+    </div></div>}
     {fullscreenError&&<p role="alert">{fullscreenError}</p>}
-    <p className="fb-hint">{t('Zum Blättern auf die rechte oder linke Seite klicken, wischen oder die Pfeiltasten benutzen.')}</p>
+    <p className="fb-hint">{t(zoom>1?'Vergrösserte Seite mit der Maus ziehen oder scrollen. Blättern mit «Zurück» und «Weiter».':'Zum Blättern auf die rechte oder linke Seite klicken, wischen oder die Pfeiltasten benutzen.')}</p>
   </div>;
 }

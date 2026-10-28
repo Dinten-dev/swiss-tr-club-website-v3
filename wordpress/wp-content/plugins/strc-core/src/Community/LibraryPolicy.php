@@ -28,7 +28,18 @@ final class LibraryPolicy
             }
         });
     }
-    public static function types(): array { return get_option('strc_library_types')?:json_decode((string)file_get_contents(__DIR__.'/library-types.json'),true); }
+    public const BOARD_TYPES = ['board-meetings'=>'Vorstandssitzungen','board-plan'=>'Jahresplan','board-finance'=>'Finanzen','board-agm'=>'Generalversammlung','board-media'=>'Medien','board-admin'=>'Clubadministration','board-contracts'=>'Verträge','board-drafts'=>'Entwurfsbox'];
+    public static function types(): array
+    {
+        $types=get_option('strc_library_types')?:json_decode((string)file_get_contents(__DIR__.'/library-types.json'),true);
+        // New restricted categories supplement legacy/custom categories without rewriting the saved option or documents.
+        foreach(self::BOARD_TYPES as $key=>$label){
+            $found=false;
+            foreach($types as &$type)if(($type['key']??'')===$key){$type['group']='board';$type['access']='restricted';$found=true;}unset($type);
+            if(!$found)$types[]=['key'=>$key,'label'=>$label,'group'=>'board','access'=>'restricted','fields'=>['date','version']];
+        }
+        return $types;
+    }
     public const GROUPS = [
         'magazine'=>'TR-Magazin', 'newsletter'=>'TR-Newsletter',
         'technical'=>'Technische Dokumente', 'travel'=>'Reiseberichte',

@@ -34,7 +34,7 @@ final class SubmissionNotifications
         $restricted=$area==='library'&&LibraryPolicy::classification($id)==='restricted';
         foreach(get_users() as $user){if($user->ID===get_current_user_id()||!self::reviews($user,$area,$restricted))continue;
             $fr=\SwissTRClub\Core\Http\UserLanguage::french((int)$user->ID);
-            $route=['gallery'=>'galerie','library'=>'bibliothek','market'=>'marktplatz'][$area];$title=($fr?'Nouvelle contribution : ':'Neue Einreichung: ').$post->post_title;$url=home_url('/#'.$route.'/'.$id);
+            $route=['gallery'=>'galerie','library'=>'bibliothek','market'=>'marktplatz'][$area];$title=($fr?'Nouvelle contribution : ':'Neue Einreichung: ').$post->post_title;$url=home_url('/#'.$route.($area==='market'?'/pruefung':'').'/'.$id);
             $notifications=(array)get_user_meta($user->ID,'strc_notifications',true);$notifications[]=['id'=>'submission-'.$id.'-'.time(),'title'=>$title,'url'=>$url,'at'=>gmdate(DATE_ATOM)];update_user_meta($user->ID,'strc_notifications',array_slice($notifications,-50));
             $prefs=self::preferences((int)$user->ID);if(!$prefs['email'])continue;
             $to=is_email((string)$prefs['address'])?(string)$prefs['address']:$user->user_email;

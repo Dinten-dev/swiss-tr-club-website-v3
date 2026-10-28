@@ -47,18 +47,72 @@ final class MarketplaceEndpoint
         $result = match ($operation) {
             'config'=>['nonce'=>wp_create_nonce('strc_marketplace'),'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area('market'),'partCategories'=>\SwissTRClub\Core\Community\CatalogSettings::parts()],
             'list' => $this->listAds($input),
+            'get' => $this->getAd(absint($input['id']??0)),
             'members' => $this->serviceMembers((string)($input['q']??'')),
-            'create' => $this->createAd($input, $_FILES),
+            'create' => $this->createOnce($input, $_FILES),
             'approve','reject','withdraw','renew','edit'=>$this->changeAd($operation,$input),
             'delete'=>$this->deleteAd($input),
             'sold' => $this->markSold(absint($input['id'] ?? 0)),
-            'contact' => $this->contact(absint($input['id'] ?? 0), $input),
+            'contact' => $this->contactOnce(absint($input['id'] ?? 0), $input),
             default => new WP_Error('invalid_operation', 'Ungültige Anfrage.', array('status' => 400)),
         };
         if (is_wp_error($result)) {
             wp_send_json_error(array('message' => $result->get_error_message()), $result->get_error_data()['status'] ?? 400);
         }
         wp_send_json_success($result);
+    }
+
+
+    public function getAd(int $id): array|WP_Error
+    {
+        $post=get_post($id);
+        if(!$post||$post->post_type!=='strc_ad'||!in_array($post->post_status,['publish','pending','draft'],true))return new WP_Error('missing','Inserat nicht gefunden.',['status'=>404]);
+        $privileged=current_user_can('strc_access_member_area')&&((int)$post->post_author===get_current_user_id()||\SwissTRClub\Core\Editorial\EditorialAccess::area('market'));
+        $public=$post->post_status==='publish'&&get_post_meta($id,'strc_ad_public_approved',true)==='1'&&!get_post_meta($id,'strc_ad_sold',true)&&(int)get_post_meta($id,'strc_ad_expires_at',true)>time();
+        if(!$privileged&&!$public)return new WP_Error('missing','Inserat nicht gefunden.',['status'=>404]);
+        return $this->present($id);
+    }
+
+    private function createOnce(array $input,array $files): array|WP_Error
+    {
+        if(!current_user_can('strc_access_member_area')||!current_user_can('edit_strc_ads'))return $this->denied();
+        $request=$input['requestId']??'';
+        if($request!==''&&(!is_string($request)||!preg_match('/^[a-f0-9-]{36}$/D',$request)))return new WP_Error('request','Ungültige Anfrage.',['status'=>422]);
+        $save=function()use($input,$files,$request){
+            $key=$request!==''?get_current_user_id().':'.$request:'';
+            if($key){$ids=get_posts(['post_type'=>'strc_ad','post_status'=>['publish','pending','draft','trash'],'fields'=>'ids','posts_per_page'=>1,'meta_key'=>'strc_ad_request','meta_value'=>$key]);if($ids)return get_post_status($ids[0])==='trash'?new WP_Error('removed','Dieses Inserat wurde bereits entfernt.',['status'=>409]):$this->present((int)$ids[0]);}
+            return $this->createAd($input,$files);
+        };
+        try{return $request!==''?\SwissTRClub\Core\Forms\FormStore::locked('market-create-'.get_current_user_id().'-'.$request,$save):$save();}
+        catch(\RuntimeException $error){return new WP_Error('busy',$error->getMessage(),['status'=>409]);}
+    }
+
+    private function contactOnce(int $id,array $input): array|WP_Error
+    {
+        $request=$input['requestId']??'';
+        if(!is_string($request)||!preg_match('/^[a-f0-9-]{36}$/D',$request))return new WP_Error('request','Bitte die Anfrage neu öffnen.',['status'=>422]);
+        $key='strc_contact_'.hash('sha256',$id.'|'.$request.'|'.strtolower((string)($input['email']??'')));
+        try{return \SwissTRClub\Core\Forms\FormStore::locked($key,function()use($key,$id,$input){$prior=get_transient($key);if(is_array($prior))return $prior;$result=$this->contact($id,$input);if(!is_wp_error($result))set_transient($key,$result,DAY_IN_SECONDS);return $result;});}
+        catch(\RuntimeException $error){return new WP_Error('busy',$error->getMessage(),['status'=>409]);}
+    }
+
+    private function receipt(int $id): string
+    {
+        $post=get_post($id);$owner=$post?get_userdata((int)$post->post_author):null;
+        if(!$owner||!is_email($owner->user_email))return 'Die Bestätigungsmail konnte nicht versendet werden.';
+        $status=$post->post_status;
+        $fr=\SwissTRClub\Core\Http\UserLanguage::french((int)$owner->ID);
+        $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
+        $name=$owner->first_name?:$owner->display_name;$title=html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8');
+        if($fr){
+            $subject=$status==='pending'?'Swiss TR-Club : ton annonce a été reçue':'Swiss TR-Club : ton annonce est en ligne';
+            $body="Bonjour {$name}\n\nMerci pour ton annonce «{$title}».\n\n".($status==='pending'?"Les annonces de véhicules sont vérifiées par l’équipe du marché. Tu recevras un message dès qu’elle sera publiée.":"Elle est désormais visible sur le marché pendant 90 jours.")."\n\nGérer mes annonces : {$base}/#marktplatz/meine/{$id}\n\nSwiss TR-Club";
+        }else{
+            $subject=$status==='pending'?'Swiss TR-Club: Dein Inserat ist eingegangen':'Swiss TR-Club: Dein Inserat ist online';
+            $body="Hallo {$name}\n\nVielen Dank für dein Inserat «{$title}».\n\n".($status==='pending'?"Fahrzeuginserate prüft das Marktplatz-Team. Du erhältst eine Nachricht, sobald es freigegeben ist.":"Es ist ab sofort während 90 Tagen im Marktplatz sichtbar.")."\n\nMeine Inserate verwalten: {$base}/#marktplatz/meine/{$id}\n\nSwiss TR-Club";
+        }
+        try{$sent=wp_mail($owner->user_email,$subject,$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable){$sent=false;}
+        return $sent?'':'Dein Inserat wurde gespeichert. Die Bestätigungsmail konnte nicht versendet werden. Du findest es unter «Meine Inserate».';
     }
 
     public function listAds(array $input): array|WP_Error
@@ -238,6 +292,7 @@ final class MarketplaceEndpoint
         }
         update_post_meta($postId, 'strc_ad_price', number_format((float) $price, 2, '.', ''));
         update_post_meta($postId, 'strc_ad_category', $category);
+        if(!empty($input['requestId']))update_post_meta($postId,'strc_ad_request',get_current_user_id().':'.$input['requestId']);
         update_post_meta($postId,'strc_ad_details',$details);update_post_meta($postId,'strc_ad_models','|'.implode('|',$details['models']??[]).'|');
         update_post_meta($postId, 'strc_ad_images', $attachments);
         if ($attachments) {
@@ -257,6 +312,7 @@ final class MarketplaceEndpoint
         }
         if($status==='pending')\SwissTRClub\Core\Community\SubmissionNotifications::send((int)$postId,'market');
         if($service)$this->notifyServiceOwner((int)$postId);
+        else update_post_meta($postId,'strc_ad_mail_warning',$this->receipt((int)$postId));
         return $this->present($postId);
     }
 
@@ -327,11 +383,17 @@ final class MarketplaceEndpoint
         $body = "Inserat: #{$id} – " . sanitize_text_field($post->post_title) . "\n\n" .
             "Name: {$name}\nE-Mail: {$email}\n" . ($phone !== '' ? "Telefon: {$phone}\n" : '') .
             "\nNachricht:\n{$message}";
-        $sent = wp_mail($seller->user_email, $subject, $body, array('Reply-To: ' . $name . ' <' . $email . '>'));
+        $headers=['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>'];
+        try{$sent=wp_mail($seller->user_email,$subject,$body,array_merge($headers,['Reply-To: '.str_replace(['"','<','>',"\r","\n"],'',$name).' <'.$email.'>']));}catch(\Throwable){$sent=false;}
         if (! $sent) {
             return new WP_Error('mail_failed', 'Die Anfrage konnte nicht gesendet werden. Bitte später erneut versuchen.');
         }
-        return array('sent' => true);
+        $user=wp_get_current_user();$recipient=$user->ID>0&&is_email($user->user_email)?$user->user_email:$email;
+        $fr=$user->ID>0&&\SwissTRClub\Core\Http\UserLanguage::french((int)$user->ID);
+        $receiptSubject=$fr?'Swiss TR-Club : ta demande a été envoyée':'Swiss TR-Club: Deine Kontaktanfrage';
+        $receiptBody=$body.($fr?"\n\nTa demande a été transmise à la personne qui a publié l’annonce. Elle te répondra directement.":"\n\nDeine Anfrage wurde an den Anbieter weitergeleitet.")."\nSwiss TR-Club";
+        try{$confirmed=wp_mail($recipient,$receiptSubject,$receiptBody,$headers);}catch(\Throwable){$confirmed=false;}
+        return array('sent' => true,'warning'=>$confirmed?'':'Die Anfrage wurde weitergeleitet. Die Bestätigungsmail an dich konnte nicht versendet werden.');
     }
 
     private function changeAd(string $operation,array $input): array|WP_Error
@@ -426,7 +488,7 @@ final class MarketplaceEndpoint
             // Name nur für das Prüfteam und den Inserenten selbst – nie öffentlich ausliefern.
             'seller' => (\SwissTRClub\Core\Editorial\EditorialAccess::area('market') || (get_current_user_id() > 0 && (int) $post->post_author === get_current_user_id())) && $seller ? $seller->display_name : '',
             'createdAt' => get_post_time(DATE_ATOM, true, $id),
-            'status'=>$post->post_status,'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area('market'),'expiresAt'=>get_post_meta($id,'strc_ad_expires_at',true)?gmdate(DATE_ATOM,(int)get_post_meta($id,'strc_ad_expires_at',true)):'',
+            'warning'=>(string)get_post_meta($id,'strc_ad_mail_warning',true),'status'=>$post->post_status,'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area('market'),'expiresAt'=>get_post_meta($id,'strc_ad_expires_at',true)?gmdate(DATE_ATOM,(int)get_post_meta($id,'strc_ad_expires_at',true)):'',
             'mine' => get_current_user_id() > 0 && (int) $post->post_author === get_current_user_id(),
             'service' => (get_current_user_id()>0&&((int)$post->post_author===get_current_user_id()||\SwissTRClub\Core\Editorial\EditorialAccess::area('market')))&&is_array(get_post_meta($id,'strc_ad_service',true))?(string)(get_userdata((int)(get_post_meta($id,'strc_ad_service',true)['by']??0))->display_name??'Marktplatz-Service'):'',
             'sold' => (bool) get_post_meta($id, 'strc_ad_sold', true),

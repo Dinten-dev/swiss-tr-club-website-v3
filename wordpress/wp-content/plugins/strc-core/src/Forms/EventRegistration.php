@@ -71,6 +71,7 @@ final class EventRegistration
             if($op==='mine'){wp_send_json_success(['registrations'=>array_map(fn($p)=>$this->present($p),FormStore::find('strc_registration',get_current_user_id())),'nonce'=>wp_create_nonce('strc_registration')]);}
             $id=absint($input['eventId']??0);$event=get_post($id);
             if(!$event||$event->post_type!=='strc_event'||$event->post_status!=='publish'||$event->post_password)throw new \RuntimeException('Veranstaltung nicht verfügbar.',404);
+            if($op==='members')wp_send_json_success($this->searchMembers((string)($input['q']??'')));
             if($op==='participants'){
                 if(!RegionalEventAccess::canEdit($id)&&!current_user_can('strc_manage_finance'))throw new \RuntimeException('Kein Zugriff auf die Teilnehmerliste.',403);
                 wp_send_json_success(['registrations'=>array_map(fn($p)=>$this->present($p),FormStore::find('strc_registration',0,$id)),'canReconcile'=>current_user_can('strc_manage_finance')]);
@@ -152,7 +153,7 @@ final class EventRegistration
     private function submission(object $event,array $settings,array $input): array
     {
         if(!$this->open($event)||$settings['externalUrl'])throw new \RuntimeException('Die Online-Anmeldung ist für diese Veranstaltung geschlossen.',409);
-        // Buchungen (Fahrzeugbesatzungen): 1. die eigene (Mitglied als Pilot), danach bis zu `guests` Zusatzbuchungen für Gäste.
+        // Buchungen (Fahrzeugbesatzungen): 1. die eigene (Mitglied als Pilot), danach bis zu `guests` Zusatzbuchungen für Mitglieder oder Gäste.
         // Konstellationen: Mitglied allein · Mitglied + Co-Pilot Mitglied · Mitglied + Co-Pilot Gast · Gast allein · Gast + Co-Pilot Gast.
         $crews=json_decode($input['crews']??'',true);
         if(!is_array($crews)||!array_is_list($crews)||!$crews||count($crews)>1+min(2,(int)$settings['guests']))throw new \InvalidArgumentException('Bitte die zugelassene Anzahl Buchungen beachten.');
@@ -166,10 +167,13 @@ final class EventRegistration
                 $person=['name'=>wp_get_current_user()->display_name,'kind'=>'member','role'=>'Mitglied','userId'=>get_current_user_id(),'crew'=>1,'room'=>$room];
                 $person['fee']=$this->participantFee(get_current_user_id(),$settings,self::roleFee($settings,'member',$room));
             }else{
-                $person=$this->guestPerson($crew['pilot']??null)+['kind'=>'guest','role'=>'Gast','crew'=>$index+1,'room'=>$room];
+                $pilot=is_array($crew['pilot']??null)?$crew['pilot']:[];
+                $pilotType=$pilot['type']??'guest';
+                if(!in_array($pilotType,['guest','member'],true))throw new \InvalidArgumentException('Bitte Mitglied oder Gast wählen.');
+                $person=($pilotType==='member'?$this->memberPerson($pilot):$this->guestPerson($pilot))+['kind'=>$pilotType,'role'=>$pilotType==='member'?'Mitglied':'Gast','crew'=>$index+1,'room'=>$room];
                 $model=FormFields::text(is_array($crew['pilot']??null)?$crew['pilot']:[],'vehicle',80);
                 if($model)$person['vehicle']=$model;
-                $person['fee']=self::roleFee($settings,'guest',$room);
+                $person['fee']=$pilotType==='member'?$this->participantFee((int)$person['userId'],$settings,self::roleFee($settings,'member',$room)):self::roleFee($settings,'guest',$room);
             }
             $participants[]=$person;$total+=$person['fee'];
             if(!$copilot)continue;
@@ -177,17 +181,11 @@ final class EventRegistration
             $type=$copilot['type']??'';
             if($own&&$type==='partner'){
                 $partner=$this->copilot();if(!$settings['copilot']||!$partner)throw new \InvalidArgumentException('Kein berechtigter Co-Pilot verknüpft.');
-                $person=['name'=>get_userdata($partner)->display_name,'kind'=>'copilot','role'=>'Co-Pilot Mitglied','userId'=>$partner,'isMember'=>true];
+                $person=['firstName'=>(string)get_user_meta($partner,'first_name',true),'lastName'=>(string)get_user_meta($partner,'last_name',true),'name'=>get_userdata($partner)->display_name,'kind'=>'copilot','role'=>'Co-Pilot Mitglied','userId'=>$partner,'isMember'=>true];
                 $person['fee']=$this->participantFee($partner,$settings,self::roleFee($settings,'copilot',$room));
-            }elseif($own&&$type==='member'){
-                $person=$this->guestPerson($copilot);$number=FormFields::text($copilot,'memberNumber',32,true);
-                global $wpdb;
-                $member=$wpdb->get_row($wpdb->prepare("SELECT user_id FROM {$wpdb->prefix}strc_memberships WHERE member_number=%s AND status IN ('active','grace')",$number),ARRAY_A);
-                $user=$member?get_userdata((int)$member['user_id']):false;
-                $match=$user?trim((string)get_user_meta($user->ID,'first_name',true).' '.(string)get_user_meta($user->ID,'last_name',true)):'';
-                if(!$user||mb_strtolower($person['name'])!==mb_strtolower($match?:$user->display_name))throw new \InvalidArgumentException('Mitgliedsnummer und Name des Co-Piloten stimmen nicht überein.');
-                $person+=['kind'=>'copilot','role'=>'Co-Pilot Mitglied','userId'=>(int)$user->ID,'memberNumber'=>$number,'isMember'=>true];
-                $person['fee']=$this->participantFee((int)$user->ID,$settings,self::roleFee($settings,'copilot',$room));
+            }elseif($type==='member'){
+                $person=$this->memberPerson($copilot)+['kind'=>'copilot','role'=>'Co-Pilot Mitglied'];
+                $person['fee']=$this->participantFee((int)$person['userId'],$settings,self::roleFee($settings,'copilot',$room));
             }elseif($type==='guest'){
                 $person=$this->guestPerson($copilot)+['kind'=>$own?'copilot-guest':'guest-copilot','role'=>'Co-Pilot Gast'];
                 $person['fee']=self::roleFee($settings,'guest-copilot',$room);
@@ -200,7 +198,7 @@ final class EventRegistration
         if(count($selectedIds)!==count(array_unique($selectedIds)))throw new \InvalidArgumentException('Eine Person darf nur einmal angemeldet werden.');
         // A linked co-pilot cannot also occupy a separate active registration.
         $ids=array_filter(array_column($participants,'userId'));
-        foreach(FormStore::find('strc_registration',0,$event->ID)as$post){$row=FormStore::data($post);if((int)$post->post_author===get_current_user_id()||in_array($row['state']??'',['cancelled','expired','payment_review'],true)||(($row['state']??'')==='pending_payment'&&!EventPayments::occupies($row)))continue;if(array_intersect($ids,array_column($row['participants']??[],'userId')))throw new \RuntimeException('Eine ausgewählte Person ist bereits für diese Veranstaltung angemeldet.',409);}
+        foreach(FormStore::find('strc_registration',0,$event->ID)as$post){$row=FormStore::data($post);if((int)$post->post_author===get_current_user_id()||in_array($row['state']??'',['cancelled','expired'],true)||(($row['state']??'')==='pending_payment'&&!EventPayments::occupies($row)))continue;if(array_intersect($ids,array_column($row['participants']??[],'userId')))throw new \RuntimeException('Eine ausgewählte Person ist bereits für diese Veranstaltung angemeldet.',409);}
         $selections=json_decode($input['selections']??'[]',true);if(!is_array($selections))throw new \InvalidArgumentException('Bitte die Auswahl prüfen.');
         $meals=self::options($settings['meals']);$roomOptions=!empty($settings['weekend'])?[]:self::options($settings['rooms']);
         foreach($participants as$i=>&$person){if($meals){$meal=FormFields::choice(is_array($selections[$i]??null)?$selections[$i]:[],'meal',array_keys($meals));$person['meal']=$meal;$total+=$meals[$meal];}}unset($person);
@@ -210,6 +208,40 @@ final class EventRegistration
         $vehicle=null;if($settings['vehicle']){$selection=$input['vehicle']??'';if(in_array($selection,['other','guest','none','modern'],true))$vehicle=['model'=>['other'=>'Anderer Triumph','guest'=>'Gastfahrzeug','modern'=>'Gastfahrzeug','none'=>'Ohne Triumph (Co-Pilot)'][$selection]];elseif(str_starts_with($selection,'model:')){$model=substr($selection,6);if(!in_array($model,FormFields::MODELS,true))throw new \InvalidArgumentException('Bitte ein gültiges Triumph-Modell wählen.');$vehicle=['model'=>$model];}else{foreach(FormsEndpoint::vehicles()as$v)if((string)$v['id']===$selection&&$v['status']==='roadworthy'){$vehicle=array_intersect_key($v,array_flip(['id','model','details','year','registration','color']));break;}if(!$vehicle)throw new \InvalidArgumentException('Bitte ein fahrbereites Fahrzeug oder eine Alternative wählen.');}}
         return ['eventTitle'=>get_the_title($event->ID),'eventStart'=>get_post_meta($event->ID,'strc_start_at',true),'participants'=>$participants,'headcount'=>count($participants),'vehicle'=>$vehicle,'room'=>$room,'total'=>$total,'notes'=>FormFields::text($input,'notes',1000)];
     }
+
+    private function searchMembers(string $query): array
+    {
+        $query=trim(sanitize_text_field($query));
+        if(mb_strlen($query)<2)return ['members'=>[]];
+        if(mb_strlen($query)>80)throw new \InvalidArgumentException('Bitte einen kürzeren Suchbegriff eingeben.');
+        global $wpdb;
+        $like='%'.$wpdb->esc_like($query).'%';
+        $rows=$wpdb->get_results($wpdb->prepare("SELECT DISTINCT m.user_id,m.member_number,u.display_name FROM {$wpdb->prefix}strc_memberships m JOIN {$wpdb->users} u ON u.ID=m.user_id WHERE m.status IN ('active','grace') AND (m.member_number LIKE %s OR u.display_name LIKE %s OR EXISTS (SELECT 1 FROM {$wpdb->usermeta} n WHERE n.user_id=u.ID AND n.meta_key IN ('first_name','last_name') AND n.meta_value LIKE %s)) ORDER BY u.display_name LIMIT 40",$like,$like,$like),ARRAY_A);
+        $members=[];
+        foreach($rows as $row){
+            $id=(int)$row['user_id'];$number=(string)$row['member_number'];
+            if(!$number||str_starts_with($number,'FG:')||!user_can($id,'strc_access_member_area'))continue;
+            $first=(string)get_user_meta($id,'first_name',true);$last=(string)get_user_meta($id,'last_name',true);
+            $members[]=['name'=>trim($first.' '.$last)?:$row['display_name'],'firstName'=>$first,'lastName'=>$last,'memberNumber'=>$number];
+            if(count($members)>=20)break;
+        }
+        return ['members'=>$members];
+    }
+
+    private function memberPerson(array $input): array
+    {
+        $number=FormFields::text($input,'memberNumber',32,true);
+        global $wpdb;
+        $row=$wpdb->get_row($wpdb->prepare("SELECT user_id FROM {$wpdb->prefix}strc_memberships WHERE member_number=%s AND status IN ('active','grace')",$number),ARRAY_A);
+        $user=$row?get_userdata((int)$row['user_id']):false;
+        if(!$user||!user_can($user,'strc_access_member_area'))throw new \InvalidArgumentException('Bitte ein aktives Mitglied auswählen.');
+        $first=(string)get_user_meta($user->ID,'first_name',true);$last=(string)get_user_meta($user->ID,'last_name',true);
+        $name=trim($first.' '.$last)?:$user->display_name;
+        $entered=trim(FormFields::text($input,'firstName',80).' '.FormFields::text($input,'lastName',80));
+        if($entered!==''&&mb_strtolower($entered)!==mb_strtolower($name))throw new \InvalidArgumentException('Mitgliedsnummer und Name stimmen nicht überein. Bitte das Mitglied erneut auswählen.');
+        return ['name'=>$name,'firstName'=>$first,'lastName'=>$last,'userId'=>(int)$user->ID,'memberNumber'=>$number,'isMember'=>true];
+    }
+
     private function guestPerson(mixed $data): array
     {
         if(!is_array($data))throw new \InvalidArgumentException('Bitte Vor- und Nachname angeben.');

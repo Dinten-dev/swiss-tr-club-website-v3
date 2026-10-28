@@ -83,16 +83,37 @@ final class MemberDashboardEndpoint
         if($query->posts){$post=$query->posts[0];$magazine=['title'=>$post->post_title,'url'=>'#bibliothek/'.$post->ID];}
         $featured=(new \SwissTRClub\Core\Content\MagazineEndpoint())->preview($language);
         if($featured&&!empty($featured['canRead'])&&LibraryPolicy::canRead((int)$featured['id']))$magazine=['title'=>$featured['title'],'url'=>'#bibliothek/'.$featured['id']];
-        wp_send_json_success(['nonce'=>wp_create_nonce('strc_dashboard'),'membership'=>$this->membership($id),'subscriptions'=>self::subscriptions($id),'region'=>(string)((new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id)['region']??''),'displayName'=>wp_get_current_user()->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'vehicles'=>\SwissTRClub\Core\Forms\FormsEndpoint::vehicles(),'upcoming'=>$upcoming,'myEvents'=>$myEvents,'registrations'=>array_slice($registrations,0,12),'uploads'=>$uploads,'orders'=>$orders,'queues'=>$queues,'notifications'=>array_reverse((array)get_user_meta($id,'strc_notifications',true)),'magazine'=>$magazine,'magazineIssue'=>$featured,'isBoard'=>current_user_can('strc_access_board_documents')]);
+        wp_send_json_success(['nonce'=>wp_create_nonce('strc_dashboard'),'membership'=>$this->membership($id),'subscriptions'=>self::subscriptions($id),'region'=>(string)((new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id)['region']??''),'displayName'=>wp_get_current_user()->display_name,'firstName'=>(string)get_user_meta($id,'first_name',true),'vehicles'=>\SwissTRClub\Core\Forms\FormsEndpoint::vehicles(),'upcoming'=>$upcoming,'myEvents'=>$myEvents,'registrations'=>array_slice($registrations,0,12),'uploads'=>$uploads,'orders'=>$orders,'queues'=>$queues,'notifications'=>$this->notifications($id),'magazine'=>$magazine,'magazineIssue'=>$featured,'isBoard'=>current_user_can('strc_access_board_documents')]);
     }
 
     /** Kopfzeile des Dashboards: Mitgliedschaftsart, Nummer, Partner, Mitglied seit, Region. */
+    /**
+     * Mitteilungen, neueste zuerst. «Neue Einreichung» erscheint pro Beitrag nur einmal und zeigt den
+     * aktuellen Stand (offen, freigegeben, abgelehnt, archiviert) statt eines eingefrorenen Verlaufs.
+     */
+    private function notifications(int $id): array
+    {
+        $rows=array_reverse(array_values(array_filter((array)get_user_meta($id,'strc_notifications',true),'is_array')));$seen=[];$result=[];
+        foreach($rows as $row){
+            if(preg_match('/^submission-(\d+)-/',(string)($row['id']??''),$match)){
+                $postId=(int)$match[1];if(isset($seen[$postId]))continue;$seen[$postId]=true;
+                $post=get_post($postId);
+                if(!$post)$row['state']='archived';
+                elseif($post->post_type==='strc_album')$row['state']=(int)get_post_meta($postId,'strc_gallery_pending_count',true)>0?'review_open':($post->post_status==='publish'?'approved':'rejected');
+                else $row['state']=match($post->post_status){'pending'=>'review_open','publish'=>'approved','trash'=>'archived',default=>'rejected'};
+            }
+            $result[]=$row;
+        }
+        return $result;
+    }
+
     private function membership(int $id): array
     {
         $row=(new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id);
         if(!$row)return [];
         $type=\SwissTRClub\Core\Members\MembershipTypePolicy::normalize((string)$row['membership_type']);
-        $label=(string)get_user_meta($id,'strc_fairgate_membership_label',true)?:(\SwissTRClub\Core\Members\MembershipTypePolicy::labels()[$type]??'Mitglied');
+        // Clubbezeichnung statt Fairgate-Rohtext (z. B. «TRiungster   (Jungmitglied bis 35 Jahre)»).
+        $label=['individual'=>'Einzelmitglied','couple_primary'=>'Paarmitglied','couple_partner'=>'Paarmitglied','youth'=>'TRiungster','honorary'=>'Ehrenmitglied'][$type]??((string)get_user_meta($id,'strc_fairgate_membership_label',true)?:'Mitglied');
         $number=(string)$row['member_number'];
         if(str_starts_with($number,'FG:')||get_user_meta($id,'strc_fairgate_number_pending',true)==='1')$number='';
         $partner='';
