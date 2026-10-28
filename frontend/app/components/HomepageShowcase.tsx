@@ -3,7 +3,7 @@ import {t,uiLocale,useUILanguage} from './UILanguage';
 
 import {useEffect,useRef,useState,useSyncExternalStore,type MouseEvent} from 'react';
 import Image from 'next/image';
-import {ContentBlock,useSiteContent,assetUrl,regionalLandscape,type ContentImage,type ContentValues} from './SiteContent';
+import {RichHtml,useSiteContent,assetUrl,regionalLandscape,type ContentImage,type ContentValues} from './SiteContent';
 import {imageFrameStyle} from './ImageFrame';
 import {scrollToHomeSection} from './HomepageOverview';
 import {trModels,Placeholder} from './VehicleModels';
@@ -27,21 +27,24 @@ export function HomeHero({nextEvent}:{nextEvent?:ClubEvent}){
  const gallery=((values.home?.photos??[]) as ContentImage[]).filter(photo=>photo.url);
  const slides=[...(heroImage?[{url:heroImage,alt:''} as ContentImage]:[]),...gallery.filter(photo=>photo.url!==heroImage)].slice(0,4);
  if(!slides.length)slides.push({url:'/club/scheinwerfer.jpg',alt:''});
+ // Einstiegstext und Leitbild wechseln sich unter dem Titel ab, im Takt der Bilder.
+ const leads=[c('home.intro'),c('home.mission')].filter(html=>html.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,'').trim());
  const [index,setIndex]=useState(0);const [paused,setPaused]=useState(false);const [visible,setVisible]=useState(true);
  useEffect(()=>{const update=()=>setVisible(!document.hidden);document.addEventListener('visibilitychange',update);return()=>document.removeEventListener('visibilitychange',update);},[]);
- useEffect(()=>{if(reduced||paused||!visible||slides.length<2)return;const timer=window.setTimeout(()=>setIndex(current=>(current+1)%slides.length),7000);return()=>window.clearTimeout(timer);},[reduced,paused,visible,slides.length,index]);
+ useEffect(()=>{if(reduced||paused||!visible||Math.max(slides.length,leads.length)<2)return;const timer=window.setTimeout(()=>setIndex(current=>current+1),7000);return()=>window.clearTimeout(timer);},[reduced,paused,visible,slides.length,leads.length,index]);
  const toNext=(event:MouseEvent<HTMLAnchorElement>)=>{if(!nextEvent||!document.getElementById('home-next-event'))return;event.preventDefault();scrollToHomeSection('home-next-event');};
- const caption=photoAlt(slides[index]??slides[0],language);
+ const slideIndex=index%slides.length;
+ const caption=photoAlt(slides[slideIndex]??slides[0],language);
  return <section className="hx-hero" aria-labelledby="home-arrival-title" onFocusCapture={()=>setPaused(true)} onBlurCapture={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setPaused(false);}}>
-  {slides.map((photo,slide)=><div key={photo.url+slide} className={`hx-hero-slide${slide===index?' is-active':''}${reduced?'':' is-moving'}`} aria-hidden="true"><Image src={assetUrl(photo.url)} alt="" width={1920} height={1080} priority={slide===0} loading={slide===0?undefined:'lazy'} style={imageFrameStyle(photo.frame,'cover')}/></div>)}
+  {slides.map((photo,slide)=><div key={photo.url+slide} className={`hx-hero-slide${slide===slideIndex?' is-active':''}${reduced?'':' is-moving'}`} aria-hidden="true"><Image src={assetUrl(photo.url)} alt="" width={1920} height={1080} priority={slide===0} loading={slide===0?undefined:'lazy'} style={imageFrameStyle(photo.frame,'cover')}/></div>)}
   <div className="hx-hero-shade" aria-hidden="true"/>
   <div className="home-width hx-hero-copy">
    <p className="hx-eyebrow">{c('home.eyebrow','Willkommen beim Swiss TR-Club')}</p>
    <h1 id="home-arrival-title">{c('home.title')}</h1>
-   <ContentBlock id="home.intro" className="hx-hero-intro"/>
+   {leads.length>1&&!reduced?<div className="hx-hero-leads" aria-live="off">{leads.map((lead,position)=><RichHtml key={position} html={lead} className={`hx-hero-intro${position===index%leads.length?' is-active':''}`}/>)}</div>:leads.map((lead,position)=><RichHtml key={position} html={lead} className="hx-hero-intro is-active"/>)}
    <div className="hx-hero-actions"><a className="hx-button hx-button-red" href="#anmeldung">{t('Mitglied werden')} <span aria-hidden="true">→</span></a><a className="hx-button hx-button-ghost" href="#agenda" onClick={toNext}>{t(nextEvent?'Nächster Anlass':'Zur Agenda')}</a></div>
   </div>
-  {slides.length>1&&<div className="home-width hx-hero-meta">{caption&&<span>{caption}</span>}<div className="hx-hero-dots" role="group" aria-label={t('Titelbild wählen')}>{slides.map((photo,slide)=><button key={photo.url+slide} type="button" aria-label={`${t('Bild')} ${slide+1}`} aria-current={slide===index} onClick={()=>setIndex(slide)}/>)}</div></div>}
+  {slides.length>1&&<div className="home-width hx-hero-meta">{caption&&<span>{caption}</span>}<div className="hx-hero-dots" role="group" aria-label={t('Titelbild wählen')}>{slides.map((photo,slide)=><button key={photo.url+slide} type="button" aria-label={`${t('Bild')} ${slide+1}`} aria-current={slide===slideIndex} onClick={()=>setIndex(slide)}/>)}</div></div>}
  </section>;
 }
 

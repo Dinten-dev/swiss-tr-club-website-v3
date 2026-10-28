@@ -830,8 +830,9 @@ button:focus-visible,a:focus-visible { outline:3px solid #187bb1; outline-offset
 .hx-marquee-track{display:flex;width:max-content}
 .hx-marquee-set{display:flex;gap:16px;padding-right:16px}
 .hx-marquee-set a{width:190px;flex-shrink:0}
-.hx-marquee-set img{filter:grayscale(1);opacity:.8;transition:filter .3s,opacity .3s}
-.hx-marquee-set a:hover img,.hx-marquee-set a:focus-visible img{filter:none;opacity:1}
+/* Partnerlogos immer farbig (Wunsch Redaktion 28.10.2026). */
+.hx-marquee-set img{transition:transform .3s}
+.hx-marquee-set a:hover img,.hx-marquee-set a:focus-visible img{transform:scale(1.04)}
 .hx-marquee.is-moving .hx-marquee-track{animation:hx-marquee 40s linear infinite}
 .hx-marquee.is-moving:hover .hx-marquee-track,.hx-marquee.is-moving:focus-within .hx-marquee-track{animation-play-state:paused}
 @keyframes hx-marquee{to{transform:translateX(-50%)}}

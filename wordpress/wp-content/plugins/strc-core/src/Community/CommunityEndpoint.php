@@ -28,6 +28,16 @@ final class CommunityEndpoint
             foreach($posts as $post){$portrait=self::portrait((int)$post->ID);update_post_meta($post->ID,'strc_portrait_model',self::portraitModel((string)($portrait['vehicle']??'')));update_post_meta($post->ID,'strc_portrait_region',(string)($portrait['region']??''));}
             if(count($posts)<100)update_option('strc_portrait_filters_v1',1,false);
         });
+        // Galerie ohne Vorabprüfung (Entscheid Redaktion 28.10.2026): wartende Fotos einmalig freigeben.
+        add_action('init',function():void{
+            if(get_option('strc_gallery_no_review_v1'))return;
+            foreach(get_posts(['post_type'=>'strc_album','post_status'=>['publish','pending','draft'],'posts_per_page'=>-1])as$post){
+                $files=$this->files((int)$post->ID);$changed=false;
+                foreach($files as &$file)if(($file['reviewStatus']??'pending')==='pending'){$file['reviewStatus']='approved';$changed=true;}unset($file);
+                if($changed){update_post_meta($post->ID,'strc_private_files',$files);$this->albumState($post,$files);}
+            }
+            update_option('strc_gallery_no_review_v1',1,false);
+        });
         add_action('wp_ajax_strc_community', array($this, 'respond'));
         add_action('wp_ajax_nopriv_strc_community', array($this, 'respond'));
         add_action('before_delete_post', array($this, 'deleteFiles'));
@@ -167,6 +177,16 @@ final class CommunityEndpoint
     private function deleteTopic(int $id): array
     {
         $post=$this->post($id,true);
+        if($post->post_type==='strc_document'){
+            // Bibliothek: endgültig löschen nur aus dem Archiv, nur durch die Bibliotheks-Moderation, nie bei Vorstandsunterlagen.
+            $typeKey=(string)get_post_meta($id,'strc_document_type',true);$type=null;foreach(LibraryPolicy::types() as $candidate)if(($candidate['key']??'')===$typeKey)$type=$candidate;
+            $group=$type?LibraryPolicy::groupForType($type):'';
+            if($post->post_status!=='trash')AjaxRequest::fail('Nur archivierte Dokumente können endgültig gelöscht werden.',422);
+            if($group==='board'||in_array($typeKey,['board','confidential'],true)||LibraryPolicy::classification($id)==='restricted')AjaxRequest::fail('Vorstandsunterlagen werden nicht gelöscht.',403);
+            if(!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+            if(!wp_delete_post($id,true))AjaxRequest::fail('Dokument konnte nicht gelöscht werden.',503);
+            return ['id'=>$id,'deleted'=>true];
+        }
         if($post->post_type!=='strc_topic')AjaxRequest::fail('Nur Forumsthemen können gelöscht werden.',422);
         if((int)$post->post_author!==get_current_user_id()&&!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
         if(!wp_delete_post($id,true))AjaxRequest::fail('Thema konnte nicht gelöscht werden.',503);
@@ -523,7 +543,7 @@ final class CommunityEndpoint
             (new PrivateUploadStore())->remove($savedFiles);
             AjaxRequest::fail('Beitrag konnte nicht gespeichert werden.', 500);
         }
-        if($kind==='gallery')foreach($savedFiles as &$file){$file['optimized']=($input['optimized']??'')==='1';$file['caption']=sanitize_text_field($input['caption']??'');$file['photographer']=$classification['photographer'];$file['uploadedAt']=gmdate(DATE_ATOM);$file['submittedBy']=get_current_user_id();$file['reviewStatus']='pending';}unset($file);
+        if($kind==='gallery')foreach($savedFiles as &$file){$file['optimized']=($input['optimized']??'')==='1';$file['caption']=sanitize_text_field($input['caption']??'');$file['photographer']=$classification['photographer'];$file['uploadedAt']=gmdate(DATE_ATOM);$file['submittedBy']=get_current_user_id();$file['reviewStatus']='approved';}unset($file);
         update_post_meta($id, 'strc_private_files', $savedFiles);
         update_post_meta($id,'strc_form_classification',$classification);
         if($kind==='gallery')update_post_meta($id,'strc_album_date',$classification['date']?:substr(get_post($id)->post_date,0,10));
@@ -538,7 +558,8 @@ final class CommunityEndpoint
             AjaxRequest::fail('Veröffentlichung fehlgeschlagen.', 500);
         }
         if($request){$requests[$request]=(int)$id;update_user_meta(get_current_user_id(),'strc_upload_requests',array_slice($requests,-50,null,true));}
-        if(in_array($kind,['gallery','library'],true))SubmissionNotifications::send((int)$id,$kind);
+        // Galerie ohne Vorabprüfung (Entscheid Redaktion 28.10.2026): nur die Bibliothek meldet neue Einreichungen.
+        if($kind==='library')SubmissionNotifications::send((int)$id,$kind);
         if($kind==='gallery')$this->albumState(get_post((int)$id),$savedFiles);
         if($kind==='gallery'&&$request&&!empty($input['fileToken']))update_post_meta($id,'strc_upload_tokens',[$input['fileToken']=>$request]);
         return $this->present(get_post($id));
@@ -591,10 +612,10 @@ final class CommunityEndpoint
         }
         foreach ($uploads as &$upload) {
             $upload['optimized']=($input['optimized']??'')==='1';$upload['caption']=sanitize_text_field($input['caption']??'');$upload['photographer'] = $photographer;
-            $upload['uploadedAt']=gmdate(DATE_ATOM);$upload['submittedBy']=get_current_user_id();$upload['reviewStatus']='pending';
+            $upload['uploadedAt']=gmdate(DATE_ATOM);$upload['submittedBy']=get_current_user_id();$upload['reviewStatus']='approved';
         }
         unset($upload);
-        $existing=$this->files((int)$post->ID);foreach($existing as &$file){$file['reviewStatus']=$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending');$file['submittedBy']=$file['submittedBy']??(int)$post->post_author;}unset($file);$next=array_merge($existing,$uploads);update_post_meta($post->ID,'strc_private_files',$next);$this->albumState($post,$next);SubmissionNotifications::send((int)$post->ID,'gallery');
+        $existing=$this->files((int)$post->ID);foreach($existing as &$file){$file['reviewStatus']=$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending');$file['submittedBy']=$file['submittedBy']??(int)$post->post_author;}unset($file);$next=array_merge($existing,$uploads);update_post_meta($post->ID,'strc_private_files',$next);$this->albumState($post,$next);
         if($token){$tokens[$token]=$request;update_post_meta($post->ID,'strc_upload_tokens',$tokens);}
         update_post_meta($post->ID, 'strc_material_rights_at', gmdate(DATE_ATOM));
         
@@ -617,7 +638,6 @@ final class CommunityEndpoint
             if (is_string($file['key'] ?? null) && hash_equals($file['key'], $key)) {
                 if(!$this->canReview($post)&&(int)($file['submittedBy']??$post->post_author)!==get_current_user_id())AjaxRequest::fail('Keine Bildberechtigung.',403);
                 $files[$index]['caption'] = $caption;
-                if(!$this->canReview($post)){$files[$index]['reviewStatus']='pending';$files[$index]['public']=false;}
                 update_post_meta($post->ID, 'strc_private_files', $files);$this->albumState($post,$files);
                 return array('id' => (int) $post->ID, 'key' => $key, 'caption' => $caption);
             }
@@ -697,7 +717,7 @@ final class CommunityEndpoint
         $files=$this->files((int)$post->ID);$found=false;
         foreach($files as &$file)if(hash_equals($file['key'],$input['key']??'')){
             if(!$this->canReview($post)&&(($input['public']??'')==='1')!==(bool)($file['public']??false))AjaxRequest::fail('Nur Galerie-Moderatoren wählen öffentliche Bilder.',403);
-            if($this->canReview($post))$file['public']=($input['public']??'')==='1';$file['retainOriginal']=($input['retainOriginal']??'')==='1';$found=true;
+            if($this->canReview($post))$file['public']=($input['public']??'')==='1';$found=true;
         }unset($file);
         if(!$found)AjaxRequest::fail('Bild nicht gefunden.',404);
         update_post_meta($post->ID,'strc_private_files',$files);return $this->present(get_post($post->ID));

@@ -1636,5 +1636,8 @@
   "Für das Magazin-Depot bleiben Bilder bis 16 MB unverändert. Grössere Dateien werden auf deinem Gerät optimiert; deine Kameradatei bleibt erhalten.": "Pour le dépôt du magazine, les images jusqu’à 16 MB restent inchangées. Les fichiers plus volumineux sont optimisés sur ton appareil ; ton fichier original est conservé.",
   "Für das Magazin-Depot bleiben passende Bilder bis 16 MB unverändert. Grössere Dateien werden auf deinem Gerät optimiert; deine Kameradatei bleibt erhalten.": "Pour le dépôt du magazine, les images adaptées jusqu’à 16 MB restent inchangées. Les fichiers plus volumineux sont optimisés sur ton appareil ; ton fichier original est conservé.",
   "Uploadversion länger als vier Monate aufbewahren": "Conserver la version téléversée au-delà de quatre mois",
-  "Original länger als vier Monate aufbewahren": "Conserver l’original au-delà de quatre mois"
+  "Original länger als vier Monate aufbewahren": "Conserver l’original au-delà de quatre mois",
+  "Mit dem Hochladen bestätigen Sie, dass die Fotos auf der Website und in Publikationen des Swiss TR-Club verwendet werden dürfen. Die Fotos sind sofort für Clubmitglieder sichtbar; die Galerie-Moderation kann einzelne Bilder ausblenden.": "En important des photos, vous confirmez qu’elles peuvent être utilisées sur le site et dans les publications du Swiss TR-Club. Les photos sont immédiatement visibles pour les membres; la modération de la galerie peut masquer certaines images.",
+  "Fotos hochgeladen und in der Galerie sichtbar.": "Photos importées et visibles dans la galerie.",
+  "Uploaddateien werden vier Monate nach dem Upload automatisch gelöscht. Die Webversion bleibt in der Galerie.": "Les fichiers importés sont supprimés automatiquement quatre mois après l’importation. La version web reste dans la galerie."
 }

@@ -17,6 +17,8 @@ final class LibraryPolicy
             }
             update_option('strc_travel_report_v1',1,false);
         });
+        // Vorstandsunterlagen: Rubriken statt «Intern» / «Vertraulich»; bestehende Dokumente werden umgestellt (Entscheid Redaktion 28.10.2026).
+        add_action('init', static function(): void { self::migrateBoardTypes(); });
         // The native WordPress editor must enforce the same document boundaries.
         add_filter('map_meta_cap',static function(array $caps,string $cap,int $userId,array $args):array{
             if(in_array($cap,['read_post','edit_post','delete_post'],true)&&!empty($args[0])&&get_post_type((int)$args[0])==='strc_document'&&!in_array(self::classification((int)$args[0]),self::classesForUser($userId),true))return ['do_not_allow'];
@@ -29,9 +31,36 @@ final class LibraryPolicy
         });
     }
     public const BOARD_TYPES = ['board-meetings'=>'Vorstandssitzungen','board-plan'=>'Jahresplan','board-finance'=>'Finanzen','board-agm'=>'Generalversammlung','board-media'=>'Medien','board-admin'=>'Clubadministration','board-contracts'=>'Verträge','board-drafts'=>'Entwurfsbox'];
+    /** Alte Vorstandsrubriken «board» → Vorstandssitzungen, «confidential» → Finanzen; danach entfallen sie. */
+    public static function migrateBoardTypes(): void
+    {
+        if(get_option('strc_board_types_v1'))return;
+        $types=get_option('strc_library_types');
+        if(is_array($types)){
+            $kept=[];$inserted=false;
+            foreach($types as $type){
+                if(in_array($type['key']??'',['board','confidential'],true)){
+                    if(!$inserted){foreach(self::BOARD_TYPES as $key=>$label)if(!in_array($key,array_column($types,'key'),true))$kept[]=['key'=>$key,'label'=>$label,'group'=>'board','access'=>'restricted','fields'=>['date','version']];$inserted=true;}
+                    continue;
+                }
+                $kept[]=$type;
+            }
+            update_option('strc_library_types',$kept,false);
+        }
+        $map=['board'=>'board-meetings','confidential'=>'board-finance'];
+        $ids=get_posts(['post_type'=>'strc_document','post_status'=>['publish','pending','private','draft','trash'],'posts_per_page'=>200,'fields'=>'ids','meta_query'=>[['key'=>'strc_document_type','value'=>array_keys($map),'compare'=>'IN']]]);
+        foreach($ids as $id){
+            $new=$map[(string)get_post_meta((int)$id,'strc_document_type',true)]??'';if($new==='')continue;
+            update_post_meta((int)$id,'strc_document_type',$new);
+            $data=get_post_meta((int)$id,'strc_form_classification',true);
+            if(is_array($data)){$data['documentType']=$new;$data['access']='restricted';update_post_meta((int)$id,'strc_form_classification',$data);}
+        }
+        if(count($ids)<200)update_option('strc_board_types_v1',1,false);
+    }
     public static function types(): array
     {
         $types=get_option('strc_library_types')?:json_decode((string)file_get_contents(__DIR__.'/library-types.json'),true);
+        $types=array_values(array_filter($types,static fn($type)=>!in_array($type['key']??'',['board','confidential'],true)));
         // New restricted categories supplement legacy/custom categories without rewriting the saved option or documents.
         foreach(self::BOARD_TYPES as $key=>$label){
             $found=false;
@@ -48,7 +77,7 @@ final class LibraryPolicy
     ];
     public static function groupForType(array $type): string
     {
-        $defaults=['magazine'=>'magazine','newsletter'=>'newsletter','manual'=>'technical','parts'=>'technical','technical'=>'technical','vehicle'=>'technical','roadbook'=>'travel','regional'=>'travel','statutes'=>'club','club'=>'club','agm'=>'club','operations'=>'operations','board'=>'board','confidential'=>'board'];
+        $defaults=['magazine'=>'magazine','newsletter'=>'newsletter','manual'=>'technical','parts'=>'technical','technical'=>'technical','vehicle'=>'technical','roadbook'=>'travel','regional'=>'travel','statutes'=>'club','club'=>'club','agm'=>'club','operations'=>'operations','board'=>'board','confidential'=>'board','board-meetings'=>'board','board-plan'=>'board','board-finance'=>'board','board-agm'=>'board','board-media'=>'board','board-admin'=>'board','board-contracts'=>'board','board-drafts'=>'board'];
         return $type['group']??($defaults[$type['key']]??'');
     }
     public static function groups(): array
