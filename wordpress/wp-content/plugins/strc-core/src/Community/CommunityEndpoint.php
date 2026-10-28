@@ -638,12 +638,16 @@ final class CommunityEndpoint
         if($operation==='trash'&&$post->post_type==='strc_album')AjaxRequest::fail('Galeriealben bleiben in der Galerie erhalten.',422);
         // Bibliothek: archivieren und wiederherstellen nur durch Admin bzw. Bibliotheks-Moderation.
         if($post->post_type==='strc_document'&&!$this->canReview($post))AjaxRequest::fail('Nur die Bibliotheks-Moderation kann Dokumente archivieren.',403);
+        // Status vor dem Archivieren (WordPress löscht diese Angabe beim Wiederherstellen).
+        $before=(string)get_post_meta($id,'_wp_trash_meta_status',true);
         $result = 'trash' === $operation ? wp_trash_post($id) : wp_untrash_post($id);
         if (! $result) {
             AjaxRequest::fail('Status konnte nicht geändert werden.', 409);
         }
         if ('restore' === $operation) {
-            wp_update_post(array('ID' => $id, 'post_status' => $post->post_type==='strc_topic'||($post->post_type==='strc_document'&&$this->canReview($post))?'publish':'pending'));
+            // Nur was vorher veröffentlicht war, kommt veröffentlicht zurück; abgelehnte oder offene Dokumente gehen zurück in die Prüfung.
+            $restored=$post->post_type==='strc_topic'||($post->post_type==='strc_document'&&$this->canReview($post)&&$before==='publish')?'publish':'pending';
+            wp_update_post(array('ID' => $id, 'post_status' => $restored));
             if($post->post_type==='strc_document')delete_post_meta($id,'strc_replaced_by');
         }
         return array('id' => $id);
@@ -682,7 +686,9 @@ final class CommunityEndpoint
 
     private function file(int $id, string $key): never
     {
-        $post=$this->post($id);
+        // Archivierte Bibliotheksdokumente bleiben für die Prüfenden lesbar.
+        $post=$this->post($id,get_post_type($id)==='strc_document');
+        if($post->post_status==='trash'&&!$this->canReview($post))AjaxRequest::fail('Dokument nicht verfügbar.',404);
         foreach ($this->visibleFiles($post) as $file) {
             if (hash_equals($file['key'], $key)) {
                 if(get_post_type($id)==='strc_album'){

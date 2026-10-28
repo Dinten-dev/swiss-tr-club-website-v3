@@ -69,7 +69,8 @@ final class FairgateApplications
 
     private function regions(): array
     {
-        $terms=\SwissTRClub\Core\Events\RegionDirectory::terms();
+        // TRiungsters ist eine Mitgliedschaftsform, keine Region: sie ergibt sich aus der gewählten Mitgliedschaft.
+        $terms=array_filter(\SwissTRClub\Core\Events\RegionDirectory::terms(),static fn($term)=>$term->slug!=='triungsters');
         return array_values(array_map(static fn($term)=>['slug'=>$term->slug,'name'=>$term->name], $terms));
     }
 

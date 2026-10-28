@@ -257,6 +257,7 @@ final class MarketplaceEndpoint
         }
         if($status==='pending')\SwissTRClub\Core\Community\SubmissionNotifications::send((int)$postId,'market');
         if($service)$this->notifyServiceOwner((int)$postId);
+        else $this->confirmAdReceived((int)$postId,$status);
         return $this->present($postId);
     }
 
@@ -288,6 +289,37 @@ final class MarketplaceEndpoint
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
         $body="Hallo ".($owner->first_name?:$owner->display_name)."\n\nDer Marktplatz-Service des Swiss TR-Club hat in deinem Namen ein Inserat erstellt:\n«".$post->post_title."»\n\nKontaktanfragen von Interessierten erhältst du an diese E-Mail-Adresse. Unter «Meine Inserate» kannst du das Inserat bearbeiten, als verkauft markieren oder zurückziehen:\n{$base}/#marktplatz/meine\n\nSwiss TR-Club\n";
         try{wp_mail($owner->user_email,'Swiss TR-Club: Dein Inserat ist online',$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable $error){error_log('STRC marketplace service mail failed for ad '.$id.'.');}
+    }
+
+    /** Bestätigung an die inserierende Person: eingegangen und in Prüfung (Fahrzeuge) bzw. direkt online. */
+    private function confirmAdReceived(int $id,string $status): void
+    {
+        $post=get_post($id);$owner=$post?get_userdata((int)$post->post_author):null;
+        if(!$owner||!is_email($owner->user_email))return;
+        $fr=\SwissTRClub\Core\Http\UserLanguage::french((int)$owner->ID);
+        $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
+        $name=$owner->first_name?:$owner->display_name;$title=html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8');
+        if($fr){
+            $subject=$status==='pending'?'Swiss TR-Club : ton annonce a été reçue':'Swiss TR-Club : ton annonce est en ligne';
+            $body="Bonjour {$name}\n\nMerci pour ton annonce «{$title}».\n\n".($status==='pending'?"Les annonces de véhicules sont vérifiées par l’équipe du marché. Tu recevras un message dès qu’elle sera publiée.":"Elle est désormais visible sur le marché pendant 90 jours.")."\n\nGérer mes annonces : {$base}/#marktplatz/meine\n\nSwiss TR-Club";
+        }else{
+            $subject=$status==='pending'?'Swiss TR-Club: Dein Inserat ist eingegangen':'Swiss TR-Club: Dein Inserat ist online';
+            $body="Hallo {$name}\n\nVielen Dank für dein Inserat «{$title}».\n\n".($status==='pending'?"Fahrzeuginserate prüft das Marktplatz-Team. Du erhältst eine Nachricht, sobald es freigegeben ist.":"Es ist ab sofort während 90 Tagen im Marktplatz sichtbar.")."\n\nMeine Inserate verwalten: {$base}/#marktplatz/meine\n\nSwiss TR-Club";
+        }
+        try{wp_mail($owner->user_email,$subject,$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable $error){error_log('STRC marketplace confirmation mail failed for ad '.$id.'.');}
+    }
+
+    /** Kopie der Kontaktanfrage an das angemeldete Mitglied (an seine Konto-Adresse, nie an eine frei eingegebene). */
+    private function confirmContactSent(\WP_Post $post,string $message): void
+    {
+        $user=wp_get_current_user();
+        if(!$user->exists()||!is_email($user->user_email))return;
+        $fr=\SwissTRClub\Core\Http\UserLanguage::french((int)$user->ID);
+        $title=html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8');$name=$user->first_name?:$user->display_name;
+        $subject=$fr?'Swiss TR-Club : ta demande a été envoyée':'Swiss TR-Club: Deine Anfrage wurde gesendet';
+        $body=$fr?"Bonjour {$name}\n\nTa demande concernant l’annonce «{$title}» a été transmise à la personne qui a publié l’annonce. Elle te répondra directement.\n\nTon message :\n{$message}\n\nSwiss TR-Club"
+            :"Hallo {$name}\n\nDeine Anfrage zum Inserat «{$title}» wurde an die inserierende Person weitergeleitet. Sie meldet sich direkt bei dir.\n\nDeine Nachricht:\n{$message}\n\nSwiss TR-Club";
+        try{wp_mail($user->user_email,$subject,$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable $error){error_log('STRC marketplace contact copy failed.');}
     }
 
     public function markSold(int $id): array|WP_Error
@@ -327,10 +359,11 @@ final class MarketplaceEndpoint
         $body = "Inserat: #{$id} – " . sanitize_text_field($post->post_title) . "\n\n" .
             "Name: {$name}\nE-Mail: {$email}\n" . ($phone !== '' ? "Telefon: {$phone}\n" : '') .
             "\nNachricht:\n{$message}";
-        $sent = wp_mail($seller->user_email, $subject, $body, array('Reply-To: ' . $name . ' <' . $email . '>'));
+        $sent = wp_mail($seller->user_email, $subject, $body, array('Content-Type: text/plain; charset=UTF-8', 'From: Swiss TR-Club <no-reply@swisstrclub.ch>', 'Reply-To: ' . str_replace(array('"', '<', '>', "\r", "\n"), '', $name) . ' <' . $email . '>'));
         if (! $sent) {
             return new WP_Error('mail_failed', 'Die Anfrage konnte nicht gesendet werden. Bitte später erneut versuchen.');
         }
+        $this->confirmContactSent($post,$message);
         return array('sent' => true);
     }
 

@@ -730,6 +730,13 @@ button:focus-visible,a:focus-visible { outline:3px solid #187bb1; outline-offset
 .hx-eyebrow{margin:0;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--sky)}
 .home-editorial .hx-hero h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(42px,6.2vw,84px);line-height:1.02;letter-spacing:-.01em;max-width:12ch;color:#fff}
 .hx-hero-intro{max-width:46ch;font-size:clamp(17px,1.6vw,20px);line-height:1.5;color:#e6eef4}.hx-hero-intro p{margin:0}.hx-hero-intro a{color:#fff}
+.hx-hero-intro p+p{margin-top:.6em}
+.hx-hero-leads{display:grid}
+.hx-hero-leads>.hx-hero-intro{grid-area:1/1;opacity:0;visibility:hidden;transition:opacity .9s ease,visibility 0s linear .9s}
+.hx-hero-leads>.hx-hero-intro.is-active{opacity:1;visibility:visible;transition:opacity .9s ease}
+.community-review-banner{display:grid;gap:10px;margin:12px 0 16px;padding:14px 16px;border:1px solid #eed9b8;border-radius:10px;background:#fbf1e4}
+.community-review-banner p{margin:0}
+.community-review-banner .club-actions{margin:0}
 .hx-hero-actions{display:flex;flex-wrap:wrap;gap:12px}
 .hx-hero-meta{position:absolute;left:0;right:0;bottom:84px;margin-inline:auto;display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:13px;color:#d7e3ec}
 .hx-hero-dots{display:flex;gap:4px}
@@ -1190,6 +1197,12 @@ button:focus-visible,a:focus-visible { outline:3px solid #187bb1; outline-offset
 .membership-form .application-consent { display:flex; gap:12px; align-items:start; font-weight:400; }
 .membership-form .application-consent input { width:22px; height:22px; flex:0 0 22px; margin-top:4px; }
 .application-consent a { color:var(--blue); text-decoration:underline; }
+.album-move{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin-top:14px;padding:12px;border:1px solid #d6e2ea;border-radius:8px;background:#f6f9fb}
+.album-move label{display:grid;gap:6px;font-weight:700;flex:1 1 240px;margin:0}
+.album-move select{min-height:44px;padding:0 36px 0 12px;border:1px solid #8baec5;border-radius:6px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23114973' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;-webkit-appearance:none;appearance:none;font:inherit;font-weight:400;color:var(--ink)}
+.album-move .club-secondary{min-height:44px}
+.was-validated :is(input,select,textarea):invalid { border-color:#b3261e; box-shadow:0 0 0 2px rgba(179,38,30,.18); }
+.was-validated input[type=checkbox]:invalid { outline:2px solid #b3261e; outline-offset:2px; }
 .application-honeypot { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
 @media(max-width:540px) { .membership-application { padding:20px; } }
 .landing-introduction { padding-bottom: 0; }
