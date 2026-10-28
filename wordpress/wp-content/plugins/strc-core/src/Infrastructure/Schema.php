@@ -123,6 +123,7 @@ final class Schema
             display_name varchar(190) NOT NULL DEFAULT '',
             status varchar(24) NOT NULL DEFAULT 'pending',
             confirmation_hash char(64) NULL,
+            pending_request longtext NULL,
             unsubscribe_hash char(64) NOT NULL,
             consent_source varchar(64) NOT NULL DEFAULT 'website-form',
             requested_at datetime NOT NULL,

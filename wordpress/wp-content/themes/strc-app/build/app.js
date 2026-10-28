@@ -7910,8 +7910,12 @@ var A = {
 	drivingTime: "Fahrzeit",
 	duration: "Dauer (Halbtag, Tag, Wochenende, mehrere Tage)"
 }, j = (e) => Array.isArray(e) ? e.join(", ") : e || "";
-function M({ type: e, initial: t, accessClasses: n, definitions: r = E }) {
-	let i = r.find((t) => t.key === e), a = ["magazine", "newsletter"].includes(e), s = [...i?.fields || ["year"], "source"].some((e) => e !== "model" && j(t[e]));
+function M({ type: e, initial: t, accessClasses: n, definitions: r = E, canChangeAccess: i = !0 }) {
+	let a = r.find((t) => t.key === e), s = j(t.access) || a?.access || "open", c = {
+		open: 0,
+		limited: 1,
+		restricted: 2
+	}, l = i ? n.filter((e) => (c[e] ?? -1) >= (c[a?.access || "open"] ?? 2)) : [s], u = ["magazine", "newsletter"].includes(e), d = [...a?.fields || ["year"], "source"].some((e) => e !== "model" && j(t[e]));
 	return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
 		/* @__PURE__ */ (0, _.jsx)("input", {
 			type: "hidden",
@@ -7920,11 +7924,11 @@ function M({ type: e, initial: t, accessClasses: n, definitions: r = E }) {
 		}),
 		/* @__PURE__ */ (0, _.jsxs)("p", {
 			className: "library-form-type",
-			children: [i?.label || "Bisheriges Dokument", " · eigenes Uploadformular"]
+			children: [a?.label || "Bisheriges Dokument", " · eigenes Uploadformular"]
 		}),
-		a ? /* @__PURE__ */ (0, _.jsx)("div", {
+		u ? /* @__PURE__ */ (0, _.jsx)("div", {
 			className: "club-form-row",
-			children: (i?.fields || ["year"]).filter((e) => e !== "model").map((n) => /* @__PURE__ */ (0, _.jsxs)("label", { children: [
+			children: (a?.fields || ["year"]).filter((e) => e !== "model").map((n) => /* @__PURE__ */ (0, _.jsxs)("label", { children: [
 				A[n] || n,
 				["magazine", "newsletter"].includes(e) && ["issue", "year"].includes(n) ? " *" : " (optional)",
 				/* @__PURE__ */ (0, _.jsx)("input", {
@@ -7967,8 +7971,8 @@ function M({ type: e, initial: t, accessClasses: n, definitions: r = E }) {
 				]
 			})] }), /* @__PURE__ */ (0, _.jsxs)("label", { children: ["Sichtbar für *", /* @__PURE__ */ (0, _.jsx)("select", {
 				name: "access",
-				defaultValue: j(t.access) || i?.access || "open",
-				children: n.map((e) => /* @__PURE__ */ (0, _.jsx)("option", {
+				defaultValue: s,
+				children: l.map((e) => /* @__PURE__ */ (0, _.jsx)("option", {
 					value: e,
 					children: O[e]
 				}, e))
@@ -7980,12 +7984,12 @@ function M({ type: e, initial: t, accessClasses: n, definitions: r = E }) {
 		}),
 		/* @__PURE__ */ (0, _.jsxs)("details", {
 			className: "market-more",
-			open: s || void 0,
+			open: d || void 0,
 			children: [
 				/* @__PURE__ */ (0, _.jsx)("summary", { children: o("Weitere Angaben (optional)") }),
-				a ? null : /* @__PURE__ */ (0, _.jsx)("div", {
+				u ? null : /* @__PURE__ */ (0, _.jsx)("div", {
 					className: "club-form-row",
-					children: (i?.fields || ["year"]).filter((e) => e !== "model").map((n) => /* @__PURE__ */ (0, _.jsxs)("label", { children: [
+					children: (a?.fields || ["year"]).filter((e) => e !== "model").map((n) => /* @__PURE__ */ (0, _.jsxs)("label", { children: [
 						A[n] || n,
 						["magazine", "newsletter"].includes(e) && ["issue", "year"].includes(n) ? " *" : " (optional)",
 						/* @__PURE__ */ (0, _.jsx)("input", {
@@ -23166,7 +23170,7 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 												o("Dateien")
 											]
 										})] }),
-										(e !== "library" || t.canEdit || N) && /* @__PURE__ */ (0, _.jsx)("div", {
+										(e !== "library" || (N ? t.canReview : t.canEdit)) && /* @__PURE__ */ (0, _.jsx)("div", {
 											className: "club-actions",
 											children: N ? /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: /* @__PURE__ */ (0, _.jsx)("button", {
 												className: "club-secondary",
@@ -23605,6 +23609,7 @@ function mr({ kind: e, item: t, nonce: n, close: r, saved: i, accessClasses: a, 
 							]
 						}),
 						e === "library" && !E && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(M, {
+							canChangeAccess: !t || t.canReview,
 							type: b,
 							initial: t?.classification || {},
 							accessClasses: a,
