@@ -36,7 +36,7 @@ final class MemberDirectoryEndpoint
         $vehicles=$owner?array_map(static function($post)use($id){
             $data=FormStore::data($post);
             $data['colour']=($data['colour']??'')?:($data['exteriorColour']??'');
-            return array_intersect_key($data,array_flip(['model','details','year','colour','registration','status']))+['id'=>(int)$post->ID,'photo'=>!empty($data['file'])?add_query_arg(['action'=>'strc_directory','operation'=>'vehicle-photo','id'=>$id,'vehicle'=>$post->ID],admin_url('admin-ajax.php')):''];
+            return array_intersect_key($data,array_flip(['model','details','year','colour','registration','status','photoFrame']))+['id'=>(int)$post->ID,'photo'=>!empty($data['file'])?add_query_arg(['action'=>'strc_directory','operation'=>'vehicle-photo','id'=>$id,'vehicle'=>$post->ID],admin_url('admin-ajax.php')):''];
         },FormStore::find('strc_vehicle',$owner)):[];
         $youth=($membership['membership_type']??'')==='youth';
         $region=$youth?'TRiungsters':(\SwissTRClub\Core\Events\RegionDirectory::canonicalName((string)($membership['region']??''))??'');

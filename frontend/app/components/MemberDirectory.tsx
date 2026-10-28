@@ -8,9 +8,11 @@ import {vehicleModels} from './FormFields';
 import {Dialog} from './Marketplace';
 import {Pagination} from './EventManager';
 import {useSiteContent} from './SiteContent';
+import {imageFrameStyle} from './ImageFrame';
+import {vehiclePhotoRatio} from './VehiclePhotoFrame';
 import 'leaflet/dist/leaflet.css';
 
-type Vehicle={id:number;model:string;details?:string;year?:string;colour?:string;registration?:string;status:string;photo:string};
+type Vehicle={id:number;model:string;details?:string;year?:string;colour?:string;registration?:string;status:string;photo:string;photoFrame?:string};
 type Member={id:number;name:string;firstName:string;lastName:string;city:string;postcode:string;region:string;country:string;photo:string;vehicles:Vehicle[];email?:string;phone?:string};
 type MapMember={id:number;firstName:string;postcode:string;city:string;country:string;vehicle:string;position:[number,number]|null};
 type Collection={mapMembers:MapMember[];members:Member[];total:number;pages:number;regions:string[]};
@@ -48,7 +50,7 @@ export default function MemberDirectory(){
  </section>
  {selected&&<Dialog title={selected.name} close={()=>setSelected(null)}><div className="club-dialog-body dir-detail">
   <div className="dir-detail-head">{selected.photo&&<Image unoptimized src={selected.photo} alt={selected.name} width={96} height={96}/>}<div><p>{[selected.postcode,selected.city].filter(Boolean).join(' ')}{selected.region?' · '+t(selected.region):''}</p>{selected.email&&<p><a href={'mailto:'+selected.email}>{selected.email}</a></p>}{selected.phone&&<p><a href={'tel:'+selected.phone.replace(/[^+0-9]/g,'')}>{selected.phone}</a></p>}</div></div>
-  <h3>{t('Fahrzeuge')}</h3>{selected.vehicles.length?selected.vehicles.map(vehicle=><article key={vehicle.id} className="dir-vehicle-card">{vehicle.photo&&<Image unoptimized src={vehicle.photo} alt={vehicle.model} width={320} height={210}/>}<h4><VehicleChip vehicle={vehicle}/> {vehicle.details}</h4><dl className="profile-facts">{([['year','Baujahr'],['colour','Farbe'],['registration','Kennzeichen']] as [keyof Vehicle,string][]).map(([key,label])=><div key={key}><dt>{t(label)}</dt><dd>{String(vehicle[key]||'–')}</dd></div>)}<div><dt>{t('Status')}</dt><dd>{t(statusLabel(vehicle.status))}</dd></div></dl></article>):<p>{t('Keine Fahrzeuge erfasst.')}</p>}
+  <h3>{t('Fahrzeuge')}</h3>{selected.vehicles.length?selected.vehicles.map(vehicle=><article key={vehicle.id} className="dir-vehicle-card">{vehicle.photo&&<Image unoptimized src={vehicle.photo} alt={vehicle.model} width={640} height={360} style={{...imageFrameStyle(vehicle.photoFrame,'cover'),aspectRatio:vehiclePhotoRatio,height:'auto'}}/>}<h4><VehicleChip vehicle={vehicle}/> {vehicle.details}</h4><dl className="profile-facts">{([['year','Baujahr'],['colour','Farbe'],['registration','Kennzeichen']] as [keyof Vehicle,string][]).map(([key,label])=><div key={key}><dt>{t(label)}</dt><dd>{String(vehicle[key]||'–')}</dd></div>)}<div><dt>{t('Status')}</dt><dd>{t(statusLabel(vehicle.status))}</dd></div></dl></article>):<p>{t('Keine Fahrzeuge erfasst.')}</p>}
  </div></Dialog>}</>;
 }
 

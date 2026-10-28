@@ -46,6 +46,9 @@ final class FormFields
     {
         $result = ['model'=>self::choice($input, 'model', self::MODELS), 'status'=>self::choice($input, 'status', ['roadworthy','restoration'], 'roadworthy')];
         foreach (['details','year','colour','exteriorColour','interiorColour','chassisNumber','registration','notes'] as $key) $result[$key] = self::text($input, $key, $key === 'notes' ? 1000 : 160);
+        // Bildausschnitt des Fahrzeugbilds («cover|x|y» in Prozent); alles andere wird verworfen.
+        $frame = is_string($input['photoFrame'] ?? null) ? trim($input['photoFrame']) : '';
+        $result['photoFrame'] = preg_match('/^(cover|contain)\|(100|[1-9]?\d)\|(100|[1-9]?\d)$/D', $frame) ? $frame : '';
         if ($result['year'] !== '' && (!preg_match('/^\d{4}$/D', $result['year']) || (int)$result['year'] < 1900 || (int)$result['year'] > (int)gmdate('Y')+1)) throw new \InvalidArgumentException('Bitte ein gültiges Baujahr eingeben.');
         return $result;
     }

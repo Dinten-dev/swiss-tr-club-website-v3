@@ -3,7 +3,7 @@ import {t} from './UILanguage';
 import {useEffect,useRef,type ReactNode} from 'react';
 export const vehicleModels=['TR2','TR3','TR3A','TR3B','TR4','TR4A','TR5','TR250','TR6','TR6 PI','TR7','TR8','GT6','Spitfire','Stag','2000','2.5 PI','Anderer Triumph'];
 export const trVehicleModels=vehicleModels.filter(model=>model.startsWith('TR'));
-export type Vehicle={id?:number;model:string;details:string;year:string;colour:string;registration:string;status:string;notes:string;photo?:string;revision?:string;exteriorColour?:string;interiorColour?:string;chassisNumber?:string};
+export type Vehicle={id?:number;model:string;details:string;year:string;colour:string;registration:string;status:string;notes:string;photo?:string;revision?:string;exteriorColour?:string;interiorColour?:string;chassisNumber?:string;photoFrame?:string};
 export const emptyVehicle=():Vehicle=>({model:'',details:'',year:'',colour:'',registration:'',status:'roadworthy',notes:''});
 export function FormNotice({error,message}:{error?:string;message?:string}) {const ref=useRef<HTMLDivElement>(null);useEffect(()=>{if(error||message)ref.current?.focus();},[error,message]);return error||message?<div ref={ref} tabIndex={-1} className={error?'form-notice form-error':'form-notice club-notice'} role={error?'alert':'status'}>{t(error||message||'')}</div>:null;}
 /** Formularabschnitt; `collapsible` klappt optionale Abschnitte zu, `hidden` blendet aus (Felder werden trotzdem mitgesendet). */

@@ -159,6 +159,16 @@ final class CommunityEndpoint
     private function deleteTopic(int $id): array
     {
         $post=$this->post($id,true);
+        if($post->post_type==='strc_document'){
+            // Bibliothek: endgültig löschen nur aus dem Archiv, nur durch die Bibliotheks-Moderation, nie bei Vorstandsunterlagen.
+            $typeKey=(string)get_post_meta($id,'strc_document_type',true);$type=null;foreach(LibraryPolicy::types() as $candidate)if(($candidate['key']??'')===$typeKey)$type=$candidate;
+            $group=$type?LibraryPolicy::groupForType($type):'';
+            if($post->post_status!=='trash')AjaxRequest::fail('Nur archivierte Dokumente können endgültig gelöscht werden.',422);
+            if($group==='board'||LibraryPolicy::classification($id)==='restricted')AjaxRequest::fail('Vorstandsunterlagen werden nicht gelöscht.',403);
+            if(!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+            if(!wp_delete_post($id,true))AjaxRequest::fail('Dokument konnte nicht gelöscht werden.',503);
+            return ['id'=>$id,'deleted'=>true];
+        }
         if($post->post_type!=='strc_topic')AjaxRequest::fail('Nur Forumsthemen können gelöscht werden.',422);
         if((int)$post->post_author!==get_current_user_id()&&!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
         if(!wp_delete_post($id,true))AjaxRequest::fail('Thema konnte nicht gelöscht werden.',503);
@@ -638,6 +648,7 @@ final class CommunityEndpoint
         if($operation==='trash'&&$post->post_type==='strc_album')AjaxRequest::fail('Galeriealben bleiben in der Galerie erhalten.',422);
         // Bibliothek: archivieren und wiederherstellen nur durch Admin bzw. Bibliotheks-Moderation.
         if($post->post_type==='strc_document'&&!$this->canReview($post))AjaxRequest::fail('Nur die Bibliotheks-Moderation kann Dokumente archivieren.',403);
+        if($operation==='trash'&&$post->post_type==='strc_document'&&in_array((string)get_post_meta($id,'strc_document_type',true),['magazine','newsletter'],true))AjaxRequest::fail('TR-Magazin und TR-Newsletter sind bereits ein Archiv.',422);
         // Status vor dem Archivieren (WordPress löscht diese Angabe beim Wiederherstellen).
         $before=(string)get_post_meta($id,'_wp_trash_meta_status',true);
         $result = 'trash' === $operation ? wp_trash_post($id) : wp_untrash_post($id);

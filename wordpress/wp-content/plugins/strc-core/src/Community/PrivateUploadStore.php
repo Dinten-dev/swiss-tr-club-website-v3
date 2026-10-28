@@ -56,6 +56,9 @@ final class PrivateUploadStore
                 if (! $dimensions || ($dimensions['mime'] ?? '') !== $mime || $dimensions[0] * $dimensions[1] > 40000000) {
                     return new WP_Error('image', 'Bild ist ungültig oder überschreitet 40 Megapixel.');
                 }
+                if (! self::completeImage($tmp, $mime, (int) $size)) {
+                    return new WP_Error('image', 'Das Bild ist unvollständig übertragen oder beschädigt. Bitte erneut hochladen, wenn möglich über WLAN.');
+                }
             } elseif (file_get_contents($tmp, false, null, 0, 5) !== '%PDF-') {
                 return new WP_Error('pdf', 'Die PDF-Datei ist ungültig.');
             }
@@ -81,6 +84,25 @@ final class PrivateUploadStore
             $saved[] = $file;
         }
         return $saved;
+    }
+
+    /** Erkennt abgebrochene Übertragungen: Ein vollständiges Bild endet mit der Schlussmarke seines Formats. */
+    public static function completeImage(string $path, string $mime, int $size): bool
+    {
+        $handle = @fopen($path, 'rb');
+        if (! $handle || $size < 16) return false;
+        $head = (string) fread($handle, 12);
+        fseek($handle, max(0, $size - 4096));
+        $tail = (string) fread($handle, 4096);
+        fclose($handle);
+        return match ($mime) {
+            // JPEG: Endmarke FF D9; manche Kameras hängen danach noch Füllbytes an.
+            'image/jpeg' => str_contains($tail, "\xFF\xD9"),
+            'image/png' => str_contains($tail, "IEND\xAE\x42\x60\x82"),
+            // WebP: Die RIFF-Längenangabe muss zur Dateigrösse passen (plus 8 Byte Kopf, ggf. ein Füllbyte).
+            'image/webp' => str_starts_with($head, 'RIFF') && in_array($size - (unpack('V', substr($head, 4, 4))[1] ?? -1) - 8, [0, 1], true),
+            default => true,
+        };
     }
 
     public function remove(array $files): void
