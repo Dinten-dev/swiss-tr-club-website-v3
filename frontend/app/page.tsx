@@ -1,7 +1,7 @@
 'use client';
 import {t,uiLocale,UILanguageProvider,LanguageSwitcher,useUILanguage} from './components/UILanguage';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Marketplace, { Dialog, type MarketplaceSession } from './components/Marketplace';
 import AgendaPage from './components/AgendaPage';
@@ -67,7 +67,9 @@ export default function Home(){return <UILanguageProvider><SiteContentProvider><
 function ClubApp() {
   const {language}=useUILanguage();
   const [page, setPage] = useState<Page>('home');
+  const [registrationBack,setRegistrationBack]=useState('#agenda');const previousRoute=useRef('');const hasVisited=useRef(false);
   const [subroute,setSubroute]=useState('');
+  const [marketRoute,setMarketRoute]=useState('');
   const [menuOpen,setMenuOpen]=useState(false);
   const [memberSession, setMemberSession] = useState<MemberSession | null>(null);
   const [events, setEvents] = useState<ClubEvent[]>([]);
@@ -81,9 +83,12 @@ function ClubApp() {
   useEffect(() => {
     const restore = () => {
       const [slug,detail=''] = window.location.hash.slice(1).split('/');
+      if(slug==='veranstaltung'){const key='strc-event-origin-'+detail;if(hasVisited.current&&['agenda','mitglieder','regionen',''].includes(previousRoute.current))sessionStorage.setItem(key,'#'+previousRoute.current);const origin=sessionStorage.getItem(key)||'#agenda';setRegistrationBack(['#agenda','#mitglieder','#regionen','#'].includes(origin)?origin:'#agenda');}previousRoute.current=slug;hasVisited.current=true;
       setSubroute(detail);
+      setMarketRoute(slug==='marktplatz'?window.location.hash:'');
       const target = (Object.keys(routes) as Page[]).find(key => routes[key] === slug);
-      setPage(!slug && new URLSearchParams(window.location.search).has('member') ? 'members' : target ?? 'home');
+      const next:Page=!slug && new URLSearchParams(window.location.search).has('member') ? 'members' : target ?? 'home';
+      setPage(next);
       setSelectedEvent(null);
       window.scrollTo({top:0, behavior:'instant'});
     };
@@ -137,6 +142,7 @@ function ClubApp() {
 
     {(memberSession?.canEditContent||memberSession?.authenticated)&&<div className="editorial-access-bar">{memberSession.canEditContent&&<><a href="#redaktion">{t("Redaktion öffnen")}</a>{memberSession.editableDocuments?.includes(editorialKey)&&<a href={`#redaktion/${editorialKey}`}>{t("Diese Seite bearbeiten")}</a>}</>}{memberSession.memberAccess&&!memberSession.canEditContent&&<a href="#mitglieder">{t("Mein Dashboard")}</a>}</div>}
     <Breadcrumbs page={page} subroute={subroute}/>
+    {memberSession?.memberAccess&&<nav className="member-navigation" aria-label={t('Mitgliedermenü')}>{[['#mitglieder','Übersicht'],['#profil','Profil bearbeiten'],['#forum','Forum'],['#galerie','Galerie'],['#bibliothek','Bibliothek'],['#marktplatz/meine','Meine Inserate']].map(([url,label])=><a key={url} href={url}>{t(label)}</a>)}</nav>}
     {page==='editorial'&&(memberSession?.canEditContent?<EditorialDashboard nonce={memberSession.editorialNonce||''} canManageEvents={!!memberSession.canManageEvents}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='home' && <HomePage memberAccess={!!memberSession?.memberAccess} navigate={navigate} events={events} eventsState={eventsState} openEvent={setSelectedEvent}/>}
     {page==='club' && <ClubLanding canEdit={!!memberSession?.canEditContent} memberAccess={!!memberSession?.memberAccess}/>}
@@ -145,10 +151,10 @@ function ClubApp() {
     {['organisation','membership','shop','triungsters','history'].includes(page)&&<StaticPage key={editorialKey} documentKey={editorialKey} canEdit={memberSession?.editableDocuments?.includes(editorialKey)}/>}
     {page==='agenda' && <><AgendaPage memberAccess={!!memberSession?.memberAccess} events={events} eventsState={eventsState} retryEvents={retryEvents} openEvent={setSelectedEvent}/></>}
     {page==='regions' && <RegionsPage editableDocuments={memberSession?.editableDocuments||[]} events={events} eventsState={eventsState} retryEvents={retryEvents} openEvent={setSelectedEvent}/>}
-    {page==='market' && <Marketplace key={subroute} section={subroute} session={memberSession} notify={notify}/>}
+    {page==='market' && <Marketplace key={marketRoute} section={subroute} session={memberSession} notify={notify}/>}
     {page==='profile' && (memberSession?.memberAccess?<MemberForms/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='members' && <><MembersPage session={memberSession} navigate={navigate}/></>}
-    {page==='registration'&&<section className="page-content"><a href="#mitglieder">{t("← Mitgliederbereich")}</a><RegistrationForm eventId={Number(subroute)} memberAccess={!!memberSession?.memberAccess}/></section>}
+    {page==='registration'&&<section className="page-content"><a href={registrationBack}>{t(registrationBack==='#mitglieder'?'← Mitgliederbereich':registrationBack==='#regionen'?'← Regionen':registrationBack==='#'?'← Startseite':'← Zur Agenda')}</a><RegistrationForm eventId={Number(subroute)} memberAccess={!!memberSession?.memberAccess}/></section>}
     {(['forum','gallery','library','clubdocs'] as Page[]).includes(page) && (memberSession?.memberAccess?<Community key={`${page}:${subroute}`} kind={page==='clubdocs'?'library':page as 'forum'|'gallery'|'library'} nonce={memberSession.communityNonce||''} selectedId={Number(subroute)||undefined} initialGroup={page==='clubdocs'?'club':''} section={subroute} title={page==='clubdocs'?'Clubdokumente':undefined}/>:page==='gallery'?<PublicGallery/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='news' && <HomepageSections navigate={navigate} memberAccess={!!memberSession?.memberAccess} upcomingEvents={[]} eventPreview={{title:'',text:''}} archive/>}
     {page==='applications' && (memberSession?.applicationsNonce?<ApplicationInbox nonce={memberSession.applicationsNonce}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
@@ -157,7 +163,7 @@ function ClubApp() {
     {page==='event-admin' && (memberSession?.canManageEvents?<EventManager session={memberSession} changed={retryEvents}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {['contact','privacy','statutes'].includes(page) && <InformationPage key={page} page={page}/>}
 
-    <footer className="site-footer"><div className="footer-brand"><Image className="footer-logo" src={assetUrl(c('global.logo'))} width={954} height={954} alt={t("Swiss TR-Club Logo")}/><div><strong>{c('global.name')}</strong><p>{c('global.footer')}</p></div></div><div><strong>{t('Kontakt & Recht')}</strong><button onClick={() => navigate('contact')}>{t('Kontakt & Impressum')}</button><button onClick={() => navigate('privacy')}>{t('Datenschutz')}</button><button onClick={() => navigate('statutes')}>{t('Statuten')}</button></div></footer>
+    <footer className="site-footer"><div className="footer-brand"><Image className="footer-logo" src={assetUrl(c('global.logo'))} width={954} height={954} alt={t("Swiss TR-Club Logo")}/><div><strong>{c('global.name')}</strong><p className="footer-tagline">{c('global.tagline')}</p>{c('global.footer').replace(/[^\p{L}\p{N}]+/gu,'').toLowerCase()!==c('global.tagline').replace(/[^\p{L}\p{N}]+/gu,'').toLowerCase()&&<p>{c('global.footer')}</p>}</div></div><div><strong>{t('Kontakt & Recht')}</strong><button onClick={() => navigate('contact')}>{t('Kontakt & Impressum')}</button><button onClick={() => navigate('privacy')}>{t('Datenschutz')}</button><button onClick={() => navigate('statutes')}>{t('Statuten')}</button></div></footer>
 
     {(selectedEvent||linkedEvent) && <EventDialog event={(selectedEvent||linkedEvent)!} memberAccess={!!memberSession?.memberAccess} close={() => {setSelectedEvent(null);if(linkedEvent)window.location.hash='#agenda';}}/>}
     {toast && <div className="toast" role="status">✓ {toast}</div>}
@@ -246,7 +252,7 @@ function EventDialog({event,close,memberAccess}:{event:ClubEvent,close:()=>void;
         {event.registrationCloseAt&&<><span>{t("Anmeldung bis")}</span><strong>{eventDateTime(event.registrationCloseAt)}</strong></>}
       </div>
       {event.registrationRequired&&(event.externalRegistrationUrl?<a className="market-primary" href={event.externalRegistrationUrl} target="_blank" rel="noopener noreferrer">{t("Extern anmelden (neuer Tab) →")}</a>:<RegistrationForm eventId={event.id} memberAccess={memberAccess} hideTitle/>)}
-      <button className="modal-action" onClick={close}>{t("Schliessen")}</button>
+      <div className="event-dialog-dismiss"><button type="button" className="club-secondary" onClick={close}>{t(event.registrationRequired&&!event.externalRegistrationUrl?'Fenster schliessen (ohne Anmeldung)':'Schliessen')}</button></div>
     </div>
   </Dialog>;
 }

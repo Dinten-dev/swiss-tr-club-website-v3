@@ -74,6 +74,8 @@ final class EventPublicEndpoint
                 'permission_callback' => '__return_true',
                 'args' => array(
                     'language'=>array('default'=>'de','sanitize_callback'=>'sanitize_key','validate_callback'=>static fn(mixed $value):bool=>in_array($value,array('de','fr'),true)),
+                    'months'=>['default'=>0,'sanitize_callback'=>'absint','validate_callback'=>static fn(mixed $v):bool=>in_array((int)$v,[0,12,24],true)],
+                    'scope'=>['default'=>'','sanitize_callback'=>'sanitize_key','validate_callback'=>static fn(mixed $v):bool=>in_array($v,['','club-national','region','external'],true)],
                     'view' => array(
                         'default' => 'upcoming',
                         'sanitize_callback' => 'sanitize_key',
@@ -114,6 +116,11 @@ final class EventPublicEndpoint
             ));
         }
 
+        if($view==='past'&&(int)$request->get_param('months')>0){
+            $cutoff=(new \DateTimeImmutable(current_time(DATE_ATOM)))->modify('-'.(int)$request->get_param('months').' months')->format(DATE_ATOM);
+            $queryArgs['meta_query'][]=['key'=>'strc_start_at','value'=>$cutoff,'compare'=>'>=','type'=>'CHAR'];
+        }
+        if($request->get_param('scope'))$queryArgs['tax_query']=[['taxonomy'=>'strc_event_scope','field'=>'slug','terms'=>(string)$request->get_param('scope')]];
         $query = new WP_Query($queryArgs);
         $events = array_map(fn ($post): array => $this->present((int) $post->ID, (string) $request->get_param('language')), $query->posts);
 

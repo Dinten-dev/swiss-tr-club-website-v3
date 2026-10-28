@@ -6,11 +6,11 @@ import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 
 const assetBase=process.env.NEXT_PUBLIC_ASSET_BASE??'';
 
-export default function MagazineReader({url,title,back,initialFullscreen=false}:{url:string;title:string;back:()=>void;initialFullscreen?:boolean}) {
+export default function MagazineReader({url,title,back,initialFullscreen=false,initialPage=1,download=true,backLabel='Zurück zur Übersicht'}:{url:string;title:string;back:()=>void;initialFullscreen?:boolean;initialPage?:number;download?:boolean;backLabel?:string}) {
   const canvas=useRef<HTMLCanvasElement>(null);
   const viewport=useRef<HTMLDivElement>(null);
   const [document,setDocument]=useState<PDFDocumentProxy|null>(null);
-  const [page,setPage]=useState(1);
+  const [page,setPage]=useState(Math.max(1,initialPage));
   const [zoom,setZoom]=useState(1);
   const [width,setWidth]=useState(600);const [height,setHeight]=useState(600);const [fit,setFit]=useState(initialFullscreen);
   const [error,setError]=useState('');
@@ -27,10 +27,10 @@ export default function MagazineReader({url,title,back,initialFullscreen=false}:
       if(disposed)return;
       pdf.GlobalWorkerOptions.workerSrc=`${assetBase}/pdfjs/pdf.worker.min.js`;
       task=pdf.getDocument({url,withCredentials:true,rangeChunkSize:65536,cMapUrl:`${assetBase}/pdfjs/cmaps/`,cMapPacked:true,standardFontDataUrl:`${assetBase}/pdfjs/standard_fonts/`,wasmUrl:`${assetBase}/pdfjs/wasm/`});
-      const loaded=await task.promise;if(!disposed)setDocument(loaded);
+      const loaded=await task.promise;if(!disposed){setDocument(loaded);setPage(Math.max(1,Math.min(loaded.numPages,initialPage)));}
     })().catch(()=>{if(!disposed){setError(t('Das PDF konnte nicht geöffnet werden. Bitte erneut versuchen.'));setBusy(false);}});
     return()=>{disposed=true;cancelSearch();void task?.destroy().catch(()=>{});};
-  },[url,revision]);
+  },[url,revision,initialPage]);
   useEffect(()=>{
     const element=viewport.current;if(!element)return;
     const observer=new ResizeObserver(entries=>{setWidth(Math.max(180,entries[0].contentRect.width-24));setHeight(Math.max(1,entries[0].contentRect.height-24));});
@@ -70,10 +70,10 @@ export default function MagazineReader({url,title,back,initialFullscreen=false}:
       <div className="reader-group"><button onClick={()=>changePage(page-1)} disabled={!document||page===1} aria-label={t('Vorherige Seite')}>‹</button><span className="reader-page" aria-live="polite">{page} / {document?.numPages??'…'}</span><button onClick={()=>changePage(page+1)} disabled={!document||page===document.numPages} aria-label={t('Nächste Seite')}>›</button></div>
       <div className="reader-group"><button onClick={()=>setZoom(value=>Math.max(.5,value-.25))} disabled={zoom<=.5} aria-label={t('Seite verkleinern')}>−</button><span className="reader-zoom">{Math.round(zoom*100)} %</span><button onClick={()=>setZoom(value=>Math.min(3,value+.25))} disabled={zoom>=3} aria-label={t('Seite vergrössern')}>+</button><button aria-pressed={fit} onClick={()=>{setFit(value=>!value);setZoom(1);}}>{t(fit?'Seitenbreite':'Ganze Seite')}</button></div>
       <form className="reader-group reader-search" role="search" onSubmit={e=>{e.preventDefault();void find();}}><input type="search" aria-label={t('PDF durchsuchen')} placeholder={t('Im PDF suchen')} value={search} onChange={e=>{setSearch(e.target.value);setSearched(false);setMatches([]);searchRevision.current++;setFinding(false);}}/><button disabled={!document||finding||!search.trim()}>{t(finding?'Wird gesucht …':'Suchen')}</button>{matches.length>0&&<select aria-label={t('Treffer')} value={matches.includes(page)?String(page):''} onChange={e=>{if(e.target.value)changePage(Number(e.target.value));}}><option value="">{matches.length} {t(matches.length===1?'Treffer':'Treffer')}</option>{matches.map(number=><option key={number} value={number}>{t('Seite')} {number}</option>)}</select>}{searched&&!matches.length&&<span role="status">{t('Keine Treffer')}</span>}</form>
-      <div className="reader-group"><button onClick={()=>setTextMode(value=>!value)} aria-pressed={textMode}>{t(textMode?'Seitenansicht':'Text')}</button><button aria-pressed={fullscreen} onClick={()=>{setFullscreen(value=>!value);setFit(!fullscreen);setZoom(1);}} aria-label={t(fullscreen?'Vollbild beenden':'Vollbild')}>{fullscreen?'✕':'⛶'}</button></div>
+      <div className="reader-group"><button onClick={()=>setTextMode(value=>!value)} aria-pressed={textMode}>{t(textMode?'Seitenansicht':'Text')}</button><button aria-pressed={fullscreen} onClick={()=>{setFullscreen(value=>!value);setFit(!fullscreen);setZoom(1);}} aria-label={t(fullscreen?'Vollbild beenden':'Vollbild')}>{t(fullscreen?'Vollbild beenden':'Vollbild')}</button></div>
     </div>
     {error&&<div className="collection-state error" role="alert"><p>{error}</p><button onClick={()=>{setError('');setDocument(null);setBusy(true);setPage(1);setRevision(value=>value+1);}}>{t('Erneut versuchen')}</button></div>}
     <div className="magazine-reader-page" ref={viewport} aria-busy={busy} onTouchStart={event=>{touchStart.current=event.touches[0]?.clientX??null;}} onTouchEnd={event=>{const start=touchStart.current;touchStart.current=null;if(start===null)return;const delta=event.changedTouches[0]?.clientX-start;if(typeof delta==='number'&&Math.abs(delta)>55)changePage(page+(delta<0?1:-1));}}>{busy&&!error&&<p role="status">{t('Seite wird geladen …')}</p>}<canvas ref={canvas} hidden={textMode||!!error} aria-hidden={busy} style={{visibility:busy?'hidden':'visible'}} role="img" aria-label={`${title}, ${t('Seite')} ${page}. ${t('Für vorlesbaren Inhalt Textansicht wählen.')}`}/>{textMode&&!error&&<div className="magazine-reader-text" style={{fontSize:`${20*zoom}px`}}>{text||(!busy?t('Diese Seite enthält keinen auslesbaren Text. Bitte die Seitenansicht verwenden.'):'')}</div>}</div>
-    <div className="magazine-reader-footer"><button onClick={back}>{t('Zurück zur Übersicht')}</button><span className="magazine-reader-credit">{t('Mitgliederansicht')} · © Swiss TR-Club</span><a href={url} download>{t('PDF herunterladen')}</a></div>
+    <div className="magazine-reader-footer"><button onClick={back}>{t(backLabel)}</button><span className="magazine-reader-credit">{t('Mitgliederansicht')} · © Swiss TR-Club</span>{download&&<a href={url} download>{t('PDF herunterladen')}</a>}</div>
   </div>;
 }
