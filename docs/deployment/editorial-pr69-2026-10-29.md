@@ -42,6 +42,9 @@ Nach der Veröffentlichung werden Programmdateien, Vorstandsrubriken,
 Dokumentstatus und Rollenrechte auf dem echten Staging-Backend geprüft.
 Synthetische Rollenprüfungen laufen in einer zurückgerollten Transaktion;
 Testmails und externe Aufrufe werden abgefangen. Das ist kein Zustellnachweis.
+Die zusätzliche Abnahme in `scripts/tests/editorial-staging.php` verwendet
+ausschliesslich eigene Testdokumente und Testdateien. Sie prüft die Migration
+aller Dokumentstatus, Originalablauf, Webkopien, junge Bilder und Porträts.
 
 Die Aussage «Keine Veröffentlichung auf Staging oder Produktion in diesem
 Arbeitsschritt» in früheren Notizen bezeichnet nur die damalige
