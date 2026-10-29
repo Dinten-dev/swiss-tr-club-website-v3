@@ -45,8 +45,9 @@ foreach([$wpdb->users,$wpdb->usermeta,$wpdb->posts,$wpdb->postmeta,$wpdb->option
 $wpdb->query('START TRANSACTION');$failure=null;
 try{
  $admin=get_user_by('email','traver.dinten@outlook.com');qaCheck('Existing account retains all requested specialist rights',user_can($admin,'strc_manage_finance')&&user_can($admin,'strc_manage_library')&&user_can($admin,'strc_access_board_documents')&&user_can($admin,'strc_assign_admins'));
- foreach(['owner','member','organiser','finance','board','library','board_library']as$label){
-  $id=wp_insert_user(['user_login'=>$tag.'_'.$label,'user_pass'=>wp_generate_password(40,true,true),'user_email'=>$tag.'_'.$label.'@example.invalid','display_name'=>'Security QA '.$label,'role'=>'strc_member']);
+ foreach(['owner','member','organiser','finance','board','library','board_library','adminrole','superrole']as$label){
+  $initialRole=['adminrole'=>'strc_administrator','superrole'=>'strc_superadmin'][$label]??'strc_member';
+  $id=wp_insert_user(['user_login'=>$tag.'_'.$label,'user_pass'=>wp_generate_password(40,true,true),'user_email'=>$tag.'_'.$label.'@example.invalid','display_name'=>'Security QA '.$label,'role'=>$initialRole]);
   qaCheck('Create synthetic '.$label,is_int($id));$users[$label]=$id;$userIds[]=$id;(new \SwissTRClub\Core\Members\MembershipRepository())->syncUser($id);
   qaCheck('Synthetic active membership '.$label,(new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id)['status']==='active');
  }
@@ -88,6 +89,15 @@ try{
  qaCheck('Board can still open archived document',qaPrivate($community,'post',$doc,true)->ID===$doc);
  $archive=qaPrivate($community,'listing',['kind'=>'library','group'=>'board','trash'=>'1','search'=>$tag]);$found=array_values(array_filter($archive['items'],fn($item)=>$item['id']===$doc));
  qaCheck('Board archive keeps read-only UI flags',count($found)===1&&!$found[0]['canReview']&&!$found[0]['canEdit']);
+ update_post_meta($doc,'strc_pre_archive_status','publish');
+ foreach(['adminrole','superrole']as$label){
+  wp_set_current_user($users[$label]);
+  qaCheck('Admin override grants board access '.$label,!current_user_can('strc_access_board_documents')&&in_array('restricted',LibraryPolicy::classes(),true)&&qaPrivate($community,'post',$doc,true)->ID===$doc&&qaPrivate($community,'canEdit',get_post($doc))&&qaPrivate($community,'canReview',get_post($doc)));
+  qaDenied('Admin cannot permanently delete board archive '.$label,fn()=>qaPrivate($community,'deleteTopic',$doc));
+  qaPrivate($community,'status','restore',$doc);qaCheck('Admin restores board document '.$label,get_post_status($doc)==='publish');
+  qaPrivate($community,'status','trash',$doc);qaCheck('Admin archives board document '.$label,get_post_status($doc)==='trash');
+ }
+ wp_set_current_user($users['board']);
  $openDraft=wp_insert_post(['post_type'=>'strc_document','post_status'=>'draft','post_title'=>$tag.' Foreign open draft','post_author'=>$users['owner']]);$postIds[]=$openDraft;
  update_post_meta($openDraft,'strc_form_classification',['documentType'=>'technical','access'=>'open']);LibraryPolicy::index($openDraft,['documentType'=>'technical','access'=>'open']);
  qaDenied('Board cannot read foreign ordinary draft',fn()=>qaPrivate($community,'post',$openDraft),404);

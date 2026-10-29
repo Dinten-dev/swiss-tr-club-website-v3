@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-QwVcMAi3.js";
+import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-AomIhrLG.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var l = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -13228,27 +13228,26 @@ var De = "(prefers-reduced-motion: reduce)", Oe = (e) => {
 	return t.addEventListener("change", e), () => t.removeEventListener("change", e);
 }, ke = (e) => (document.addEventListener("visibilitychange", e), () => document.removeEventListener("visibilitychange", e));
 function Ae() {
-	let { values: e } = q(), { language: t } = n(), r = (e.agenda?.slides ?? []).filter((e) => e.url), i = (0, h.useSyncExternalStore)(Oe, () => matchMedia(De).matches, () => !0), a = (0, h.useSyncExternalStore)(ke, () => !document.hidden, () => !1), [s, c] = (0, h.useState)(0), [l, u] = (0, h.useState)(!1), [d, f] = (0, h.useState)(!1), [p, m] = (0, h.useState)(!1), g = (0, h.useRef)(null), y = r.length, b = y ? s % y : 0;
+	let { values: e } = q(), { language: t } = n(), r = (e.agenda?.slides ?? []).filter((e) => e.url), i = (0, h.useSyncExternalStore)(Oe, () => matchMedia(De).matches, () => !0), a = (0, h.useSyncExternalStore)(ke, () => !document.hidden, () => !1), [s, c] = (0, h.useState)(0), [l, u] = (0, h.useState)(!1), [d, f] = (0, h.useState)(!1), p = (0, h.useRef)(null), m = r.length, g = m ? s % m : 0;
 	if ((0, h.useEffect)(() => {
-		if (i || l || d || p || !a || y < 2) return;
-		let e = window.setTimeout(() => c((e) => (e + 1) % y), 6e3);
+		if (i || l || d || !a || m < 2) return;
+		let e = window.setTimeout(() => c((e) => (e + 1) % m), 6e3);
 		return () => window.clearTimeout(e);
 	}, [
 		i,
 		l,
 		d,
-		p,
 		a,
-		y,
+		m,
 		s
-	]), !y) return null;
-	let x = (e) => c((b + e + y) % y), S = (e) => t === "fr" && e.altFr ? e.altFr : e.alt;
+	]), !m) return null;
+	let y = (e) => c((g + e + m) % m), b = (e) => t === "fr" && e.altFr ? e.altFr : e.alt;
 	return /* @__PURE__ */ (0, _.jsxs)("section", {
 		className: "agenda-slider",
 		"aria-roledescription": "carousel",
 		"aria-label": o("Anlässe im Überblick"),
 		onKeyDown: (e) => {
-			e.key === "ArrowLeft" && (e.preventDefault(), x(-1)), e.key === "ArrowRight" && (e.preventDefault(), x(1));
+			e.key === "ArrowLeft" && (e.preventDefault(), y(-1)), e.key === "ArrowRight" && (e.preventDefault(), y(1));
 		},
 		onMouseEnter: () => u(!0),
 		onMouseLeave: () => u(!1),
@@ -13259,76 +13258,66 @@ function Ae() {
 		children: [/* @__PURE__ */ (0, _.jsxs)("div", {
 			className: "agenda-slider-stage",
 			onPointerDown: (e) => {
-				!e.isPrimary || e.button !== 0 || e.target.closest("button,a") || (g.current = e.clientX, e.currentTarget.setPointerCapture(e.pointerId));
+				!e.isPrimary || e.button !== 0 || e.target.closest("button,a") || (p.current = e.clientX, e.currentTarget.setPointerCapture(e.pointerId));
 			},
 			onPointerUp: (e) => {
-				let t = g.current;
-				if (g.current = null, t === null) return;
+				let t = p.current;
+				if (p.current = null, t === null) return;
 				let n = e.clientX - t;
-				Math.abs(n) > 40 && x(n < 0 ? 1 : -1);
+				Math.abs(n) > 40 && y(n < 0 ? 1 : -1);
 			},
 			onPointerCancel: () => {
-				g.current = null;
+				p.current = null;
 			},
 			children: [r.map((e, t) => /* @__PURE__ */ (0, _.jsxs)("figure", {
-				className: `agenda-slide${t === b ? " is-active" : ""}`,
+				className: `agenda-slide${t === g ? " is-active" : ""}`,
 				"aria-roledescription": "slide",
-				"aria-label": `${t + 1} / ${y}`,
-				"aria-hidden": t !== b,
+				"aria-label": `${t + 1} / ${m}`,
+				"aria-hidden": t !== g,
 				children: [/* @__PURE__ */ (0, _.jsx)("div", {
 					className: "agenda-slide-backdrop",
 					style: { backgroundImage: `url("${Y(e.url)}")` },
 					"aria-hidden": "true"
 				}), /* @__PURE__ */ (0, _.jsx)(v, {
 					src: Y(e.url),
-					alt: S(e),
+					alt: b(e),
 					width: 1600,
 					height: 1130,
 					priority: t === 0,
 					loading: t === 0 ? void 0 : "lazy",
 					draggable: !1
 				})]
-			}, e.url + t)), y > 1 && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("button", {
+			}, e.url + t)), m > 1 && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("button", {
 				type: "button",
 				className: "agenda-slider-arrow is-prev",
-				onClick: () => x(-1),
+				onClick: () => y(-1),
 				"aria-label": o("Vorheriges Bild"),
 				children: "‹"
 			}), /* @__PURE__ */ (0, _.jsx)("button", {
 				type: "button",
 				className: "agenda-slider-arrow is-next",
-				onClick: () => x(1),
+				onClick: () => y(1),
 				"aria-label": o("Nächstes Bild"),
 				children: "›"
 			})] })]
 		}), /* @__PURE__ */ (0, _.jsxs)("div", {
 			className: "agenda-slider-controls",
-			children: [
-				y > 1 && /* @__PURE__ */ (0, _.jsx)("div", {
-					className: "agenda-slider-dots",
-					role: "group",
-					"aria-label": o("Bild wählen"),
-					children: r.map((e, t) => /* @__PURE__ */ (0, _.jsx)("button", {
-						type: "button",
-						"aria-label": S(e) || `${o("Bild")} ${t + 1}`,
-						"aria-current": t === b,
-						onClick: () => c(t)
-					}, e.url + t))
-				}),
-				y > 1 && !i && /* @__PURE__ */ (0, _.jsx)("button", {
+			children: [m > 1 && /* @__PURE__ */ (0, _.jsx)("div", {
+				className: "agenda-slider-dots",
+				role: "group",
+				"aria-label": o("Bild wählen"),
+				children: r.map((e, t) => /* @__PURE__ */ (0, _.jsx)("button", {
 					type: "button",
-					className: "club-secondary",
-					"aria-pressed": p,
-					onClick: () => m((e) => !e),
-					children: o(p ? "Automatischen Wechsel fortsetzen" : "Automatischen Wechsel pausieren")
-				}),
-				/* @__PURE__ */ (0, _.jsx)("a", {
-					href: Y(r[b].url),
-					target: "_blank",
-					rel: "noopener noreferrer",
-					children: o("Plakat vergrössern")
-				})
-			]
+					"aria-label": b(e) || `${o("Bild")} ${t + 1}`,
+					"aria-current": t === g,
+					onClick: () => c(t)
+				}, e.url + t))
+			}), /* @__PURE__ */ (0, _.jsx)("a", {
+				href: Y(r[g].url),
+				target: "_blank",
+				rel: "noopener noreferrer",
+				children: o("Plakat vergrössern")
+			})]
 		})]
 	});
 }
@@ -20461,7 +20450,7 @@ function En({ members: t, detail: n, loading: r }) {
 }
 //#endregion
 //#region app/components/StrcFlipbook.tsx
-var Dn = (0, h.lazy)(() => import("./MagazineReader-DIYRrqC-.js")), On = window.strcSettings.assetBase ?? "";
+var Dn = (0, h.lazy)(() => import("./MagazineReader-IlDkjEWc.js")), On = window.strcSettings.assetBase ?? "";
 function kn({ url: e, title: t, classic: n, pages: r, download: i, search: a = !0 }) {
 	let [s, c] = (0, h.useState)(!1), l = (r || []).join(","), u = (0, h.useRef)(null), [d, f] = (0, h.useState)(!1), [p, m] = (0, h.useState)(""), g = (0, h.useRef)(0), [v, y] = (0, h.useState)(""), [b, x] = (0, h.useState)(null), [S, C] = (0, h.useState)(!1), w = (0, h.useRef)({}), T = (0, h.useRef)({}), [E, D] = (0, h.useState)(null), [O, k] = (0, h.useState)(""), [A, j] = (0, h.useState)(null), [M, N] = (0, h.useState)({}), [P, F] = (0, h.useState)(1), [I, L] = (0, h.useState)(null), [R, z] = (0, h.useState)(() => typeof window < "u" && window.innerWidth < 760), [B, V] = (0, h.useState)(null), [H, U] = (0, h.useState)(1), W = (0, h.useRef)(null), ee = (0, h.useRef)(null), te = (e) => {
 		let t = W.current, n = Math.max(1, Math.min(3, Math.round(e * 4) / 4)), r = t ? (t.scrollLeft + t.clientWidth / 2) / Math.max(1, t.scrollWidth) : .5, i = t ? (t.scrollTop + t.clientHeight / 2) / Math.max(1, t.scrollHeight) : .5;
@@ -22648,7 +22637,7 @@ function ir({ item: e, nonce: t, close: n, saved: r, deleted: i }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var ar = (0, h.lazy)(() => import("./MagazineReader-DIYRrqC-.js")), or = "strc_community", sr = {
+var ar = (0, h.lazy)(() => import("./MagazineReader-IlDkjEWc.js")), or = "strc_community", sr = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliedergalerie",
 	restorations: "Fahrzeugrestaurationen",
@@ -24349,32 +24338,38 @@ function br({ id: e, nonce: t, close: n, updated: i, inline: a = !1, addPhotos: 
 										}),
 										/* @__PURE__ */ (0, _.jsxs)("div", {
 											className: "club-actions album-options",
-											children: [W[j]?.originalUrl ? /* @__PURE__ */ (0, _.jsx)("a", {
-												href: W[j].originalUrl,
-												download: !0,
-												children: o(W[j].optimized ? "Optimierte Uploadversion herunterladen" : "Originaldatei herunterladen")
-											}) : /* @__PURE__ */ (0, _.jsx)("p", { children: o("Für dieses Bild ist keine Uploaddatei mehr verfügbar.") }), ["public", "retainOriginal"].filter((e) => e !== "public" || d.canReview).map((n) => /* @__PURE__ */ (0, _.jsxs)("label", {
-												className: "album-switch",
-												children: [/* @__PURE__ */ (0, _.jsx)("input", {
-													type: "checkbox",
-													role: "switch",
-													checked: !!W[j]?.[n],
-													onChange: async (r) => {
-														let i = W[j];
-														try {
-															await w(or, t, T({
-																operation: "image-policy",
-																id: String(e),
-																key: i.key,
-																public: (n === "public" ? r.target.checked : i.public) ? "1" : "0",
-																retainOriginal: (n === "retainOriginal" ? r.target.checked : i.retainOriginal) ? "1" : "0"
-															})), y((e) => e + 1);
-														} catch (e) {
-															x(e.message);
+											children: [
+												W[j]?.originalUrl ? /* @__PURE__ */ (0, _.jsx)("a", {
+													href: W[j].originalUrl,
+													download: !0,
+													children: o(W[j].optimized ? "Optimierte Uploadversion herunterladen" : "Originaldatei herunterladen")
+												}) : /* @__PURE__ */ (0, _.jsx)("p", { children: o("Für dieses Bild ist keine Uploaddatei mehr verfügbar.") }),
+												/* @__PURE__ */ (0, _.jsx)("p", {
+													className: "club-hint",
+													children: o("Uploaddateien werden vier Monate nach dem Upload automatisch gelöscht. Die Webversion bleibt in der Galerie.")
+												}),
+												["public"].filter(() => d.canReview).map((n) => /* @__PURE__ */ (0, _.jsxs)("label", {
+													className: "album-switch",
+													children: [/* @__PURE__ */ (0, _.jsx)("input", {
+														type: "checkbox",
+														role: "switch",
+														checked: !!W[j]?.[n],
+														onChange: async (r) => {
+															let i = W[j];
+															try {
+																await w(or, t, T({
+																	operation: "image-policy",
+																	id: String(e),
+																	key: i.key,
+																	public: (n === "public" ? r.target.checked : i.public) ? "1" : "0"
+																})), y((e) => e + 1);
+															} catch (e) {
+																x(e.message);
+															}
 														}
-													}
-												}), /* @__PURE__ */ (0, _.jsx)("span", { children: o(n === "public" ? "Für öffentliche Galerie auswählen" : W[j]?.optimized ? "Uploadversion länger als vier Monate aufbewahren" : "Original länger als vier Monate aufbewahren") })]
-											}, n))]
+													}), /* @__PURE__ */ (0, _.jsx)("span", { children: o("Für öffentliche Galerie auswählen") })]
+												}, n))
+											]
 										})
 									]
 								}),
@@ -27026,7 +27021,7 @@ function mi() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var hi = (0, h.lazy)(() => import("./MagazineReader-DIYRrqC-.js"));
+var hi = (0, h.lazy)(() => import("./MagazineReader-IlDkjEWc.js"));
 function gi({ issue: e, loading: t, error: r, retry: i }) {
 	let { text: a } = q(), s = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: c } = n(), l = (e, t) => c === "fr" ? t : e, [u, d] = (0, h.useState)(!1), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(0), [y, b] = (0, h.useState)(!1), x = (0, h.useRef)(null), S = (0, h.useRef)(!1), C = e?.previewPages || [], w = !!e?.cover && !C.includes(e.cover), T = [...w && e?.cover ? [e.cover] : [], ...C].slice(0, 6), E = Math.min(m, Math.max(0, T.length - 1)), D = w && E === 0 ? `${l("Titelseite", "Couverture")} · ${e?.title || ""}` : e?.previewCaptions?.[E - +!!w] || `${l("Vorschau", "Aperçu")} ${E + 1} · ${e?.title || ""}`;
 	(0, h.useEffect)(() => {

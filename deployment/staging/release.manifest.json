@@ -79,8 +79,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/CommunityEndpoint.php",
-      "bytes": 74143,
-      "sha256": "7fd1bfb94953a7964a94537e137faa31d5cbbab59a5e8faac0df7e044371da9c"
+      "bytes": 74082,
+      "sha256": "66cf6ae73c4b4b296186c6f551ab7ad902cc3244cd116037b3126ea714426344"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/ForumSettings.php",
@@ -89,8 +89,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/GalleryRetention.php",
-      "bytes": 1498,
-      "sha256": "58ad63051907d5aff6f82e03aec7d3f46774341cf9cbd2ae3f2b84a8ee27f785"
+      "bytes": 1854,
+      "sha256": "0a07e6cb86adf3c3e308997e8e71a53b2bb8c78e57076743ec06b875e714878f"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/library-types.json",
@@ -104,8 +104,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/LibraryPolicy.php",
-      "bytes": 10410,
-      "sha256": "682ac1e0010c2c1e63c5952f4f76ea57fa0d3c7eed30522b51fd6c98fa3ab1f4"
+      "bytes": 10790,
+      "sha256": "01a8d328a024ec88b0b1ec4d5bb112e3074a7747b6bbcc7638d55ddf243e863d"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/PrivateUploadStore.php",
@@ -684,8 +684,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 975032,
-      "sha256": "c259d013994366ad39779112b86687ee58cb640e39ffde4f07b0198280419e7b"
+      "bytes": 974707,
+      "sha256": "de89aa0d7412fea3669754f5f89bb8ee487780e01e949cceec079a4f9ada7ed5"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -996,6 +996,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-fBf1UM1C.js",
       "bytes": 5552,
       "sha256": "b5f617c6625c308313e216bb0569e43d04539f8e3cd5639ea1c41493b06bd37b"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-IlDkjEWc.js",
+      "bytes": 9934,
+      "sha256": "2cbb82fea663fc995af0e42f0b9fddadfd0822be3e131124833beed6cdbb0387"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-Lj_vynxI.js",
@@ -2243,6 +2248,11 @@
       "sha256": "2eb93b8d9f7dac5a87e2b828831ab6f1cef6f92e7ac09f9dc60c1009e5162b32"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-AomIhrLG.js",
+      "bytes": 147647,
+      "sha256": "c6cf8fc2e9fa8d75266992ba268d4f9bcab6372de1bbf57a1fa0ea9e56a508b3"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-B6axRZhf.js",
       "bytes": 133924,
       "sha256": "a0a78ea9cfa76e8f2bbea8c54a5dea074d5983b02a72998b93aa2ae6e867b0cd"
@@ -2379,6 +2389,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-10-29T07:57:20.057Z",
+  "builtOn": "2026-10-29T10:32:09.261Z",
   "baselineCapturedOn": "2026-10-13"
 }

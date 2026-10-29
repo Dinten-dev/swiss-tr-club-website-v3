@@ -73,6 +73,13 @@ namespace {
  $posts[300]->post_status='trash';$posts[300]->post_author=1;$areas=[];
  denied(fn()=>invoke($community,'deleteTopic',300),403,'Document owner cannot permanently delete without moderation');
  $areas['library']=true;check(invoke($community,'deleteTopic',300)['deleted']&&$deleted===[300],'Moderator can permanently delete ordinary archived document');
+ require dirname($base).'/Roles/RoleDefinitions.php';
+ foreach(['strc_administrator','strc_superadmin'] as $role){
+  $caps=\SwissTRClub\Core\Roles\RoleDefinitions::all()[$role]['capabilities'];$areas=['library'=>true];
+  check(!isset($caps['strc_access_board_documents'])&&in_array('restricted',\SwissTRClub\Core\Community\LibraryPolicy::classes(),true),'Admin role overrides board classification: '.$role);
+  check(invoke($community,'post',1,true)->ID===1&&invoke($community,'canEdit',$posts[1])&&invoke($community,'canReview',$posts[1]),'Admin role maintains archived board documents: '.$role);
+  denied(fn()=>invoke($community,'deleteTopic',1),403,'Admin still cannot permanently delete board archives: '.$role);
+ }
  $posts=[];$meta=[];$options=[];$areas=[];$caps=['strc_access_member_area'=>true];$hooks=[];
  foreach([400=>'pending',401=>'draft',402=>'trash',403=>'publish'] as $id=>$status){$posts[$id]=new WP_Post($id,'strc_album',$status);$meta[$id]['strc_private_files']=[['key'=>'photo'.$id,'reviewStatus'=>$id===403?'rejected':'pending','submittedBy'=>2,'retainOriginal'=>true]];}
  $community->registerHooks();$galleryMigration=end($hooks['init']);$galleryMigration();
