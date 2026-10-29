@@ -88,7 +88,10 @@ namespace {
   ['key'=>'unknown','mime'=>'image/jpeg'],
  ]]];
  (new \SwissTRClub\Core\Community\GalleryRetention())->run();
- check($expired===['old']&&$copies===['old'],'Only eligible original expires after attempting web copy');
- check(empty($meta[500]['strc_private_files'][0]['originalExpired'])&&!empty($meta[500]['strc_private_files'][2]['originalExpired']),'Protected originals and unknown dates remain retained');
+ check($expired===['protected','old','unknown']&&$copies===['protected','old','unknown'],'Four-month limit applies without retention exception; unknown dates count from album creation');
+ check(!empty($meta[500]['strc_private_files'][0]['originalExpired'])&&empty($meta[500]['strc_private_files'][1]['originalExpired'])&&!empty($meta[500]['strc_private_files'][3]['originalExpired']),'Legacy retention flag no longer extends the limit');
+ $posts=[501=>new WP_Post(501,'strc_album')];$meta=[501=>['strc_portrait'=>['vehicle'=>'TR6'],'strc_private_files'=>[['key'=>'portrait','mime'=>'image/jpeg','uploadedAt'=>gmdate('c',strtotime('-6 months'))]]]];$expired=[];$copies=[];
+ (new \SwissTRClub\Core\Community\GalleryRetention())->run();
+ check($expired===[]&&empty($meta[501]['strc_private_files'][0]['originalExpired']),'Member portraits are not gallery uploads and keep their image');
  echo json_encode(['passed'=>count($checks),'checks'=>$checks],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)."\n";
 }

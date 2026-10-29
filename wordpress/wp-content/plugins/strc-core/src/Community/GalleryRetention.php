@@ -17,10 +17,13 @@ final class GalleryRetention
     {
         $store=new PrivateUploadStore();
         foreach(get_posts(['post_type'=>'strc_album','post_status'=>['publish','pending','draft'],'posts_per_page'=>-1]) as $post){
+            // Mitgliederporträts sind Profilinhalte, keine Galerie-Uploads: dort bleibt das Bild unverändert.
+            if(get_post_meta($post->ID,'strc_portrait',true))continue;
             $files=get_post_meta($post->ID,'strc_private_files',true);if(!is_array($files))continue;$changed=false;
             foreach($files as &$file){
-                $uploaded=strtotime($file['uploadedAt']??'');
-                if(!$uploaded||!empty($file['retainOriginal'])||!empty($file['originalExpired'])||strtotime('+'.self::MONTHS.' months',$uploaded)>time())continue;
+                // Frist ab Upload-Datum, ohne Verlängerung (Entscheid Redaktion 28./29.10.2026); ältere Fotos ohne Upload-Datum zählen ab Erstellung des Albums.
+                $uploaded=strtotime($file['uploadedAt']??'')?:strtotime($post->post_date_gmt.' UTC');
+                if(!$uploaded||!empty($file['originalExpired'])||strtotime('+'.self::MONTHS.' months',$uploaded)>time())continue;
                 if(!get_option('strc_web_image_'.($file['key']??''))&&!empty($file['mime'])&&str_starts_with((string)$file['mime'],'image/'))$store->webCopy($file);
                 if($store->expireOriginal($file)){$file['originalExpired']=true;$changed=true;}
             }unset($file);
