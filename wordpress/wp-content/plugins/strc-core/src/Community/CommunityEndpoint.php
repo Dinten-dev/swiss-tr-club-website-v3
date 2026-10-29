@@ -182,9 +182,13 @@ final class CommunityEndpoint
             $typeKey=(string)get_post_meta($id,'strc_document_type',true);$type=null;foreach(LibraryPolicy::types() as $candidate)if(($candidate['key']??'')===$typeKey)$type=$candidate;
             $group=$type?LibraryPolicy::groupForType($type):'';
             if($post->post_status!=='trash')AjaxRequest::fail('Nur archivierte Dokumente können endgültig gelöscht werden.',422);
-            if($group==='board'||in_array($typeKey,['board','confidential'],true)||LibraryPolicy::classification($id)==='restricted')AjaxRequest::fail('Vorstandsunterlagen werden nicht gelöscht.',403);
-            if(!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+            $boardDocument=$group==='board'||in_array($typeKey,['board','confidential'],true)||LibraryPolicy::classification($id)==='restricted';
+            // Vorstandsunterlagen (Entscheid Redaktion 29.10.2026): nur Vorstand plus Bibliotheksverwalter/Admin/Superadmin (strc_manage_library), mit Löschprotokoll.
+            if($boardDocument&&!self::canPurgeBoard())AjaxRequest::fail('Vorstandsunterlagen löschen nur Vorstandsmitglieder mit Bibliotheksverwaltung.',403);
+            if(!$boardDocument&&!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+            $title=html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8');$label=$type['label']??$typeKey;
             if(!wp_delete_post($id,true))AjaxRequest::fail('Dokument konnte nicht gelöscht werden.',503);
+            if($boardDocument){$log=get_option('strc_board_deletion_log',[]);$log=is_array($log)?$log:[];array_unshift($log,['title'=>$title,'type'=>(string)$label,'by'=>wp_get_current_user()->display_name,'byId'=>get_current_user_id(),'at'=>gmdate(DATE_ATOM)]);update_option('strc_board_deletion_log',array_slice($log,0,200),false);}
             return ['id'=>$id,'deleted'=>true];
         }
         if($post->post_type!=='strc_topic')AjaxRequest::fail('Nur Forumsthemen können gelöscht werden.',422);
@@ -207,6 +211,12 @@ final class CommunityEndpoint
     private function canEdit(\WP_Post $post): bool
     {
         return (int) $post->post_author === get_current_user_id() || current_user_can('strc_manage_community') || \SwissTRClub\Core\Editorial\EditorialAccess::area((string) array_search($post->post_type, self::TYPES, true));
+    }
+
+    /** Vorstandsunterlagen endgültig löschen: Rolle Vorstand und Bibliotheksverwaltung (Bibliotheksverwalter, STRC-Admin, STRC-Superadmin). */
+    private static function canPurgeBoard(): bool
+    {
+        return current_user_can('strc_access_member_area')&&current_user_can('strc_access_board_documents')&&current_user_can('strc_manage_library');
     }
 
     private function canReview(\WP_Post $post): bool
@@ -440,7 +450,8 @@ final class CommunityEndpoint
         remove_filter('posts_where',$visibility,10);
         if($searchFilter)remove_filter('posts_where',$searchFilter,10);
         $posts=$type==='strc_document'?array_filter($query->posts,fn($p)=>LibraryPolicy::canRead((int)$p->ID)&&($p->post_status==='publish'||$this->canEdit($p)||$this->canReadBoardDocument($p))):$query->posts;
-        return ['areaCounts'=>$areaCounts,'galleryCounts'=>$galleryCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
+        $boardLog=$type==='strc_document'&&($input['group']??'')==='board'&&$trash&&current_user_can('strc_access_board_documents')?array_map(static fn($row)=>array_intersect_key($row,array_flip(['title','type','by','at'])),array_slice((array)get_option('strc_board_deletion_log',[]),0,50)):null;
+        return ['boardDeletions'=>$boardLog,'canPurgeBoard'=>self::canPurgeBoard(),'areaCounts'=>$areaCounts,'galleryCounts'=>$galleryCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
     }
 
     private function detail(int $id, int $page): array
@@ -728,19 +739,20 @@ final class CommunityEndpoint
         $files=$this->files((int)$post->ID);$found=false;
         foreach($files as &$file)if(hash_equals($file['key'],$input['key']??'')){
             if(!$this->canReview($post)&&(($input['public']??'')==='1')!==(bool)($file['public']??false))AjaxRequest::fail('Nur Galerie-Moderatoren wählen öffentliche Bilder.',403);
-            if($this->canReview($post))$file['public']=($input['public']??'')==='1';$found=true;
+            if($this->canReview($post)){$public=($input['public']??'')==='1';if($public&&empty($file['public']))$file['publicAt']=gmdate(DATE_ATOM);$file['public']=$public;}$found=true;
         }unset($file);
         if(!$found)AjaxRequest::fail('Bild nicht gefunden.',404);
         update_post_meta($post->ID,'strc_private_files',$files);return $this->present(get_post($post->ID));
     }
     private function teasers(): array
     {
+        // Für die Startseite ausgewählte Albumbilder, zuletzt ausgewählte zuerst (ältere Auswahl ohne Zeitpunkt nach Albumdatum).
         $images=[];
         foreach(get_posts(['post_type'=>'strc_album','post_status'=>'publish','posts_per_page'=>-1]) as $post)foreach($this->files((int)$post->ID) as $file)if(!empty($file['public'])&&$this->approved($file,$post)){
-            $images[]=['url'=>add_query_arg(['action'=>'strc_community','operation'=>'teaser-file','id'=>$post->ID,'key'=>$file['key']],admin_url('admin-ajax.php')),'caption'=>$file['caption']??''];
-            if(count($images)>=24)return $images;
+            $images[]=['url'=>add_query_arg(['action'=>'strc_community','operation'=>'teaser-file','id'=>$post->ID,'key'=>$file['key']],admin_url('admin-ajax.php')),'caption'=>$file['caption']??'','sort'=>(string)($file['publicAt']??'').'|'.$post->post_date_gmt];
         }
-        return $images;
+        usort($images,static fn($a,$b)=>strcmp($b['sort'],$a['sort']));
+        return array_map(static fn($image)=>['url'=>$image['url'],'caption'=>$image['caption']],array_slice($images,0,24));
     }
     private function teaserFile(int $id,string $key): never
     {
