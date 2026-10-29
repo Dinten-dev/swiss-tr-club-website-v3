@@ -679,13 +679,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 324259,
-      "sha256": "ade69e6de9bb268fcacf2278f7673c84c1e675b8faba1b2e5edfb20267886adb"
+      "bytes": 325019,
+      "sha256": "0f07088339d17cc734e09e8114ea2b91c346ae8deac142fead225770585e9849"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 974707,
-      "sha256": "de89aa0d7412fea3669754f5f89bb8ee487780e01e949cceec079a4f9ada7ed5"
+      "bytes": 974793,
+      "sha256": "01561632f7491a167552009de0b8f390334a10600e9b871d7d0c44d44b3668f9"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -741,6 +741,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/club/club-morgenlicht.jpg",
       "bytes": 86731,
       "sha256": "f0dac13469de3a6ab7fdd3cb831534ab1ca97a38a118da10eb71fb610f58da32"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/club/cockpit-tr4a.png",
+      "bytes": 61726,
+      "sha256": "3a1a8b94ffd66816e47e62dfb3c2154aff2c670ce62dfffa2e630a7c15fbce5a"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/club/magazine/tr-magazine-3-2026-spread-1.jpg",
@@ -2388,9 +2393,7 @@
       "sha256": "6355c019a358f34e46406a5dad8f0057bae8d1bd0c530f0420d1d56a37087eb0"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-10-29T10:32:09.261Z",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-29T10:39:42.437035+00:00",
-  "publishedFiles": 22
+  "status": "candidate",
+  "builtOn": "2026-10-29T11:08:51.245Z",
+  "baselineCapturedOn": "2026-10-13"
 }

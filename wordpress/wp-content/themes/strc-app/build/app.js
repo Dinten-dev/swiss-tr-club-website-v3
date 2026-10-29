@@ -21165,7 +21165,8 @@ function Pn({ extraTools: e = [], logoutUrl: t = "" }) {
 	return /* @__PURE__ */ (0, _.jsxs)("section", {
 		className: "page-content personal-dashboard",
 		children: [/* @__PURE__ */ (0, _.jsxs)("header", {
-			className: "dashboard-welcome",
+			className: "dashboard-welcome has-cockpit",
+			style: { "--dashboard-art": `url("${Y("/club/cockpit-tr4a.png")}")` },
 			children: [
 				/* @__PURE__ */ (0, _.jsxs)("a", {
 					className: "dashboard-avatar is-link",
