@@ -21165,7 +21165,8 @@ function Pn({ extraTools: e = [], logoutUrl: t = "" }) {
 	return /* @__PURE__ */ (0, _.jsxs)("section", {
 		className: "page-content personal-dashboard",
 		children: [/* @__PURE__ */ (0, _.jsxs)("header", {
-			className: "dashboard-welcome",
+			className: "dashboard-welcome has-cockpit",
+			style: { "--dashboard-art": `url("${Y("/club/cockpit-tr4a.png")}")` },
 			children: [
 				/* @__PURE__ */ (0, _.jsxs)("a", {
 					className: "dashboard-avatar is-link",
@@ -26857,7 +26858,7 @@ var di = [
 	]
 };
 function pi({ regions: e }) {
-	let { text: t } = q(), n = e.filter((e) => Yr[e.slug]), [r, i] = (0, h.useState)(""), a = n.find((e) => e.slug === r) || n[0];
+	let { text: t } = q(), n = e.filter((e) => Yr[e.slug]), [r, i] = (0, h.useState)("innerschweiz"), a = n.find((e) => e.slug === r) || n[0];
 	if (!a) return null;
 	let s = (e) => t(`region-${e}.intro`, t("regions.intro"));
 	return /* @__PURE__ */ (0, _.jsx)("section", {
