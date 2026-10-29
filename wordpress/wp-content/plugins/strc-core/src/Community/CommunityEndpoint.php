@@ -728,7 +728,7 @@ final class CommunityEndpoint
         $files=$this->files((int)$post->ID);$found=false;
         foreach($files as &$file)if(hash_equals($file['key'],$input['key']??'')){
             if(!$this->canReview($post)&&(($input['public']??'')==='1')!==(bool)($file['public']??false))AjaxRequest::fail('Nur Galerie-Moderatoren wählen öffentliche Bilder.',403);
-            if($this->canReview($post))$file['public']=($input['public']??'')==='1';$file['retainOriginal']=($input['retainOriginal']??'')==='1';$found=true;
+            if($this->canReview($post))$file['public']=($input['public']??'')==='1';$found=true;
         }unset($file);
         if(!$found)AjaxRequest::fail('Bild nicht gefunden.',404);
         update_post_meta($post->ID,'strc_private_files',$files);return $this->present(get_post($post->ID));

@@ -39,12 +39,11 @@ test('Mouse leaving does not resume rotation while keyboard focus remains',()=>{
  const f=fixture();f.tree.props.onMouseEnter();f.render();f.tree.props.onFocusCapture();f.render();f.tree.props.onMouseLeave();f.render();assert.equal(f.timers.size,0);
  f.tree.props.onBlurCapture({currentTarget:{contains:()=>false},relatedTarget:null});f.render();assert.equal(f.timers.size,1);
 });
-test('Explicit pause persists through mouse and focus changes',()=>{
- const f=fixture();f.toggle().props.onClick();f.render();f.tree.props.onMouseEnter();f.render();f.tree.props.onMouseLeave();f.render();assert.equal(f.timers.size,0);assert.equal(f.toggle().props['aria-pressed'],true);
- f.toggle().props.onClick();f.render();assert.equal(f.timers.size,1);
+test('No permanent pause button (Redaktion 29.10.2026)',()=>{
+ const f=fixture();assert.equal(f.toggle(),undefined);f.tree.props.onMouseEnter();f.render();assert.equal(f.timers.size,0);f.tree.props.onMouseLeave();f.render();assert.equal(f.timers.size,1);
 });
 test('Reduced motion and hidden documents stop automatic changes',()=>{
- const f=fixture();f.state.reduced=true;f.render();assert.equal(f.timers.size,0);assert.equal(f.toggle(),undefined);
+ const f=fixture();f.state.reduced=true;f.render();assert.equal(f.timers.size,0);
  f.state.reduced=false;f.state.hidden=true;f.render();assert.equal(f.timers.size,0);f.state.hidden=false;f.render();assert.equal(f.timers.size,1);
 });
 test('Swipe captures the pointer and moves only beyond the threshold',()=>{
