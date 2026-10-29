@@ -113,8 +113,9 @@
     ]
   },
   {
-    "key": "board",
-    "label": "Interne Vorstandsunterlagen",
+    "key": "board-meetings",
+    "label": "Vorstandssitzungen",
+    "group": "board",
     "access": "restricted",
     "fields": [
       "date",
@@ -122,11 +123,72 @@
     ]
   },
   {
-    "key": "confidential",
-    "label": "Vertrauliche Finanz- / Führungsunterlagen",
+    "key": "board-plan",
+    "label": "Jahresplan",
+    "group": "board",
     "access": "restricted",
     "fields": [
-      "year",
+      "date",
+      "version"
+    ]
+  },
+  {
+    "key": "board-finance",
+    "label": "Finanzen",
+    "group": "board",
+    "access": "restricted",
+    "fields": [
+      "date",
+      "version"
+    ]
+  },
+  {
+    "key": "board-agm",
+    "label": "Generalversammlung",
+    "group": "board",
+    "access": "restricted",
+    "fields": [
+      "date",
+      "version"
+    ]
+  },
+  {
+    "key": "board-media",
+    "label": "Medien",
+    "group": "board",
+    "access": "restricted",
+    "fields": [
+      "date",
+      "version"
+    ]
+  },
+  {
+    "key": "board-admin",
+    "label": "Clubadministration",
+    "group": "board",
+    "access": "restricted",
+    "fields": [
+      "date",
+      "version"
+    ]
+  },
+  {
+    "key": "board-contracts",
+    "label": "Verträge",
+    "group": "board",
+    "access": "restricted",
+    "fields": [
+      "date",
+      "version"
+    ]
+  },
+  {
+    "key": "board-drafts",
+    "label": "Entwurfsbox",
+    "group": "board",
+    "access": "restricted",
+    "fields": [
+      "date",
       "version"
     ]
   },

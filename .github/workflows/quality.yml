@@ -39,6 +39,8 @@ jobs:
       - run: composer test
       - run: composer lint
       - run: php ../../../../scripts/tests/security-boundaries.php
+      - run: php ../../../../scripts/tests/baur-feedback.php
+      - run: php ../../../../scripts/tests/editorial-pr66.php
 
   structure:
     runs-on: ubuntu-latest

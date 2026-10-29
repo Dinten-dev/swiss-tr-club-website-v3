@@ -68,10 +68,10 @@ final class MemberDashboardEndpoint
             $uploads[]=['id'=>(int)$post->ID,'title'=>$post->post_title,'status'=>$post->post_status,'url'=>'#'.$route.'/'.($route==='marktplatz'?'meine/':'').$post->ID];
         }
         $queues=[];
-        foreach(['forum'=>'strc_topic','gallery'=>'strc_album','library'=>'strc_document','market'=>'strc_ad'] as $area=>$type){
+        // Galerie ohne Prüfwarteschlange (Entscheid Redaktion 28.10.2026).
+        foreach(['forum'=>'strc_topic','library'=>'strc_document','market'=>'strc_ad'] as $area=>$type){
             if(!EditorialAccess::area($area))continue;
             $args=['post_type'=>$type,'post_status'=>'pending','posts_per_page'=>1,'fields'=>'ids'];
-            if($area==='gallery'){$args['post_status']=['pending','publish'];$args['meta_query']=[['key'=>'strc_gallery_pending_count','value'=>0,'compare'=>'>','type'=>'NUMERIC']];}
             if($area==='library')$args['meta_query']=[LibraryPolicy::filter()];
             $query=new \WP_Query($args);
             $queues[]=['title'=>EditorialAccess::AREAS[$area],'count'=>(int)$query->found_posts,'url'=>'#'.['forum'=>'forum','gallery'=>'galerie','library'=>'bibliothek','market'=>'marktplatz'][$area].'/pruefung'];

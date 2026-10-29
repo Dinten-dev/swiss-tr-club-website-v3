@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-r536S_Zo.js";
+import { a as n, i as r, n as i, o as a, r as o, s, t as c } from "./UILanguage-1b9oExuB.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var l = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -7867,16 +7867,60 @@ var E = [
 		fields: ["region", "date"]
 	},
 	{
-		key: "board",
-		label: "Interne Vorstandsunterlagen",
+		key: "board-meetings",
+		label: "Vorstandssitzungen",
+		group: "board",
 		access: "restricted",
 		fields: ["date", "version"]
 	},
 	{
-		key: "confidential",
-		label: "Vertrauliche Finanz- / Führungsunterlagen",
+		key: "board-plan",
+		label: "Jahresplan",
+		group: "board",
 		access: "restricted",
-		fields: ["year", "version"]
+		fields: ["date", "version"]
+	},
+	{
+		key: "board-finance",
+		label: "Finanzen",
+		group: "board",
+		access: "restricted",
+		fields: ["date", "version"]
+	},
+	{
+		key: "board-agm",
+		label: "Generalversammlung",
+		group: "board",
+		access: "restricted",
+		fields: ["date", "version"]
+	},
+	{
+		key: "board-media",
+		label: "Medien",
+		group: "board",
+		access: "restricted",
+		fields: ["date", "version"]
+	},
+	{
+		key: "board-admin",
+		label: "Clubadministration",
+		group: "board",
+		access: "restricted",
+		fields: ["date", "version"]
+	},
+	{
+		key: "board-contracts",
+		label: "Verträge",
+		group: "board",
+		access: "restricted",
+		fields: ["date", "version"]
+	},
+	{
+		key: "board-drafts",
+		label: "Entwurfsbox",
+		group: "board",
+		access: "restricted",
+		fields: ["date", "version"]
 	},
 	{
 		key: "travel-report",
@@ -20267,7 +20311,7 @@ function Sn({ members: t, detail: n, loading: r }) {
 }
 //#endregion
 //#region app/components/StrcFlipbook.tsx
-var Cn = (0, h.lazy)(() => import("./MagazineReader-xmPYQIQI.js")), wn = window.strcSettings.assetBase ?? "";
+var Cn = (0, h.lazy)(() => import("./MagazineReader-BDaYYFvb.js")), wn = window.strcSettings.assetBase ?? "";
 function Tn({ url: e, title: t, classic: n, pages: r, download: i, search: a = !0 }) {
 	let [s, c] = (0, h.useState)(!1), l = (r || []).join(","), u = (0, h.useRef)(null), [d, f] = (0, h.useState)(!1), [p, m] = (0, h.useState)(""), g = (0, h.useRef)(0), [v, y] = (0, h.useState)(""), [b, x] = (0, h.useState)(null), [S, C] = (0, h.useState)(!1), w = (0, h.useRef)({}), T = (0, h.useRef)({}), [E, D] = (0, h.useState)(null), [O, k] = (0, h.useState)(""), [A, j] = (0, h.useState)(null), [M, N] = (0, h.useState)({}), [P, F] = (0, h.useState)(1), [I, L] = (0, h.useState)(null), [R, z] = (0, h.useState)(() => typeof window < "u" && window.innerWidth < 760), [B, V] = (0, h.useState)(null), [H, U] = (0, h.useState)(1), W = (0, h.useRef)(null), ee = (0, h.useRef)(null), te = (e) => {
 		let t = W.current, n = Math.max(1, Math.min(3, Math.round(e * 4) / 4)), r = t ? (t.scrollLeft + t.clientWidth / 2) / Math.max(1, t.scrollWidth) : .5, i = t ? (t.scrollTop + t.clientHeight / 2) / Math.max(1, t.scrollHeight) : .5;
@@ -22454,7 +22498,7 @@ function er({ item: e, nonce: t, close: n, saved: r, deleted: i }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var tr = (0, h.lazy)(() => import("./MagazineReader-xmPYQIQI.js")), nr = "strc_community", rr = {
+var tr = (0, h.lazy)(() => import("./MagazineReader-BDaYYFvb.js")), nr = "strc_community", rr = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliedergalerie",
 	restorations: "Fahrzeugrestaurationen",
@@ -22634,7 +22678,21 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 	function Re(e = "") {
 		te(e), H(!0), B((e) => e + 1);
 	}
-	async function ze(e, n) {
+	let [ze, Be] = (0, h.useState)(0);
+	async function Ve(e) {
+		ue(!0), W("");
+		try {
+			await w(nr, t, T({
+				operation: "delete",
+				id: String(e.id)
+			})), Be(0), Re("Dokument endgültig gelöscht.");
+		} catch (e) {
+			W(e.message);
+		} finally {
+			ue(!1);
+		}
+	}
+	async function He(e, n) {
 		ue(!0), W("");
 		try {
 			await w(nr, t, T({
@@ -22647,7 +22705,7 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 			ue(!1);
 		}
 	}
-	let Be = e === "gallery" && ae !== null;
+	let Ue = e === "gallery" && ae !== null;
 	return (0, h.useEffect)(() => {
 		if (e !== "gallery" || typeof window > "u") return;
 		let t = ae === null ? Se ? "#galerie/pruefung" : Ce ? "#galerie/meine" : "#galerie" : `#galerie/${ae}`;
@@ -22669,7 +22727,7 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 				/* @__PURE__ */ (0, _.jsx)("p", { children: c(`${e}.intro`) })
 			]
 		}),
-		Be ? /* @__PURE__ */ (0, _.jsx)("section", {
+		Ue ? /* @__PURE__ */ (0, _.jsx)("section", {
 			className: "page-content album-page",
 			children: /* @__PURE__ */ (0, _.jsx)(gr, {
 				id: ae,
@@ -23062,21 +23120,21 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 													children: [/* @__PURE__ */ (0, _.jsx)("button", {
 														disabled: J,
 														className: "market-primary",
-														onClick: () => void ze(t, "approve"),
+														onClick: () => void He(t, "approve"),
 														children: o("Freigeben")
 													}), /* @__PURE__ */ (0, _.jsx)("button", {
 														disabled: J,
 														className: "club-secondary",
-														onClick: () => void ze(t, "reject"),
+														onClick: () => void He(t, "reject"),
 														children: o("Ablehnen")
 													})]
 												}),
 												N ? /* @__PURE__ */ (0, _.jsx)("div", {
 													className: "club-actions",
-													children: /* @__PURE__ */ (0, _.jsx)("button", {
+													children: t.canEdit && /* @__PURE__ */ (0, _.jsx)("button", {
 														className: "club-secondary",
 														disabled: J,
-														onClick: () => void ze(t, "restore"),
+														onClick: () => void He(t, "restore"),
 														children: o("Wiederherstellen")
 													})
 												}) : t.canEdit && /* @__PURE__ */ (0, _.jsxs)("div", {
@@ -23150,12 +23208,12 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 											children: [/* @__PURE__ */ (0, _.jsx)("button", {
 												disabled: J,
 												className: "market-primary",
-												onClick: () => void ze(t, "approve"),
+												onClick: () => void He(t, "approve"),
 												children: o("Freigeben")
 											}), /* @__PURE__ */ (0, _.jsx)("button", {
 												disabled: J,
 												className: "club-secondary",
-												onClick: () => void ze(t, "reject"),
+												onClick: () => void He(t, "reject"),
 												children: o("Ablehnen")
 											})]
 										}),
@@ -23170,14 +23228,37 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 												o("Dateien")
 											]
 										})] }),
-										(e !== "library" || (N ? t.canReview : t.canEdit)) && /* @__PURE__ */ (0, _.jsx)("div", {
+										(e !== "library" || t.canEdit || N) && /* @__PURE__ */ (0, _.jsx)("div", {
 											className: "club-actions",
-											children: N ? /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: /* @__PURE__ */ (0, _.jsx)("button", {
+											children: N ? /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [t.canEdit && /* @__PURE__ */ (0, _.jsx)("button", {
 												className: "club-secondary",
 												disabled: J,
-												onClick: () => void ze(t, "restore"),
+												onClick: () => void He(t, "restore"),
 												children: o("Wiederherstellen")
-											}) }) : /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: t.canEdit && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("button", {
+											}), e === "library" && t.canReview && f !== "board" && !k(cr(t.classification.documentType)).startsWith("board") && cr(t.classification.access) !== "restricted" && (ze === t.id ? /* @__PURE__ */ (0, _.jsxs)("span", {
+												className: "lib-purge-confirm",
+												children: [
+													o("Dokument mit allen Dateien endgültig löschen?"),
+													" ",
+													/* @__PURE__ */ (0, _.jsx)("button", {
+														className: "market-primary",
+														disabled: J,
+														onClick: () => void Ve(t),
+														children: o("Ja, definitiv löschen")
+													}),
+													/* @__PURE__ */ (0, _.jsx)("button", {
+														className: "club-secondary",
+														disabled: J,
+														onClick: () => Be(0),
+														children: o("Abbrechen")
+													})
+												]
+											}) : /* @__PURE__ */ (0, _.jsx)("button", {
+												className: "market-text-button lib-purge",
+												disabled: J,
+												onClick: () => Be(t.id),
+												children: o("Definitiv löschen")
+											}))] }) : /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: t.canEdit && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("button", {
 												className: "market-text-button",
 												onClick: () => Qn(t) ? G(t) : re(t),
 												children: o("Bearbeiten")
@@ -23218,7 +23299,7 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 				re(void 0), se(null);
 			},
 			saved: (t) => {
-				re(void 0), se(null), Re(e === "gallery" ? "Fotos hochgeladen. Die Galerie-Moderation prüft sie vor der Veröffentlichung." : t.status === "pending" ? "Beitrag zur Prüfung eingereicht." : "Beitrag gespeichert."), K(t.id);
+				re(void 0), se(null), Re(e === "gallery" ? "Fotos hochgeladen und in der Galerie sichtbar." : t.status === "pending" ? "Beitrag zur Prüfung eingereicht." : "Beitrag gespeichert."), K(t.id);
 			}
 		}),
 		fe && /* @__PURE__ */ (0, _.jsx)(X, {
@@ -23256,7 +23337,7 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 				G(void 0), K(null), Re("Porträt gelöscht.");
 			}
 		}),
-		ae !== null && !Be && /* @__PURE__ */ (0, _.jsx)(gr, {
+		ae !== null && !Ue && /* @__PURE__ */ (0, _.jsx)(gr, {
 			id: ae,
 			nonce: t,
 			close: () => K(null),
@@ -23288,7 +23369,7 @@ function pr({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 						}), /* @__PURE__ */ (0, _.jsx)("button", {
 							className: "market-primary",
 							disabled: J,
-							onClick: () => void ze(ce, "trash"),
+							onClick: () => void He(ce, "trash"),
 							children: o("Ins Archiv verschieben")
 						})]
 					})
@@ -23710,7 +23791,7 @@ function mr({ kind: e, item: t, nonce: n, close: r, saved: i, accessClasses: a, 
 						})] }),
 						!t && e === "gallery" && /* @__PURE__ */ (0, _.jsx)("p", {
 							className: "gallery-disclaimer",
-							children: o("Mit dem Hochladen bestätigen Sie, dass die Fotos auf der Website und in Publikationen des Swiss TR-Club verwendet werden dürfen. Im Zweifel einfach hochladen – die Galerie-Moderation prüft jedes Bild vor der Veröffentlichung.")
+							children: o("Mit dem Hochladen bestätigst du, dass die Fotos auf der Website und in Publikationen des Swiss TR-Club verwendet werden dürfen. Die Fotos sind sofort für Clubmitglieder sichtbar; die Galerie-Moderation kann einzelne Bilder ausblenden.")
 						}),
 						!t && !D && e !== "gallery" && (e !== "forum" || ie.length > 0) && /* @__PURE__ */ (0, _.jsxs)("label", {
 							className: "application-consent",
@@ -24580,7 +24661,11 @@ function vr({ item: e, busy: t, act: n }) {
 	return /* @__PURE__ */ (0, _.jsxs)("details", {
 		className: "form-section",
 		children: [
-			/* @__PURE__ */ (0, _.jsx)("summary", { children: o("Bilder prüfen und Album pflegen") }),
+			/* @__PURE__ */ (0, _.jsx)("summary", { children: o("Album pflegen (Moderation)") }),
+			/* @__PURE__ */ (0, _.jsx)("p", {
+				className: "club-hint",
+				children: o("Hochgeladene Bilder sind sofort sichtbar. Hier lassen sich einzelne Bilder ausblenden und wieder einblenden.")
+			}),
 			/* @__PURE__ */ (0, _.jsxs)("div", {
 				className: "club-actions",
 				children: [/* @__PURE__ */ (0, _.jsx)("button", {
@@ -24611,11 +24696,7 @@ function vr({ item: e, busy: t, act: n }) {
 					/* @__PURE__ */ (0, _.jsxs)("span", { children: [
 						e.name,
 						" · ",
-						o({
-							approved: "Freigegeben",
-							pending: "In Prüfung",
-							rejected: "Abgelehnt"
-						}[e.reviewStatus] || e.reviewStatus)
+						o(e.reviewStatus === "rejected" ? "Ausgeblendet" : "Sichtbar")
 					] })
 				] }, e.key))
 			}),
@@ -24623,16 +24704,16 @@ function vr({ item: e, busy: t, act: n }) {
 				className: "club-actions",
 				children: [
 					/* @__PURE__ */ (0, _.jsx)("button", {
-						className: "market-primary",
+						className: "club-secondary",
 						disabled: t || !r.length,
-						onClick: () => void f("photos-review", { state: "approved" }),
-						children: o("Auswahl freigeben")
+						onClick: () => void f("photos-review", { state: "rejected" }),
+						children: o("Auswahl ausblenden")
 					}),
 					/* @__PURE__ */ (0, _.jsx)("button", {
 						className: "club-secondary",
 						disabled: t || !r.length,
-						onClick: () => void f("photos-review", { state: "rejected" }),
-						children: o("Auswahl ablehnen")
+						onClick: () => void f("photos-review", { state: "approved" }),
+						children: o("Auswahl einblenden")
 					}),
 					/* @__PURE__ */ (0, _.jsx)("button", {
 						className: "club-secondary",
@@ -26164,27 +26245,13 @@ function Ur(e) {
 		block: "start"
 	}), t.focus({ preventScroll: !0 }));
 }
-function Wr() {
-	let { text: e } = q();
-	return e("home.mission").replace(/<[^>]*>/g, "").trim() ? /* @__PURE__ */ (0, _.jsx)("section", {
-		className: "home-arrival hx-mission",
-		"aria-label": o("Über den Club"),
-		children: /* @__PURE__ */ (0, _.jsx)("div", {
-			className: "home-width",
-			children: /* @__PURE__ */ (0, _.jsx)(ue, {
-				id: "home.mission",
-				className: "home-reference-story"
-			})
-		})
-	}) : null;
-}
 //#endregion
 //#region app/components/swissOutline.ts
-var Gr = {
+var Wr = {
 	width: 620,
 	height: 424,
 	path: "M493.9,72.3 L499.0,106.4 L478.8,153.6 L538.5,188.7 L605.8,193.9 L595.4,273.0 L537.3,305.5 L439.7,281.3 L411.1,359.0 L348.2,365.1 L325.4,334.6 L251.4,400.0 L187.8,409.1 L131.1,367.8 L85.8,283.3 L22.8,313.5 L24.7,226.3 L121.2,118.0 L117.0,69.0 L177.1,86.8 L213.3,53.8 L325.5,55.2 L352.6,13.3 L493.9,72.3 Z"
-}, Kr = {
+}, Gr = {
 	zuerich: [354.9, 102.1],
 	bern: [211.1, 183.1],
 	ostschweiz: [464.3, 92.5],
@@ -26192,16 +26259,16 @@ var Gr = {
 	innerschweiz: [324.5, 163.8],
 	nordwestschweiz: [229.5, 65.5],
 	"suisse-romande": [102.9, 265.9]
-}, qr = "(prefers-reduced-motion: reduce)", Jr = (e) => {
-	let t = matchMedia(qr);
+}, Kr = "(prefers-reduced-motion: reduce)", qr = (e) => {
+	let t = matchMedia(Kr);
 	return t.addEventListener("change", e), () => t.removeEventListener("change", e);
 };
-function Yr() {
-	return (0, h.useSyncExternalStore)(Jr, () => matchMedia(qr).matches, () => !0);
+function Jr() {
+	return (0, h.useSyncExternalStore)(qr, () => matchMedia(Kr).matches, () => !0);
 }
-var Xr = () => matchMedia(qr).matches ? "instant" : "smooth", Zr = (e, t) => t === "fr" && e.altFr ? e.altFr : e.alt;
-function Qr({ nextEvent: e }) {
-	let { text: t, values: r } = q(), { language: i } = n(), a = Yr(), s = t("home.heroImage").trim(), c = (r.home?.photos ?? []).filter((e) => e.url), l = [...s ? [{
+var Yr = () => matchMedia(Kr).matches ? "instant" : "smooth", Xr = (e, t) => t === "fr" && e.altFr ? e.altFr : e.alt;
+function Zr({ nextEvent: e }) {
+	let { text: t, values: r } = q(), { language: i } = n(), a = Jr(), s = t("home.heroImage").trim(), c = (r.home?.photos ?? []).filter((e) => e.url), l = [...s ? [{
 		url: s,
 		alt: ""
 	}] : [], ...c.filter((e) => e.url !== s)].slice(0, 4);
@@ -26209,34 +26276,35 @@ function Qr({ nextEvent: e }) {
 		url: "/club/scheinwerfer.jpg",
 		alt: ""
 	});
-	let [u, d] = (0, h.useState)(0), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(!0);
+	let u = [t("home.intro"), t("home.mission")].filter((e) => e.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, "").trim()), [d, f] = (0, h.useState)(0), [p, m] = (0, h.useState)(!1), [g, y] = (0, h.useState)(!0);
 	(0, h.useEffect)(() => {
-		let e = () => g(!document.hidden);
+		let e = () => y(!document.hidden);
 		return document.addEventListener("visibilitychange", e), () => document.removeEventListener("visibilitychange", e);
 	}, []), (0, h.useEffect)(() => {
-		if (a || f || !m || l.length < 2) return;
-		let e = window.setTimeout(() => d((e) => (e + 1) % l.length), 7e3);
+		if (a || p || !g || Math.max(l.length, u.length) < 2) return;
+		let e = window.setTimeout(() => f((e) => e + 1), 7e3);
 		return () => window.clearTimeout(e);
 	}, [
 		a,
-		f,
-		m,
+		p,
+		g,
 		l.length,
-		u
+		u.length,
+		d
 	]);
-	let y = (t) => {
+	let b = (t) => {
 		!e || !document.getElementById("home-next-event") || (t.preventDefault(), Ur("home-next-event"));
-	}, b = Zr(l[u] ?? l[0], i);
+	}, x = d % l.length, S = Xr(l[x] ?? l[0], i);
 	return /* @__PURE__ */ (0, _.jsxs)("section", {
 		className: "hx-hero",
 		"aria-labelledby": "home-arrival-title",
-		onFocusCapture: () => p(!0),
+		onFocusCapture: () => m(!0),
 		onBlurCapture: (e) => {
-			e.currentTarget.contains(e.relatedTarget) || p(!1);
+			e.currentTarget.contains(e.relatedTarget) || m(!1);
 		},
 		children: [
 			l.map((e, t) => /* @__PURE__ */ (0, _.jsx)("div", {
-				className: `hx-hero-slide${t === u ? " is-active" : ""}${a ? "" : " is-moving"}`,
+				className: `hx-hero-slide${t === x ? " is-active" : ""}${a ? "" : " is-moving"}`,
 				"aria-hidden": "true",
 				children: /* @__PURE__ */ (0, _.jsx)(v, {
 					src: Y(e.url),
@@ -26263,10 +26331,17 @@ function Qr({ nextEvent: e }) {
 						id: "home-arrival-title",
 						children: t("home.title")
 					}),
-					/* @__PURE__ */ (0, _.jsx)(ue, {
-						id: "home.intro",
-						className: "hx-hero-intro"
-					}),
+					u.length > 1 && !a ? /* @__PURE__ */ (0, _.jsx)("div", {
+						className: "hx-hero-leads",
+						"aria-live": "off",
+						children: u.map((e, t) => /* @__PURE__ */ (0, _.jsx)(J, {
+							html: e,
+							className: `hx-hero-intro${t === d % u.length ? " is-active" : ""}`
+						}, t))
+					}) : u.map((e, t) => /* @__PURE__ */ (0, _.jsx)(J, {
+						html: e,
+						className: "hx-hero-intro is-active"
+					}, t)),
 					/* @__PURE__ */ (0, _.jsxs)("div", {
 						className: "hx-hero-actions",
 						children: [/* @__PURE__ */ (0, _.jsxs)("a", {
@@ -26283,7 +26358,7 @@ function Qr({ nextEvent: e }) {
 						}), /* @__PURE__ */ (0, _.jsx)("a", {
 							className: "hx-button hx-button-ghost",
 							href: "#agenda",
-							onClick: y,
+							onClick: b,
 							children: o(e ? "Nächster Anlass" : "Zur Agenda")
 						})]
 					})
@@ -26291,22 +26366,22 @@ function Qr({ nextEvent: e }) {
 			}),
 			l.length > 1 && /* @__PURE__ */ (0, _.jsxs)("div", {
 				className: "home-width hx-hero-meta",
-				children: [b && /* @__PURE__ */ (0, _.jsx)("span", { children: b }), /* @__PURE__ */ (0, _.jsx)("div", {
+				children: [S && /* @__PURE__ */ (0, _.jsx)("span", { children: S }), /* @__PURE__ */ (0, _.jsx)("div", {
 					className: "hx-hero-dots",
 					role: "group",
 					"aria-label": o("Titelbild wählen"),
 					children: l.map((e, t) => /* @__PURE__ */ (0, _.jsx)("button", {
 						type: "button",
 						"aria-label": `${o("Bild")} ${t + 1}`,
-						"aria-current": t === u,
-						onClick: () => d(t)
+						"aria-current": t === x,
+						onClick: () => f(t)
 					}, e.url + t))
 				})]
 			})
 		]
 	});
 }
-function $r(e, t) {
+function Qr(e, t) {
 	let n = Math.max(0, Math.floor((e - t) / 6e4));
 	return {
 		days: Math.floor(n / 1440),
@@ -26314,7 +26389,7 @@ function $r(e, t) {
 		minutes: n % 60
 	};
 }
-function ei({ event: e, open: t }) {
+function $r({ event: e, open: t }) {
 	let [n, i] = (0, h.useState)(() => Date.now());
 	if ((0, h.useEffect)(() => {
 		let e = window.setInterval(() => i(Date.now()), 3e4);
@@ -26322,7 +26397,7 @@ function ei({ event: e, open: t }) {
 	}, []), !e) return null;
 	let a = new Date(e.startAt);
 	if (Number.isNaN(a.getTime())) return null;
-	let s = $r(a.getTime(), n), c = r(), l = { timeZone: "Europe/Zurich" }, u = `${a.toLocaleDateString(c, {
+	let s = Qr(a.getTime(), n), c = r(), l = { timeZone: "Europe/Zurich" }, u = `${a.toLocaleDateString(c, {
 		...l,
 		weekday: "short",
 		day: "numeric",
@@ -26406,7 +26481,7 @@ function ei({ event: e, open: t }) {
 		})
 	});
 }
-function ti({ value: e, from: t = 0, run: n }) {
+function ei({ value: e, from: t = 0, run: n }) {
 	let [r, i] = (0, h.useState)(e);
 	return (0, h.useEffect)(() => {
 		if (!n) return;
@@ -26421,8 +26496,8 @@ function ti({ value: e, from: t = 0, run: n }) {
 		t
 	]), /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: r });
 }
-function ni({ stats: e }) {
-	let t = Yr(), n = (0, h.useRef)(null), [r, i] = (0, h.useState)(!1);
+function ti({ stats: e }) {
+	let t = Jr(), n = (0, h.useRef)(null), [r, i] = (0, h.useState)(!1);
 	(0, h.useEffect)(() => {
 		let e = n.current;
 		if (!e || t || r || !("IntersectionObserver" in window)) return;
@@ -26463,7 +26538,7 @@ function ni({ stats: e }) {
 		children: /* @__PURE__ */ (0, _.jsx)("div", {
 			className: "home-width",
 			children: /* @__PURE__ */ (0, _.jsx)("ul", { children: a.map(([e, t, n, i]) => /* @__PURE__ */ (0, _.jsxs)("li", { children: [
-				/* @__PURE__ */ (0, _.jsx)("b", { children: /* @__PURE__ */ (0, _.jsx)(ti, {
+				/* @__PURE__ */ (0, _.jsx)("b", { children: /* @__PURE__ */ (0, _.jsx)(ei, {
 					value: e,
 					from: i,
 					run: r
@@ -26474,7 +26549,7 @@ function ni({ stats: e }) {
 		})
 	});
 }
-function ri({ count: e }) {
+function ni({ count: e }) {
 	let { text: t } = q(), n = t("home.triungstersImage").trim() || t("triungsters.image").trim(), r = t("home.triungstersTitle");
 	return r ? /* @__PURE__ */ (0, _.jsx)("section", {
 		className: "hx-triungsters",
@@ -26528,21 +26603,21 @@ function ri({ count: e }) {
 		})
 	}) : null;
 }
-var ii = (e, t) => {
+var ri = (e, t) => {
 	let n = typeof e[t] == "string" ? e[t].trim() : "";
 	return /^(?:beispiel|exemple|example)\b/i.test(n) ? "" : n;
-}, ai = (e) => e.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&#8217;|&rsquo;/g, "’").replace(/&#039;|&#39;/g, "'").replace(/\s+/g, " ").trim();
-function oi(e, t) {
+}, ii = (e) => e.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&#8217;|&rsquo;/g, "’").replace(/&#039;|&#39;/g, "'").replace(/\s+/g, " ").trim();
+function ai(e, t) {
 	let n = typeof e.factsBody == "string" ? e.factsBody : "";
 	for (let e of n.split(/<\/p>/i)) {
 		let n = e.match(/<strong>([\s\S]*?)<\/strong>([\s\S]*)/i);
-		if (!n || !t.some((e) => ai(n[1]).toLowerCase() === e.toLowerCase())) continue;
-		let r = n[2].split(/<br\s*\/?>/i).map(ai).find(Boolean) || "";
+		if (!n || !t.some((e) => ii(n[1]).toLowerCase() === e.toLowerCase())) continue;
+		let r = n[2].split(/<br\s*\/?>/i).map(ii).find(Boolean) || "";
 		return /^(?:beispiel|exemple|example)\b/i.test(r) ? "" : r;
 	}
 	return "";
 }
-function si() {
+function oi() {
 	let { values: e, published: t } = q(), n = (0, h.useRef)(null), r = (n) => {
 		let r = "model-" + n.toLowerCase();
 		return t[r] && e[r] || {};
@@ -26550,7 +26625,7 @@ function si() {
 		let t = n.current;
 		t && t.scrollBy({
 			left: e * t.clientWidth * .8,
-			behavior: Xr()
+			behavior: Yr()
 		});
 	};
 	return /* @__PURE__ */ (0, _.jsx)("section", {
@@ -26587,7 +26662,7 @@ function si() {
 				className: "hx-model-track",
 				ref: n,
 				children: it.map((e) => {
-					let t = r(e), n = ii(t, "image"), i = oi(t, ["Bauzeit", "Période de production"]) || ii(t, "years"), a = oi(t, ["Motor", "Moteur"]) || [ii(t, "engine"), ii(t, "displacement")].filter(Boolean).join(" · ");
+					let t = r(e), n = ri(t, "image"), i = ai(t, ["Bauzeit", "Période de production"]) || ri(t, "years"), a = ai(t, ["Motor", "Moteur"]) || [ri(t, "engine"), ri(t, "displacement")].filter(Boolean).join(" · ");
 					return /* @__PURE__ */ (0, _.jsxs)("a", {
 						className: "hx-model",
 						href: `#tr-modelle/${e.toLowerCase()}`,
@@ -26602,7 +26677,7 @@ function si() {
 									style: pe(t.imageFrame)
 								}) : /* @__PURE__ */ (0, _.jsx)(ct, { model: e })
 							}),
-							/* @__PURE__ */ (0, _.jsx)("strong", { children: ii(t, "title") || e }),
+							/* @__PURE__ */ (0, _.jsx)("strong", { children: ri(t, "title") || e }),
 							i && /* @__PURE__ */ (0, _.jsx)("span", {
 								className: "hx-model-years",
 								children: i
@@ -26615,11 +26690,11 @@ function si() {
 		})
 	});
 }
-var ci = [
+var si = [
 	"start",
 	14,
 	5
-], li = {
+], ci = {
 	nordwestschweiz: [
 		"end",
 		-14,
@@ -26636,8 +26711,8 @@ var ci = [
 		30
 	]
 };
-function ui({ regions: e }) {
-	let { text: t } = q(), n = e.filter((e) => Kr[e.slug]), [r, i] = (0, h.useState)(""), a = n.find((e) => e.slug === r) || n[0];
+function li({ regions: e }) {
+	let { text: t } = q(), n = e.filter((e) => Gr[e.slug]), [r, i] = (0, h.useState)(""), a = n.find((e) => e.slug === r) || n[0];
 	if (!a) return null;
 	let s = (e) => t(`region-${e}.intro`, t("regions.intro"));
 	return /* @__PURE__ */ (0, _.jsx)("section", {
@@ -26672,14 +26747,14 @@ function ui({ regions: e }) {
 				className: "hx-regions-grid",
 				children: [/* @__PURE__ */ (0, _.jsxs)("div", { children: [/* @__PURE__ */ (0, _.jsxs)("svg", {
 					className: "hx-map",
-					viewBox: `0 0 ${Gr.width} ${Gr.height}`,
+					viewBox: `0 0 ${Wr.width} ${Wr.height}`,
 					role: "img",
 					"aria-label": o("Schweizerkarte mit den Regionen des Swiss TR-Club"),
 					children: [/* @__PURE__ */ (0, _.jsx)("path", {
 						className: "hx-map-land",
-						d: Gr.path
+						d: Wr.path
 					}), n.map((e) => {
-						let [t, n] = Kr[e.slug], [r, s, c] = li[e.slug] ?? ci;
+						let [t, n] = Gr[e.slug], [r, s, c] = ci[e.slug] ?? si;
 						return /* @__PURE__ */ (0, _.jsxs)("g", {
 							className: `hx-pin${e.slug === a.slug ? " is-active" : ""}`,
 							onClick: () => i(e.slug),
@@ -26749,7 +26824,7 @@ function ui({ regions: e }) {
 		})
 	});
 }
-function di() {
+function ui() {
 	let { values: e } = q(), { language: t } = n(), r = (e.home?.photos ?? []).filter((e) => e.url).slice(0, 6);
 	return r.length < 3 ? null : /* @__PURE__ */ (0, _.jsx)("section", {
 		className: "hx-wall-section",
@@ -26782,7 +26857,7 @@ function di() {
 			}), /* @__PURE__ */ (0, _.jsx)("div", {
 				className: `hx-wall is-${r.length}`,
 				children: r.map((e, n) => {
-					let r = Zr(e, t);
+					let r = Xr(e, t);
 					return /* @__PURE__ */ (0, _.jsxs)("figure", { children: [/* @__PURE__ */ (0, _.jsx)(v, {
 						src: Y(e.url),
 						alt: r,
@@ -26801,8 +26876,8 @@ function di() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var fi = (0, h.lazy)(() => import("./MagazineReader-xmPYQIQI.js"));
-function pi({ issue: e, loading: t, error: r, retry: i }) {
+var di = (0, h.lazy)(() => import("./MagazineReader-BDaYYFvb.js"));
+function fi({ issue: e, loading: t, error: r, retry: i }) {
 	let { text: a } = q(), s = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: c } = n(), l = (e, t) => c === "fr" ? t : e, [u, d] = (0, h.useState)(!1), [f, p] = (0, h.useState)(!1), [m, g] = (0, h.useState)(0), [y, b] = (0, h.useState)(!1), x = (0, h.useRef)(null), S = (0, h.useRef)(!1), C = e?.previewPages || [], w = !!e?.cover && !C.includes(e.cover), T = [...w && e?.cover ? [e.cover] : [], ...C].slice(0, 6), E = Math.min(m, Math.max(0, T.length - 1)), D = w && E === 0 ? `${l("Titelseite", "Couverture")} · ${e?.title || ""}` : e?.previewCaptions?.[E - +!!w] || `${l("Vorschau", "Aperçu")} ${E + 1} · ${e?.title || ""}`;
 	(0, h.useEffect)(() => {
 		if (!e || S.current || new URLSearchParams(window.location.search).get("magazine") !== String(e.id)) return;
@@ -26924,7 +26999,7 @@ function pi({ issue: e, loading: t, error: r, retry: i }) {
 						role: "status",
 						children: l("Leseansicht wird geladen …", "Chargement du lecteur…")
 					}),
-					children: /* @__PURE__ */ (0, _.jsx)(fi, {
+					children: /* @__PURE__ */ (0, _.jsx)(di, {
 						url: e.fileUrl,
 						title: e.title,
 						initialFullscreen: !0,
@@ -26971,15 +27046,15 @@ function pi({ issue: e, loading: t, error: r, retry: i }) {
 }
 //#endregion
 //#region app/components/HomepageFeed.tsx
-var mi;
-function hi() {
+var pi;
+function mi() {
 	let e = new Intl.DateTimeFormat("en", {
 		timeZone: "Europe/Zurich",
 		year: "numeric",
 		month: "numeric",
 		day: "numeric"
 	}).formatToParts(/* @__PURE__ */ new Date()), t = (t) => Number(e.find((e) => e.type === t)?.value), n = Math.floor(Date.UTC(t("year"), t("month") - 1, t("day")) / 864e5);
-	if (mi?.day === n) return mi.cycle;
+	if (pi?.day === n) return pi.cycle;
 	let r = 0;
 	try {
 		let e = JSON.parse(sessionStorage.getItem("strc_home_cycle") || "null");
@@ -26988,12 +27063,12 @@ function hi() {
 			cycle: r
 		}));
 	} catch {}
-	return mi = {
+	return pi = {
 		day: n,
 		cycle: r
 	}, r;
 }
-function gi({ content: e, loading: t, error: i, retry: a, events: o, allEvents: s, eventsState: c, openNews: l, openEvent: u }) {
+function hi({ content: e, loading: t, error: i, retry: a, events: o, allEvents: s, eventsState: c, openNews: l, openEvent: u }) {
 	let { language: d } = n(), f = (e, t) => d === "fr" ? t : e, [p] = (0, h.useState)(() => Date.now()), m = o.filter((e) => new Date(e.startAt).getTime() >= p).sort((e, t) => Date.parse(e.startAt) - Date.parse(t.startAt)).slice(0, 3), g = (e) => new Date(e).toLocaleDateString(r(), {
 		day: "numeric",
 		month: "long",
@@ -27195,7 +27270,7 @@ function gi({ content: e, loading: t, error: i, retry: a, events: o, allEvents: 
 						})
 					]
 				}),
-				/* @__PURE__ */ (0, _.jsx)(pi, {
+				/* @__PURE__ */ (0, _.jsx)(fi, {
 					issue: e?.magazine ?? null,
 					loading: t,
 					error: i,
@@ -27207,13 +27282,13 @@ function gi({ content: e, loading: t, error: i, retry: a, events: o, allEvents: 
 }
 //#endregion
 //#region app/components/HomepageSections.tsx
-var _i = (e) => new Date(e).toLocaleDateString(r(), {
+var gi = (e) => new Date(e).toLocaleDateString(r(), {
 	day: "numeric",
 	month: "long",
 	year: "numeric"
 });
-function vi({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i, eventsState: a = "ready", openEvent: s }) {
-	let { text: c, values: l } = q(), { language: u } = n(), d = l.home?.partners ?? [], [f, p] = (0, h.useState)(null), [m, g] = (0, h.useState)(""), [y, b] = (0, h.useState)(0), [x, S] = (0, h.useState)(null), [w, T] = (0, h.useState)(!1), [E, D] = (0, h.useState)(""), [O] = (0, h.useState)(hi);
+function _i({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i, eventsState: a = "ready", openEvent: s }) {
+	let { text: c, values: l } = q(), { language: u } = n(), d = l.home?.partners ?? [], [f, p] = (0, h.useState)(null), [m, g] = (0, h.useState)(""), [y, b] = (0, h.useState)(0), [x, S] = (0, h.useState)(null), [w, T] = (0, h.useState)(!1), [E, D] = (0, h.useState)(""), [O] = (0, h.useState)(mi);
 	(0, h.useEffect)(() => {
 		let e = new AbortController();
 		return C("strc_homepage", {
@@ -27264,16 +27339,15 @@ function vi({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 		className: "home-editorial",
 		children: [
 			!t && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
-				/* @__PURE__ */ (0, _.jsx)(Qr, { nextEvent: N }),
-				/* @__PURE__ */ (0, _.jsx)(ei, {
+				/* @__PURE__ */ (0, _.jsx)(Zr, { nextEvent: N }),
+				/* @__PURE__ */ (0, _.jsx)($r, {
 					event: N,
 					open: s
 				}),
-				/* @__PURE__ */ (0, _.jsx)(ni, { stats: f?.stats }),
-				/* @__PURE__ */ (0, _.jsx)(ri, { count: f?.stats?.youth }),
-				/* @__PURE__ */ (0, _.jsx)(Wr, {})
+				/* @__PURE__ */ (0, _.jsx)(ti, { stats: f?.stats }),
+				/* @__PURE__ */ (0, _.jsx)(ni, { count: f?.stats?.youth })
 			] }),
-			!t && /* @__PURE__ */ (0, _.jsx)(gi, {
+			!t && /* @__PURE__ */ (0, _.jsx)(hi, {
 				content: f,
 				loading: !f && !m,
 				error: !!m,
@@ -27288,9 +27362,9 @@ function vi({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 				}, t)
 			}),
 			!t && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
-				/* @__PURE__ */ (0, _.jsx)(si, {}),
-				f?.stats?.regions && /* @__PURE__ */ (0, _.jsx)(ui, { regions: f.stats.regions }),
-				/* @__PURE__ */ (0, _.jsx)(di, {})
+				/* @__PURE__ */ (0, _.jsx)(oi, {}),
+				f?.stats?.regions && /* @__PURE__ */ (0, _.jsx)(li, { regions: f.stats.regions }),
+				/* @__PURE__ */ (0, _.jsx)(ui, {})
 			] }),
 			t && /* @__PURE__ */ (0, _.jsxs)("section", {
 				className: "home-width home-news",
@@ -27342,7 +27416,7 @@ function vi({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 										className: "home-meta",
 										children: /* @__PURE__ */ (0, _.jsx)("time", {
 											dateTime: e.date,
-											children: _i(e.date)
+											children: gi(e.date)
 										})
 									}),
 									/* @__PURE__ */ (0, _.jsx)("h3", { children: /* @__PURE__ */ (0, _.jsx)("button", {
@@ -27425,7 +27499,7 @@ function vi({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 							children: [
 								o("Clubnews ·"),
 								" ",
-								_i(x.date)
+								gi(x.date)
 							]
 						}),
 						x.image && /* @__PURE__ */ (0, _.jsx)(v, {
@@ -27443,7 +27517,7 @@ function vi({ memberAccess: e, archive: t = !1, upcomingEvents: r, allEvents: i,
 }
 //#endregion
 //#region app/page.tsx
-var yi = window.strcSettings.wordpressUrl ?? "http://localhost:8080", bi = window.strcSettings.siteUrl ?? "http://localhost:3000", xi = {
+var vi = window.strcSettings.wordpressUrl ?? "http://localhost:8080", yi = window.strcSettings.siteUrl ?? "http://localhost:3000", bi = {
 	history: "club-geschichte",
 	news: "neuigkeiten",
 	applications: "antraege",
@@ -27473,10 +27547,10 @@ var yi = window.strcSettings.wordpressUrl ?? "http://localhost:8080", bi = windo
 	editorial: "redaktion",
 	finance: "kasse"
 };
-function Si() {
-	return /* @__PURE__ */ (0, _.jsx)(i, { children: /* @__PURE__ */ (0, _.jsx)(ce, { children: /* @__PURE__ */ (0, _.jsx)(F, { children: /* @__PURE__ */ (0, _.jsx)(Ci, {}) }) }) });
+function xi() {
+	return /* @__PURE__ */ (0, _.jsx)(i, { children: /* @__PURE__ */ (0, _.jsx)(ce, { children: /* @__PURE__ */ (0, _.jsx)(F, { children: /* @__PURE__ */ (0, _.jsx)(Si, {}) }) }) });
 }
-function Ci() {
+function Si() {
 	let { language: e } = n(), [t, r] = (0, h.useState)("home"), [i, a] = (0, h.useState)("#agenda"), s = (0, h.useRef)(""), l = (0, h.useRef)(!1), [u, d] = (0, h.useState)(""), [f, p] = (0, h.useState)(""), [m, g] = (0, h.useState)(!1), [y, b] = (0, h.useState)(null), [x, S] = (0, h.useState)([]), [C, w] = (0, h.useState)("loading"), [T, E] = (0, h.useState)(null), [D, O] = (0, h.useState)(""), { text: k } = q(), [A, j] = (0, h.useState)(0);
 	function M() {
 		w("loading"), j((e) => e + 1);
@@ -27501,7 +27575,7 @@ function Ci() {
 				].includes(n) ? n : "#agenda");
 			}
 			s.current = e, l.current = !0, d(t), p(e === "marktplatz" ? window.location.hash : "");
-			let n = Object.keys(xi).find((t) => xi[t] === e);
+			let n = Object.keys(bi).find((t) => bi[t] === e);
 			r(!e && new URLSearchParams(window.location.search).has("member") ? "members" : n ?? "home"), E(null), window.scrollTo({
 				top: 0,
 				behavior: "instant"
@@ -27512,7 +27586,7 @@ function Ci() {
 		};
 	}, []), (0, h.useEffect)(() => {
 		let e = !0;
-		return fetch(`${yi}/wp-admin/admin-ajax.php?action=strc_session`, { credentials: "include" }).then((e) => e.ok ? e.json() : Promise.reject()).then((t) => {
+		return fetch(`${vi}/wp-admin/admin-ajax.php?action=strc_session`, { credentials: "include" }).then((e) => e.ok ? e.json() : Promise.reject()).then((t) => {
 			e && b(t);
 		}).catch(() => {
 			e && b({
@@ -27527,7 +27601,7 @@ function Ci() {
 		async function n() {
 			let n = [], r = 1, i = 1;
 			do {
-				let a = await fetch(`${yi}/?rest_route=/strc/v1/events&view=upcoming&limit=100&page=${r}&language=${e}`, {
+				let a = await fetch(`${vi}/?rest_route=/strc/v1/events&view=upcoming&limit=100&page=${r}&language=${e}`, {
 					cache: "no-store",
 					signal: t.signal
 				});
@@ -27547,7 +27621,7 @@ function Ci() {
 	]);
 	let N = t === "agenda" && /^\d+$/.test(u) ? x.find((e) => e.id === Number(u)) ?? null : null;
 	function P(e) {
-		r(e), E(null), window.location.hash = xi[e], window.scrollTo({
+		r(e), E(null), window.location.hash = bi[e], window.scrollTo({
 			top: 0,
 			behavior: "instant"
 		});
@@ -27717,11 +27791,11 @@ function Ci() {
 		t === "editorial" && (y?.canEditContent ? /* @__PURE__ */ (0, _.jsx)(At, {
 			nonce: y.editorialNonce || "",
 			canManageEvents: !!y.canManageEvents
-		}) : /* @__PURE__ */ (0, _.jsx)(Pi, {
+		}) : /* @__PURE__ */ (0, _.jsx)(Ni, {
 			session: y,
 			navigate: P
 		})),
-		t === "home" && /* @__PURE__ */ (0, _.jsx)(wi, {
+		t === "home" && /* @__PURE__ */ (0, _.jsx)(Ci, {
 			memberAccess: !!y?.memberAccess,
 			navigate: P,
 			events: x,
@@ -27754,7 +27828,7 @@ function Ci() {
 			retryEvents: M,
 			openEvent: E
 		}) }),
-		t === "regions" && /* @__PURE__ */ (0, _.jsx)(Mi, {
+		t === "regions" && /* @__PURE__ */ (0, _.jsx)(ji, {
 			editableDocuments: y?.editableDocuments || [],
 			events: x,
 			eventsState: C,
@@ -27766,11 +27840,11 @@ function Ci() {
 			session: y,
 			notify: F
 		}, f),
-		t === "profile" && (y?.memberAccess ? /* @__PURE__ */ (0, _.jsx)(Fr, {}) : /* @__PURE__ */ (0, _.jsx)(Pi, {
+		t === "profile" && (y?.memberAccess ? /* @__PURE__ */ (0, _.jsx)(Fr, {}) : /* @__PURE__ */ (0, _.jsx)(Ni, {
 			session: y,
 			navigate: P
 		})),
-		t === "members" && /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: /* @__PURE__ */ (0, _.jsx)(Pi, {
+		t === "members" && /* @__PURE__ */ (0, _.jsx)(_.Fragment, { children: /* @__PURE__ */ (0, _.jsx)(Ni, {
 			session: y,
 			navigate: P
 		}) }),
@@ -27796,11 +27870,11 @@ function Ci() {
 			initialGroup: t === "clubdocs" ? "club" : "",
 			section: u,
 			title: t === "clubdocs" ? "Clubdokumente" : void 0
-		}, `${t}:${u}`) : t === "gallery" ? /* @__PURE__ */ (0, _.jsx)(jn, {}) : /* @__PURE__ */ (0, _.jsx)(Pi, {
+		}, `${t}:${u}`) : t === "gallery" ? /* @__PURE__ */ (0, _.jsx)(jn, {}) : /* @__PURE__ */ (0, _.jsx)(Ni, {
 			session: y,
 			navigate: P
 		})),
-		t === "news" && /* @__PURE__ */ (0, _.jsx)(vi, {
+		t === "news" && /* @__PURE__ */ (0, _.jsx)(_i, {
 			navigate: P,
 			memberAccess: !!y?.memberAccess,
 			upcomingEvents: [],
@@ -27810,22 +27884,22 @@ function Ci() {
 			},
 			archive: !0
 		}),
-		t === "applications" && (y?.applicationsNonce ? /* @__PURE__ */ (0, _.jsx)(Br, { nonce: y.applicationsNonce }) : /* @__PURE__ */ (0, _.jsx)(Pi, {
+		t === "applications" && (y?.applicationsNonce ? /* @__PURE__ */ (0, _.jsx)(Br, { nonce: y.applicationsNonce }) : /* @__PURE__ */ (0, _.jsx)(Ni, {
 			session: y,
 			navigate: P
 		})),
-		t === "directory" && (y?.memberAccess ? /* @__PURE__ */ (0, _.jsx)(bn, {}) : /* @__PURE__ */ (0, _.jsx)(Pi, {
+		t === "directory" && (y?.memberAccess ? /* @__PURE__ */ (0, _.jsx)(bn, {}) : /* @__PURE__ */ (0, _.jsx)(Ni, {
 			session: y,
 			navigate: P
 		})),
-		t === "finance" && (y?.canReadFinance ? /* @__PURE__ */ (0, _.jsx)(Bt, {}) : /* @__PURE__ */ (0, _.jsx)(Pi, {
+		t === "finance" && (y?.canReadFinance ? /* @__PURE__ */ (0, _.jsx)(Bt, {}) : /* @__PURE__ */ (0, _.jsx)(Ni, {
 			session: y,
 			navigate: P
 		})),
 		t === "event-admin" && (y?.canManageEvents ? /* @__PURE__ */ (0, _.jsx)(dn, {
 			session: y,
 			changed: M
-		}) : /* @__PURE__ */ (0, _.jsx)(Pi, {
+		}) : /* @__PURE__ */ (0, _.jsx)(Ni, {
 			session: y,
 			navigate: P
 		})),
@@ -27833,7 +27907,7 @@ function Ci() {
 			"contact",
 			"privacy",
 			"statutes"
-		].includes(t) && /* @__PURE__ */ (0, _.jsx)(Ni, { page: t }, t),
+		].includes(t) && /* @__PURE__ */ (0, _.jsx)(Mi, { page: t }, t),
 		/* @__PURE__ */ (0, _.jsxs)("footer", {
 			className: "site-footer",
 			children: [/* @__PURE__ */ (0, _.jsxs)("div", {
@@ -27868,7 +27942,7 @@ function Ci() {
 				})
 			] })]
 		}),
-		(T || N) && /* @__PURE__ */ (0, _.jsx)(Fi, {
+		(T || N) && /* @__PURE__ */ (0, _.jsx)(Pi, {
 			event: T || N,
 			memberAccess: !!y?.memberAccess,
 			close: () => {
@@ -27882,9 +27956,9 @@ function Ci() {
 		})
 	] });
 }
-function wi({ navigate: e, events: t, eventsState: n, openEvent: r, memberAccess: i }) {
+function Ci({ navigate: e, events: t, eventsState: n, openEvent: r, memberAccess: i }) {
 	let a = t[0];
-	return /* @__PURE__ */ (0, _.jsx)(vi, {
+	return /* @__PURE__ */ (0, _.jsx)(_i, {
 		eventPreview: n === "loading" ? {
 			title: o("Termine werden geladen …"),
 			text: o("Die nächsten Treffen findest du hier.")
@@ -27893,7 +27967,7 @@ function wi({ navigate: e, events: t, eventsState: n, openEvent: r, memberAccess
 			text: o("Bitte versuche es in der Terminübersicht erneut.")
 		} : a ? {
 			title: a.title,
-			text: `${Di(a.startAt)} · ${a.location || Oi(a)}`
+			text: `${Ei(a.startAt)} · ${a.location || Di(a)}`
 		} : {
 			title: o("Das nächste Wiedersehen"),
 			text: o("Aktuell sind noch keine kommenden Termine veröffentlicht. Die Regionen ergänzen ihre Treffen hier.")
@@ -27906,7 +27980,7 @@ function wi({ navigate: e, events: t, eventsState: n, openEvent: r, memberAccess
 		navigate: e
 	});
 }
-function Ti({ eyebrow: e, title: t, text: n, landscape: r }) {
+function wi({ eyebrow: e, title: t, text: n, landscape: r }) {
 	return /* @__PURE__ */ (0, _.jsxs)("section", {
 		className: `page-hero${r ? " regional-hero" : ""}`,
 		style: r ? {
@@ -27924,7 +27998,7 @@ function Ti({ eyebrow: e, title: t, text: n, landscape: r }) {
 		]
 	});
 }
-function Ei(e) {
+function Ti(e) {
 	let t = new Date(e);
 	return Number.isNaN(t.getTime()) ? {
 		day: "–",
@@ -27936,17 +28010,17 @@ function Ei(e) {
 		year: new Intl.DateTimeFormat(r(), { year: "numeric" }).format(t)
 	};
 }
-function Di(e) {
+function Ei(e) {
 	let t = new Date(e);
 	return Number.isNaN(t.getTime()) ? o("Wird bekanntgegeben") : new Intl.DateTimeFormat(r(), {
 		dateStyle: "long",
 		timeStyle: "short"
 	}).format(t);
 }
-function Oi(e) {
+function Di(e) {
 	return o(e.region?.name || e.scope?.name || e.eventType?.name || "Swiss TR-Club");
 }
-function ki(e) {
+function Oi(e) {
 	return o({
 		information: "Keine Anmeldung erforderlich",
 		scheduled: "Anmeldung öffnet später",
@@ -27956,7 +28030,7 @@ function ki(e) {
 		waiting: "Warteliste offen"
 	}[e]);
 }
-function Ai({ state: e, count: t, retry: n }) {
+function ki({ state: e, count: t, retry: n }) {
 	return e === "loading" ? /* @__PURE__ */ (0, _.jsx)("p", {
 		className: "collection-state",
 		role: "status",
@@ -27974,8 +28048,8 @@ function Ai({ state: e, count: t, retry: n }) {
 		children: o("Momentan sind keine kommenden Veranstaltungen veröffentlicht.")
 	}) : null;
 }
-function ji({ event: e, open: t }) {
-	let n = Ei(e.startAt);
+function Ai({ event: e, open: t }) {
+	let n = Ti(e.startAt);
 	return /* @__PURE__ */ (0, _.jsxs)("article", {
 		className: "event-card",
 		children: [
@@ -27984,12 +28058,12 @@ function ji({ event: e, open: t }) {
 				children: [/* @__PURE__ */ (0, _.jsx)("strong", { children: n.day }), /* @__PURE__ */ (0, _.jsx)("span", { children: n.month })]
 			}),
 			/* @__PURE__ */ (0, _.jsxs)("div", { children: [
-				/* @__PURE__ */ (0, _.jsx)("p", { children: Oi(e) }),
+				/* @__PURE__ */ (0, _.jsx)("p", { children: Di(e) }),
 				/* @__PURE__ */ (0, _.jsx)("h3", { children: e.title }),
 				/* @__PURE__ */ (0, _.jsxs)("span", { children: [
 					e.location || e.eventType?.name,
 					" · ",
-					ki(e.registrationStatus)
+					Oi(e.registrationStatus)
 				] })
 			] }),
 			/* @__PURE__ */ (0, _.jsx)("button", {
@@ -28000,7 +28074,7 @@ function ji({ event: e, open: t }) {
 		]
 	});
 }
-function Mi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableDocuments: i }) {
+function ji({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableDocuments: i }) {
 	let { text: a, values: s } = q(), [c, l] = (0, h.useState)([]), [u, d] = (0, h.useState)(""), [f, p] = (0, h.useState)("loading"), [m, g] = (0, h.useState)(0);
 	(0, h.useEffect)(() => {
 		let e = () => d(decodeURIComponent(window.location.hash.split("/")[1] || "")), t = requestAnimationFrame(e);
@@ -28012,7 +28086,7 @@ function Mi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableD
 			if (document.visibilityState === "hidden") return;
 			n?.abort();
 			let r = new AbortController();
-			n = r, fetch(`${yi}/?rest_route=/strc/v1/regions`, {
+			n = r, fetch(`${vi}/?rest_route=/strc/v1/regions`, {
 				signal: r.signal,
 				cache: "no-store"
 			}).then((e) => e.ok ? e.json() : Promise.reject()).then((n) => {
@@ -28036,7 +28110,7 @@ function Mi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableD
 	}, [m]);
 	let v = c.find((e) => e.slug === u), y = e.filter((e) => e.region?.slug === u);
 	return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
-		/* @__PURE__ */ (0, _.jsx)(Ti, {
+		/* @__PURE__ */ (0, _.jsx)(wi, {
 			eyebrow: o("Lokal präsent – lokal aktiv"),
 			title: v ? `${o("Region")} ${o(v.name)}` : a("regions.title"),
 			text: v ? a(`region-${v.slug}.intro`, a("regions.intro")) : a("regions.intro"),
@@ -28070,13 +28144,13 @@ function Mi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableD
 					values: s["region-" + v.slug] || { body: v.description },
 					canEdit: i.includes("region-" + v.slug),
 					eventCount: t === "ready" ? y.length : void 0,
-					events: /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(Ai, {
+					events: /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(ki, {
 						state: t,
 						count: y.length,
 						retry: n
 					}), /* @__PURE__ */ (0, _.jsx)("div", {
 						className: "events",
-						children: y.map((e) => /* @__PURE__ */ (0, _.jsx)(ji, {
+						children: y.map((e) => /* @__PURE__ */ (0, _.jsx)(Ai, {
 							event: e,
 							open: () => r(e)
 						}, e.id))
@@ -28111,9 +28185,9 @@ function Mi({ events: e, eventsState: t, retryEvents: n, openEvent: r, editableD
 		})
 	] });
 }
-function Ni({ page: e }) {
+function Mi({ page: e }) {
 	let { text: t, error: n, refresh: r } = q();
-	return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(Ti, {
+	return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(wi, {
 		eyebrow: o("Swiss TR-Club"),
 		title: t(`${e}.title`),
 		text: o("Informationen des Clubs")
@@ -28131,7 +28205,7 @@ function Ni({ page: e }) {
 		}), e === "contact" && /* @__PURE__ */ (0, _.jsx)(Dr, {})]
 	})] });
 }
-function Pi({ session: e, navigate: t }) {
+function Ni({ session: e, navigate: t }) {
 	let { text: n } = q();
 	if (e === null) return /* @__PURE__ */ (0, _.jsx)("section", {
 		className: "page-content",
@@ -28140,7 +28214,7 @@ function Pi({ session: e, navigate: t }) {
 			children: o("Mitgliederzugang wird geprüft …")
 		})
 	});
-	if (!e.memberAccess) return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(Ti, {
+	if (!e.memberAccess) return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)(wi, {
 		eyebrow: o("Geschützter Bereich"),
 		title: n("members.title"),
 		text: n("members.intro")
@@ -28148,7 +28222,7 @@ function Pi({ session: e, navigate: t }) {
 		className: "login-panel",
 		children: [/* @__PURE__ */ (0, _.jsxs)("form", {
 			method: "post",
-			action: `${yi}/wp-login.php`,
+			action: `${vi}/wp-login.php`,
 			children: [
 				/* @__PURE__ */ (0, _.jsx)("p", {
 					className: "secure-label",
@@ -28174,14 +28248,14 @@ function Pi({ session: e, navigate: t }) {
 				/* @__PURE__ */ (0, _.jsx)("input", {
 					type: "hidden",
 					name: "redirect_to",
-					value: `${bi}/${window.location.hash || "#mitglieder"}`
+					value: `${yi}/${window.location.hash || "#mitglieder"}`
 				}),
 				/* @__PURE__ */ (0, _.jsx)("button", {
 					type: "submit",
 					children: o("Sicher anmelden →")
 				}),
 				/* @__PURE__ */ (0, _.jsx)("a", {
-					href: `${yi}/wp-login.php?action=lostpassword`,
+					href: `${vi}/wp-login.php?action=lostpassword`,
 					children: o("Passwort vergessen?")
 				})
 			]
@@ -28223,7 +28297,7 @@ function Pi({ session: e, navigate: t }) {
 		logoutUrl: e.logoutUrl || ""
 	})] });
 }
-function Fi({ event: e, close: t, memberAccess: n }) {
+function Pi({ event: e, close: t, memberAccess: n }) {
 	return /* @__PURE__ */ (0, _.jsx)(X, {
 		title: e.title,
 		close: t,
@@ -28233,7 +28307,7 @@ function Fi({ event: e, close: t, memberAccess: n }) {
 				/* @__PURE__ */ (0, _.jsxs)("p", {
 					className: "eyebrow",
 					children: [
-						Oi(e),
+						Di(e),
 						" · ",
 						e.eventType?.name
 					]
@@ -28243,14 +28317,14 @@ function Fi({ event: e, close: t, memberAccess: n }) {
 					className: "detail-box",
 					children: [
 						/* @__PURE__ */ (0, _.jsx)("span", { children: o("Beginn") }),
-						/* @__PURE__ */ (0, _.jsx)("strong", { children: e.startAt ? Di(e.startAt) : "Wird bekanntgegeben" }),
-						e.endAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Ende") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Di(e.endAt) })] }),
+						/* @__PURE__ */ (0, _.jsx)("strong", { children: e.startAt ? Ei(e.startAt) : "Wird bekanntgegeben" }),
+						e.endAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Ende") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Ei(e.endAt) })] }),
 						/* @__PURE__ */ (0, _.jsx)("span", { children: o("Ort") }),
 						/* @__PURE__ */ (0, _.jsx)("strong", { children: e.location || o("Wird bekanntgegeben") }),
 						/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung") }),
-						/* @__PURE__ */ (0, _.jsx)("strong", { children: ki(e.registrationStatus) }),
-						e.registrationOpenAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung ab") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Di(e.registrationOpenAt) })] }),
-						e.registrationCloseAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung bis") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Di(e.registrationCloseAt) })] })
+						/* @__PURE__ */ (0, _.jsx)("strong", { children: Oi(e.registrationStatus) }),
+						e.registrationOpenAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung ab") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Ei(e.registrationOpenAt) })] }),
+						e.registrationCloseAt && /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [/* @__PURE__ */ (0, _.jsx)("span", { children: o("Anmeldung bis") }), /* @__PURE__ */ (0, _.jsx)("strong", { children: Ei(e.registrationCloseAt) })] })
 					]
 				}),
 				e.registrationRequired && (e.externalRegistrationUrl ? /* @__PURE__ */ (0, _.jsx)("a", {
@@ -28279,6 +28353,6 @@ function Fi({ event: e, close: t, memberAccess: n }) {
 }
 //#endregion
 //#region wordpress/main.tsx
-var Ii = document.getElementById("strc-app");
-Ii && (0, g.createRoot)(Ii).render(/* @__PURE__ */ (0, _.jsx)(Si, {}));
+var Fi = document.getElementById("strc-app");
+Fi && (0, g.createRoot)(Fi).render(/* @__PURE__ */ (0, _.jsx)(xi, {}));
 //#endregion

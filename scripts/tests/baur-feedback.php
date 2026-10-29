@@ -52,7 +52,12 @@ namespace {
  function get_the_title(int $id):string{return get_post($id)->post_title;}
  function absint(mixed $v):int{return abs((int)$v);}
  function home_url(string $path=''):string{return 'https://qa.invalid'.$path;}
- function wp_mail(mixed ...$args):bool{$GLOBALS['mails'][]=$args;return $GLOBALS['mailSuccess'];}
+ function add_action(string $hook,callable $callback):void{$GLOBALS['hooks'][$hook][]=$callback;}
+ function remove_action(string $hook,callable $callback):void{$GLOBALS['hooks'][$hook]=array_filter($GLOBALS['hooks'][$hook]??[],static fn($saved)=>$saved!==$callback);}
+ function esc_html(string $v):string{return htmlspecialchars($v,ENT_QUOTES,'UTF-8');}
+ function esc_attr(string $v):string{return esc_html($v);}
+ function esc_url(string $v):string{return esc_html($v);}
+ function wp_mail(mixed ...$args):bool{$mailer=(object)['AltBody'=>''];foreach($GLOBALS['hooks']['phpmailer_init']??[] as $callback)$callback($mailer);$GLOBALS['mailAlternatives'][]=$mailer->AltBody;$GLOBALS['mails'][]=$args;return $GLOBALS['mailSuccess'];}
  function get_transient(string $key):mixed{return $GLOBALS['transients'][$key]??false;}
  function set_transient(string $key,mixed $value,int $ttl):bool{$GLOBALS['transients'][$key]=$value;return true;}
  $GLOBALS['currentUser']=1;$GLOBALS['libraryRead']=true;$GLOBALS['mailSuccess']=true;$GLOBALS['mails']=[];$GLOBALS['transients']=[];
@@ -103,10 +108,19 @@ namespace {
  $before=count($mails);invoke($market,'contactOnce',10,$request);
  check($mails[$before+1][0]===$users[2]->user_email,'Member receipt uses account address');
  check(in_array('Reply-To: QA name <qa@example.invalid>',$mails[$before][3],true),'Reply-To strips header punctuation');
- check(in_array('Content-Type: text/plain; charset=UTF-8',$mails[$before][3],true),'Contact mail has UTF-8 header');
+ check(in_array('Content-Type: text/html; charset=UTF-8',$mails[$before][3],true),'Contact mail has UTF-8 header');
  check(in_array('From: Swiss TR-Club <no-reply@swisstrclub.ch>',$mails[$before+1][3],true),'Receipt has club sender');
  $currentUser=0;$request['requestId']='00000000-0000-4000-8000-000000000005';$before=count($mails);invoke($market,'contactOnce',10,$request);
  check(count($mails)===$before+2&&$mails[$before+1][0]===$request['email'],'Guest still receives one confirmation');
+ check(str_contains(end($mailAlternatives),'Synthetic request')&&!str_contains(end($mailAlternatives),'<table'),'HTML contact receipt includes plain-text alternative');
+ check(empty($hooks['phpmailer_init']),'Contact mail removes temporary text-alternative hook');
+ $meta[10]['strc_ad_price']='1200';$meta[10]['strc_ad_category']='Fahrzeuge';$meta[10]['strc_ad_details']=['models'=>['TR6'],'year'=>'1973'];
+ $contact=['name'=>'<b>QA</b>','email'=>'qa@example.invalid','phone'=>'','message'=>'<img src=x onerror=alert(1)>'];
+ [$subject,$html,$plain]=invoke($market,'contactMail',10,$contact,false,false);
+ check(str_contains($subject,'CHF 1’200')&&str_contains($html,'TR6')&&str_contains($plain,'1973')&&str_contains($plain,'#marktplatz/10'),'Contact mail carries price, model, year and direct link');
+ check(str_contains($html,'&lt;img src=x onerror=alert(1)&gt;')&&!str_contains($html,'<img src=x'),'Contact message is escaped in HTML');
+ [$subject,$html,$plain]=invoke($market,'contactMail',10,$contact,true,true);
+ check(str_contains($subject,'ta demande')&&str_contains($html,'Véhicules')&&str_contains($plain,'Copie de ton message'),'French contact receipt is localized');
  $userMeta[1]['strc_ui_language']='fr';$posts[10]->post_status='pending';invoke($market,'receipt',10);
  check(str_contains(end($mails)[1],'a été reçue')&&str_contains(end($mails)[2],'#marktplatz/meine/10'),'French pending receipt includes direct ad link');
  $currentUser=1;$capabilities=['strc_access_member_area'=>true,'review-library'=>true];$posts[20]->post_status='publish';

@@ -21,6 +21,7 @@ final class GalleryRetention
             foreach($files as &$file){
                 $uploaded=strtotime($file['uploadedAt']??'');
                 if(!$uploaded||!empty($file['retainOriginal'])||!empty($file['originalExpired'])||strtotime('+'.self::MONTHS.' months',$uploaded)>time())continue;
+                if(!get_option('strc_web_image_'.($file['key']??''))&&!empty($file['mime'])&&str_starts_with((string)$file['mime'],'image/'))$store->webCopy($file);
                 if($store->expireOriginal($file)){$file['originalExpired']=true;$changed=true;}
             }unset($file);
             if($changed)update_post_meta($post->ID,'strc_private_files',$files);
