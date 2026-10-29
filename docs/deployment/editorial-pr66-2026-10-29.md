@@ -1,5 +1,10 @@
 # Redaktionsänderungen: PR 66
 
+Diese Notiz beschreibt die damalige GitHub-Integration. Die Angaben zur
+verlängerten Fotoaufbewahrung werden durch Peters Entscheid in PR 69 ersetzt.
+«Keine Veröffentlichung … in diesem Arbeitsschritt» bedeutet ausschliesslich,
+dass jener GitHub-Schritt keine Dateien auf dem Server verändert hat.
+
 ## Übernommen
 
 - Galerie: neue Bilder sofort für Mitglieder sichtbar, Moderation kann ausblenden;

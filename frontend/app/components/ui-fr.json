@@ -1643,5 +1643,6 @@
   "Bild wählen": "Choisir une image",
   "Automatischen Wechsel pausieren": "Mettre le défilement automatique en pause",
   "Automatischen Wechsel fortsetzen": "Reprendre le défilement automatique",
-  "Plakat vergrössern": "Agrandir l’affiche"
+  "Plakat vergrössern": "Agrandir l’affiche",
+  "Uploaddateien werden vier Monate nach dem Upload automatisch gelöscht. Die Webversion bleibt in der Galerie.": "Les fichiers importés sont supprimés automatiquement quatre mois après l’importation. La version web reste dans la galerie."
 }

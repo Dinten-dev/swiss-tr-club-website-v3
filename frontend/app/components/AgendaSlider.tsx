@@ -14,10 +14,10 @@ export default function AgendaSlider(){
  const slides=((values.agenda?.slides??[]) as ContentImage[]).filter(slide=>slide.url);
  const reduced=useSyncExternalStore(subscribeMotion,()=>matchMedia(motionQuery).matches,()=>true);
  const visible=useSyncExternalStore(subscribeVisibility,()=>!document.hidden,()=>false);
- const [index,setIndex]=useState(0);const [hovered,setHovered]=useState(false);const [focused,setFocused]=useState(false);const [stopped,setStopped]=useState(false);
+ const [index,setIndex]=useState(0);const [hovered,setHovered]=useState(false);const [focused,setFocused]=useState(false);
  const swipe=useRef<number|null>(null);
  const count=slides.length;const current=count?index%count:0;
- useEffect(()=>{if(reduced||hovered||focused||stopped||!visible||count<2)return;const timer=window.setTimeout(()=>setIndex(value=>(value+1)%count),6000);return()=>window.clearTimeout(timer);},[reduced,hovered,focused,stopped,visible,count,index]);
+ useEffect(()=>{if(reduced||hovered||focused||!visible||count<2)return;const timer=window.setTimeout(()=>setIndex(value=>(value+1)%count),6000);return()=>window.clearTimeout(timer);},[reduced,hovered,focused,visible,count,index]);
  if(!count)return null;
  const go=(step:number)=>setIndex((current+step+count)%count);
  const alt=(slide:ContentImage)=>language==='fr'&&slide.altFr?slide.altFr:slide.alt;
@@ -35,7 +35,6 @@ export default function AgendaSlider(){
   </div>
   <div className="agenda-slider-controls">
    {count>1&&<div className="agenda-slider-dots" role="group" aria-label={t('Bild wählen')}>{slides.map((slide,position)=><button key={slide.url+position} type="button" aria-label={alt(slide)||`${t('Bild')} ${position+1}`} aria-current={position===current} onClick={()=>setIndex(position)}/>)}</div>}
-   {count>1&&!reduced&&<button type="button" className="club-secondary" aria-pressed={stopped} onClick={()=>setStopped(value=>!value)}>{t(stopped?'Automatischen Wechsel fortsetzen':'Automatischen Wechsel pausieren')}</button>}
    <a href={assetUrl(slides[current].url)} target="_blank" rel="noopener noreferrer">{t('Plakat vergrössern')}</a>
   </div>
  </section>;
