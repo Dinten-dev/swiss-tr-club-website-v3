@@ -147,7 +147,7 @@ const labelSide:Record<string,LabelPlacement>={nordwestschweiz:['end',-14,5],mit
 export function HomeRegionMap({regions}:{regions:{name:string;slug:string}[]}){
  const {text:c}=useSiteContent();
  const placed=regions.filter(region=>regionPins[region.slug]);
- const [selected,setSelected]=useState('');
+ const [selected,setSelected]=useState('innerschweiz');
  const current=placed.find(region=>region.slug===selected)||placed[0];
  if(!current)return null;
  const intro=(slug:string)=>c(`region-${slug}.intro`,c('regions.intro'));
