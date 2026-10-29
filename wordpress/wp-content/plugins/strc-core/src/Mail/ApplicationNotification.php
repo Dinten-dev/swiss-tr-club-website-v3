@@ -84,7 +84,8 @@ final class ApplicationNotification
                     return;
                 }
                 $base = rtrim(defined('STRC_FRONTEND_ORIGIN') ? STRC_FRONTEND_ORIGIN : home_url(), '/');
-                $body = "Sie haben eine neue Anmeldung erhalten.\n\nBitte prüfen Sie die Anmeldung im Clubportal und bestätigen Sie die Aufnahme.\n\nZum Clubportal:\n{$base}/#antraege\n\nSwiss TR-Club\n";
+                $mail = \SwissTRClub\Core\Mail\MailTemplates::render('internal.application', 'de', array('link' => $base . '/#antraege'));
+                $body = $mail['body'] . "\n";
                 $headers = ['Content-Type: text/plain; charset=UTF-8', 'From: Swiss TR-Club <no-reply@swisstrclub.ch>'];
                 $status['state'] = 'sending';
                 $status['attempts'] = (int)($status['attempts'] ?? 0)+1;
@@ -92,8 +93,8 @@ final class ApplicationNotification
                 $status['payloadHash'] = hash('sha256', wp_json_encode($payload));
                 $this->save($id, $status); // Persist before invoking the transport.
                 try {
-                    \SwissTRClub\Core\Mail\MailLog::context('Mitgliedschaft: neue Anmeldung (Verwaltung)');
-                    $accepted = wp_mail($recipient, 'Swiss TR-Club: Neue Anmeldung', $body, $headers);
+                    \SwissTRClub\Core\Mail\MailLog::context('internal.application');
+                    $accepted = wp_mail($recipient, $mail['subject'], $body, $headers);
                     $status['state'] = $accepted ? 'accepted' : 'failed';
                     if ($accepted) $status['acceptedAt'] = gmdate(DATE_ATOM);
                 } catch (\Throwable $error) {

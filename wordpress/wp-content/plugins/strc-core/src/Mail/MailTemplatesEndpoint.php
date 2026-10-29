@@ -123,7 +123,7 @@ final class MailTemplatesEndpoint
         $subject = strtr($clean[$language]['subject'], $replace);
         $body = strtr($clean[$language]['body'], $replace);
         if (! empty($entry['note'])) $body .= "\n\n[" . ($language === 'fr' ? 'Exemple' : 'Beispiel') . '] ' . $entry['note'];
-        if (! $send) return array('subject' => $subject, 'heading' => strtr($clean[$language]['heading'], $replace), 'body' => $body);
+        if (! $send) return array('subject' => $subject, 'heading' => strtr($clean[$language]['heading'], $replace), 'body' => $body, 'html' => empty($entry['woo']) ? MailLayout::layout($subject, MailLayout::textToHtml($body)) : '');
         $email = wp_get_current_user()->user_email;
         if (! is_email($email)) throw new \InvalidArgumentException('Für dein Konto ist keine gültige E-Mail-Adresse hinterlegt.');
         MailLog::context('Testmail: ' . MailTemplates::label($key));

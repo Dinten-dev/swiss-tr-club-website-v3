@@ -29,15 +29,15 @@ export default function MailTemplatesEditor(){
 
 function TemplateForm({template,nonce,email,back,saved}:{template:Template;nonce:string;email:string;back:()=>void;saved:(list:Template[])=>void}){
  const [values,setValues]=useState<{de:Text;fr:Text}>({de:{...template.de},fr:{...template.fr}});const [enabled,setEnabled]=useState(!!template.enabled);
- const [language,setLanguage]=useState<'de'|'fr'>('de');const [busy,setBusy]=useState(false);const [notice,setNotice]=useState('');const [error,setError]=useState('');const [preview,setPreview]=useState<Text|null>(null);
+ const [language,setLanguage]=useState<'de'|'fr'>('de');const [busy,setBusy]=useState(false);const [notice,setNotice]=useState('');const [error,setError]=useState('');const [preview,setPreview]=useState<(Text&{html?:string})|null>(null);
  const text=values[language];
  const change=(field:keyof Text,value:string)=>{setValues(current=>({...current,[language]:{...current[language],[field]:value}}));setPreview(null);setNotice('');};
  const missing=template.woo?[]:template.required.filter(name=>!(text.subject+text.body).includes('{{'+name+'}}'));
  async function call(operation:'save'|'reset'|'preview'|'test'){
   setBusy(true);setError('');setNotice('');
   try{
-   const result=await mutate<{message?:string;templates?:Template[];subject?:string;heading?:string;body?:string}>(action,nonce,fields({operation,key:template.key,language,values:JSON.stringify(values),enabled:enabled?'1':'0'}));
-   if(operation==='preview'){setPreview({subject:result.subject||'',heading:result.heading||'',body:result.body||''});return;}
+   const result=await mutate<{message?:string;templates?:Template[];subject?:string;heading?:string;body?:string;html?:string}>(action,nonce,fields({operation,key:template.key,language,values:JSON.stringify(values),enabled:enabled?'1':'0'}));
+   if(operation==='preview'){setPreview({subject:result.subject||'',heading:result.heading||'',body:result.body||'',html:result.html||''});return;}
    if(result.templates){saved(result.templates);const next=result.templates.find(row=>row.key===template.key);if(next&&operation==='reset')setValues({de:{...next.de},fr:{...next.fr}});}
    setNotice(result.message||'');
   }catch(reason){setError((reason as Error).message);}finally{setBusy(false);}
@@ -56,7 +56,7 @@ function TemplateForm({template,nonce,email,back,saved}:{template:Template;nonce
   <div className="club-actions"><button type="button" className="market-primary" disabled={busy||missing.length>0} onClick={()=>void call('save')}>{t(busy?'Wird gespeichert …':'Speichern')}</button><button type="button" className="club-secondary" disabled={busy} onClick={()=>void call('preview')}>{t('Vorschau')}</button><button type="button" className="club-secondary" disabled={busy||missing.length>0||!email} onClick={()=>void call('test')}>{t('Testmail an mich')}</button>{template.customized&&<button type="button" className="market-text-button" disabled={busy} onClick={()=>{if(window.confirm(t('Standardtext wiederherstellen? Deine Anpassung (DE und FR) wird verworfen.')))void call('reset');}}>{t('Standardtext wiederherstellen')}</button>}<button type="button" className="market-text-button" onClick={back}>{t('Abbrechen')}</button></div>
   {email&&<p className="club-hint">{t('Die Testmail geht nur an')} {email}.</p>}
   {notice&&<p role="status" className="club-notice">{t(notice)}</p>}{error&&<p role="alert" className="collection-state error">{error}</p>}
-  {preview&&<div className="mail-preview" aria-label={t('Vorschau')}><p><strong>{t('Betreff')}:</strong> {preview.subject||t('(WooCommerce-Standard)')}</p>{template.woo&&<p><strong>{t('Überschrift')}:</strong> {preview.heading||t('(WooCommerce-Standard)')}</p>}<pre>{preview.body||t('(WooCommerce-Standard)')}</pre></div>}
+  {preview&&<div className="mail-preview" aria-label={t('Vorschau')}><p><strong>{t('Betreff')}:</strong> {preview.subject||t('(WooCommerce-Standard)')}</p>{template.woo&&<p><strong>{t('Überschrift')}:</strong> {preview.heading||t('(WooCommerce-Standard)')}</p>}{preview.html?<iframe className="mail-preview-frame" title={t('Vorschau')} sandbox="" srcDoc={preview.html}/>:<pre>{preview.body||t('(WooCommerce-Standard)')}</pre>}</div>}
  </div>;
 }
 

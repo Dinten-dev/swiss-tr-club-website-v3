@@ -191,23 +191,9 @@ final class ShopEndpoint
             }
 
             foreach ($recipients as $key => $recipient) {
-                $subject = sprintf('Neue Bestellung im TR-Shop: #%s', $order->get_order_number());
-                $body = array(
-                    'Eine Bestellung ist im TR-Shop eingegangen. Zahlungsstatus: '.$order->get_status(),
-                    '',
-                    'Bestellung: #' . $order->get_order_number(),
-                    'Artikel: ' . implode("\n", $recipient['items']),
-                    'Gesamtbetrag: ' . wp_strip_all_tags(wc_price((float) $order->get_total(), array('currency' => $order->get_currency()))),
-                    'Bestellt von: ' . trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
-                    'E-Mail: ' . $order->get_billing_email(),
-                    '',
-                    'Lieferadresse:',
-                    self::shippingAddress($order),
-                    'Telefon: ' . ((method_exists($order, 'get_shipping_phone') ? $order->get_shipping_phone() : '') ?: $order->get_billing_phone() ?: 'nicht angegeben'),
-                    '',
-                    'Bitte Versand und Übergabe des Artikels veranlassen.',
-                );
-                \SwissTRClub\Core\Mail\MailLog::context('Shop: Hinweis an Kasse');
+                $mail = \SwissTRClub\Core\Mail\MailTemplates::render('internal.shop_order', 'de', array('bestellnummer' => $order->get_order_number(), 'status' => $order->get_status(), 'artikel' => implode("\n", $recipient['items']), 'betrag' => wp_strip_all_tags(wc_price((float) $order->get_total(), array('currency' => $order->get_currency()))), 'kunde' => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()), 'email' => $order->get_billing_email(), 'lieferadresse' => self::shippingAddress($order), 'telefon' => ((method_exists($order, 'get_shipping_phone') ? $order->get_shipping_phone() : '') ?: $order->get_billing_phone() ?: 'nicht angegeben')));
+                $subject = $mail['subject'];
+                $body = array($mail['body']);
                 if (wp_mail($recipient['email'], $subject, implode("\n", $body), array('Content-Type: text/plain; charset=UTF-8'))) {
                     $sent[$key] = current_time('mysql', true);
                     $order->update_meta_data('_strc_shop_notifications_sent', $sent);

@@ -3682,3 +3682,4 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .mail-log-table th,.mail-log-table td{padding:8px 10px;border-bottom:1px solid #e3eaf0;text-align:left;vertical-align:top}
 .mail-log-table tr.is-failed td{background:#fdf1ef;color:#7a1d16}
 @media(max-width:640px){.mail-log-table th:nth-child(2),.mail-log-table td:nth-child(2){min-width:140px}}
+.mail-preview-frame{width:100%;min-height:520px;border:1px solid #d9e3ec;border-radius:8px;margin-top:8px;background:#eef2f5}
