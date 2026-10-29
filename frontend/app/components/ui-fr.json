@@ -1672,5 +1672,16 @@
   "Wird erstellt …": "Création en cours …",
   "Rechnung erstellen": "Créer la facture",
   "noch nicht erstellt": "pas encore créée",
-  "Rechnung herunterladen (PDF)": "Télécharger la facture (PDF)"
+  "Rechnung herunterladen (PDF)": "Télécharger la facture (PDF)",
+  "Dieses Bild auf der Startseite zeigen": "Afficher cette image sur la page d’accueil",
+  "Auf der Startseite": "Sur la page d’accueil",
+  "Clubfoto": "Photo du club",
+  "Diese ältere Buchung enthält ein Mitglied als weitere Person. Mitglieder melden sich neu selbst an – bitte diese Person entfernen.": "Cette ancienne réservation contient un membre comme personne supplémentaire. Les membres s’inscrivent désormais eux-mêmes – merci de retirer cette personne.",
+  "Gäste müssen vom Organisator genehmigt werden.": "Les invités doivent être approuvés par l’organisateur.",
+  "＋ Weitere Person (Gast)": "＋ Personne supplémentaire (invité·e)",
+  "Anderes Mitglied": "Autre membre",
+  "Gewählt": "Sélectionné",
+  "Mitglied über die Suche auswählen (Name oder Mitgliedsnummer).": "Choisir le membre via la recherche (nom ou numéro de membre).",
+  "Bitte das begleitende Mitglied über die Suche auswählen.": "Merci de choisir le membre accompagnant via la recherche.",
+  "1 = eine weitere Person (Gast), optional mit Begleitung (Gast). 0 = keine weiteren Personen.": "1 = une personne supplémentaire (invité·e), éventuellement accompagnée (invité·e). 0 = aucune personne supplémentaire."
 }

@@ -3650,3 +3650,12 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .shop-product-edit{margin-top:6px}
 .shop-invoice-note{display:block;margin-top:4px;color:#5a6b78}
 @media(max-width:640px){.shop-product-rows li{flex-wrap:wrap}.shop-product-rows li .club-secondary{width:100%}}
+
+/* Anmeldung: gewähltes begleitendes Mitglied, Hinweis zu Gästen. */
+.registration-member-chosen{margin:6px 0 10px;padding:10px 12px;border:1px solid #cfdfec;border-radius:8px;background:#f3f8fc}
+.registration-member-chosen .market-text-button{margin-left:8px}
+.registration-guest-add{display:grid;gap:6px;justify-items:start;margin:8px 0}
+/* Galerie: Startseiten-Auswahl je Bild. */
+.thumb-pick{position:relative}
+.thumb-home{position:absolute;right:6px;top:6px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;font-size:14px;line-height:1;box-shadow:0 1px 4px #0004;pointer-events:none}
+.album-home-switch{margin:10px 0}
