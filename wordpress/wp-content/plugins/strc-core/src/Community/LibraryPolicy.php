@@ -51,9 +51,11 @@ final class LibraryPolicy
         $ids=get_posts(['post_type'=>'strc_document','post_status'=>['publish','pending','private','draft','trash'],'posts_per_page'=>200,'fields'=>'ids','meta_query'=>[['key'=>'strc_document_type','value'=>array_keys($map),'compare'=>'IN']]]);
         foreach($ids as $id){
             $new=$map[(string)get_post_meta((int)$id,'strc_document_type',true)]??'';if($new==='')continue;
-            update_post_meta((int)$id,'strc_document_type',$new);
             $data=get_post_meta((int)$id,'strc_form_classification',true);
-            if(is_array($data)){$data['documentType']=$new;$data['access']='restricted';update_post_meta((int)$id,'strc_form_classification',$data);}
+            $data=is_array($data)?$data:[];$data['documentType']=$new;$data['access']='restricted';
+            update_post_meta((int)$id,'strc_form_classification',$data);
+            $post=get_post((int)$id);
+            self::index((int)$id,$data,$post?$post->post_title:'',$post?$post->post_content:'',get_post_meta((int)$id,'strc_private_files',true)?:[]);
         }
         if(count($ids)<200)update_option('strc_board_types_v1',1,false);
     }
@@ -92,6 +94,7 @@ final class LibraryPolicy
     public static function classesForImport(): array { return ['open','limited','restricted']; }
     public static function type(string $value): string
     {
+        $value=['board'=>'board-meetings','confidential'=>'board-finance'][$value]??$value;
         if(in_array($value,array_column(self::types(),'key'),true))return $value;
         return ['TR-Magazin'=>'magazine','Technik / Anleitung'=>'technical'][$value]??'legacy';
     }

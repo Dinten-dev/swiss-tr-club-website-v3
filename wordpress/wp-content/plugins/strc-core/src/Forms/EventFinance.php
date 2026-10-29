@@ -31,7 +31,7 @@ final class EventFinance
                 });wp_send_json_success(['message'=>'Teilnahme bestätigt. Ein Teilnahmebeitrag wird separat in Rechnung gestellt.']);
             }
             if ($op==='reconcile') {
-                if (!$finance&&!RegionalEventAccess::canEdit($eventId)) throw new \RuntimeException('Nur die Kasse darf Zahlungen abstimmen.',403);
+                if (!$finance) throw new \RuntimeException('Nur die Kasse darf Zahlungen abstimmen.',403);
                 FormStore::locked('event-'.$eventId, static function () use ($input,$eventId) {
                     $post=get_post(absint($input['id']??0));
                     if (!$post||$post->post_type!=='strc_registration'||(int)$post->post_parent!==$eventId) throw new \RuntimeException('Anmeldung nicht gefunden.',404);
@@ -59,7 +59,7 @@ final class EventFinance
                 $data=EventPayments::present($post,FormStore::data($post)); $member=get_userdata($post->post_author);
                 $rows[]=['id'=>(int)$post->ID,'revision'=>FormStore::revision($post),'name'=>$member?$member->display_name:'','email'=>$member?$member->user_email:'','phone'=>$member?(string)get_user_meta($member->ID,'strc_phone',true):'','participants'=>implode(', ',array_column($data['participants'],'name')),'vehicle'=>$data['vehicle']??null,'room'=>$data['room']??'','notes'=>$data['notes']??'','meals'=>array_values(array_filter(array_map(static fn($p)=>empty($p['meal'])?'':$p['name'].': '.$p['meal'],$data['participants']))),'total'=>$data['total'],'state'=>$data['state'],'paymentMethod'=>$data['paymentMethod'],'paymentStatus'=>$data['paymentStatus'],'financeAudit'=>$finance?(FormStore::data($post)['financeAudit']??[]):[],'invoiceNumber'=>(string)get_post_meta($post->ID,'strc_invoice_number',true),'invoiceUrl'=>EventInvoice::downloadUrl((int)$post->ID)];
             }
-            wp_send_json_success(['rows'=>$rows,'canPromote'=>RegionalEventAccess::canEdit($eventId),'canReconcile'=>$finance||RegionalEventAccess::canEdit($eventId),'onlineReady'=>\SwissTRClub\Core\Integrations\Zahls\ZahlsClient::ready(),'treasuryReady'=>is_email(defined('STRC_EVENT_TREASURY_EMAIL')?(string)STRC_EVENT_TREASURY_EMAIL:(string)getenv('STRC_EVENT_TREASURY_EMAIL'))!==false,'nonce'=>wp_create_nonce('strc_event_finance')]);
+            wp_send_json_success(['rows'=>$rows,'canPromote'=>RegionalEventAccess::canEdit($eventId),'canReconcile'=>$finance,'onlineReady'=>\SwissTRClub\Core\Integrations\Zahls\ZahlsClient::ready(),'treasuryReady'=>is_email(defined('STRC_EVENT_TREASURY_EMAIL')?(string)STRC_EVENT_TREASURY_EMAIL:(string)getenv('STRC_EVENT_TREASURY_EMAIL'))!==false,'nonce'=>wp_create_nonce('strc_event_finance')]);
         } catch (\InvalidArgumentException $e) { AjaxRequest::fail($e->getMessage(),422); }
           catch (\RuntimeException $e) { AjaxRequest::fail($e->getMessage(),in_array($e->getCode(),[403,404,409],true)?$e->getCode():503); }
     }
