@@ -223,6 +223,7 @@ final class ApplicationAdmission
                 'library_url'=>$base.'/#bibliothek','marketplace_url'=>$base.'/#marktplatz','contact_url'=>$base.'/#kontakt',
             ));
             $d['contacts'][$slot]['mailState']='sending';$this->save($id,$d);
+            \SwissTRClub\Core\Mail\MailLog::context('member.welcome');
             try{$sent=wp_mail($p['email'],$message['subject'],$message['body'],['Content-Type: text/plain; charset=UTF-8']);}catch(\Throwable $e){$d['state']='mail_uncertain';$d['error']='Mailversand unterbrochen. Bitte Mailprotokoll prüfen.';$this->save($id,$d);return;}
             $d['contacts'][$slot]['mailState']=$sent?'sent':'failed';
             if($sent)$d['contacts'][$slot]['mailAcceptedAt']=gmdate(DATE_ATOM);

@@ -97,7 +97,7 @@ namespace {
   public function update(string $table,array $values,array $where):int|false{if($this->fail)return false;$stmt=$this->db->prepare('UPDATE '.$table.' SET '.implode(',',array_map(fn($k)=>$k.'=?',array_keys($values))).' WHERE '.implode(' AND ',array_map(fn($k)=>$k.'=?',array_keys($where))));$stmt->execute([...array_values($values),...array_values($where)]);return $stmt->rowCount();}
  }
  $base=dirname(__DIR__,2).'/wordpress/wp-content/plugins/strc-core/src/';
- foreach(['Http/AjaxRequest.php','Forms/FormFields.php','Forms/FormStore.php','Editorial/EditorialAccess.php','Events/RegionalEventAccess.php','Forms/EventFinance.php','Community/LibraryPolicy.php','Community/CommunityEndpoint.php','Community/SubmissionNotifications.php','Mail/NewsletterEndpoint.php']as$file)require $base.$file;
+ foreach(['Mail/MailLog.php','Http/AjaxRequest.php','Forms/FormFields.php','Forms/FormStore.php','Editorial/EditorialAccess.php','Events/RegionalEventAccess.php','Forms/EventFinance.php','Community/LibraryPolicy.php','Community/CommunityEndpoint.php','Community/SubmissionNotifications.php','Mail/NewsletterEndpoint.php']as$file)require $base.$file;
  function callPrivate(object $target,string $method,mixed ...$args):mixed{return (new ReflectionMethod($target,$method))->invoke($target,...$args);}
  $checks=[];
  function check(bool $pass,string $label):void{if(!$pass)throw new RuntimeException('FAILED: '.$label);$GLOBALS['checks'][]=$label;}

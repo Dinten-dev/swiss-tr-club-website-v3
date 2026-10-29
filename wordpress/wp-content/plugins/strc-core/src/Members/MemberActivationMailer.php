@@ -27,8 +27,8 @@ final class MemberActivationMailer
             'wp-login.php?action=rp&key=' . rawurlencode($key) . '&login=' . rawurlencode($user->user_login),
             'login'
         );
-        $message = "Guten Tag {$user->display_name}\n\nIhr Konto beim Swiss TR-Club ist vorbereitet. Legen Sie über folgenden sicheren Link Ihr persönliches Passwort fest:\n\n{$url}\n\nDer Link ist zeitlich begrenzt und nur einmal verwendbar.";
-        if (! wp_mail($user->user_email, 'Ihr Konto beim Swiss TR-Club aktivieren', $message)) {
+        $mail = \SwissTRClub\Core\Mail\MailTemplates::render('member.activation', \SwissTRClub\Core\Http\UserLanguage::french((int) $user->ID) ? 'fr' : 'de', array('name' => $user->display_name, 'link' => $url));
+        if (! wp_mail($user->user_email, $mail['subject'], $mail['body'])) {
             throw new RuntimeException('Aktivierungs-E-Mail konnte nicht versendet werden.');
         }
         update_user_meta($userId, 'strc_activation_sent_at', time());

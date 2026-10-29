@@ -70,7 +70,8 @@ namespace {
   public function get_results(string $sql,string $format):array{return array_map(fn($row)=>$row+['display_name'=>get_userdata($row['user_id'])->display_name],array_values($GLOBALS['memberships']));}
  };
  $base=dirname(__DIR__,2).'/wordpress/wp-content/plugins/strc-core/src/';
- foreach(['Http/UserLanguage.php','Forms/FormFields.php','Members/MembershipTypePolicy.php','Forms/EventPayments.php','Forms/EventRegistration.php','Community/CommunityEndpoint.php','Marketplace/MarketplaceEndpoint.php','Events/RegionDirectory.php','Integrations/Fairgate/FairgateApplications.php']as$file)require $base.$file;
+ if(!function_exists('get_option')){function get_option(string $key,mixed $default=false):mixed{return $GLOBALS['options'][$key]??$default;}}
+ foreach(['Mail/WelcomeMailSettings.php','Mail/MailLog.php','Mail/MailTemplates.php','Http/UserLanguage.php','Forms/FormFields.php','Members/MembershipTypePolicy.php','Forms/EventPayments.php','Forms/EventRegistration.php','Community/CommunityEndpoint.php','Marketplace/MarketplaceEndpoint.php','Events/RegionDirectory.php','Integrations/Fairgate/FairgateApplications.php']as$file)require $base.$file;
  function invoke(object $object,string $method,mixed ...$args):mixed{return (new ReflectionMethod($object,$method))->invoke($object,...$args);}
  $checks=[];
  function check(bool $condition,string $label):void{if(!$condition)throw new RuntimeException('FAILED: '.$label);$GLOBALS['checks'][]=$label;}

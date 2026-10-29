@@ -92,6 +92,7 @@ final class ApplicationNotification
                 $status['payloadHash'] = hash('sha256', wp_json_encode($payload));
                 $this->save($id, $status); // Persist before invoking the transport.
                 try {
+                    \SwissTRClub\Core\Mail\MailLog::context('Mitgliedschaft: neue Anmeldung (Verwaltung)');
                     $accepted = wp_mail($recipient, 'Swiss TR-Club: Neue Anmeldung', $body, $headers);
                     $status['state'] = $accepted ? 'accepted' : 'failed';
                     if ($accepted) $status['acceptedAt'] = gmdate(DATE_ATOM);

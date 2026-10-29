@@ -3659,3 +3659,26 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .thumb-pick{position:relative}
 .thumb-home{position:absolute;right:6px;top:6px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;font-size:14px;line-height:1;box-shadow:0 1px 4px #0004;pointer-events:none}
 .album-home-switch{margin:10px 0}
+
+/* Redaktion: E-Mail-Vorlagen und Versandprotokoll. */
+.mail-templates{display:grid;gap:14px}
+.mail-tabs{margin:4px 0 8px}
+.mail-tabs button{border:0;background:none;padding:10px 14px;font:inherit;font-weight:700;color:var(--blue);cursor:pointer;border-bottom:3px solid transparent}
+.mail-tabs button[aria-selected="true"]{border-bottom-color:var(--red);color:var(--navy)}
+.mail-group h3{margin:10px 0 8px}
+.mail-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.mail-list .editorial-card{width:100%;text-align:left}
+.mail-form{display:grid;gap:12px;max-width:860px}
+.mail-form h3{margin:0}
+.mail-form textarea{font:15px/1.5 var(--font-sans)}
+.mail-language{display:flex;gap:8px}
+.mail-placeholders{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0;font-size:14px}
+.mail-chip{border:1px solid #cfdfec;background:#f3f8fc;border-radius:999px;padding:3px 10px;font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--blue);cursor:pointer}
+.mail-chip.is-required{border-color:var(--red);color:var(--red)}
+.mail-preview{border:1px solid #d9e3ec;border-radius:10px;padding:14px 16px;background:#fff}
+.mail-preview pre{white-space:pre-wrap;font:15px/1.5 var(--font-sans);margin:8px 0 0}
+.mail-log-table{overflow-x:auto}
+.mail-log-table table{width:100%;border-collapse:collapse;font-size:14px}
+.mail-log-table th,.mail-log-table td{padding:8px 10px;border-bottom:1px solid #e3eaf0;text-align:left;vertical-align:top}
+.mail-log-table tr.is-failed td{background:#fdf1ef;color:#7a1d16}
+@media(max-width:640px){.mail-log-table th:nth-child(2),.mail-log-table td:nth-child(2){min-width:140px}}

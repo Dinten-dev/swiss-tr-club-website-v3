@@ -207,6 +207,7 @@ final class ShopEndpoint
                     '',
                     'Bitte Versand und Übergabe des Artikels veranlassen.',
                 );
+                \SwissTRClub\Core\Mail\MailLog::context('Shop: Hinweis an Kasse');
                 if (wp_mail($recipient['email'], $subject, implode("\n", $body), array('Content-Type: text/plain; charset=UTF-8'))) {
                     $sent[$key] = current_time('mysql', true);
                     $order->update_meta_data('_strc_shop_notifications_sent', $sent);

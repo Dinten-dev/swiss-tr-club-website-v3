@@ -38,7 +38,7 @@ export default function Breadcrumbs({page,subroute}:{page:string;subroute:string
  if(page==='clubdocs')parents.push(['#bibliothek','Bibliothek']);
  const detail=page==='regions'&&subroute?regionNames[subroute]||subroute.split('-').map(v=>v.charAt(0).toUpperCase()+v.slice(1)).join(' ')
   :page==='models'&&subroute?text('model-'+subroute+'.title',subroute.toUpperCase())
-  :page==='editorial'&&subroute?(subroute==='people'?'Moderatorrollen':text(subroute+'.title','Seite bearbeiten'))
+  :page==='editorial'&&subroute?(subroute==='people'?'Moderatorrollen':subroute==='mails'?'E-Mail-Vorlagen':text(subroute+'.title','Seite bearbeiten'))
   :page==='market'?marketSections[subroute]||''
   :page==='shop'?shopSections[subroute]||''
   :'';

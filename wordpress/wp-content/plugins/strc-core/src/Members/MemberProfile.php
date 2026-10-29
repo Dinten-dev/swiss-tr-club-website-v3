@@ -251,6 +251,7 @@ final class MemberProfile
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
         $body=$fr?"Bonjour {$user->first_name}\n\nVotre affiliation en couple avec {$copilot} est désormais active. Nouvelle cotisation annuelle : ".(string)($p['fee']??'CHF 160.–').". La facture suit séparément.\n\nProfil : {$base}/#profil\n\nSwiss TR-Club\n"
             :"Hallo {$user->first_name}\n\nEure Paarmitgliedschaft mit {$copilot} ist jetzt aktiv. Neuer Jahresbeitrag: ".(string)($p['fee']??'CHF 160.–').". Die Rechnung folgt separat.\n\nProfil: {$base}/#profil\n\nSwiss TR-Club\n";
+        \SwissTRClub\Core\Mail\MailLog::context('Mitgliedschaft: Paarmitgliedschaft aktiv');
         try{$accepted=wp_mail($user->user_email,$fr?'Swiss TR-Club : affiliation en couple active':'Swiss TR-Club: Paarmitgliedschaft aktiv',$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
         catch(\Throwable $error){$status['state']='uncertain';}
         update_post_meta($form,'strc_couple_member_notification',$status);
@@ -275,6 +276,7 @@ final class MemberProfile
         $lines[]='Neuer Jahresbeitrag: '.(string)($p['fee']??'CHF 160.–');
         $lines[]='Aktiv seit: '.wp_date('d.m.Y');
         $lines=array_merge($lines,["","Bitte den Beitrag für die Rechnungsstellung berücksichtigen.","","Swiss TR-Club"]);
+        \SwissTRClub\Core\Mail\MailLog::context('Mitgliedschaft: neue Paarmitgliedschaft (Verwaltung)');
         try{$accepted=wp_mail($status['recipients'],'Swiss TR-Club: Neue Paarmitgliedschaft – Beitrag anpassen',implode("\n",$lines)."\n",['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
         catch(\Throwable $error){$status['state']='uncertain';}
         update_post_meta($form,'strc_couple_treasurer_notification',$status);
@@ -287,6 +289,7 @@ final class MemberProfile
         update_post_meta($form,'strc_couple_notification',$status);
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
         $body="Neuer Antrag: Wechsel zur Paarmitgliedschaft\n\nMitglied: {$member}\nCo-Pilot: {$copilot}\n\n".($inFairgate?"Die Angaben des Co-Piloten stehen in Fairgate beim Mitglied unter «Haushalt/Partner» (Co-Pilot-Felder) bereit. Bitte dort prüfen und den Co-Piloten als Paarmitglied verbinden.":"Die Angaben des Co-Piloten konnten nicht automatisch nach Fairgate übertragen werden; sie stehen auf der Website unter «Anträge bearbeiten». Bitte in Fairgate erfassen und den Co-Piloten als Paarmitglied verbinden.")." Beim nächsten Abgleich wird die Paarmitgliedschaft auf der Website aktiv; das Mitglied und der Kassier werden dann automatisch informiert.\n\nAlle Angaben und Rückfragen unter «Anträge bearbeiten» → Paarmitgliedschaften:\n{$base}/#antraege/paar\n\nSwiss TR-Club\n";
+        \SwissTRClub\Core\Mail\MailLog::context('Mitgliedschaft: Wechsel zur Paarmitgliedschaft (Verwaltung)');
         try{$accepted=wp_mail($status['recipients'],'Swiss TR-Club: Wechsel zur Paarmitgliedschaft',$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
         catch(\Throwable $error){$status['state']='uncertain';}
         update_post_meta($form,'strc_couple_notification',$status);

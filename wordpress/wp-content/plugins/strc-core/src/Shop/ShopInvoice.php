@@ -68,10 +68,9 @@ final class ShopInvoice
                     $copies = ClubDocument::treasury();
                     $headers = array('Content-Type: text/plain; charset=UTF-8');
                     foreach ($copies as $copy) $headers[] = 'Bcc: ' . $copy;
-                    $subject = $lang === 'fr' ? 'Swiss TR-Club : facture ' . $number . ' – commande #' . $order->get_order_number() : 'Swiss TR-Club: Rechnung ' . $number . ' – Bestellung #' . $order->get_order_number();
-                    $body = $lang === 'fr'
-                        ? "Bonjour " . $order->get_billing_first_name() . "\n\nMerci pour ta commande au TR-Shop. Tu trouveras la facture avec le bulletin de versement QR en pièce jointe.\nMontant : CHF " . number_format((float) $order->get_total(), 2, '.', "'") . "\n\nMeilleures salutations\nSwiss TR-Club\n"
-                        : "Hallo " . $order->get_billing_first_name() . "\n\nVielen Dank für deine Bestellung im TR-Shop. Die Rechnung mit QR-Einzahlungsschein liegt als PDF bei.\nBetrag: CHF " . number_format((float) $order->get_total(), 2, '.', "'") . "\n\nFreundliche Grüsse\nSwiss TR-Club\n";
+                    $mail = \SwissTRClub\Core\Mail\MailTemplates::render('shop.invoice', $lang, array('vorname' => $order->get_billing_first_name(), 'rechnungsnummer' => $number, 'bestellnummer' => $order->get_order_number(), 'betrag' => number_format((float) $order->get_total(), 2, '.', "'")));
+                    $subject = $mail['subject'];
+                    $body = $mail['body'] . "\n";
                     if (is_email($order->get_billing_email()) && wp_mail($order->get_billing_email(), $subject, $body, $headers, array($file))) {
                         $order->update_meta_data('_strc_invoice_sent', gmdate(DATE_ATOM));
                         $order->save();

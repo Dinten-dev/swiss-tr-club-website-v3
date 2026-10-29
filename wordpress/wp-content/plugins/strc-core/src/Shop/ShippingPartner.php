@@ -85,6 +85,7 @@ final class ShippingPartner
                         . "Nach dem Versand bitte unter «Mein Konto» → Versandaufträge «Versand melden» wählen:\n" . wc_get_page_permalink('myaccount') . "\n\nFreundliche Grüsse\nSwiss TR-Club\n";
                     $headers = ['Content-Type: text/plain; charset=UTF-8'];
                     if ($partner !== '') foreach ($copies as $copy) $headers[] = 'Cc: '.$copy;
+                    \SwissTRClub\Core\Mail\MailLog::context('Shop: Lieferschein an Versandpartner');
                     if (wp_mail($to, 'Lieferschein Swiss TR-Club – Bestellung #'.$order->get_order_number(), $body, $headers, [$file])) {
                         $order->update_meta_data('_strc_delivery_note_sent', gmdate(DATE_ATOM));
                         $order->save();
@@ -222,6 +223,7 @@ final class ShippingPartner
             $mailer = function_exists('WC') ? WC()->mailer() : null;
             $switched = switch_to_locale($fr ? 'fr_FR' : 'de_CH');
             try {
+                \SwissTRClub\Core\Mail\MailLog::context('Shop: Versandbestätigung an Käufer');
                 $accepted = $mailer ? $mailer->send($email, $subject, $mailer->wrap_message($fr ? 'Ta commande est en route' : 'Deine Bestellung ist unterwegs', $body), ['Content-Type: text/html; charset=UTF-8']) : wp_mail($email, $subject, wp_strip_all_tags($body));
             } finally {
                 if ($switched) restore_previous_locale();

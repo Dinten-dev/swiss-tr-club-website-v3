@@ -41,6 +41,7 @@ jobs:
       - run: php ../../../../scripts/tests/security-boundaries.php
       - run: php ../../../../scripts/tests/baur-feedback.php
       - run: php ../../../../scripts/tests/editorial-pr66.php
+      - run: php ../../../../scripts/tests/mail-templates.php
       - run: php -l ../../../../scripts/tests/security-staging.php
       - run: php -l ../../../../scripts/tests/editorial-staging.php
 
