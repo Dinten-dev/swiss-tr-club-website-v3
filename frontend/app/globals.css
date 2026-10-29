@@ -3603,3 +3603,22 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .agenda-slider-dots button[aria-current="true"]::before{background:var(--blue)}
 @media(max-width:640px){.agenda-slider{width:calc(100% - 32px);margin-top:20px}.agenda-slider-stage{border-radius:10px}.agenda-slider-arrow{width:36px;height:36px;font-size:24px}.agenda-slider-arrow.is-prev{left:6px}.agenda-slider-arrow.is-next{right:6px}}
 @media(prefers-reduced-motion:reduce){.agenda-slide,.agenda-slide.is-active{transition:none}}
+
+/* Dashboard: Profilbild im Avatar statt Initialen. */
+.dashboard-avatar.has-photo{position:relative;padding:0}
+.dashboard-avatar.has-photo img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+
+/* Shop: Artikelpflege auf der Website. */
+.shop-product-admin{margin-top:24px}
+.shop-product-admin h3{margin:0 0 10px}
+.shop-product-rows{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.shop-product-rows li{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid #d9e3ec;border-radius:8px;background:#fff}
+.shop-product-rows img,.shop-product-rows-empty{width:48px;height:48px;border-radius:6px;object-fit:cover;flex:0 0 48px;display:grid;place-items:center;background:#e7f0f8;color:var(--blue);font-weight:700}
+.shop-product-rows-name{flex:1;min-width:0;display:grid}
+.shop-product-rows-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shop-product-rows-name small{color:#5a6b78}
+.shop-editor-image{display:flex;align-items:center;gap:12px}
+.shop-editor-image img{width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #d9e3ec}
+.shop-product-edit{margin-top:6px}
+.shop-invoice-note{display:block;margin-top:4px;color:#5a6b78}
+@media(max-width:640px){.shop-product-rows li{flex-wrap:wrap}.shop-product-rows li .club-secondary{width:100%}}
