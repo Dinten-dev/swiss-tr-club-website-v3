@@ -182,9 +182,13 @@ final class CommunityEndpoint
             $typeKey=(string)get_post_meta($id,'strc_document_type',true);$type=null;foreach(LibraryPolicy::types() as $candidate)if(($candidate['key']??'')===$typeKey)$type=$candidate;
             $group=$type?LibraryPolicy::groupForType($type):'';
             if($post->post_status!=='trash')AjaxRequest::fail('Nur archivierte Dokumente können endgültig gelöscht werden.',422);
-            if($group==='board'||in_array($typeKey,['board','confidential'],true)||LibraryPolicy::classification($id)==='restricted')AjaxRequest::fail('Vorstandsunterlagen werden nicht gelöscht.',403);
-            if(!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+            $boardDocument=$group==='board'||in_array($typeKey,['board','confidential'],true)||LibraryPolicy::classification($id)==='restricted';
+            // Vorstandsunterlagen (Entscheid Redaktion 29.10.2026): nur Vorstand plus Bibliotheksverwalter/Admin/Superadmin (strc_manage_library), mit Löschprotokoll.
+            if($boardDocument&&!self::canPurgeBoard())AjaxRequest::fail('Vorstandsunterlagen löschen nur Vorstandsmitglieder mit Bibliotheksverwaltung.',403);
+            if(!$boardDocument&&!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+            $title=html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8');$label=$type['label']??$typeKey;
             if(!wp_delete_post($id,true))AjaxRequest::fail('Dokument konnte nicht gelöscht werden.',503);
+            if($boardDocument){$log=get_option('strc_board_deletion_log',[]);$log=is_array($log)?$log:[];array_unshift($log,['title'=>$title,'type'=>(string)$label,'by'=>wp_get_current_user()->display_name,'byId'=>get_current_user_id(),'at'=>gmdate(DATE_ATOM)]);update_option('strc_board_deletion_log',array_slice($log,0,200),false);}
             return ['id'=>$id,'deleted'=>true];
         }
         if($post->post_type!=='strc_topic')AjaxRequest::fail('Nur Forumsthemen können gelöscht werden.',422);
@@ -207,6 +211,12 @@ final class CommunityEndpoint
     private function canEdit(\WP_Post $post): bool
     {
         return (int) $post->post_author === get_current_user_id() || current_user_can('strc_manage_community') || \SwissTRClub\Core\Editorial\EditorialAccess::area((string) array_search($post->post_type, self::TYPES, true));
+    }
+
+    /** Vorstandsunterlagen endgültig löschen: Rolle Vorstand und Bibliotheksverwaltung (Bibliotheksverwalter, STRC-Admin, STRC-Superadmin). */
+    private static function canPurgeBoard(): bool
+    {
+        return current_user_can('strc_access_member_area')&&current_user_can('strc_access_board_documents')&&current_user_can('strc_manage_library');
     }
 
     private function canReview(\WP_Post $post): bool
@@ -440,7 +450,8 @@ final class CommunityEndpoint
         remove_filter('posts_where',$visibility,10);
         if($searchFilter)remove_filter('posts_where',$searchFilter,10);
         $posts=$type==='strc_document'?array_filter($query->posts,fn($p)=>LibraryPolicy::canRead((int)$p->ID)&&($p->post_status==='publish'||$this->canEdit($p)||$this->canReadBoardDocument($p))):$query->posts;
-        return ['areaCounts'=>$areaCounts,'galleryCounts'=>$galleryCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
+        $boardLog=$type==='strc_document'&&($input['group']??'')==='board'&&$trash&&current_user_can('strc_access_board_documents')?array_map(static fn($row)=>array_intersect_key($row,array_flip(['title','type','by','at'])),array_slice((array)get_option('strc_board_deletion_log',[]),0,50)):null;
+        return ['boardDeletions'=>$boardLog,'canPurgeBoard'=>self::canPurgeBoard(),'areaCounts'=>$areaCounts,'galleryCounts'=>$galleryCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
     }
 
     private function detail(int $id, int $page): array
