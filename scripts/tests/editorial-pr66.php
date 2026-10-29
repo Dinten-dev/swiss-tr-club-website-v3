@@ -25,6 +25,7 @@ namespace {
  function get_current_user_id():int{return 1;}
  function current_user_can(string $cap):bool{return !empty($GLOBALS['caps'][$cap]);}
  function user_can(int $id,string $cap):bool{return current_user_can($cap);}
+ function wp_get_current_user():object{return (object)['ID'=>1,'display_name'=>'QA Board'];}
  function get_option(string $key):mixed{return $GLOBALS['options'][$key]??false;}
  function update_option(string $key,mixed $value,mixed ...$args):bool{$GLOBALS['options'][$key]=$value;return true;}
  function get_post(int $id):?WP_Post{return $GLOBALS['posts'][$id]??null;}
@@ -84,8 +85,15 @@ namespace {
   $caps['strc_access_board_documents']=true;
   check(in_array('restricted',\SwissTRClub\Core\Community\LibraryPolicy::classes(),true),'Admin with Board role reads board documents: '.$role);
   check(invoke($community,'post',1,true)->ID===1&&invoke($community,'canEdit',$posts[1])&&invoke($community,'canReview',$posts[1]),'Admin with Board role maintains archived board documents: '.$role);
-  denied(fn()=>invoke($community,'deleteTopic',1),403,'Admin still cannot permanently delete board archives: '.$role);
+  $board=$posts[1];$deleted=[];$options['strc_board_deletion_log']=[];
+  check(invoke($community,'deleteTopic',1)['deleted']&&$deleted===[1]&&($options['strc_board_deletion_log'][0]['by']??'')==='QA Board'&&!isset($options['strc_board_deletion_log'][0]['content']),'Admin with Board role deletes archived board document with log: '.$role);
+  $posts[1]=$board;
  }
+ $caps=['strc_access_member_area'=>true,'strc_manage_library'=>true];$areas=['library'=>true];
+ denied(fn()=>invoke($community,'deleteTopic',1),404,'Library administrator without Board role cannot reach board archives');
+ $caps['strc_access_board_documents']=true;$deleted=[];
+ check(invoke($community,'deleteTopic',1)['deleted']&&$deleted===[1]&&count($options['strc_board_deletion_log'])===2,'Board member with library administration deletes board archive');
+ $posts[1]=$board;
  $posts=[];$meta=[];$options=[];$areas=[];$caps=['strc_access_member_area'=>true];$hooks=[];
  foreach([400=>'pending',401=>'draft',402=>'trash',403=>'publish'] as $id=>$status){$posts[$id]=new WP_Post($id,'strc_album',$status);$meta[$id]['strc_private_files']=[['key'=>'photo'.$id,'reviewStatus'=>$id===403?'rejected':'pending','submittedBy'=>2,'retainOriginal'=>true]];}
  $community->registerHooks();$galleryMigration=end($hooks['init']);$galleryMigration();

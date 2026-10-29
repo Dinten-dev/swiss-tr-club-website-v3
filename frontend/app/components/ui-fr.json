@@ -1644,5 +1644,16 @@
   "Automatischen Wechsel pausieren": "Mettre le défilement automatique en pause",
   "Automatischen Wechsel fortsetzen": "Reprendre le défilement automatique",
   "Plakat vergrössern": "Agrandir l’affiche",
-  "Uploaddateien werden vier Monate nach dem Upload automatisch gelöscht. Die Webversion bleibt in der Galerie.": "Les fichiers importés sont supprimés automatiquement quatre mois après l’importation. La version web reste dans la galerie."
+  "Uploaddateien werden vier Monate nach dem Upload automatisch gelöscht. Die Webversion bleibt in der Galerie.": "Les fichiers importés sont supprimés automatiquement quatre mois après l’importation. La version web reste dans la galerie.",
+  "Zurück zur Startseite": "Retour à l’accueil",
+  "Öffnen und antworten": "Ouvrir et répondre",
+  "So funktioniert das Forum": "Comment fonctionne le forum",
+  "Bereich wählen: Klicke auf eine Kachel, z. B. «Technik» oder «Ersatzteilsuche». Dort siehst du alle Themen dieses Bereichs.": "Choisir un domaine : clique sur une tuile, p. ex. « Technique » ou « Recherche de pièces ». Tu y vois tous les sujets de ce domaine.",
+  "Thema öffnen: Klicke auf den Titel, um Beitrag und Antworten zu lesen.": "Ouvrir un sujet : clique sur le titre pour lire la contribution et les réponses.",
+  "Antworten: Im geöffneten Thema unten deine Antwort schreiben. Webadressen werden automatisch zu Links.": "Répondre : écris ta réponse en bas du sujet ouvert. Les adresses web deviennent automatiquement des liens.",
+  "Neues Thema: Im Bereich auf «Thema erstellen» klicken. Mit dem Knopf «Link» in der Werkzeugleiste fügst du Verweise auf andere Websites oder Foren ein; Bilder und PDF kannst du anhängen.": "Nouveau sujet : dans le domaine, clique sur « Créer un sujet ». Le bouton « Lien » de la barre d’outils permet d’insérer des liens vers d’autres sites ou forums ; tu peux joindre des images et des PDF.",
+  "Benachrichtigung: Mit «Abonnieren» wirst du über neue Beiträge im Bereich informiert, auf Wunsch zusätzlich per WhatsApp.": "Notification : avec « S’abonner », tu es informé·e des nouvelles contributions du domaine, sur demande aussi par WhatsApp.",
+  "Löschprotokoll Vorstandsunterlagen": "Journal des suppressions – documents du comité",
+  "gelöscht von": "supprimé par",
+  "Noch keine Vorstandsunterlagen gelöscht.": "Aucun document du comité supprimé pour l’instant."
 }
