@@ -47,8 +47,9 @@ try{
  $admin=get_user_by('email','traver.dinten@outlook.com');qaCheck('Existing account retains all requested specialist rights',user_can($admin,'strc_manage_finance')&&user_can($admin,'strc_manage_library')&&user_can($admin,'strc_access_board_documents')&&user_can($admin,'strc_assign_admins'));
  foreach(['owner','member','organiser','finance','board','library','board_library','adminrole','superrole']as$label){
   $initialRole=['adminrole'=>'strc_administrator','superrole'=>'strc_superadmin'][$label]??'strc_member';
-  $id=wp_insert_user(['user_login'=>$tag.'_'.$label,'user_pass'=>wp_generate_password(40,true,true),'user_email'=>$tag.'_'.$label.'@example.invalid','display_name'=>'Security QA '.$label,'role'=>$initialRole]);
+  $id=wp_insert_user(['user_login'=>$tag.'_'.$label,'user_pass'=>wp_generate_password(40,true,true),'user_email'=>$tag.'_'.$label.'@example.invalid','display_name'=>'Security QA '.$label,'role'=>'strc_member']);
   qaCheck('Create synthetic '.$label,is_int($id));$users[$label]=$id;$userIds[]=$id;(new \SwissTRClub\Core\Members\MembershipRepository())->syncUser($id);
+  if($initialRole!=='strc_member'){(new WP_User($id))->add_role($initialRole);clean_user_cache($id);}
   qaCheck('Synthetic active membership '.$label,(new \SwissTRClub\Core\Members\MembershipRepository())->findForUser($id)['status']==='active');
  }
  wp_set_current_user($admin->ID);
