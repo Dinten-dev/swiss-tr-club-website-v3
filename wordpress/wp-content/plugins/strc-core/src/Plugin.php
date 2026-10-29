@@ -42,9 +42,9 @@ final class Plugin
         add_filter('determine_locale',array(self::class,'locale'));
         add_action('init', array(\SwissTRClub\Core\Http\UserLanguage::class, 'rememberSelection'));
 
-        if ('20260926-2' !== get_option('strc_core_schema_version')) {
+        if ('20261028-1' !== get_option('strc_core_schema_version')) {
             \SwissTRClub\Core\Infrastructure\Schema::installNewsletter();
-            update_option('strc_core_schema_version', '20260926-2', false);
+            update_option('strc_core_schema_version', '20261028-1', false);
         }
 
         (new RoleManager())->registerHooks();

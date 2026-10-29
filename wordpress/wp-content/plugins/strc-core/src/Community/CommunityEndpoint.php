@@ -28,6 +28,16 @@ final class CommunityEndpoint
             foreach($posts as $post){$portrait=self::portrait((int)$post->ID);update_post_meta($post->ID,'strc_portrait_model',self::portraitModel((string)($portrait['vehicle']??'')));update_post_meta($post->ID,'strc_portrait_region',(string)($portrait['region']??''));}
             if(count($posts)<100)update_option('strc_portrait_filters_v1',1,false);
         });
+        // Galerie ohne Vorabprüfung (Entscheid Redaktion 28.10.2026): wartende Fotos einmalig freigeben.
+        add_action('init',function():void{
+            if(get_option('strc_gallery_no_review_v1'))return;
+            foreach(get_posts(['post_type'=>'strc_album','post_status'=>['publish','pending'],'posts_per_page'=>-1])as$post){
+                $files=$this->files((int)$post->ID);$changed=false;
+                foreach($files as &$file)if(($file['reviewStatus']??'pending')==='pending'){$file['reviewStatus']='approved';$changed=true;}unset($file);
+                if($changed){update_post_meta($post->ID,'strc_private_files',$files);$this->albumState($post,$files);}
+            }
+            update_option('strc_gallery_no_review_v1',1,false);
+        });
         add_action('wp_ajax_strc_community', array($this, 'respond'));
         add_action('wp_ajax_nopriv_strc_community', array($this, 'respond'));
         add_action('before_delete_post', array($this, 'deleteFiles'));
@@ -47,7 +57,7 @@ final class CommunityEndpoint
             return $clauses;
         }
         $id=absint($query?->query_vars['post_id']??0);
-        if($id&&current_user_can('strc_access_member_area')){ $post=get_post($id);if($post&&in_array($post->post_type,self::TYPES,true)&&($post->post_status==='publish'||$this->canEdit($post))&&($post->post_type!=='strc_document'||LibraryPolicy::canRead($id)))return $clauses; }
+        if($id&&current_user_can('strc_access_member_area')){ $post=get_post($id);if($post&&in_array($post->post_type,self::TYPES,true)&&($post->post_status==='publish'||$this->canEdit($post)||$this->canReadBoardDocument($post))&&($post->post_type!=='strc_document'||LibraryPolicy::canRead($id)))return $clauses; }
         $clauses['where'] = $this->excludePrivateComments($clauses['where'] ?: '1=1');
         return $clauses;
     }
@@ -167,6 +177,16 @@ final class CommunityEndpoint
     private function deleteTopic(int $id): array
     {
         $post=$this->post($id,true);
+        if($post->post_type==='strc_document'){
+            // Bibliothek: endgültig löschen nur aus dem Archiv, nur durch die Bibliotheks-Moderation, nie bei Vorstandsunterlagen.
+            $typeKey=(string)get_post_meta($id,'strc_document_type',true);$type=null;foreach(LibraryPolicy::types() as $candidate)if(($candidate['key']??'')===$typeKey)$type=$candidate;
+            $group=$type?LibraryPolicy::groupForType($type):'';
+            if($post->post_status!=='trash')AjaxRequest::fail('Nur archivierte Dokumente können endgültig gelöscht werden.',422);
+            if($group==='board'||in_array($typeKey,['board','confidential'],true)||LibraryPolicy::classification($id)==='restricted')AjaxRequest::fail('Vorstandsunterlagen werden nicht gelöscht.',403);
+            if(!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
+            if(!wp_delete_post($id,true))AjaxRequest::fail('Dokument konnte nicht gelöscht werden.',503);
+            return ['id'=>$id,'deleted'=>true];
+        }
         if($post->post_type!=='strc_topic')AjaxRequest::fail('Nur Forumsthemen können gelöscht werden.',422);
         if((int)$post->post_author!==get_current_user_id()&&!$this->canReview($post))AjaxRequest::fail('Keine Berechtigung zum Löschen.',403);
         if(!wp_delete_post($id,true))AjaxRequest::fail('Thema konnte nicht gelöscht werden.',503);
@@ -179,19 +199,25 @@ final class CommunityEndpoint
         if (! $post || ! in_array($post->post_type, self::TYPES, true) || ! in_array($post->post_status, $allowTrash ? array('publish', 'pending', 'draft', 'trash') : array('publish', 'pending', 'draft'), true)) {
             AjaxRequest::fail('Beitrag nicht gefunden.', 404);
         }
-        if ($post->post_status !== 'publish' && !$this->canEdit($post)&&!($post->post_type==='strc_album'&&($this->originals()||$this->ownPhotos($post)))) AjaxRequest::fail('Beitrag nicht gefunden.',404);
+        if ($post->post_status !== 'publish' && !$this->canEdit($post)&&!$this->canReadBoardDocument($post)&&!($post->post_type==='strc_album'&&($this->originals()||$this->ownPhotos($post)))) AjaxRequest::fail('Beitrag nicht gefunden.',404);
         if ($post->post_type==='strc_document'&&!LibraryPolicy::canRead($id)) AjaxRequest::fail('Dokument nicht verfügbar.',404);
         return $post;
     }
 
     private function canEdit(\WP_Post $post): bool
     {
-        return ($post->post_type==='strc_document'&&LibraryPolicy::classification((int)$post->ID)==='restricted'&&current_user_can('strc_access_board_documents')) || (int) $post->post_author === get_current_user_id() || current_user_can('strc_manage_community') || \SwissTRClub\Core\Editorial\EditorialAccess::area((string) array_search($post->post_type, self::TYPES, true));
+        return (int) $post->post_author === get_current_user_id() || current_user_can('strc_manage_community') || \SwissTRClub\Core\Editorial\EditorialAccess::area((string) array_search($post->post_type, self::TYPES, true));
     }
 
     private function canReview(\WP_Post $post): bool
     {
-        return ($post->post_type==='strc_document'&&LibraryPolicy::classification((int)$post->ID)==='restricted'&&current_user_can('strc_access_board_documents'))||\SwissTRClub\Core\Editorial\EditorialAccess::area((string)array_search($post->post_type,self::TYPES,true));
+        return \SwissTRClub\Core\Editorial\EditorialAccess::area((string)array_search($post->post_type,self::TYPES,true));
+    }
+
+    /** Board access includes unpublished/archive reads, never editing or moderation. */
+    private function canReadBoardDocument(\WP_Post $post): bool
+    {
+        return $post->post_type==='strc_document'&&current_user_can('strc_access_member_area')&&current_user_can('strc_access_board_documents')&&LibraryPolicy::classification((int)$post->ID)==='restricted';
     }
 
     private function setSubscription(int $id,bool $subscribe): void
@@ -251,7 +277,7 @@ final class CommunityEndpoint
     private function link(int $id): ?array
     {
         if($id<1)return null;$post=get_post($id);
-        return $post&&$post->post_type==='strc_document'&&LibraryPolicy::canRead($id)&&($post->post_status==='publish'||$this->canReview($post))?['id'=>$id,'title'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8')]:null;
+        return $post&&$post->post_type==='strc_document'&&LibraryPolicy::canRead($id)&&($post->post_status==='publish'||$this->canReview($post)||$this->canReadBoardDocument($post))?['id'=>$id,'title'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8')]:null;
     }
 
     /** Alle, die sichtbare Bilder zum Album beigetragen haben (Ersteller/in zuerst). */
@@ -335,7 +361,7 @@ final class CommunityEndpoint
             'orderby'=>['date'=>'DESC','ID'=>'DESC']];
         $searchFilter=null;
         // Prüfliste der Moderation (#forum/pruefung usw.): nur eingereichte Beiträge, ohne Bereichs- oder Gruppenfilter.
-        $reviewOnly='1'===($input['review']??'')&&(\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])||($type==='strc_album'&&$this->originals())||($type==='strc_document'&&current_user_can('strc_access_board_documents')));
+        $reviewOnly='1'===($input['review']??'')&&(\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])||($type==='strc_album'&&$this->originals()));
         if($reviewOnly){
             foreach(['group','documentType','model','component','area','galleryCategory','year','language','duration','region'] as $key)unset($input[$key]);
             $search='';$args['post_status']='pending';
@@ -392,6 +418,7 @@ final class CommunityEndpoint
             if($query->get('post_type')!==$type)return $where;
             if($type==='strc_album'&&'1'===($input['mine']??''))return $where.$wpdb->prepare(" AND ({$wpdb->posts}.post_author=%d OR EXISTS(SELECT 1 FROM {$wpdb->postmeta} sub WHERE sub.post_id={$wpdb->posts}.ID AND sub.meta_key='strc_album_submitters' AND sub.meta_value LIKE %s))",get_current_user_id(),'%|'.get_current_user_id().'|%');
             if($canReview)return $where;
+            if($type==='strc_document'&&current_user_can('strc_access_board_documents'))return $where.$wpdb->prepare(" AND ({$wpdb->posts}.post_status='publish' OR {$wpdb->posts}.post_author=%d OR EXISTS(SELECT 1 FROM {$wpdb->postmeta} board_document WHERE board_document.post_id={$wpdb->posts}.ID AND board_document.meta_key='strc_document_access' AND board_document.meta_value='restricted'))",get_current_user_id());
             if($type==='strc_album')return $where.$wpdb->prepare(" AND ({$wpdb->posts}.post_status='publish' OR {$wpdb->posts}.post_author=%d OR EXISTS(SELECT 1 FROM {$wpdb->postmeta} sub WHERE sub.post_id={$wpdb->posts}.ID AND sub.meta_key='strc_album_submitters' AND sub.meta_value LIKE %s))",get_current_user_id(),'%|'.get_current_user_id().'|%');
             return $where.$wpdb->prepare(" AND ({$wpdb->posts}.post_status='publish' OR {$wpdb->posts}.post_author=%d)",get_current_user_id());
         };
@@ -412,7 +439,7 @@ final class CommunityEndpoint
         remove_filter('posts_orderby',$pinnedOrder,10);
         remove_filter('posts_where',$visibility,10);
         if($searchFilter)remove_filter('posts_where',$searchFilter,10);
-        $posts=$type==='strc_document'?array_filter($query->posts,static fn($p)=>LibraryPolicy::canRead((int)$p->ID)):$query->posts;
+        $posts=$type==='strc_document'?array_filter($query->posts,fn($p)=>LibraryPolicy::canRead((int)$p->ID)&&($p->post_status==='publish'||$this->canEdit($p)||$this->canReadBoardDocument($p))):$query->posts;
         return ['areaCounts'=>$areaCounts,'galleryCounts'=>$galleryCounts,'items'=>array_values(array_map(fn($post)=>$this->present($post),$posts)),'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'accessClasses'=>LibraryPolicy::classes(),'libraryGroups'=>$type==='strc_document'?LibraryPolicy::groups():[],'canReview'=>\SwissTRClub\Core\Editorial\EditorialAccess::area($input['kind'])];
     }
 
@@ -482,8 +509,12 @@ final class CommunityEndpoint
                 if(in_array($type,['magazine','newsletter'],true)&&(!$data['issue']||!$data['year']))throw new \InvalidArgumentException('Bitte Ausgabe und Erscheinungsjahr angeben.');
                 $types=array_column(LibraryPolicy::types(),null,'key');
                 if(isset($types[$type])&&!in_array($types[$type]['access'],LibraryPolicy::classes(),true))throw new \InvalidArgumentException('Für diese Dokumentart fehlt die Berechtigung.');
-                $data['access']=\SwissTRClub\Core\Forms\FormFields::text($input,'access',20)?:($types[$type]['access']??'open');
+                $minimum=$types[$type]['access']??'open';
+                $data['access']=\SwissTRClub\Core\Forms\FormFields::text($input,'access',20)?:($existing?LibraryPolicy::classification((int)$existing->ID):$minimum);
                 if(!in_array($data['access'],LibraryPolicy::classes(),true))throw new \InvalidArgumentException('Für diese Zugriffsklasse fehlt die Berechtigung.');
+                if($existing&&$data['access']!==LibraryPolicy::classification((int)$existing->ID)&&!$libraryEditor)AjaxRequest::fail('Nur die Bibliotheksverwaltung darf die Zugriffsklasse ändern.',403);
+                $ranks=['open'=>0,'limited'=>1,'restricted'=>2];
+                if(($ranks[$data['access']]??-1)<($ranks[$minimum]??2))throw new \InvalidArgumentException('Die Zugriffsklasse darf den Schutz der Dokumentart nicht unterschreiten.');
             }
             if($data['date']&&!preg_match('/^\d{4}-\d{2}-\d{2}$/D',$data['date']))throw new \InvalidArgumentException('Bitte ein gültiges Aufnahmedatum angeben.');
             if($data['year']&&!preg_match('/^\d{4}$/D',$data['year']))throw new \InvalidArgumentException('Bitte ein vierstelliges Erscheinungsjahr angeben.');
@@ -523,7 +554,7 @@ final class CommunityEndpoint
             (new PrivateUploadStore())->remove($savedFiles);
             AjaxRequest::fail('Beitrag konnte nicht gespeichert werden.', 500);
         }
-        if($kind==='gallery')foreach($savedFiles as &$file){$file['optimized']=($input['optimized']??'')==='1';$file['caption']=sanitize_text_field($input['caption']??'');$file['photographer']=$classification['photographer'];$file['uploadedAt']=gmdate(DATE_ATOM);$file['submittedBy']=get_current_user_id();$file['reviewStatus']='pending';}unset($file);
+        if($kind==='gallery')foreach($savedFiles as &$file){$file['optimized']=($input['optimized']??'')==='1';$file['caption']=sanitize_text_field($input['caption']??'');$file['photographer']=$classification['photographer'];$file['uploadedAt']=gmdate(DATE_ATOM);$file['submittedBy']=get_current_user_id();$file['reviewStatus']='approved';}unset($file);
         update_post_meta($id, 'strc_private_files', $savedFiles);
         update_post_meta($id,'strc_form_classification',$classification);
         if($kind==='gallery')update_post_meta($id,'strc_album_date',$classification['date']?:substr(get_post($id)->post_date,0,10));
@@ -538,7 +569,8 @@ final class CommunityEndpoint
             AjaxRequest::fail('Veröffentlichung fehlgeschlagen.', 500);
         }
         if($request){$requests[$request]=(int)$id;update_user_meta(get_current_user_id(),'strc_upload_requests',array_slice($requests,-50,null,true));}
-        if(in_array($kind,['gallery','library'],true))SubmissionNotifications::send((int)$id,$kind);
+        // Galerie ohne Vorabprüfung (Entscheid Redaktion 28.10.2026): nur die Bibliothek meldet neue Einreichungen.
+        if($kind==='library')SubmissionNotifications::send((int)$id,$kind);
         if($kind==='gallery')$this->albumState(get_post((int)$id),$savedFiles);
         if($kind==='gallery'&&$request&&!empty($input['fileToken']))update_post_meta($id,'strc_upload_tokens',[$input['fileToken']=>$request]);
         return $this->present(get_post($id));
@@ -591,10 +623,10 @@ final class CommunityEndpoint
         }
         foreach ($uploads as &$upload) {
             $upload['optimized']=($input['optimized']??'')==='1';$upload['caption']=sanitize_text_field($input['caption']??'');$upload['photographer'] = $photographer;
-            $upload['uploadedAt']=gmdate(DATE_ATOM);$upload['submittedBy']=get_current_user_id();$upload['reviewStatus']='pending';
+            $upload['uploadedAt']=gmdate(DATE_ATOM);$upload['submittedBy']=get_current_user_id();$upload['reviewStatus']='approved';
         }
         unset($upload);
-        $existing=$this->files((int)$post->ID);foreach($existing as &$file){$file['reviewStatus']=$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending');$file['submittedBy']=$file['submittedBy']??(int)$post->post_author;}unset($file);$next=array_merge($existing,$uploads);update_post_meta($post->ID,'strc_private_files',$next);$this->albumState($post,$next);SubmissionNotifications::send((int)$post->ID,'gallery');
+        $existing=$this->files((int)$post->ID);foreach($existing as &$file){$file['reviewStatus']=$file['reviewStatus']??($post->post_status==='publish'?'approved':'pending');$file['submittedBy']=$file['submittedBy']??(int)$post->post_author;}unset($file);$next=array_merge($existing,$uploads);update_post_meta($post->ID,'strc_private_files',$next);$this->albumState($post,$next);
         if($token){$tokens[$token]=$request;update_post_meta($post->ID,'strc_upload_tokens',$tokens);}
         update_post_meta($post->ID, 'strc_material_rights_at', gmdate(DATE_ATOM));
         
@@ -617,7 +649,6 @@ final class CommunityEndpoint
             if (is_string($file['key'] ?? null) && hash_equals($file['key'], $key)) {
                 if(!$this->canReview($post)&&(int)($file['submittedBy']??$post->post_author)!==get_current_user_id())AjaxRequest::fail('Keine Bildberechtigung.',403);
                 $files[$index]['caption'] = $caption;
-                if(!$this->canReview($post)){$files[$index]['reviewStatus']='pending';$files[$index]['public']=false;}
                 update_post_meta($post->ID, 'strc_private_files', $files);$this->albumState($post,$files);
                 return array('id' => (int) $post->ID, 'key' => $key, 'caption' => $caption);
             }

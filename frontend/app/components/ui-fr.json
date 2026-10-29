@@ -1580,9 +1580,9 @@
   "Für dieses Album sind keine Originale mehr vorhanden.": "Il n’y a plus d’originaux pour cet album.",
   "Aktuelles Bild für die öffentliche Galerie auswählen": "Sélectionner l’image actuelle pour la galerie publique",
   "Album pflegen (Moderation)": "Gérer l’album (modération)",
-  "Hochgeladene Bilder sind sofort sichtbar. Hier lassen sich einzelne Bilder ausblenden und wieder einblenden.": "Les images importées sont visibles immédiatement. Ici, chaque image peut être masquée ou réaffichée.",
+  "Hochgeladene Bilder sind sofort sichtbar. Hier lassen sich einzelne Bilder ausblenden und wieder einblenden.": "Les images importées sont immédiatement visibles. Ici, tu peux masquer et réafficher certaines images.",
   "Sichtbar": "Visible",
-  "Ausgeblendet": "Masquée",
+  "Ausgeblendet": "Masqué",
   "Auswahl ausblenden": "Masquer la sélection",
   "Auswahl einblenden": "Afficher la sélection",
   "Galeriebereiche": "Rubriques de la galerie",
@@ -1637,6 +1637,11 @@
   "Für das Magazin-Depot bleiben passende Bilder bis 16 MB unverändert. Grössere Dateien werden auf deinem Gerät optimiert; deine Kameradatei bleibt erhalten.": "Pour le dépôt du magazine, les images adaptées jusqu’à 16 MB restent inchangées. Les fichiers plus volumineux sont optimisés sur ton appareil ; ton fichier original est conservé.",
   "Uploadversion länger als vier Monate aufbewahren": "Conserver la version téléversée au-delà de quatre mois",
   "Original länger als vier Monate aufbewahren": "Conserver l’original au-delà de quatre mois",
+  "Fotos hochgeladen und in der Galerie sichtbar.": "Photos importées et visibles dans la galerie.",
+  "Mit dem Hochladen bestätigst du, dass die Fotos auf der Website und in Publikationen des Swiss TR-Club verwendet werden dürfen. Die Fotos sind sofort für Clubmitglieder sichtbar; die Galerie-Moderation kann einzelne Bilder ausblenden.": "En important des photos, vous confirmez qu’elles peuvent être utilisées sur le site et dans les publications du Swiss TR-Club. Les photos sont immédiatement visibles pour les membres; la modération de la galerie peut masquer certaines images.",
   "Anlässe im Überblick": "Les événements en un coup d’œil",
-  "Bild wählen": "Choisir une image"
+  "Bild wählen": "Choisir une image",
+  "Automatischen Wechsel pausieren": "Mettre le défilement automatique en pause",
+  "Automatischen Wechsel fortsetzen": "Reprendre le défilement automatique",
+  "Plakat vergrössern": "Agrandir l’affiche"
 }

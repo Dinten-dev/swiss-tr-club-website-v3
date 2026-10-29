@@ -379,21 +379,81 @@ final class MarketplaceEndpoint
         if ('' === $name || mb_strlen($name) > 120 || ! is_email($email) || mb_strlen($email) > 254 || mb_strlen($phone) > 40 || '' === $message || mb_strlen($message) > 2000) {
             return new WP_Error('invalid_contact', 'Bitte Name, gültige E-Mail-Adresse und Nachricht prüfen.');
         }
-        $subject = sprintf('Anfrage zu Inserat #%d: %s', $id, sanitize_text_field($post->post_title));
-        $body = "Inserat: #{$id} – " . sanitize_text_field($post->post_title) . "\n\n" .
-            "Name: {$name}\nE-Mail: {$email}\n" . ($phone !== '' ? "Telefon: {$phone}\n" : '') .
-            "\nNachricht:\n{$message}";
-        $headers=['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>'];
-        try{$sent=wp_mail($seller->user_email,$subject,$body,array_merge($headers,['Reply-To: '.str_replace(['"','<','>',"\r","\n"],'',$name).' <'.$email.'>']));}catch(\Throwable){$sent=false;}
+        // Anbieter und Anfragende erhalten dieselben Inseratsdaten (Titel, Kategorie, Modell, Preis, Kurzbeschrieb, Link, Bild)
+        // plus die Nachricht; Sprache je Empfänger (Wunsch Redaktion 28.10.2026). Antworten gehen direkt an die anfragende Person.
+        $sellerFr=\SwissTRClub\Core\Http\UserLanguage::french((int)$seller->ID);
+        $user=wp_get_current_user();$recipient=$user->ID>0&&is_email($user->user_email)?$user->user_email:$email;
+        $fr=$user->ID>0&&\SwissTRClub\Core\Http\UserLanguage::french((int)$user->ID);
+        $contact=['name'=>$name,'email'=>$email,'phone'=>$phone,'message'=>$message];
+        $headers=['Content-Type: text/html; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>'];
+        [$subject,$html,$text]=$this->contactMail($id,$contact,$sellerFr,false);
+        $sent=$this->sendHtmlMail($seller->user_email,$subject,$html,$text,array_merge($headers,['Reply-To: '.str_replace(['"','<','>',"\r","\n",','],'',$name).' <'.$email.'>']));
         if (! $sent) {
             return new WP_Error('mail_failed', 'Die Anfrage konnte nicht gesendet werden. Bitte später erneut versuchen.');
         }
-        $user=wp_get_current_user();$recipient=$user->ID>0&&is_email($user->user_email)?$user->user_email:$email;
-        $fr=$user->ID>0&&\SwissTRClub\Core\Http\UserLanguage::french((int)$user->ID);
-        $receiptSubject=$fr?'Swiss TR-Club : ta demande a été envoyée':'Swiss TR-Club: Deine Kontaktanfrage';
-        $receiptBody=$body.($fr?"\n\nTa demande a été transmise à la personne qui a publié l’annonce. Elle te répondra directement.":"\n\nDeine Anfrage wurde an den Anbieter weitergeleitet.")."\nSwiss TR-Club";
-        try{$confirmed=wp_mail($recipient,$receiptSubject,$receiptBody,$headers);}catch(\Throwable){$confirmed=false;}
+        [$receiptSubject,$receiptHtml,$receiptText]=$this->contactMail($id,$contact,$fr,true);
+        $confirmed=$this->sendHtmlMail($recipient,$receiptSubject,$receiptHtml,$receiptText,$headers);
         return array('sent' => true,'warning'=>$confirmed?'':'Die Anfrage wurde weitergeleitet. Die Bestätigungsmail an dich konnte nicht versendet werden.');
+    }
+
+    /** Text- und HTML-Fassung der Inseratsanfrage. $receipt=true: Bestätigung an die anfragende Person. */
+    private function contactMail(int $id,array $contact,bool $fr,bool $receipt): array
+    {
+        $post=get_post($id);$details=get_post_meta($id,'strc_ad_details',true);$details=is_array($details)?$details:[];
+        $title=html_entity_decode(sanitize_text_field($post->post_title),ENT_QUOTES|ENT_HTML5,'UTF-8');
+        $category=(string)(get_post_meta($id,'strc_ad_category',true)?:'Sonstiges');
+        $categoryLabel=$fr?(['Teile'=>'Pièces','Fahrzeuge'=>'Véhicules','Zubehör'=>'Accessoires','Sonstiges'=>'Divers'][$category]??$category):$category;
+        $models=implode(', ',array_filter(array_map('strval',(array)($details['models']??[$details['model']??'']))));
+        $amount=(float)get_post_meta($id,'strc_ad_price',true);$offer=(string)($details['offerType']??'sale');$mode=(string)($details['priceMode']??'fixed');
+        $chf='CHF '.number_format($amount,$amount==floor($amount)?0:2,'.','’');
+        $price=$offer==='free'?($fr?'Gratuit':'Gratis'):($offer==='swap'?($fr?'Échange':'Tausch'):($mode==='request'?($fr?'Prix sur demande':'Preis auf Anfrage'):$chf.($mode==='negotiable'?($fr?' (à discuter)':' (VB)'):'')));
+        $short=wp_strip_all_tags($post->post_content);$short=trim(preg_replace('/\s+/u',' ',$short));if(mb_strlen($short)>300)$short=rtrim(mb_substr($short,0,297)).'…';
+        $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');$link=$base.'/#marktplatz/'.$id;
+        $images=get_post_meta($id,'strc_ad_images',true);$image=is_array($images)&&$images?(string)wp_get_attachment_image_url((int)$images[0],'medium'):'';
+        $priceShort=$mode==='request'||$offer!=='sale'?$price:$chf;
+        $subject=$receipt
+            ?($fr?sprintf('Swiss TR-Club : ta demande pour l’annonce n° %d – %s',$id,$title):sprintf('Swiss TR-Club: Deine Anfrage zu Inserat #%d – %s',$id,$title))
+            :($fr?sprintf('Demande pour l’annonce n° %d : %s (%s)',$id,$title,$priceShort):sprintf('Anfrage zu Inserat #%d: %s (%s)',$id,$title,$priceShort));
+        $rows=array_filter([
+            [$fr?'Annonce':'Inserat','#'.$id.' – '.$title],
+            [$fr?'Catégorie':'Kategorie',$categoryLabel],
+            [$fr?'Modèle':'Modell',$models],
+            [$fr?'Année':'Baujahr',(string)($details['year']??'')],
+            [$fr?'Prix':'Preis',$price],
+            [$fr?'Description':'Kurzbeschreibung',$short],
+            ['Link',$link],
+        ],static fn($row)=>$row[1]!=='');
+        $person=array_filter([[ 'Name',$contact['name']],[$fr?'E-mail':'E-Mail',$contact['email']],[$fr?'Téléphone':'Telefon',$contact['phone']]],static fn($row)=>$row[1]!=='');
+        $intro=$receipt
+            ?($fr?'Merci pour ta demande. Elle a été transmise à la personne qui a publié l’annonce; elle te répondra directement.':'Danke für deine Anfrage. Sie wurde an die Person weitergeleitet, die das Inserat aufgegeben hat. Sie meldet sich direkt bei dir.')
+            :($fr?'Tu as reçu une demande pour ton annonce. Réponds simplement à cet e-mail pour contacter directement la personne intéressée.':'Du hast eine Anfrage zu deinem Inserat erhalten. Antworte einfach auf diese E-Mail, um die interessierte Person direkt zu erreichen.');
+        $messageLabel=$receipt?($fr?'Copie de ton message':'Kopie deiner Nachricht'):($fr?'Message':'Nachricht');
+        $personLabel=$receipt?($fr?'Tes coordonnées':'Deine Angaben'):($fr?'Personne intéressée':'Anfragende Person');
+        $adLabel=$fr?'Détails de l’annonce':'Inseratsdetails';
+        $line=static fn(array $rows):string=>implode("\n",array_map(static fn($row)=>$row[0].': '.$row[1],$rows));
+        $text=$intro."\n\n".$adLabel."\n".$line($rows)."\n\n".$personLabel."\n".$line($person)."\n\n".$messageLabel.":\n".$contact['message']."\n\nSwiss TR-Club";
+        $e=static fn(string $value):string=>esc_html($value);
+        $table=static fn(array $rows):string=>'<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:15px">'.implode('',array_map(static fn($row)=>'<tr><td style="padding:3px 14px 3px 0;color:#555;vertical-align:top;white-space:nowrap">'.esc_html($row[0]).'</td><td style="padding:3px 0;vertical-align:top">'.($row[0]==='Link'?'<a href="'.esc_url($row[1]).'">'.esc_html($row[1]).'</a>':nl2br(esc_html($row[1]))).'</td></tr>',$rows)).'</table>';
+        $html='<div style="font-family:Arial,Helvetica,sans-serif;color:#1d2a33;line-height:1.45;max-width:620px">'
+            .'<p>'.$e($intro).'</p>'
+            .'<h3 style="margin:18px 0 6px;font-size:16px">'.$e($adLabel).'</h3>'
+            .($image!==''?'<p style="margin:0 0 8px"><a href="'.esc_url($link).'"><img src="'.esc_url($image).'" alt="'.esc_attr($title).'" width="220" style="max-width:220px;height:auto;border-radius:6px;border:0"></a></p>':'')
+            .$table($rows)
+            .'<h3 style="margin:18px 0 6px;font-size:16px">'.$e($personLabel).'</h3>'.$table($person)
+            .'<h3 style="margin:18px 0 6px;font-size:16px">'.$e($messageLabel).'</h3>'
+            .'<div style="padding:10px 12px;background:#f3f5f7;border-radius:6px;white-space:pre-wrap">'.nl2br($e($contact['message'])).'</div>'
+            .'<p style="margin-top:18px">Swiss TR-Club</p></div>';
+        return [$subject,$html,$text];
+    }
+
+    /** HTML-Mail mit Textfassung (AltBody) für Mailprogramme ohne HTML. */
+    private function sendHtmlMail(string $to,string $subject,string $html,string $text,array $headers): bool
+    {
+        $alt=static function($mailer)use($text):void{$mailer->AltBody=$text;};
+        add_action('phpmailer_init',$alt);
+        try{$sent=wp_mail($to,$subject,$html,$headers);}catch(\Throwable){$sent=false;}
+        remove_action('phpmailer_init',$alt);
+        return (bool)$sent;
     }
 
     private function changeAd(string $operation,array $input): array|WP_Error

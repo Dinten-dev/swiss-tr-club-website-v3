@@ -830,8 +830,9 @@ button:focus-visible,a:focus-visible { outline:3px solid #187bb1; outline-offset
 .hx-marquee-track{display:flex;width:max-content}
 .hx-marquee-set{display:flex;gap:16px;padding-right:16px}
 .hx-marquee-set a{width:190px;flex-shrink:0}
-.hx-marquee-set img{filter:grayscale(1);opacity:.8;transition:filter .3s,opacity .3s}
-.hx-marquee-set a:hover img,.hx-marquee-set a:focus-visible img{filter:none;opacity:1}
+/* Partnerlogos immer farbig (Wunsch Redaktion 28.10.2026). */
+.hx-marquee-set img{transition:transform .3s}
+.hx-marquee-set a:hover img,.hx-marquee-set a:focus-visible img{transform:scale(1.04)}
 .hx-marquee.is-moving .hx-marquee-track{animation:hx-marquee 40s linear infinite}
 .hx-marquee.is-moving:hover .hx-marquee-track,.hx-marquee.is-moving:focus-within .hx-marquee-track{animation-play-state:paused}
 @keyframes hx-marquee{to{transform:translateX(-50%)}}
@@ -3595,8 +3596,10 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .agenda-slider-arrow:hover,.agenda-slider-arrow:focus-visible{background:rgba(10,37,63,.85)}
 .agenda-slider-arrow:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .agenda-slider-arrow.is-prev{left:12px}.agenda-slider-arrow.is-next{right:12px}
-.agenda-slider-dots{display:flex;justify-content:center;gap:10px;margin-top:12px}
-.agenda-slider-dots button{width:11px;height:11px;padding:0;border:2px solid var(--blue);border-radius:50%;background:transparent;cursor:pointer}
-.agenda-slider-dots button[aria-current="true"]{background:var(--blue)}
+.agenda-slider-controls{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+.agenda-slider-dots{display:flex;justify-content:center;flex-wrap:wrap;gap:2px}
+.agenda-slider-dots button{width:32px;height:32px;padding:0;border:0;background:transparent;cursor:pointer;display:grid;place-items:center}
+.agenda-slider-dots button::before{content:'';width:11px;height:11px;border:2px solid var(--blue);border-radius:50%}
+.agenda-slider-dots button[aria-current="true"]::before{background:var(--blue)}
 @media(max-width:640px){.agenda-slider{width:calc(100% - 32px);margin-top:20px}.agenda-slider-stage{border-radius:10px}.agenda-slider-arrow{width:36px;height:36px;font-size:24px}.agenda-slider-arrow.is-prev{left:6px}.agenda-slider-arrow.is-next{right:6px}}
 @media(prefers-reduced-motion:reduce){.agenda-slide,.agenda-slide.is-active{transition:none}}

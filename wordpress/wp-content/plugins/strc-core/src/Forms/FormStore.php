@@ -14,7 +14,8 @@ final class FormStore
     public static function revision(object $post): string {return hash('sha256',$post->post_content);}
     public static function find(string $type, int $owner = 0, int $parent = 0): array
     {
-        $args=['post_type'=>$type,'post_status'=>'private','posts_per_page'=>-1,'orderby'=>'ID','order'=>'DESC'];
+        // Fahrzeuge in Erfassungsreihenfolge (Fahrzeug 1 zuerst/links), übrige Formulare neueste zuerst.
+        $args=['post_type'=>$type,'post_status'=>'private','posts_per_page'=>-1,'orderby'=>'ID','order'=>$type==='strc_vehicle'?'ASC':'DESC'];
         if ($owner) $args['author']=$owner;
         if ($parent) $args['post_parent']=$parent;
         return get_posts($args);
