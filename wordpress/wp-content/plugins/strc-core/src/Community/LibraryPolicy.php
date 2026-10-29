@@ -98,15 +98,13 @@ final class LibraryPolicy
         if(in_array($value,array_column(self::types(),'key'),true))return $value;
         return ['TR-Magazin'=>'magazine','Technik / Anleitung'=>'technical'][$value]??'legacy';
     }
-    /** STRC Admin und Superadmin (nur diese Rollen tragen strc_manage_content_roles). */
-    private static function admin(int $userId): bool { return user_can($userId,'strc_manage_content_roles'); }
     public static function classes(): array { return self::classesForUser(get_current_user_id()); }
     private static function classesForUser(int $userId): array
     {
         if(!user_can($userId,'strc_access_member_area'))return [];
         // Stufen: Mitglied (alle Mitglieder) · Regional (Regionalleitungen, Admins, Bibliotheksverwaltung) · Vorstand (Rolle Vorstand, sieht alles).
-        // Admins (STRC Admin/Superadmin) übersteuern: Vorstandsunterlagen lesen und mit ihren Moderationsrechten pflegen (Entscheid Redaktion 29.10.2026).
-        if(user_can($userId,'strc_access_board_documents')||self::admin($userId))return ['open','limited','restricted'];
+        // Vorstandsunterlagen nur mit Rolle Vorstand. Admins übersteuern nur, wenn sie selbst im Vorstand sind (Entscheid Redaktion 29.10.2026).
+        if(user_can($userId,'strc_access_board_documents'))return ['open','limited','restricted'];
         $regional=\SwissTRClub\Core\Roles\RoleAssignments::limited($userId)
             ||user_can($userId,'strc_manage_content_roles')||user_can($userId,'strc_manage_library');
         return $regional?['open','limited']:['open'];

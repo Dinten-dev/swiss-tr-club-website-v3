@@ -191,7 +191,7 @@ final class EditorialEndpoint
             $documents[] = array('key'=>$key,'title'=>$definition['title'],'route'=>$definition['route'],'hasDraft'=>$state['hasDraft']);
         }
         return array('documents'=>$documents,'areas'=>array_keys(array_filter(EditorialAccess::AREAS,static fn ($label,$key)=>EditorialAccess::area($key), ARRAY_FILTER_USE_BOTH)),
-            'canAssign'=>(bool)\SwissTRClub\Core\Roles\RoleAssignments::options(),
+            'canAssign'=>(bool)\SwissTRClub\Core\Roles\RoleAssignments::options(),'canManageMails'=>\SwissTRClub\Core\Mail\MailTemplates::canManage(),
             'magazineUrl'=>EditorialAccess::area('library') ? admin_url('options-general.php?page=strc-magazine') : '');
     }
 

@@ -25,14 +25,27 @@ final class ShopInvoice
 
     public function issue(int $orderId): void
     {
-        if (! function_exists('wc_get_order')) return;
+        self::create($orderId, false);
+    }
+
+    /**
+     * Rechnung erstellen und versenden. Automatisch (Status «Rechnung offen») oder auf Knopfdruck durch die Shopverwaltung ($manual):
+     * dann auch ohne Freischaltzeitpunkt und ohne E-Mail (nur Download). Ergebnis mit Grund, falls keine Rechnung entsteht.
+     * @return array{number:string,url:string,sent:bool,reason:string}
+     */
+    public static function create(int $orderId, bool $manual): array
+    {
+        $result = array('number' => '', 'url' => '', 'sent' => false, 'reason' => '');
+        if (! function_exists('wc_get_order')) return array('reason' => 'WooCommerce ist nicht aktiv.') + $result;
         try {
-            \SwissTRClub\Core\Forms\FormStore::locked('shop-invoice-' . $orderId, function () use ($orderId): void {
+            \SwissTRClub\Core\Forms\FormStore::locked('shop-invoice-' . $orderId, function () use ($orderId, $manual, &$result): void {
                 $order = wc_get_order($orderId);
-                if (! $order instanceof \WC_Order || $order->get_payment_method() !== self::GATEWAY || $order->get_meta('_strc_invoice_sent')) return;
-                if (!ClubDocument::eligible($order->get_date_created()?->getTimestamp() ?? 0)) return;
-                if ($order->get_currency() !== 'CHF' || (float)$order->get_total() <= 0 || !$order->has_status('on-hold') || !is_email($order->get_billing_email())) return;
-                if (! ClubDocument::ready()) { $order->add_order_note('Rechnung nicht erstellt: Rechnungssteller oder QR-IBAN fehlen.'); return; }
+                if (! $order instanceof \WC_Order || $order->get_payment_method() !== self::GATEWAY) { $result['reason'] = 'Die Bestellung ist keine Bestellung auf Rechnung.'; return; }
+                if ($order->get_meta('_strc_invoice_sent') || ($manual && $order->get_meta('_strc_invoice_pdf'))) { $result = self::state($order) + $result; return; }
+                if (! $manual && !ClubDocument::eligible($order->get_date_created()?->getTimestamp() ?? 0)) return;
+                if ($order->get_currency() !== 'CHF' || (float)$order->get_total() <= 0) { $result['reason'] = 'Rechnungen gibt es nur für positive CHF-Beträge.'; return; }
+                if ($manual ? $order->has_status(array('cancelled', 'refunded', 'failed')) : (!$order->has_status('on-hold') || !is_email($order->get_billing_email()))) { $result['reason'] = 'Für diese Bestellung wird keine Rechnung erstellt (Status).'; return; }
+                if (! ClubDocument::ready()) { $order->add_order_note('Rechnung nicht erstellt: Rechnungssteller oder QR-IBAN fehlen.'); $result['reason'] = 'Rechnungssteller, QR-IBAN oder PDF-Bibliothek fehlen in der Konfiguration (Webmaster).'; return; }
                 if (! $order->get_meta('_strc_invoice_number')) {
                     $sequence = ClubDocument::next('shop');
                     $order->update_meta_data('_strc_invoice_number', ClubDocument::number('shop', $sequence));
@@ -49,15 +62,15 @@ final class ShopInvoice
                     $order->save();
                     if (wc_get_order($orderId)->get_meta('_strc_invoice_pdf') !== $archive) throw new \RuntimeException('Rechnung konnte nicht archiviert werden.');
                 }
+                if (! is_email($order->get_billing_email())) { $order->add_order_note('Rechnung ' . $number . ' erstellt (ohne E-Mail-Adresse, nur zum Herunterladen).'); $result = self::state($order) + $result; return; }
                 $file = ClubDocument::temporaryFile($document, 'Rechnung-' . $number . '.pdf');
                 try {
                     $copies = ClubDocument::treasury();
                     $headers = array('Content-Type: text/plain; charset=UTF-8');
                     foreach ($copies as $copy) $headers[] = 'Bcc: ' . $copy;
-                    $subject = $lang === 'fr' ? 'Swiss TR-Club : facture ' . $number . ' – commande #' . $order->get_order_number() : 'Swiss TR-Club: Rechnung ' . $number . ' – Bestellung #' . $order->get_order_number();
-                    $body = $lang === 'fr'
-                        ? "Bonjour " . $order->get_billing_first_name() . "\n\nMerci pour ta commande au TR-Shop. Tu trouveras la facture avec le bulletin de versement QR en pièce jointe.\nMontant : CHF " . number_format((float) $order->get_total(), 2, '.', "'") . "\n\nMeilleures salutations\nSwiss TR-Club\n"
-                        : "Hallo " . $order->get_billing_first_name() . "\n\nVielen Dank für deine Bestellung im TR-Shop. Die Rechnung mit QR-Einzahlungsschein liegt als PDF bei.\nBetrag: CHF " . number_format((float) $order->get_total(), 2, '.', "'") . "\n\nFreundliche Grüsse\nSwiss TR-Club\n";
+                    $mail = \SwissTRClub\Core\Mail\MailTemplates::render('shop.invoice', $lang, array('vorname' => $order->get_billing_first_name(), 'rechnungsnummer' => $number, 'bestellnummer' => $order->get_order_number(), 'betrag' => number_format((float) $order->get_total(), 2, '.', "'")));
+                    $subject = $mail['subject'];
+                    $body = $mail['body'] . "\n";
                     if (is_email($order->get_billing_email()) && wp_mail($order->get_billing_email(), $subject, $body, $headers, array($file))) {
                         $order->update_meta_data('_strc_invoice_sent', gmdate(DATE_ATOM));
                         $order->save();
@@ -66,11 +79,29 @@ final class ShopInvoice
                 } finally {
                     if (is_file($file)) unlink($file);
                 }
+                $result = self::state(wc_get_order($orderId)) + $result;
             });
-        } catch (\Throwable) {
-            error_log('STRC shop invoice failed for order ' . $orderId . '.');
+        } catch (\Throwable $error) {
+            error_log('STRC shop invoice failed for order ' . $orderId . ': ' . $error->getMessage());
+            $result['reason'] = 'Rechnung konnte nicht erstellt werden: ' . $error->getMessage();
         }
+        return $result;
     }
+
+    /** Rechnungsnummer, Download-Link und Versandstand einer Bestellung. */
+    public static function state(\WC_Order $order): array
+    {
+        $number = (string) $order->get_meta('_strc_invoice_number');
+        if ($number === '') return array();
+        return array('number' => $number, 'url' => self::url($order), 'sent' => (bool) $order->get_meta('_strc_invoice_sent'), 'reason' => '');
+    }
+
+    public static function url(\WC_Order $order): string
+    {
+        return wp_nonce_url(admin_url('admin-post.php?action=strc_shop_invoice&order=' . $order->get_id()), 'strc_shop_invoice_' . $order->get_id());
+    }
+
+    public static function canDownload(\WC_Order $order): bool { return self::allowed($order); }
 
     private static function language(\WC_Order $order): string
     {
@@ -139,7 +170,7 @@ final class ShopInvoice
     public function customerLink($order): void
     {
         if (! $order instanceof \WC_Order || ! $order->get_meta('_strc_invoice_number') || ! self::allowed($order)) return;
-        $url = wp_nonce_url(admin_url('admin-post.php?action=strc_shop_invoice&order=' . $order->get_id()), 'strc_shop_invoice_' . $order->get_id());
+        $url = self::url($order);
         echo '<p class="strc-invoice-link"><a class="button" href="' . esc_url($url) . '" target="_blank" rel="noopener">' . esc_html((self::language($order) === 'fr' ? 'Facture ' : 'Rechnung ') . $order->get_meta('_strc_invoice_number') . ' (PDF)') . '</a></p>';
     }
 }

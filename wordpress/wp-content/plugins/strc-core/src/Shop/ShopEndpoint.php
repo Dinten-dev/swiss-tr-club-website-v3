@@ -33,12 +33,20 @@ final class ShopEndpoint
 
     public function respond(): void
     {
-        [$operation,$input] = AjaxRequest::read('strc_shop', array('product-save','order-save','product-order'));
-        if(in_array($operation,['product-save','order-save','order-options','product-order'],true)){
+        [$operation,$input] = AjaxRequest::read('strc_shop', array('product-save','product-update','order-save','product-order','invoice-issue'));
+        if(in_array($operation,['product-save','product-update','product-list','product-detail','order-save','order-options','product-order'],true)){
             if(!self::canManageShop()||!function_exists('wc_get_product'))AjaxRequest::fail('Keine Shopberechtigung.',403);
-            try{wp_send_json_success(match($operation){'product-save'=>ShopOperations::saveProduct($input),'order-save'=>ShopOperations::order($input),'product-order'=>ShopOperations::sortProducts($input),default=>ShopOperations::choices()});}
+            try{wp_send_json_success(match($operation){'product-save'=>ShopOperations::saveProduct($input),'product-update'=>ShopOperations::updateProduct($input),'product-list'=>ShopOperations::productList(),'product-detail'=>ShopOperations::productDetail($input),'order-save'=>ShopOperations::order($input),'product-order'=>ShopOperations::sortProducts($input),default=>ShopOperations::choices()});}
             catch(\InvalidArgumentException $e){AjaxRequest::fail($e->getMessage(),422);}
             catch(\Throwable $e){error_log('STRC shop operation: '.$e->getMessage());AjaxRequest::fail('Vorgang konnte nicht abgeschlossen werden. Bitte Bestand und Angaben neu prüfen.',409);}
+        }
+        if($operation==='invoice-issue'){
+            // Rechnung auf Knopfdruck erstellen bzw. erneut abrufen (Shopverwaltung und Kasse).
+            if(!current_user_can('strc_access_member_area')||!(self::canManageShop()||current_user_can('strc_manage_finance'))||!function_exists('wc_get_order'))AjaxRequest::fail('Keine Berechtigung für Rechnungen.',403);
+            $order=wc_get_order(absint($input['id']??0));if(!$order instanceof \WC_Order)AjaxRequest::fail('Bestellung nicht gefunden.',404);
+            $result=ShopInvoice::create($order->get_id(),true);
+            if($result['url']==='')AjaxRequest::fail($result['reason']?:'Rechnung konnte nicht erstellt werden.',422);
+            wp_send_json_success($result+['message'=>'Rechnung '.$result['number'].($result['sent']?' erstellt und per E-Mail versandt.':' erstellt.')]);
         }
         if($operation==='reports')$this->reports($input);
         if ('config' !== $operation) AjaxRequest::fail('Unbekannte Shop-Anfrage.', 400);
@@ -125,7 +133,7 @@ final class ShopEndpoint
         $args=['type'=>'shop_order','limit'=>50,'page'=>$page,'paginate'=>true,'orderby'=>'date','order'=>'DESC'];
         if($event)$args['meta_query']=[['key'=>'_strc_pickup_event','value'=>$event]];
         $result=wc_get_orders($args);$orders=[];
-        foreach($result->orders as $order){$pickup=(int)$order->get_meta('_strc_pickup_event');$orders[]=['id'=>$order->get_id(),'number'=>$order->get_order_number(),'date'=>$order->get_date_created()?->date(DATE_ATOM),'status'=>$order->get_status(),'customer'=>trim($order->get_billing_first_name().' '.$order->get_billing_last_name()),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'paymentMethod'=>$order->get_payment_method_title(),'pickupEvent'=>$pickup?get_the_title($pickup):'','shippedAt'=>(string)$order->get_meta('_strc_shipped_at'),'tracking'=>(string)$order->get_meta('_strc_tracking'),'items'=>array_values(array_map(static fn($item)=>$item->get_name().' × '.$item->get_quantity(),$order->get_items()))];}
+        foreach($result->orders as $order){$pickup=(int)$order->get_meta('_strc_pickup_event');$orders[]=['id'=>$order->get_id(),'number'=>$order->get_order_number(),'date'=>$order->get_date_created()?->date(DATE_ATOM),'status'=>$order->get_status(),'customer'=>trim($order->get_billing_first_name().' '.$order->get_billing_last_name()),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'paymentMethod'=>$order->get_payment_method_title(),'pickupEvent'=>$pickup?get_the_title($pickup):'','shippedAt'=>(string)$order->get_meta('_strc_shipped_at'),'tracking'=>(string)$order->get_meta('_strc_tracking'),'items'=>array_values(array_map(static fn($item)=>$item->get_name().' × '.$item->get_quantity(),$order->get_items())),'invoice'=>$order->get_payment_method()===ShopInvoice::GATEWAY?(ShopInvoice::state($order)?:['number'=>'','url'=>'','sent'=>false,'reason'=>'']):null];}
         $stock=[];$products=wc_get_products(['limit'=>50,'page'=>max(1,absint($input['stockPage']??1)),'paginate'=>true,'status'=>['publish','draft','private']]);
         foreach($products->products as $product){$stock[]=['id'=>$product->get_id(),'name'=>$product->get_name(),'sku'=>$product->get_sku(),'quantity'=>$product->get_stock_quantity(),'stockStatus'=>$product->get_stock_status(),'type'=>$product->get_type()];if($product->is_type('variable'))foreach($product->get_children() as $variantId){$variant=wc_get_product($variantId);if($variant)$stock[]=['id'=>$variantId,'name'=>$variant->get_name(),'sku'=>$variant->get_sku(),'quantity'=>$variant->get_stock_quantity(),'stockStatus'=>$variant->get_stock_status(),'type'=>'variation'];}}
         $summary=null;
@@ -183,22 +191,9 @@ final class ShopEndpoint
             }
 
             foreach ($recipients as $key => $recipient) {
-                $subject = sprintf('Neue Bestellung im TR-Shop: #%s', $order->get_order_number());
-                $body = array(
-                    'Eine Bestellung ist im TR-Shop eingegangen. Zahlungsstatus: '.$order->get_status(),
-                    '',
-                    'Bestellung: #' . $order->get_order_number(),
-                    'Artikel: ' . implode("\n", $recipient['items']),
-                    'Gesamtbetrag: ' . wp_strip_all_tags(wc_price((float) $order->get_total(), array('currency' => $order->get_currency()))),
-                    'Bestellt von: ' . trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
-                    'E-Mail: ' . $order->get_billing_email(),
-                    '',
-                    'Lieferadresse:',
-                    self::shippingAddress($order),
-                    'Telefon: ' . ((method_exists($order, 'get_shipping_phone') ? $order->get_shipping_phone() : '') ?: $order->get_billing_phone() ?: 'nicht angegeben'),
-                    '',
-                    'Bitte Versand und Übergabe des Artikels veranlassen.',
-                );
+                $mail = \SwissTRClub\Core\Mail\MailTemplates::render('internal.shop_order', 'de', array('bestellnummer' => $order->get_order_number(), 'status' => $order->get_status(), 'artikel' => implode("\n", $recipient['items']), 'betrag' => wp_strip_all_tags(wc_price((float) $order->get_total(), array('currency' => $order->get_currency()))), 'kunde' => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()), 'email' => $order->get_billing_email(), 'lieferadresse' => self::shippingAddress($order), 'telefon' => ((method_exists($order, 'get_shipping_phone') ? $order->get_shipping_phone() : '') ?: $order->get_billing_phone() ?: 'nicht angegeben')));
+                $subject = $mail['subject'];
+                $body = array($mail['body']);
                 if (wp_mail($recipient['email'], $subject, implode("\n", $body), array('Content-Type: text/plain; charset=UTF-8'))) {
                     $sent[$key] = current_time('mysql', true);
                     $order->update_meta_data('_strc_shop_notifications_sent', $sent);

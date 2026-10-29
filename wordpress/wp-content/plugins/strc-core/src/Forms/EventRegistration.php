@@ -46,7 +46,7 @@ final class EventRegistration
         if($data['externalUrl']&&(!filter_var($data['externalUrl'],FILTER_VALIDATE_URL)||!in_array(strtolower(parse_url($data['externalUrl'],PHP_URL_SCHEME)?:''),['https','http'],true)))throw new \InvalidArgumentException('Bitte eine gültige externe Anmelde-Adresse angeben.');
         if($data['cancelAt']&&!self::validDate($data['cancelAt']))throw new \InvalidArgumentException('Bitte eine gültige Abmeldefrist angeben.');
         foreach(['vehicle','copilot','waitlist','organiserFree']as$key)$data[$key]=($input['reg_'.$key]??'')==='1';
-        $guests=$input['reg_guests']??'2';if(!ctype_digit($guests)||(int)$guests>2)throw new \InvalidArgumentException('Zusätzliche Gast-Buchungen: 0 bis 2.');$data['guests']=(int)$guests;
+        $guests=$input['reg_guests']??'2';if(!ctype_digit($guests)||(int)$guests>2)throw new \InvalidArgumentException('Zusätzliche Gast-Buchungen: 0 bis 2.');$data['guests']=min(1,(int)$guests);
         $data['weekend']=in_array($input['eventType']??'',['weekend','weekend-meeting'],true);
         $data['meeting']=($input['eventType']??'')==='meeting';
         if($data['organiserFree']&&!$data['organiserUserId']&&!$data['organiserMemberNumber'])throw new \InvalidArgumentException('Für den Beitragserlass bitte die Veranstaltungsleitung als Mitglied auswählen.');
@@ -153,10 +153,10 @@ final class EventRegistration
     private function submission(object $event,array $settings,array $input): array
     {
         if(!$this->open($event)||$settings['externalUrl'])throw new \RuntimeException('Die Online-Anmeldung ist für diese Veranstaltung geschlossen.',409);
-        // Buchungen (Fahrzeugbesatzungen): 1. die eigene (Mitglied als Pilot), danach bis zu `guests` Zusatzbuchungen für Mitglieder oder Gäste.
-        // Konstellationen: Mitglied allein · Mitglied + Co-Pilot Mitglied · Mitglied + Co-Pilot Gast · Gast allein · Gast + Co-Pilot Gast.
+        // Buchungen (Entscheid Redaktion 29.10.2026): die eigene (Mitglied, Begleitung Mitglied oder Gast) und höchstens eine weitere Person.
+        // Die weitere Person ist immer Gast, ihre Begleitung ebenfalls Gast – Mitglieder melden sich selbst an. Höchstens 2+2 Personen.
         $crews=json_decode($input['crews']??'',true);
-        if(!is_array($crews)||!array_is_list($crews)||!$crews||count($crews)>1+min(2,(int)$settings['guests']))throw new \InvalidArgumentException('Bitte die zugelassene Anzahl Buchungen beachten.');
+        if(!is_array($crews)||!array_is_list($crews)||!$crews||count($crews)>1+min(1,(int)$settings['guests']))throw new \InvalidArgumentException('Pro Anmeldung ist höchstens eine weitere Person (Gast) möglich.');
         $participants=[];$total=0;$rooms=[];
         foreach($crews as $index=>$crew){
             if(!is_array($crew))throw new \InvalidArgumentException('Bitte die Buchungsangaben prüfen.');
@@ -169,7 +169,7 @@ final class EventRegistration
             }else{
                 $pilot=is_array($crew['pilot']??null)?$crew['pilot']:[];
                 $pilotType=$pilot['type']??'guest';
-                if(!in_array($pilotType,['guest','member'],true))throw new \InvalidArgumentException('Bitte Mitglied oder Gast wählen.');
+                if($pilotType!=='guest')throw new \InvalidArgumentException('Weitere Personen sind Gäste. Mitglieder melden sich selbst an.');
                 $person=($pilotType==='member'?$this->memberPerson($pilot):$this->guestPerson($pilot))+['kind'=>$pilotType,'role'=>$pilotType==='member'?'Mitglied':'Gast','crew'=>$index+1,'room'=>$room];
                 $model=FormFields::text(is_array($crew['pilot']??null)?$crew['pilot']:[],'vehicle',80);
                 if($model)$person['vehicle']=$model;
@@ -183,6 +183,8 @@ final class EventRegistration
                 $partner=$this->copilot();if(!$settings['copilot']||!$partner)throw new \InvalidArgumentException('Kein berechtigter Co-Pilot verknüpft.');
                 $person=['firstName'=>(string)get_user_meta($partner,'first_name',true),'lastName'=>(string)get_user_meta($partner,'last_name',true),'name'=>get_userdata($partner)->display_name,'kind'=>'copilot','role'=>'Co-Pilot Mitglied','userId'=>$partner,'isMember'=>true];
                 $person['fee']=$this->participantFee($partner,$settings,self::roleFee($settings,'copilot',$room));
+            }elseif($type==='member'&&!$own){
+                throw new \InvalidArgumentException('Die Begleitung eines Gastes ist ebenfalls Gast. Mitglieder melden sich selbst an.');
             }elseif($type==='member'){
                 $person=$this->memberPerson($copilot)+['kind'=>'copilot','role'=>'Co-Pilot Mitglied'];
                 $person['fee']=$this->participantFee((int)$person['userId'],$settings,self::roleFee($settings,'copilot',$room));

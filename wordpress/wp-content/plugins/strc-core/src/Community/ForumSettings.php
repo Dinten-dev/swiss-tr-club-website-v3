@@ -76,7 +76,7 @@ final class ForumSettings
         if($fr){foreach(['Neues Thema: '=>'Nouveau sujet : ','Neue Antwort: '=>'Nouvelle réponse : '] as $de=>$translation)if(str_starts_with($title,$de)){$title=$translation.substr($title,strlen($de));break;}}
         $prefs=self::preferences($id);
         if($prefs['website']){$activity=(array)get_user_meta($id,'strc_notifications',true);$activity[]=['id'=>$key,'title'=>$title,'url'=>$url,'at'=>gmdate(DATE_ATOM)];update_user_meta($id,'strc_notifications',array_slice($activity,-50));}
-        if($prefs['email']){$user=get_userdata($id);wp_mail($user->user_email,'TR-Club Forum',$title."\n".$url."\n".($fr?'Les notifications peuvent être modifiées dans le forum.':'Benachrichtigungen können im Forum angepasst werden.'));}
+        if($prefs['email']){$user=get_userdata($id);$mail=\SwissTRClub\Core\Mail\MailTemplates::render('internal.forum',$fr?'fr':'de',['titel'=>$title,'link'=>$url]);wp_mail($user->user_email,$mail['subject'],$mail['body']);}
         self::notifyWhatsApp($id,$key,$title,$url,$fr);
     }
 

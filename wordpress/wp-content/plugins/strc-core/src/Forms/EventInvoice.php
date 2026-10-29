@@ -52,10 +52,9 @@ final class EventInvoice
                 $headers = array('Content-Type: text/plain; charset=UTF-8');
                 foreach (ClubDocument::treasury() as $copy) $headers[] = 'Bcc: ' . $copy;
                 $amount = number_format(((int) $row['total']) / 100, 2, '.', "'");
-                $subject = $lang === 'fr' ? 'Facture ' . $number . ' : ' . $title : 'Rechnung ' . $number . ': ' . $title;
-                $body = $lang === 'fr'
-                    ? "Bonjour " . ($user->first_name ?: $user->display_name) . "\n\nTu trouveras en pièce jointe la facture avec le bulletin de versement QR pour ta participation.\n\n" . $title . "\nMontant : CHF " . $amount . "\n\nMeilleures salutations\nSwiss TR-Club\n"
-                    : "Hallo " . ($user->first_name ?: $user->display_name) . "\n\nIm Anhang findest du die Rechnung mit QR-Einzahlungsschein für deine Teilnahme.\n\n" . $title . "\nBetrag: CHF " . $amount . "\n\nFreundliche Grüsse\nSwiss TR-Club\n";
+                $mail = \SwissTRClub\Core\Mail\MailTemplates::render('event.invoice', $lang, array('vorname' => $user->first_name ?: $user->display_name, 'rechnungsnummer' => $number, 'anlass' => $title, 'betrag' => $amount));
+                $subject = $mail['subject'];
+                $body = $mail['body'] . "\n";
                 if (! wp_mail($user->user_email, $subject, $body, $headers, array($file))) return false;
                 update_post_meta($id, 'strc_invoice_sent', gmdate(DATE_ATOM));
                 return true;
