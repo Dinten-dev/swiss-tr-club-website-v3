@@ -8,6 +8,9 @@ namespace SwissTRClub\Core\Editorial {
 namespace SwissTRClub\Core\Http {
  final class AjaxRequest {public static function fail(string $message,int $code=400):never{throw new \RuntimeException($message,$code);}}
 }
+namespace SwissTRClub\Core\Roles {
+ final class RoleAssignments {public static function limited(int $id):bool{return false;}}
+}
 namespace SwissTRClub\Core\Community {
  final class PrivateUploadStore {
   public function webCopy(array $file):array{$GLOBALS['copies'][]=$file['key'];return [];}
@@ -76,8 +79,11 @@ namespace {
  require dirname($base).'/Roles/RoleDefinitions.php';
  foreach(['strc_administrator','strc_superadmin'] as $role){
   $caps=\SwissTRClub\Core\Roles\RoleDefinitions::all()[$role]['capabilities'];$areas=['library'=>true];
-  check(!isset($caps['strc_access_board_documents'])&&in_array('restricted',\SwissTRClub\Core\Community\LibraryPolicy::classes(),true),'Admin role overrides board classification: '.$role);
-  check(invoke($community,'post',1,true)->ID===1&&invoke($community,'canEdit',$posts[1])&&invoke($community,'canReview',$posts[1]),'Admin role maintains archived board documents: '.$role);
+  check(!in_array('restricted',\SwissTRClub\Core\Community\LibraryPolicy::classes(),true),'Admin without Board role cannot read board documents: '.$role);
+  denied(fn()=>invoke($community,'post',1,true),404,'Admin without Board role cannot open archived board documents: '.$role);
+  $caps['strc_access_board_documents']=true;
+  check(in_array('restricted',\SwissTRClub\Core\Community\LibraryPolicy::classes(),true),'Admin with Board role reads board documents: '.$role);
+  check(invoke($community,'post',1,true)->ID===1&&invoke($community,'canEdit',$posts[1])&&invoke($community,'canReview',$posts[1]),'Admin with Board role maintains archived board documents: '.$role);
   denied(fn()=>invoke($community,'deleteTopic',1),403,'Admin still cannot permanently delete board archives: '.$role);
  }
  $posts=[];$meta=[];$options=[];$areas=[];$caps=['strc_access_member_area'=>true];$hooks=[];
