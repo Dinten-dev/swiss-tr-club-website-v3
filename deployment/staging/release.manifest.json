@@ -79,8 +79,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/CommunityEndpoint.php",
-      "bytes": 74527,
-      "sha256": "30475761b035468fd2c7a97a593381c9080fcfde5538b80c2910970bcaeb05fa"
+      "bytes": 78193,
+      "sha256": "7a805eebcf2631400f6e4af562f04599ec37435d2d5456a4d89a332885c35666"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Community/ForumSettings.php",
@@ -269,8 +269,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Forms/EventRegistration.php",
-      "bytes": 30030,
-      "sha256": "910cdd4b44d949b68a791b26222e48449eaba11f41756052cbd22950279fd738"
+      "bytes": 32119,
+      "sha256": "d3b1ad961e3049289791bb1d5e36dcd618e6ec4efe65fa499b8e32ad0c1b2523"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Forms/FormFields.php",
@@ -709,8 +709,8 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 1000590,
-      "sha256": "424cbe22e4fea7d429f847d204052b530a726d5b09bd0941bcb64636217c0ad0"
+      "bytes": 1002165,
+      "sha256": "08ba5441b0ee1163f1cbf2b1050c2c691b98a1b588d767bce6d2f0c65f86e2dd"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -2429,6 +2429,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-10-30T15:05:21.234Z",
+  "builtOn": "2026-10-30T19:36:11.923Z",
   "baselineCapturedOn": "2026-10-13"
 }

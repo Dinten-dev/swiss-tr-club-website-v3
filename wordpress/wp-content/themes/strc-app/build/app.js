@@ -19016,13 +19016,14 @@ function dn(e, t) {
 	for (let r of e) {
 		let e = (r.crew || (r.kind === "guest" ? n.length + 1 : r.kind === "guest-copilot" ? n.length : 1)) - 1;
 		if (r.kind === "member" && e === 0) {
-			r.room && (n[0].room = r.room === "single" ? "single" : "double");
+			r.room && (n[0].room = r.room === "single" ? "single" : "double"), n[0].meal = r.meal || "";
 			continue;
 		}
 		for (; n.length <= e;) n.push(sn());
 		let i = n[e];
-		if (r.kind === "guest" || r.kind === "member") {
+		if (e > 0 && (i.existingCrew = e + 1), r.kind === "guest" || r.kind === "member") {
 			Object.assign(i, {
+				meal: r.meal || "",
 				type: r.kind === "member" ? "member" : "guest",
 				memberNumber: r.memberNumber || "",
 				firstName: r.firstName || r.name,
@@ -19033,6 +19034,7 @@ function dn(e, t) {
 			continue;
 		}
 		i.copilot = {
+			meal: r.meal || "",
 			type: r.kind === "copilot" ? r.memberNumber || !t ? "member" : "partner" : "guest",
 			firstName: r.firstName || r.name,
 			lastName: r.lastName || "",
@@ -19094,7 +19096,7 @@ var fn = "strc_registration", pn = (e) => new Intl.NumberFormat("de-CH", {
 	"Buchung Co-Pilot Gast": "Buchung Begleitung Gast",
 	"Co-Piloten zulassen (Mitglied oder Gast)": "Begleitung zulassen (Mitglied oder Gast)",
 	"Zusätzliche Buchungen pro Anmeldung": "Weitere Personen pro Anmeldung",
-	"Weitere Person als Mitglied oder Gast, optional mit Begleitung (Mitglied oder Gast). 0 = keine weiteren Personen.": "Weitere Person als Mitglied oder Gast, optional mit Begleitung (Mitglied oder Gast). 0 = keine weiteren Personen."
+	"Eine zusätzliche Gast-Buchung, optional mit Gastbegleitung. 0 = keine zusätzliche Gast-Buchung.": "Eine zusätzliche Gast-Buchung, optional mit Gastbegleitung. 0 = keine zusätzliche Gast-Buchung."
 }, yn = (e, t) => o(e && vn[t] || t), bn = (e) => ((e || 0) / 100).toFixed(2);
 function xn({ event: e, localDate: t, nonce: n, eventId: r, uploadState: i, organisers: a, weekend: s = !1, meeting: c = !1 }) {
 	let [l, u] = (0, h.useState)(e?.registrationRequired || !1), d = e?.registration, [f, p] = (0, h.useState)(d?.organiserUserId ? String(d.organiserUserId) : ""), [m, g] = (0, h.useState)(d?.organiser || ""), [v, y] = (0, h.useState)({
@@ -19237,10 +19239,10 @@ function xn({ event: e, localDate: t, nonce: n, eventId: r, uploadState: i, orga
 									name: "reg_guests",
 									type: "number",
 									min: 0,
-									max: 2,
-									defaultValue: Math.min(2, d?.guests ?? 2)
+									max: 1,
+									defaultValue: Math.min(1, d?.guests ?? 1)
 								}),
-								/* @__PURE__ */ (0, _.jsx)("small", { children: yn(c, "Weitere Person als Mitglied oder Gast, optional mit Begleitung (Mitglied oder Gast). 0 = keine weiteren Personen.") })
+								/* @__PURE__ */ (0, _.jsx)("small", { children: yn(c, "Eine zusätzliche Gast-Buchung, optional mit Gastbegleitung. 0 = keine zusätzliche Gast-Buchung.") })
 							] })]
 						}),
 						/* @__PURE__ */ (0, _.jsxs)("label", {
@@ -19472,18 +19474,19 @@ function Cn({ eventId: e, memberAccess: t, hideTitle: n = !1 }) {
 		A.current = !0, p(!0), l("");
 		let n = new FormData(t);
 		n.set("operation", v ? "submit" : "preview"), n.set("eventId", String(e)), n.set("paymentMethod", b), n.set("crews", JSON.stringify(m.map((e, t) => ({
-			...t ? { pilot: {
-				type: e.type,
-				memberNumber: e.memberNumber,
-				firstName: e.firstName,
-				lastName: e.lastName,
-				vehicle: e.vehicle
-			} } : {},
+			...t ? {
+				existingCrew: e.existingCrew,
+				pilot: {
+					type: e.type,
+					memberNumber: e.memberNumber,
+					firstName: e.firstName,
+					lastName: e.lastName,
+					vehicle: e.vehicle
+				}
+			} : {},
 			copilot: e.copilot.type ? e.copilot : null,
 			room: e.room
-		}))));
-		let a = m.reduce((e, t) => e + 1 + +!!t.copilot.type, 0);
-		n.set("selections", JSON.stringify(Array.from({ length: a }, (e, t) => ({ meal: String(n.get(`meal_${t}`) || "") })))), D && r.registration && (n.set("id", String(r.registration.id)), n.set("revision", r.registration.revision)), v && n.set("reviewToken", v.reviewToken);
+		})))), n.set("selections", JSON.stringify(m.flatMap((e) => [{ meal: e.meal || "" }, ...e.copilot.type ? [{ meal: e.copilot.meal || "" }] : []]))), D && r.registration && (n.set("id", String(r.registration.id)), n.set("revision", r.registration.revision)), v && n.set("reviewToken", v.reviewToken);
 		try {
 			if (v) {
 				let e = await w(fn, r.nonce, n);
@@ -19536,7 +19539,17 @@ function Cn({ eventId: e, memberAccess: t, hideTitle: n = !1 }) {
 			}
 		}
 	}
-	let P = (e) => yn(r?.settings.meeting, e), F = r?.registration, I = (e, t) => [e, t].filter(Boolean).join(" "), L = r ? m.flatMap((e, t) => [t ? I(e.firstName, e.lastName) || `Gast ${t}` : r.name, ...e.copilot.type ? [e.copilot.type === "partner" ? r.copilot || P("Co-Pilot") : I(e.copilot.firstName, e.copilot.lastName) || P("Co-Pilot")] : []]) : [], z = (e, t) => g((n) => n.map((n, r) => r === e ? {
+	let P = (e) => yn(r?.settings.meeting, e), F = r?.registration, I = (e, t) => [e, t].filter(Boolean).join(" "), L = r ? m.flatMap((e, t) => [{
+		name: t ? I(e.firstName, e.lastName) || `Gast ${t}` : r.name,
+		meal: e.meal || "",
+		crew: t,
+		copilot: !1
+	}, ...e.copilot.type ? [{
+		name: e.copilot.type === "partner" ? r.copilot || P("Co-Pilot") : I(e.copilot.firstName, e.copilot.lastName) || P("Co-Pilot"),
+		meal: e.copilot.meal || "",
+		crew: t,
+		copilot: !0
+	}] : []]) : [], z = (e, t) => g((n) => n.map((n, r) => r === e ? {
 		...n,
 		...t
 	} : n)), B = (e, t) => g((n) => n.map((n, r) => r === e ? {
@@ -19548,10 +19561,11 @@ function Cn({ eventId: e, memberAccess: t, hideTitle: n = !1 }) {
 	} : n));
 	function U(t) {
 		if (!r || !r.settings.copilot) return null;
-		let n = m[t], i = t === 0, a = n.copilot.type, s = a === "member" && n.copilot.memberNumber;
+		let n = m[t], i = t === 0, a = n.copilot.type, s = a === "member" && n.copilot.memberNumber, c = !i && a === "member" && !!n.existingCrew;
 		return /* @__PURE__ */ (0, _.jsxs)(_.Fragment, { children: [
 			/* @__PURE__ */ (0, _.jsxs)("label", { children: [P("Co-Pilot"), /* @__PURE__ */ (0, _.jsxs)("select", {
 				value: a,
+				disabled: c,
 				onChange: (e) => B(t, {
 					...on,
 					type: e.target.value
@@ -19570,7 +19584,7 @@ function Cn({ eventId: e, memberAccess: t, hideTitle: n = !1 }) {
 							")"
 						]
 					}),
-					/* @__PURE__ */ (0, _.jsx)("option", {
+					(i || c) && /* @__PURE__ */ (0, _.jsx)("option", {
 						value: "member",
 						children: P("Anderes Mitglied")
 					}),
@@ -19591,7 +19605,7 @@ function Cn({ eventId: e, memberAccess: t, hideTitle: n = !1 }) {
 					" ",
 					n.copilot.memberNumber,
 					" ",
-					/* @__PURE__ */ (0, _.jsx)("button", {
+					!c && /* @__PURE__ */ (0, _.jsx)("button", {
 						type: "button",
 						className: "market-text-button",
 						onClick: () => B(t, {
@@ -19877,55 +19891,47 @@ function Cn({ eventId: e, memberAccess: t, hideTitle: n = !1 }) {
 									W(0)
 								]
 							}),
-							m.slice(1).map((t, n) => {
-								let i = n + 1;
+							/* @__PURE__ */ (0, _.jsx)("p", {
+								className: "club-hint",
+								children: o("Du kannst dich mit einer Begleitung (Mitglied oder Gast) und höchstens einer zusätzlichen Gast-Buchung mit Gastbegleitung anmelden. Bitte stimme die Teilnahme von Gästen mit der Veranstaltungsleitung ab.")
+							}),
+							D && m.some((e) => e.existingCrew && (e.type === "member" || e.copilot.type === "member" || m.length > 2)) && /* @__PURE__ */ (0, _.jsx)("p", {
+								className: "club-notice",
+								children: o("Bestehende zusätzliche Personen bleiben erhalten. Weitere Mitglieder melden sich künftig mit ihrem eigenen Konto an.")
+							}),
+							m.slice(1).map((e, t) => {
+								let n = t + 1;
 								return /* @__PURE__ */ (0, _.jsxs)(H, {
-									title: `${o("Weitere Person")} ${m.length > 2 ? i : ""}`.trim(),
+									title: `${o("Weitere Person")} ${m.length > 2 ? n : ""}`.trim(),
 									children: [
-										/* @__PURE__ */ (0, _.jsxs)("label", { children: [o("Mitglied oder Gast"), /* @__PURE__ */ (0, _.jsxs)("select", {
-											value: t.type,
-											onChange: (e) => z(i, {
-												type: e.target.value,
-												firstName: "",
-												lastName: "",
-												memberNumber: ""
-											}),
-											children: [/* @__PURE__ */ (0, _.jsx)("option", {
-												value: "guest",
-												children: o("Gast")
-											}), /* @__PURE__ */ (0, _.jsx)("option", {
-												value: "member",
-												children: o("Mitglied")
-											})]
-										})] }),
-										t.type === "member" && /* @__PURE__ */ (0, _.jsx)(an, {
-											eventId: e,
-											selected: t.memberNumber,
-											onSelect: (e) => z(i, e)
-										}),
-										/* @__PURE__ */ (0, _.jsxs)("div", {
+										e.type === "member" ? /* @__PURE__ */ (0, _.jsxs)("p", {
+											className: "club-hint",
+											children: [
+												o("Bestehendes Mitglied"),
+												": ",
+												/* @__PURE__ */ (0, _.jsx)("strong", { children: I(e.firstName, e.lastName) }),
+												" · ",
+												o("Mitgliedsnummer"),
+												" ",
+												e.memberNumber
+											]
+										}) : /* @__PURE__ */ (0, _.jsxs)("div", {
 											className: "club-form-row",
-											children: [/* @__PURE__ */ (0, _.jsxs)("label", { children: [o("Vorname *"), /* @__PURE__ */ (0, _.jsx)("input", {
+											children: [/* @__PURE__ */ (0, _.jsxs)("label", { children: [o("Vorname Gast *"), /* @__PURE__ */ (0, _.jsx)("input", {
 												required: !0,
 												maxLength: 80,
-												value: t.firstName,
-												onChange: (e) => z(i, { firstName: e.target.value })
-											})] }), /* @__PURE__ */ (0, _.jsxs)("label", { children: [o("Nachname *"), /* @__PURE__ */ (0, _.jsx)("input", {
+												value: e.firstName,
+												onChange: (e) => z(n, { firstName: e.target.value })
+											})] }), /* @__PURE__ */ (0, _.jsxs)("label", { children: [o("Nachname Gast *"), /* @__PURE__ */ (0, _.jsx)("input", {
 												required: !0,
 												maxLength: 80,
-												value: t.lastName,
-												onChange: (e) => z(i, { lastName: e.target.value })
+												value: e.lastName,
+												onChange: (e) => z(n, { lastName: e.target.value })
 											})] })]
 										}),
-										t.type === "member" && /* @__PURE__ */ (0, _.jsxs)("label", { children: [o("Mitgliedsnummer *"), /* @__PURE__ */ (0, _.jsx)("input", {
-											required: !0,
-											maxLength: 32,
-											value: t.memberNumber,
-											onChange: (e) => z(i, { memberNumber: e.target.value })
-										})] }),
 										r.settings.vehicle && /* @__PURE__ */ (0, _.jsxs)("label", { children: [o("Fahrzeug der weiteren Person"), /* @__PURE__ */ (0, _.jsxs)("select", {
-											value: t.vehicle,
-											onChange: (e) => z(i, { vehicle: e.target.value }),
+											value: e.vehicle,
+											onChange: (e) => z(n, { vehicle: e.target.value }),
 											children: [
 												/* @__PURE__ */ (0, _.jsx)("option", {
 													value: "",
@@ -19952,31 +19958,32 @@ function Cn({ eventId: e, memberAccess: t, hideTitle: n = !1 }) {
 												})
 											]
 										})] }),
-										U(i),
-										W(i),
+										U(n),
+										W(n),
 										/* @__PURE__ */ (0, _.jsx)("button", {
 											type: "button",
 											className: "market-text-button",
-											onClick: () => g((e) => e.filter((e, t) => t !== i)),
+											onClick: () => g((e) => e.filter((e, t) => t !== n)),
 											children: o("Weitere Person entfernen")
 										})
 									]
-								}, i);
+								}, n);
 							}),
-							m.length - 1 < Math.min(2, r.settings.guests) && /* @__PURE__ */ (0, _.jsx)("button", {
+							m.length - 1 < Math.min(1, r.settings.guests) && /* @__PURE__ */ (0, _.jsx)("button", {
 								type: "button",
 								className: "club-secondary",
 								onClick: () => g((e) => [...e, sn()]),
-								children: o("＋ Weitere Person (Mitglied oder Gast)")
+								children: o("＋ Gast-Buchung hinzufügen")
 							}),
 							Object.keys(r.meals).length > 0 && L.map((e, t) => /* @__PURE__ */ (0, _.jsxs)("label", { children: [
 								"Essen: ",
-								e || `Gast ${t}`,
+								e.name || `Gast ${t}`,
 								" *",
 								/* @__PURE__ */ (0, _.jsxs)("select", {
 									name: `meal_${t}`,
 									required: !0,
-									defaultValue: D && F?.participants[t]?.meal || "",
+									value: e.meal,
+									onChange: (t) => e.copilot ? B(e.crew, { meal: t.target.value }) : z(e.crew, { meal: t.target.value }),
 									children: [/* @__PURE__ */ (0, _.jsx)("option", {
 										value: "",
 										children: o("Bitte wählen")
@@ -23507,10 +23514,12 @@ function Ar({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 	async function Ve(e) {
 		ue(!0), W("");
 		try {
-			await w(yr, t, T({
+			let n = await w(yr, t, T({
 				operation: "delete",
-				id: String(e.id)
-			})), Be(0), Re("Dokument endgültig gelöscht.");
+				id: String(e.id),
+				deleteRevision: e.deleteRevision || ""
+			}));
+			Be(0), Re(n.warning || "Dokument endgültig gelöscht.");
 		} catch (e) {
 			W(e.message);
 		} finally {
@@ -24072,7 +24081,7 @@ function Ar({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 												disabled: J,
 												onClick: () => void He(t, "restore"),
 												children: o("Wiederherstellen")
-											}), e === "library" && t.canReview && f !== "board" && !k(Tr(t.classification.documentType)).startsWith("board") && Tr(t.classification.access) !== "restricted" && (ze === t.id ? /* @__PURE__ */ (0, _.jsxs)("span", {
+											}), e === "library" && (f === "board" || k(Tr(t.classification.documentType)).startsWith("board") || Tr(t.classification.access) === "restricted" ? !!u.canPurgeBoard : t.canReview) && (ze === t.id ? /* @__PURE__ */ (0, _.jsxs)("span", {
 												className: "lib-purge-confirm",
 												children: [
 													o("Dokument mit allen Dateien endgültig löschen?"),
@@ -24113,6 +24122,30 @@ function Ar({ kind: e, nonce: t, selectedId: n, initialGroup: i = "", title: a, 
 							page: F,
 							pages: u.pages,
 							change: L
+						}),
+						e === "library" && N && f === "board" && u.boardDeletions && /* @__PURE__ */ (0, _.jsxs)("details", {
+							className: "board-deletion-log",
+							children: [/* @__PURE__ */ (0, _.jsxs)("summary", { children: [
+								o("Löschprotokoll Vorstandsunterlagen"),
+								" (",
+								u.boardDeletions.length,
+								")"
+							] }), u.boardDeletions.length ? /* @__PURE__ */ (0, _.jsx)("ul", { children: [...u.boardDeletions].reverse().map((e, t) => /* @__PURE__ */ (0, _.jsxs)("li", { children: [
+								/* @__PURE__ */ (0, _.jsx)("strong", { children: e.title }),
+								" ",
+								/* @__PURE__ */ (0, _.jsxs)("span", { children: [
+									o(l.libraryTypes.find((t) => t.key === e.type)?.label || e.type),
+									" · ",
+									e.by,
+									" · ",
+									new Date(e.at).toLocaleString(r(), {
+										dateStyle: "short",
+										timeStyle: "short"
+									}),
+									" · ",
+									o(e.state === "pending" ? "Abschluss prüfen" : e.state === "failed" ? "Löschung fehlgeschlagen" : "Gelöscht")
+								] })
+							] }, e.id || t)) }) : /* @__PURE__ */ (0, _.jsx)("p", { children: o("Noch keine Löschversuche vorhanden.") })]
 						})
 					] })
 				] })

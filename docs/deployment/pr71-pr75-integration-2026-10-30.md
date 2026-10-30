@@ -9,23 +9,26 @@ Arbeitszweig: `integration/editorial-pr75`. Lokal vorbereitet; keine Veröffentl
 |---|---|
 | [#71](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/71) | Shopartikel auf der Website bearbeiten, Varianten und Bilder pflegen, Rechnungs-PDFs über Shopverwaltung/Kasse, Profilbild im Dashboard. |
 | [#72](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/72) | Vorstandsunterlagen erfordern die tatsächliche Vorstandsrolle. Admin-/Superadmin-Rechte allein ersetzen diese nicht. Pflege erfordert zusätzlich passende Bearbeitungsrechte. |
-| [#73](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/73) | Rückweg mit Scrollposition, anklickbare Forumsadressen, beschriftete Linkfunktion, einklappbare Forumshilfe, übersichtlicheres Teilegesuch, Schliessen nach Dokumentfreigabe. |
-| [#74](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/74) | Vereinfachte Galerie-Downloads, klarere Original-ZIP-Aktion, Startseitenauswahl direkt am Bild, zuletzt ausgewählte öffentliche Bilder zuerst, aufgeräumte Mitgliedernavigation, vorausgewählte verknüpfte Begleitung und klarere Mitgliedersuche. |
+| [#73](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/73) | Rückweg mit Scrollposition, anklickbare Forumsadressen, beschriftete Linkfunktion, einklappbare Forumshilfe, übersichtlicheres Teilegesuch, Schliessen nach Dokumentfreigabe; endgültiges Löschen archivierter Vorstandsunterlagen mit Vorstand plus Bibliotheksverwaltung und Löschprotokoll. |
+| [#74](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/74) | Vereinfachte Galerie-Downloads, klarere Original-ZIP-Aktion, Startseitenauswahl direkt am Bild, zuletzt ausgewählte öffentliche Bilder zuerst, aufgeräumte Mitgliedernavigation, vorausgewählte verknüpfte Begleitung und klarere Mitgliedersuche; neue Anmeldungen mit eigener Besatzung und höchstens einer zusätzlichen Gastbesatzung. |
 | [#75](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/75) | Zentral bearbeitbare deutsche/französische Mailvorlagen, Vorschau, Testmail an die eigene Adresse, Versandprotokoll, gemeinsames Maildesign und Anbindung der Club- und WooCommerce-Mails. |
 
 Die PRs bilden einen kumulativen Stapel. Der Stand von #75 enthält #71–#74; die Integration übernimmt diese Änderungen einmalig. Die fünf Quellstände wurden nach der Bearbeitung nochmals gegen GitHub geprüft und waren unverändert.
 
-## Erhaltene Vorgaben des Nutzers
+## Anmeldungen, Dokumentrechte und erhaltene Vorgaben
 
-- Weitere Personen und Begleitungen können weiterhin Mitglieder oder Gäste sein. Bestehende Teilnehmergrenzen, Tarife, Fahrzeug- und Zimmerregeln bleiben erhalten; alte Anmeldungen werden nicht zum Entfernen bestehender Personen gezwungen.
-- Vorstandsunterlagen bleiben gegen endgültiges Löschen geschützt.
+- Neue Anmeldungen: eigenes Mitglied mit optionaler Begleitung (Mitglied oder Gast), dazu höchstens eine Gast-Buchung mit optionaler Gastbegleitung. Der Organisator kann zusätzliche Gast-Buchungen ausschalten. Eine frühere Einstellung «2» wirkt für neue Anmeldungen als «1». Gäste sollen ihre Teilnahme mit der Veranstaltungsleitung abstimmen; die Oberfläche behauptet keine nicht vorhandene separate Genehmigungsstufe.
+- Vorstandsunterlagen: endgültiges Löschen nur aus dem Archiv, mit tatsächlicher Vorstandsrolle **und** Bibliotheksverwaltung. Admin-/Superadmin allein ersetzen die Vorstandsrolle nicht. Die bestehende ausdrückliche Bestätigung im Formular bleibt erhalten.
 - Das bestehende 16-MB-Limit für Magazin-Originalbilder bleibt erhalten.
 - Bestehende Farben bleiben erhalten; es erfolgt kein allgemeiner Farbumbau.
 - Eine bereits vorhandene, sachfremde Dokumentänderung wurde unverändert erhalten und nicht in die Integration aufgenommen.
 
-Zwei fachliche Entscheidungen sind noch offen: die neue Beschränkung auf höchstens ein weiteres Gastpaar aus #74 und das endgültige Löschen von Vorstandsunterlagen aus #73. Diese beiden Vorschläge sind im Integrationsstand **nicht aktiviert**. Bis zur Antwort gelten die bisherigen Regeln; die übrigen Änderungen hängen nicht von dieser Entscheidung ab.
+Die frühere Rückstellung dieser beiden Regeln ist mit dem erneuten Auftrag zur vollständigen Integration aufgehoben. Die Umsetzung übernimmt Peters fachliche Vorgaben und ergänzt Schutz für bestehende Daten und fehlgeschlagene Speichervorgänge.
 
 ## Zusätzliche technische Korrekturen
+
+- **Altanmeldungen:** vorhandene zusätzliche Mitglieder und weitere Besatzungen bleiben beim Bearbeiten erhalten. Identitäten bestehender zusätzlicher Mitglieder sind im Formular schreibgeschützt. Entfernte vorhergehende Buchungen verschieben keine Mitgliedszuordnung; Essensauswahlen bleiben ebenfalls an die jeweilige Person gebunden. Gespeicherte Besatzungsreferenzen werden serverseitig gegen die bereits authentifizierte, passende Anmeldung geprüft. Fremde, abgemeldete oder veranstaltungsfremde Anmeldungen sowie erfundene oder doppelte Referenzen geben keine Ausnahme. Mitglieder lassen sich nicht durch andere Mitgliedsidentitäten ersetzen. Mitgliedsstatus, Tarife, Doppelanmeldungen, Kapazität, Fahrzeuge und Zimmer werden weiterhin serverseitig geprüft.
+- **Vorstandslöschung:** eine Dokumentrevision bindet die Bestätigung an Titel, Inhalt, Status, Dokumentart, Zugriffszuordnung und Dateien. Dokumentaktionen und Protokollschreibvorgänge werden serialisiert. Vor jeder endgültigen Löschung muss ein Protokolleintrag mit Dokument, ausführender Person und Zeit gespeichert und zurückgelesen werden; scheitert dies, bleibt das Dokument erhalten. Scheitert die Löschung oder deren Abschlussprotokoll, bleibt der Versuch nachweisbar und der Zustand sichtbar. Physisch entfernte Dateien werden dadurch nicht als wiederherstellbar dargestellt. Aufbewahrung: maximal 200 Protokolleinträge, letzte 50 im Vorstandsarchiv sichtbar; keine Dokumentinhalte im Protokoll.
 
 - **Artikelspeicherung:** alle Varianten, Einstandspreise und bereinigten Grössen vor dem ersten Speichern prüfen. Doppelte Varianten-IDs und nach Bereinigung gleiche Grössen ablehnen. Sämtliche neuen Bilder werden vor den Artikeländerungen verarbeitet.
 - **Gleichzeitige Bearbeitung:** Artikelrevision prüfen, relevante Datenbankzeilen sperren und unmittelbar vor dem Speichern erneut lesen. Artikel und Varianten werden innerhalb einer geprüften Transaktion geändert; Start-/Commitfehler und spätere Variantenfehler brechen sicher ab.
@@ -43,13 +46,13 @@ Zwei fachliche Entscheidungen sind noch offen: die neue Beschränkung auf höchs
 | Prüfung | Ergebnis / Grenze |
 |---|---|
 | ESLint und TypeScript | Erfolgreich. |
-| JavaScript-Verhaltenstests | 27 erfolgreich: Passwort-Reset, Fotoupload, Agenda-Slider, Rückweg und Maileditor. |
-| Isolierte PHP-Regressionen | 216 erfolgreich: 65 Sicherheitsgrenzen, 64 Baur-Feedback, 34 Dokument-/Galerieprüfungen, 31 Mailvorlagen, 22 Shop-/Rechnungsprüfungen. Keine echten Mails oder Mitgliederdaten. |
+| JavaScript-Verhaltenstests | 32 erfolgreich: Passwort-Reset, Fotoupload, Agenda-Slider, Rückweg, Maileditor und Anmeldebedienung. Die fünf neuen Anmeldetests sind auch im GitHub-Workflow eingebunden. |
+| Isolierte PHP-Regressionen | 255 erfolgreich: 65 Sicherheitsgrenzen, 86 Baur-/Anmeldeprüfungen, 51 Dokument-/Galerieprüfungen, 31 Mailvorlagen, 22 Shop-/Rechnungsprüfungen. Keine echten Mails oder Mitgliederdaten. |
 | PHPUnit | 93 Tests, 403 Assertions erfolgreich mit lokalem PHP 8.3.33 über WebAssembly. 92 Tests regulär; der Test mit Prozessisolierung wurde in einem separaten lokalen Prozess ausgeführt. Die eigentliche CI-Konfiguration bleibt unverändert prozessisoliert. |
 | PHP-Syntax | 147 PHP-Dateien erfolgreich geprüft. |
 | Anwendungsbuild und WordPress-Build | Erfolgreich. Bekannte Hinweise zu Chunkgrösse und statischer Routenerkennung bleiben bestehen. |
 | Struktur und Patchformat | Erfolgreich. |
-| Safari, lokale synthetische Oberfläche | Privater Artikelstatus erhalten; Variantenformular ergänzbar; Escape schliesst den Dialog. Mailformular sichtbar; Verlassen warnt; Abbrechen erhält den Entwurf; Speichern bestätigt. Testtab danach geschlossen. |
+| Safari, lokale synthetische Oberfläche | Privater Artikelstatus erhalten; Variantenformular ergänzbar; Escape schliesst den Dialog. Mailformular sichtbar; Verlassen warnt; Abbrechen erhält den Entwurf; Speichern bestätigt. Zusätzlich Altanmeldung mit zwei zusätzlichen Besatzungen geöffnet; frühere Gastbuchung entfernt, bestehende Mitgliedszuordnungen und Hinweise erhalten. Vorstandsarchiv zeigt Wiederherstellen, Löschbestätigung und Protokollzustände. Testtab danach geschlossen. |
 | In-App-Browser, lokale Oberfläche | Mailübersicht und Formular sichtbar. Der anschliessende native Bestätigungsdialog blockierte die Browsersteuerung; keine vollständige Chromium-Abnahme behauptet. |
 | Firefox | Nicht verwendet. |
 | Native GitHub-CI | Für diesen lokalen Integrationszweig noch nicht gestartet. |
@@ -58,4 +61,4 @@ Zwei fachliche Entscheidungen sind noch offen: die neue Beschränkung auf höchs
 
 ## Nächste Veröffentlichung
 
-Quellcode und erzeugte Website-Dateien sind gemeinsam vorbereitet; das Release-Manifest ist als `candidate` gekennzeichnet. Main, Staging und Produktion wurden nicht verändert. Vor einer Veröffentlichung: die beiden fachlichen Entscheidungen klären, den Integrationsdiff gemeinsam prüfen, native GitHub-Checks ausführen und Staging separat freigeben. Vor einem Staging-Upload sind der dann aktuelle Serverstand und die Datenbank neu zu sichern.
+Quellcode und erzeugte Website-Dateien sind gemeinsam vorbereitet; das Release-Manifest ist als `candidate` gekennzeichnet. Main, Staging und Produktion wurden nicht verändert. Vor einer Veröffentlichung: den Integrationsdiff gemeinsam prüfen, native GitHub-Checks ausführen und Staging separat freigeben. Die erneute Umsetzung hat lokal stattgefunden; der zwischenzeitliche Stopp wurde nicht als neue Deployment-Freigabe ausgelegt. Vor einem Staging-Upload sind der dann aktuelle Serverstand, Datenbank und externe private Dateiablagen neu zu sichern. Der Deployment-Helfer kann den lokalen Kandidaten mit `--dry-run` ohne Serververbindung prüfen. Sein Empfängerschutz berücksichtigt sowohl die frühere feste Adresse als auch den bereits vorhandenen dynamischen Adressresolver, dessen unveränderter Quelltext kontrolliert wird. Die synthetische Staging-Rollenprüfung wurde um Löschrechte und Löschprotokoll erweitert; diese Erweiterung wurde noch nicht auf dem Server ausgeführt.
