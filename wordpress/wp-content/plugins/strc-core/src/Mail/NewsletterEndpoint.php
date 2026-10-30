@@ -109,6 +109,7 @@ final class NewsletterEndpoint
         $unsubscribeUrl = add_query_arg(array('action' => 'strc_newsletter', 'operation' => 'unsubscribe', 'email' => $email, 'token' => $unsubscribe), admin_url('admin-ajax.php'));
         $subject = 'Bitte bestätige deine Anmeldung zum Swiss TR-Club Newsletter';
         $body = '<p>Guten Tag' . ($name ? ' ' . esc_html($name) : '') . ',</p><p>Du hast dich für den Newsletter des Swiss TR-Club angemeldet. Bitte bestätige deine Anmeldung:</p><p><a href="' . esc_url($confirmUrl) . '">Newsletter-Anmeldung bestätigen</a></p><p>Die Bestätigung ist einmalig und kann jederzeit widerrufen werden. Falls du dich nicht angemeldet hast, kannst du diese Nachricht ignorieren.</p><p><a href="' . esc_url($unsubscribeUrl) . '">Anmeldung widerrufen</a></p>';
+        \SwissTRClub\Core\Mail\MailLog::context('Newsletter: Bestätigung');
         if (! wp_mail($email, $subject, $body, array('Content-Type: text/html; charset=UTF-8'))) {
             wp_send_json_error(array('message' => 'Bestätigungsnachricht konnte nicht versendet werden. Bitte später erneut versuchen.'), 503);
         }

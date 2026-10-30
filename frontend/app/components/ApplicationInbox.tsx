@@ -1,4 +1,5 @@
 'use client';
+import {replaceRoute} from './RouteHistory';
 import {t} from './UILanguage';
 import {useEffect,useState} from 'react';
 import {query,mutate,fields} from './ClubApi';
@@ -15,7 +16,7 @@ const running=['queued','syncing','provisioning','mail_pending'];
 function PersonDetails({person,title}:{person:Person;title:string}){return <section><h3>{title}</h3><p><strong>{person.first_name} {person.last_name}</strong><br/>{person.email}<br/>{person.phone||'Kein Telefon angegeben'}<br/>{person.street}<br/>{person.postcode} {person.city}, {person.country}{person.gender&&<><br/>{t('Geschlecht')}: {t(({female:'Weiblich',male:'Männlich',other:'Divers'} as Record<string,string>)[person.gender]||person.gender)}</>}{person.birth_date&&<><br/>{t('Geburtsdatum')}: {person.birth_date}</>}<br/>Korrespondenz: {person.language==='fr'?'Français':'Deutsch'}</p></section>;}
 export default function ApplicationInbox({nonce}:{nonce:string}){
  const [tab,setTab]=useState<'applications'|'couples'>(()=>typeof window!=='undefined'&&window.location.hash.startsWith('#antraege/paar')?'couples':'applications');
- function switchTab(next:'applications'|'couples'){setTab(next);if(typeof window!=='undefined')window.history.replaceState(null,'',next==='couples'?'#antraege/paar':'#antraege');}
+ function switchTab(next:'applications'|'couples'){setTab(next);if(typeof window!=='undefined')replaceRoute(next==='couples'?'#antraege/paar':'#antraege');}
  const [listing,setListing]=useState<Listing|null>(null),[application,setApplication]=useState<Application|null>(null),[page,setPage]=useState(1),[version,setVersion]=useState(0),[error,setError]=useState(''),[busy,setBusy]=useState(false),[note,setNote]=useState(''),[confirm,setConfirm]=useState('');
  useEffect(()=>{const controller=new AbortController();query<Listing>('strc_applications',{page:String(page)},controller.signal).then(setListing).catch(e=>{if(!controller.signal.aborted)setError(e.message);});return()=>controller.abort();},[page,version]);
  useEffect(()=>{if(!application||!running.includes(application.state))return;let active=true;const timer=setTimeout(()=>{mutate<{application:Application}>('strc_applications',nonce,fields({operation:'process',id:String(application.id)})).then(r=>{if(active){setApplication(r.application);setVersion(v=>v+1);}}).catch(e=>{if(active)setError(e.message);});},1800);return()=>{active=false;clearTimeout(timer);};},[application,nonce]);

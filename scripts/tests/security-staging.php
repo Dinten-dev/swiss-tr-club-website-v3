@@ -93,10 +93,10 @@ try{
  update_post_meta($doc,'strc_pre_archive_status','publish');
  foreach(['adminrole','superrole']as$label){
   wp_set_current_user($users[$label]);
-  qaCheck('Admin override grants board access '.$label,!current_user_can('strc_access_board_documents')&&in_array('restricted',LibraryPolicy::classes(),true)&&qaPrivate($community,'post',$doc,true)->ID===$doc&&qaPrivate($community,'canEdit',get_post($doc))&&qaPrivate($community,'canReview',get_post($doc)));
-  qaDenied('Admin cannot permanently delete board archive '.$label,fn()=>qaPrivate($community,'deleteTopic',$doc));
-  qaPrivate($community,'status','restore',$doc);qaCheck('Admin restores board document '.$label,get_post_status($doc)==='publish');
-  qaPrivate($community,'status','trash',$doc);qaCheck('Admin archives board document '.$label,get_post_status($doc)==='trash');
+  qaCheck('Admin alone has no board access '.$label,!current_user_can('strc_access_board_documents')&&!in_array('restricted',LibraryPolicy::classes(),true));
+  qaDenied('Admin alone cannot read board archive '.$label,fn()=>qaPrivate($community,'post',$doc,true),404);
+  foreach(['restore','trash'] as $operation)qaDenied('Admin alone cannot '.$operation.' board document '.$label,fn()=>qaPrivate($community,'status',$operation,$doc),404);
+
  }
  wp_set_current_user($users['board']);
  $openDraft=wp_insert_post(['post_type'=>'strc_document','post_status'=>'draft','post_title'=>$tag.' Foreign open draft','post_author'=>$users['owner']]);$postIds[]=$openDraft;

@@ -79,13 +79,12 @@ final class ShippingPartner
                 try {
                     if (file_put_contents($file, self::pdf($order)) === false) throw new \RuntimeException('PDF konnte nicht gespeichert werden.');
                     $address = self::address($order);
-                    $body = "Guten Tag\n\nIm TR-Shop des Swiss TR-Club ist eine Versandbestellung eingegangen. Der Lieferschein liegt als PDF bei.\n\n"
-                        . 'Bestellung: #' . $order->get_order_number() . "\n"
-                        . 'Lieferadresse: ' . implode(', ', array_filter($address)) . "\n\n"
-                        . "Nach dem Versand bitte unter «Mein Konto» → Versandaufträge «Versand melden» wählen:\n" . wc_get_page_permalink('myaccount') . "\n\nFreundliche Grüsse\nSwiss TR-Club\n";
+                    $mail = \SwissTRClub\Core\Mail\MailTemplates::render('internal.delivery_note', 'de', array('bestellnummer' => $order->get_order_number(), 'lieferadresse' => implode(', ', array_filter($address)), 'link' => wc_get_page_permalink('myaccount')));
+                    $body = $mail['body'] . "\n";
                     $headers = ['Content-Type: text/plain; charset=UTF-8'];
                     if ($partner !== '') foreach ($copies as $copy) $headers[] = 'Cc: '.$copy;
-                    if (wp_mail($to, 'Lieferschein Swiss TR-Club – Bestellung #'.$order->get_order_number(), $body, $headers, [$file])) {
+                    \SwissTRClub\Core\Mail\MailLog::context('internal.delivery_note');
+                    if (wp_mail($to, $mail['subject'], $body, $headers, [$file])) {
                         $order->update_meta_data('_strc_delivery_note_sent', gmdate(DATE_ATOM));
                         $order->save();
                         $order->add_order_note('Lieferschein per E-Mail an '.implode(', ', $to).' gesendet.');
@@ -212,17 +211,18 @@ final class ShippingPartner
     {
         $email = $order->get_billing_email();
         $fr = CustomerLanguage::language($order) === 'fr';
-        $subject = ($fr ? 'Ta commande #' : 'Deine Bestellung #') . $order->get_order_number() . ($fr ? ' est en route' : ' ist unterwegs');
-        $lines = array();
-        foreach ($order->get_items() as $item) $lines[] = '<li>' . esc_html($item->get_name()) . ' × ' . (int) $item->get_quantity() . '</li>';
-        $body = '<p>' . esc_html(($fr ? 'Bonjour ' : 'Hallo ') . $order->get_billing_first_name()) . '</p><p>' . esc_html($subject) . '.</p><ul>' . implode('', $lines) . '</ul>'
-            . ($tracking !== '' ? '<p><strong>' . ($fr ? 'Numéro de suivi :' : 'Sendungsnummer:') . '</strong> ' . esc_html($tracking) . '</p>' : '')
-            . '<p>' . ($fr ? 'Merci pour ta commande au TR-Shop.' : 'Vielen Dank für deine Bestellung im TR-Shop.') . '<br>Swiss TR-Club</p>';
+        $items = array();
+        foreach ($order->get_items() as $item) $items[] = $item->get_name() . ' × ' . (int) $item->get_quantity();
+        $mail = \SwissTRClub\Core\Mail\MailTemplates::render('shop.shipped', $fr ? 'fr' : 'de', array('vorname' => $order->get_billing_first_name(), 'bestellnummer' => $order->get_order_number(), 'artikel' => implode("\n", $items), 'sendungsnummer' => $tracking));
+        $subject = $mail['subject'];
+        $lines = $tracking === '' ? array_filter(explode("\n", $mail['body']), static fn ($line) => !preg_match('/(Sendungsnummer|Numéro de suivi)\s*:?\s*$/u', trim($line))) : explode("\n", $mail['body']);
+        $body = nl2br(esc_html(implode("\n", $lines)));
         if (is_email($email)) {
             $mailer = function_exists('WC') ? WC()->mailer() : null;
             $switched = switch_to_locale($fr ? 'fr_FR' : 'de_CH');
             try {
-                $accepted = $mailer ? $mailer->send($email, $subject, $mailer->wrap_message($fr ? 'Ta commande est en route' : 'Deine Bestellung ist unterwegs', $body), ['Content-Type: text/html; charset=UTF-8']) : wp_mail($email, $subject, wp_strip_all_tags($body));
+                \SwissTRClub\Core\Mail\MailLog::context('shop.shipped');
+                $accepted = $mailer ? $mailer->send($email, $subject, $mailer->wrap_message($subject, $body), ['Content-Type: text/html; charset=UTF-8']) : wp_mail($email, $subject, implode("\n", $lines));
             } finally {
                 if ($switched) restore_previous_locale();
             }

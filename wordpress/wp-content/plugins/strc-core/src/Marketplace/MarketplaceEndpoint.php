@@ -104,13 +104,7 @@ final class MarketplaceEndpoint
         $fr=\SwissTRClub\Core\Http\UserLanguage::french((int)$owner->ID);
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
         $name=$owner->first_name?:$owner->display_name;$title=html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8');
-        if($fr){
-            $subject=$status==='pending'?'Swiss TR-Club : ton annonce a été reçue':'Swiss TR-Club : ton annonce est en ligne';
-            $body="Bonjour {$name}\n\nMerci pour ton annonce «{$title}».\n\n".($status==='pending'?"Les annonces de véhicules sont vérifiées par l’équipe du marché. Tu recevras un message dès qu’elle sera publiée.":"Elle est désormais visible sur le marché pendant 90 jours.")."\n\nGérer mes annonces : {$base}/#marktplatz/meine/{$id}\n\nSwiss TR-Club";
-        }else{
-            $subject=$status==='pending'?'Swiss TR-Club: Dein Inserat ist eingegangen':'Swiss TR-Club: Dein Inserat ist online';
-            $body="Hallo {$name}\n\nVielen Dank für dein Inserat «{$title}».\n\n".($status==='pending'?"Fahrzeuginserate prüft das Marktplatz-Team. Du erhältst eine Nachricht, sobald es freigegeben ist.":"Es ist ab sofort während 90 Tagen im Marktplatz sichtbar.")."\n\nMeine Inserate verwalten: {$base}/#marktplatz/meine/{$id}\n\nSwiss TR-Club";
-        }
+        $mail=\SwissTRClub\Core\Mail\MailTemplates::render($status==='pending'?'market.received':'market.online',$fr?'fr':'de',['vorname'=>$name,'titel'=>$title,'link'=>$base.'/#marktplatz/meine/'.$id]);$subject=$mail['subject'];$body=$mail['body'];
         try{$sent=wp_mail($owner->user_email,$subject,$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable){$sent=false;}
         return $sent?'':'Dein Inserat wurde gespeichert. Die Bestätigungsmail konnte nicht versendet werden. Du findest es unter «Meine Inserate».';
     }
@@ -342,8 +336,8 @@ final class MarketplaceEndpoint
         $post=get_post($id);$owner=$post?get_userdata((int)$post->post_author):null;
         if(!$owner||!is_email($owner->user_email))return;
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
-        $body="Hallo ".($owner->first_name?:$owner->display_name)."\n\nDer Marktplatz-Service des Swiss TR-Club hat in deinem Namen ein Inserat erstellt:\n«".$post->post_title."»\n\nKontaktanfragen von Interessierten erhältst du an diese E-Mail-Adresse. Unter «Meine Inserate» kannst du das Inserat bearbeiten, als verkauft markieren oder zurückziehen:\n{$base}/#marktplatz/meine\n\nSwiss TR-Club\n";
-        try{wp_mail($owner->user_email,'Swiss TR-Club: Dein Inserat ist online',$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable $error){error_log('STRC marketplace service mail failed for ad '.$id.'.');}
+        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('market.service',\SwissTRClub\Core\Http\UserLanguage::french((int)$owner->ID)?'fr':'de',['vorname'=>$owner->first_name?:$owner->display_name,'titel'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8'),'link'=>$base.'/#marktplatz/meine']);
+        try{wp_mail($owner->user_email,$mail['subject'],$mail['body'],['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable $error){error_log('STRC marketplace service mail failed for ad '.$id.'.');}
     }
 
     public function markSold(int $id): array|WP_Error
@@ -411,9 +405,8 @@ final class MarketplaceEndpoint
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');$link=$base.'/#marktplatz/'.$id;
         $images=get_post_meta($id,'strc_ad_images',true);$image=is_array($images)&&$images?(string)wp_get_attachment_image_url((int)$images[0],'medium'):'';
         $priceShort=$mode==='request'||$offer!=='sale'?$price:$chf;
-        $subject=$receipt
-            ?($fr?sprintf('Swiss TR-Club : ta demande pour l’annonce n° %d – %s',$id,$title):sprintf('Swiss TR-Club: Deine Anfrage zu Inserat #%d – %s',$id,$title))
-            :($fr?sprintf('Demande pour l’annonce n° %d : %s (%s)',$id,$title,$priceShort):sprintf('Anfrage zu Inserat #%d: %s (%s)',$id,$title,$priceShort));
+        $template=\SwissTRClub\Core\Mail\MailTemplates::render($receipt?'market.contact_receipt':'market.contact_seller',$fr?'fr':'de',['nummer'=>(string)$id,'titel'=>$title,'preis'=>$priceShort,'name'=>$contact['name']]);
+        $subject=$template['subject'];
         $rows=array_filter([
             [$fr?'Annonce':'Inserat','#'.$id.' – '.$title],
             [$fr?'Catégorie':'Kategorie',$categoryLabel],
@@ -424,9 +417,7 @@ final class MarketplaceEndpoint
             ['Link',$link],
         ],static fn($row)=>$row[1]!=='');
         $person=array_filter([[ 'Name',$contact['name']],[$fr?'E-mail':'E-Mail',$contact['email']],[$fr?'Téléphone':'Telefon',$contact['phone']]],static fn($row)=>$row[1]!=='');
-        $intro=$receipt
-            ?($fr?'Merci pour ta demande. Elle a été transmise à la personne qui a publié l’annonce; elle te répondra directement.':'Danke für deine Anfrage. Sie wurde an die Person weitergeleitet, die das Inserat aufgegeben hat. Sie meldet sich direkt bei dir.')
-            :($fr?'Tu as reçu une demande pour ton annonce. Réponds simplement à cet e-mail pour contacter directement la personne intéressée.':'Du hast eine Anfrage zu deinem Inserat erhalten. Antworte einfach auf diese E-Mail, um die interessierte Person direkt zu erreichen.');
+        $intro=$template['body'];
         $messageLabel=$receipt?($fr?'Copie de ton message':'Kopie deiner Nachricht'):($fr?'Message':'Nachricht');
         $personLabel=$receipt?($fr?'Tes coordonnées':'Deine Angaben'):($fr?'Personne intéressée':'Anfragende Person');
         $adLabel=$fr?'Détails de l’annonce':'Inseratsdetails';
@@ -435,7 +426,7 @@ final class MarketplaceEndpoint
         $e=static fn(string $value):string=>esc_html($value);
         $table=static fn(array $rows):string=>'<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:15px">'.implode('',array_map(static fn($row)=>'<tr><td style="padding:3px 14px 3px 0;color:#555;vertical-align:top;white-space:nowrap">'.esc_html($row[0]).'</td><td style="padding:3px 0;vertical-align:top">'.($row[0]==='Link'?'<a href="'.esc_url($row[1]).'">'.esc_html($row[1]).'</a>':nl2br(esc_html($row[1]))).'</td></tr>',$rows)).'</table>';
         $html='<div style="font-family:Arial,Helvetica,sans-serif;color:#1d2a33;line-height:1.45;max-width:620px">'
-            .'<p>'.$e($intro).'</p>'
+            .'<p>'.nl2br($e($intro)).'</p>'
             .'<h3 style="margin:18px 0 6px;font-size:16px">'.$e($adLabel).'</h3>'
             .($image!==''?'<p style="margin:0 0 8px"><a href="'.esc_url($link).'"><img src="'.esc_url($image).'" alt="'.esc_attr($title).'" width="220" style="max-width:220px;height:auto;border-radius:6px;border:0"></a></p>':'')
             .$table($rows)

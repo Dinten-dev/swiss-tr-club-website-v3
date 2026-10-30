@@ -19,7 +19,7 @@ namespace SwissTRClub\Core\Members {final class MembershipRepository {public fun
 namespace {
  if(defined('ABSPATH'))throw new RuntimeException('Run this fixture without WordPress.');
  const ARRAY_A='ARRAY_A';const DAY_IN_SECONDS=86400;
- class WP_Post {public function __construct(public int $ID,public string $post_type,public string $post_status='publish',public int $post_author=1,public string $post_title='QA',public string $post_content='') {}}
+ class WP_Post {public string $post_date_gmt='';public function __construct(public int $ID,public string $post_type,public string $post_status='publish',public int $post_author=1,public string $post_title='QA',public string $post_content='') {}}
  class WP_Error {public function __construct(public string $code,public string $message,public array $data=[]){}public function get_error_message():string{return $this->message;}}
  class StreamedFile extends RuntimeException {}
  function is_wp_error(mixed $value):bool{return $value instanceof WP_Error;}
@@ -30,7 +30,9 @@ namespace {
  function wp_get_current_user():object{return get_userdata(get_current_user_id())?: (object)['ID'=>0,'user_email'=>''];}
  function get_user_locale(int $id):string{return 'de_CH';}
  function get_user_meta(int $id,string $key,bool $single=true):mixed{return $GLOBALS['userMeta'][$id][$key]??'';}
- function get_posts(array $args):array{if(($args['meta_key']??'')==='strc_ad_request'){foreach($GLOBALS['meta'] as $id=>$values)if(($values['strc_ad_request']??'')===($args['meta_value']??null))return [$id];}return [];}
+ function get_posts(array $args):array{if(($args['post_type']??'')==='strc_album')return $GLOBALS['teaserAlbums']??[];if(($args['meta_key']??'')==='strc_ad_request'){foreach($GLOBALS['meta'] as $id=>$values)if(($values['strc_ad_request']??'')===($args['meta_value']??null))return [$id];}return [];}
+ function admin_url(string $path):string{return 'https://qa.invalid/wp-admin/'.$path;}
+ function add_query_arg(array $args,string $url):string{return $url.'?'.http_build_query($args);}
  function get_terms(array $args):array{return [(object)['slug'=>'bern','name'=>'Bern'],(object)['slug'=>'triungsters','name'=>'TRiungsters']];}
  function is_email(string $v):bool{return (bool)filter_var($v,FILTER_VALIDATE_EMAIL);}
  function sanitize_email(string $v):string{return $v;}
@@ -70,7 +72,8 @@ namespace {
   public function get_results(string $sql,string $format):array{return array_map(fn($row)=>$row+['display_name'=>get_userdata($row['user_id'])->display_name],array_values($GLOBALS['memberships']));}
  };
  $base=dirname(__DIR__,2).'/wordpress/wp-content/plugins/strc-core/src/';
- foreach(['Http/UserLanguage.php','Forms/FormFields.php','Members/MembershipTypePolicy.php','Forms/EventPayments.php','Forms/EventRegistration.php','Community/CommunityEndpoint.php','Marketplace/MarketplaceEndpoint.php','Events/RegionDirectory.php','Integrations/Fairgate/FairgateApplications.php']as$file)require $base.$file;
+ if(!function_exists('get_option')){function get_option(string $key,mixed $default=false):mixed{return $GLOBALS['options'][$key]??$default;}}
+ foreach(['Mail/WelcomeMailSettings.php','Mail/MailLog.php','Mail/MailTemplates.php','Http/UserLanguage.php','Forms/FormFields.php','Members/MembershipTypePolicy.php','Forms/EventPayments.php','Forms/EventRegistration.php','Community/CommunityEndpoint.php','Marketplace/MarketplaceEndpoint.php','Events/RegionDirectory.php','Integrations/Fairgate/FairgateApplications.php']as$file)require $base.$file;
  function invoke(object $object,string $method,mixed ...$args):mixed{return (new ReflectionMethod($object,$method))->invoke($object,...$args);}
  $checks=[];
  function check(bool $condition,string $label):void{if(!$condition)throw new RuntimeException('FAILED: '.$label);$GLOBALS['checks'][]=$label;}
@@ -126,5 +129,10 @@ namespace {
  $currentUser=1;$capabilities=['strc_access_member_area'=>true,'review-library'=>true];$posts[20]->post_status='publish';
  foreach(['magazine','newsletter'] as $type){$meta[20]['strc_document_type']=$type;rejects(fn()=>invoke($community,'status','trash',20),'Periodical cannot be archived: '.$type,422);}
  check(\SwissTRClub\Core\Community\CommunityEndpoint::portraitModel('TR6 PI 1973')==='TR6 PI','Portrait filter chooses longest matching model');
+ $teaserAlbums=[new WP_Post(50,'strc_album'),new WP_Post(51,'strc_album')];
+ $teaserAlbums[0]->post_date_gmt='2020-01-01 12:00:00';$teaserAlbums[1]->post_date_gmt='2025-01-01 12:00:00';
+ $meta[50]['strc_private_files']=[['key'=>'new-selection','public'=>true,'publicAt'=>'2026-10-30T12:00:00Z','caption'=>'Newest selection'],['key'=>'hidden','public'=>true,'reviewStatus'=>'rejected','caption'=>'Hidden']];
+ $meta[51]['strc_private_files']=[['key'=>'legacy-selection','public'=>true,'caption'=>'Legacy selection']];
+ $teasers=invoke($community,'teasers');check(count($teasers)===2&&array_column($teasers,'caption')===['Newest selection','Legacy selection'],'Newest selected photo sorts before legacy selections; hidden photos remain private');
  echo json_encode(['passed'=>count($checks),'checks'=>$checks],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
 }

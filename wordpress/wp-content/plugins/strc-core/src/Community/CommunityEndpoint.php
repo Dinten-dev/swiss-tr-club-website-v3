@@ -728,19 +728,20 @@ final class CommunityEndpoint
         $files=$this->files((int)$post->ID);$found=false;
         foreach($files as &$file)if(hash_equals($file['key'],$input['key']??'')){
             if(!$this->canReview($post)&&(($input['public']??'')==='1')!==(bool)($file['public']??false))AjaxRequest::fail('Nur Galerie-Moderatoren wählen öffentliche Bilder.',403);
-            if($this->canReview($post))$file['public']=($input['public']??'')==='1';$found=true;
+            if($this->canReview($post)){$public=($input['public']??'')==='1';if($public&&empty($file['public']))$file['publicAt']=gmdate(DATE_ATOM);$file['public']=$public;}$found=true;
         }unset($file);
         if(!$found)AjaxRequest::fail('Bild nicht gefunden.',404);
         update_post_meta($post->ID,'strc_private_files',$files);return $this->present(get_post($post->ID));
     }
     private function teasers(): array
     {
+        // Für die Startseite ausgewählte Albumbilder, zuletzt ausgewählte zuerst (ältere Auswahl ohne Zeitpunkt nach Albumdatum).
         $images=[];
         foreach(get_posts(['post_type'=>'strc_album','post_status'=>'publish','posts_per_page'=>-1]) as $post)foreach($this->files((int)$post->ID) as $file)if(!empty($file['public'])&&$this->approved($file,$post)){
-            $images[]=['url'=>add_query_arg(['action'=>'strc_community','operation'=>'teaser-file','id'=>$post->ID,'key'=>$file['key']],admin_url('admin-ajax.php')),'caption'=>$file['caption']??''];
-            if(count($images)>=24)return $images;
+            $images[]=['url'=>add_query_arg(['action'=>'strc_community','operation'=>'teaser-file','id'=>$post->ID,'key'=>$file['key']],admin_url('admin-ajax.php')),'caption'=>$file['caption']??'','sort'=>(string)(strtotime($file['publicAt']??'')?:strtotime($post->post_date_gmt.' UTC'))];
         }
-        return $images;
+        usort($images,static fn($a,$b)=>((int)$b['sort'])<=>((int)$a['sort']));
+        return array_map(static fn($image)=>['url'=>$image['url'],'caption'=>$image['caption']],array_slice($images,0,24));
     }
     private function teaserFile(int $id,string $key): never
     {

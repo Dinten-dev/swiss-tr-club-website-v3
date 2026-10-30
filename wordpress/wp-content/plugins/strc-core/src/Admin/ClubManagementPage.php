@@ -214,6 +214,7 @@ final class ClubManagementPage
         if (! $temporary || false === file_put_contents($temporary, $this->pdf->generate($invoice, $user))) {
             throw new Exception('Temporäre PDF-Datei konnte nicht erstellt werden.');
         }
+        \SwissTRClub\Core\Mail\MailLog::context('Mitgliederrechnung');
         $sent = wp_mail($user->user_email, 'Mitgliederrechnung ' . $invoice['invoice_number'], 'Im Anhang befindet sich Ihre Mitgliederrechnung.', array(), array($temporary));
         wp_delete_file($temporary);
         if (! $sent) {
