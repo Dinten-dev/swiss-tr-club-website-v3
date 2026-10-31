@@ -1,7 +1,7 @@
 # Shop, Community und Mailvorlagen: Integration von PR #71–#75
 
-Stand: 30.10.2026. Ausgangspunkt: `main` bei `acaf47ffb921593b4d924f47a10eb1313cc304cb`.
-Arbeitszweig: `integration/editorial-pr75`. Lokal vorbereitet; keine Veröffentlichung.
+Stand: 31.10.2026. Ausgangspunkt: `main` bei `acaf47ffb921593b4d924f47a10eb1313cc304cb`.
+Arbeitszweig: `integration/editorial-pr75`. Freigegebener Code bei `3c4fe51`; am 31.10.2026 auf `https://staging.swisstrclub.ch` veröffentlicht. Main und GitHub-PRs bleiben unverändert.
 
 ## Peters Änderungen
 
@@ -49,16 +49,30 @@ Die frühere Rückstellung dieser beiden Regeln ist mit dem erneuten Auftrag zur
 | JavaScript-Verhaltenstests | 32 erfolgreich: Passwort-Reset, Fotoupload, Agenda-Slider, Rückweg, Maileditor und Anmeldebedienung. Die fünf neuen Anmeldetests sind auch im GitHub-Workflow eingebunden. |
 | Isolierte PHP-Regressionen | 255 erfolgreich: 65 Sicherheitsgrenzen, 86 Baur-/Anmeldeprüfungen, 51 Dokument-/Galerieprüfungen, 31 Mailvorlagen, 22 Shop-/Rechnungsprüfungen. Keine echten Mails oder Mitgliederdaten. |
 | PHPUnit | 93 Tests, 403 Assertions erfolgreich mit lokalem PHP 8.3.33 über WebAssembly. 92 Tests regulär; der Test mit Prozessisolierung wurde in einem separaten lokalen Prozess ausgeführt. Die eigentliche CI-Konfiguration bleibt unverändert prozessisoliert. |
-| PHP-Syntax | 147 PHP-Dateien erfolgreich geprüft. |
+| PHP-Syntax | 148 PHP-Dateien erfolgreich geprüft, einschliesslich der neuen nativen Staging-Abnahme. |
 | Anwendungsbuild und WordPress-Build | Erfolgreich. Bekannte Hinweise zu Chunkgrösse und statischer Routenerkennung bleiben bestehen. |
 | Struktur und Patchformat | Erfolgreich. |
 | Safari, lokale synthetische Oberfläche | Privater Artikelstatus erhalten; Variantenformular ergänzbar; Escape schliesst den Dialog. Mailformular sichtbar; Verlassen warnt; Abbrechen erhält den Entwurf; Speichern bestätigt. Zusätzlich Altanmeldung mit zwei zusätzlichen Besatzungen geöffnet; frühere Gastbuchung entfernt, bestehende Mitgliedszuordnungen und Hinweise erhalten. Vorstandsarchiv zeigt Wiederherstellen, Löschbestätigung und Protokollzustände. Testtab danach geschlossen. |
 | In-App-Browser, lokale Oberfläche | Mailübersicht und Formular sichtbar. Der anschliessende native Bestätigungsdialog blockierte die Browsersteuerung; keine vollständige Chromium-Abnahme behauptet. |
 | Firefox | Nicht verwendet. |
 | Native GitHub-CI | Für diesen lokalen Integrationszweig noch nicht gestartet. |
-| Reale WooCommerce-/Datenbank-/Rollenabnahme | Nach Review und Freigabe auf Staging erforderlich; lokale Testdoubles ersetzen diese nicht. |
+| Native PHP-Abnahme auf Staging | PHP 8.3.36: 255 isolierte Regressionen, 94 Rollen-/Sicherheitsprüfungen, 19 Dokument-/Galerieprüfungen und 32 zusätzliche Integrationsprüfungen; insgesamt 400 erfolgreich. Rollen wurden gespeichert und neu geladen; Vorstand plus Bibliotheksverwaltung darf mit gültiger Dokumentrevision protokolliert löschen. |
+| WooCommerce, Datenbank und Rechnungen | Echte Produkt-/Variantenobjekte, Transaktionsabbruch bei spätem Variantenfehler, Status-/Attributerhalt, native Mailvorlagen-Speicherung mit Konfliktprüfung und Anmeldungen mit echter Mitgliedersuche erfolgreich. QR-PDF erzeugt, archiviert und wiederverwendet; Mailfehler, Wiederholung und Schutz vor erneutem Versand geprüft. Sämtliche synthetischen Datensätze und PDFs entfernt. |
+| Auslieferung und Zugriffsschutz | Sechs HTTP-Prüfungen erfolgreich: anonymer Zugriff geschützt, authentifizierte Startseite erreichbar, App-Bundle eingebunden, JS/CSS entsprechen dem freigegebenen Build, Mailverwaltung ohne WordPress-Sitzung gesperrt. |
+| Echter Mailtransport | In den Servertests abgefangen: keine echten Mails oder externen API-Anfragen. Diese Prüfung ersetzt keine Zustellbestätigung im Postfach. |
+| Safari auf Staging | Mac bei Prüfungsbeginn gesperrt; Entsperrung angefragt. Abschliessende Sichtprüfung noch offen. |
 | Mobilansicht und vollständige Tastatur-/Fokusprüfung | Noch offen. |
 
-## Nächste Veröffentlichung
+## Staging-Veröffentlichung und Sicherung
 
-Quellcode und erzeugte Website-Dateien sind gemeinsam vorbereitet; das Release-Manifest ist als `candidate` gekennzeichnet. Main, Staging und Produktion wurden nicht verändert. Vor einer Veröffentlichung: den Integrationsdiff gemeinsam prüfen, native GitHub-Checks ausführen und Staging separat freigeben. Die erneute Umsetzung hat lokal stattgefunden; der zwischenzeitliche Stopp wurde nicht als neue Deployment-Freigabe ausgelegt. Vor einem Staging-Upload sind der dann aktuelle Serverstand, Datenbank und externe private Dateiablagen neu zu sichern. Der Deployment-Helfer kann den lokalen Kandidaten mit `--dry-run` ohne Serververbindung prüfen. Sein Empfängerschutz berücksichtigt sowohl die frühere feste Adresse als auch den bereits vorhandenen dynamischen Adressresolver, dessen unveränderter Quelltext kontrolliert wird. Die synthetische Staging-Rollenprüfung wurde um Löschrechte und Löschprotokoll erweitert; diese Erweiterung wurde noch nicht auf dem Server ausgeführt.
+Der Nutzer hat Staging am 31.10.2026 ausdrücklich freigegeben. Vor der Veröffentlichung wurden aktueller Servercode und Daten geprüft: keine Abweichungen vom erwarteten Ausgangsstand. Danach wurden Datenbank, vollständige Website und alle drei privaten Ablagen (Galerie, Rechnungen, Inseratedokumente) gesichert. Die Website- und Privatarchive wurden in ein geschütztes Prüfverzeichnis entpackt und vollständig mit dem Serverbestand verglichen: 14’139 Website-Dateien und 329 private Dateien stimmen überein. Die SQL-Sicherung ist ein erfolgreicher vollständiger Export; ein Datenbank-Neuimport wurde nicht durchgeführt.
+
+- Sicherung: `/private/strc-staging-backups/20261031T081709Z-pr71-pr75`.
+- SQL: 4’379’566 Bytes; Website-Archiv: 407’843’425 Bytes; Privatarchiv: 1’959’302’676 Bytes. Prüfsummen und Wiederherstellungsbeleg liegen geschützt bei der Sicherung.
+- Veröffentlichung: 31 geänderte Dateien, per Dateiumbenennung ersetzt und mit Prüfsummen kontrolliert. Das lokale Release-Manifest ist als `published` markiert.
+- Rückfall: `/private/strc-peter-release-20261031082146` enthält die vorherigen Dateien und `rollback.json`. Vor einer Rücksetzung sind spätere fremde Änderungen abzugleichen. Eine Datenbank-Rücksetzung erfordert einen gesonderten Datenabgleich.
+- Datenbankschema bleibt `20261028-1`. Die bestehenden Dokument-/Galeriemigrationen wurden mit zurückgerollten Testdaten nochmals geprüft; keine neue Schemaänderung ist für diese Veröffentlichung erforderlich.
+- Abschliessender Vergleich erfolgreich: alle 480 Programmdateien entsprechen dem Manifest; Konten, Passwörter, Rollen, Funktionszuordnungen, 266 bestehende Inhalts-/Anmelde-/Produktdatensätze, Mailvorlagen, Löschprotokoll und 329 private Dateien stimmen mit dem Ausgangsstand überein.
+- Main, GitHub-PRs und Produktion wurden in diesem Schritt nicht verändert. Firefox wurde nicht verwendet.
+
+Die zusätzlichen Staging-Prüfungen sind unter `scripts/tests/pr71-pr75-staging.php` nachvollziehbar; CI prüft dessen Syntax. Private Sicherungen, Zugangsdaten und Testprotokolle liegen ausserhalb von GitHub.
