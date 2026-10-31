@@ -60,8 +60,8 @@ Die frühere Rückstellung dieser beiden Regeln ist mit dem erneuten Auftrag zur
 | WooCommerce, Datenbank und Rechnungen | Echte Produkt-/Variantenobjekte, Transaktionsabbruch bei spätem Variantenfehler, Status-/Attributerhalt, native Mailvorlagen-Speicherung mit Konfliktprüfung und Anmeldungen mit echter Mitgliedersuche erfolgreich. QR-PDF erzeugt, archiviert und wiederverwendet; Mailfehler, Wiederholung und Schutz vor erneutem Versand geprüft. Sämtliche synthetischen Datensätze und PDFs entfernt. |
 | Auslieferung und Zugriffsschutz | Sechs HTTP-Prüfungen erfolgreich: anonymer Zugriff geschützt, authentifizierte Startseite erreichbar, App-Bundle eingebunden, JS/CSS entsprechen dem freigegebenen Build, Mailverwaltung ohne WordPress-Sitzung gesperrt. |
 | Echter Mailtransport | In den Servertests abgefangen: keine echten Mails oder externen API-Anfragen. Diese Prüfung ersetzt keine Zustellbestätigung im Postfach. |
-| Safari auf Staging | Mac bei Prüfungsbeginn gesperrt; Entsperrung angefragt. Abschliessende Sichtprüfung noch offen. |
-| Mobilansicht und vollständige Tastatur-/Fokusprüfung | Noch offen. |
+| Safari auf Staging | Erfolgreich mit angemeldetem Nutzer: Dashboard, DE/FR-Mailvorlagen und französische Vorschau mit ersetzten Platzhaltern; Abbrechen erhält ungespeicherte Eingaben. Shopvarianten sichtbar, Escape schliesst den Dialog. Archiv-PDF mit Zoom und Seitenwechsel; Rückkehr zur gefilterten Übersicht und Abbrechen der endgültigen Löschung funktionieren. Anmeldevorschau mit zusätzlicher Gastbesatzung und Gastbegleitung; keine zweite zusätzliche Buchung verfügbar. Galeriebildauswahl zählt korrekt, Auswahl- und Originaldownload sind getrennt. Keine Vorlagen gespeichert, Dokumente gelöscht, Mails verschickt oder Anmeldungen bestätigt. |
+| Responsive Ansicht und Tastaturbedienung | Safari mit erhöhtem Seitenzoom: einspaltiges Dashboard, Menütaste sowie Öffnen/Schliessen der Navigation erfolgreich. Zoom und Fensteranordnung anschliessend zurückgestellt, Prüftab geschlossen. Escape und Abbrechen geprüft; echte Mobilgeräte und die vollständige Tastatur-/Fokusmatrix bleiben ungeprüft. |
 
 ## Staging-Veröffentlichung und Sicherung
 
