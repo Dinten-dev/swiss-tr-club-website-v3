@@ -92,6 +92,10 @@ final class Plugin
         (new MemberProfileFields())->registerHooks();
         (new MailConfiguration())->registerHooks();
         (new \SwissTRClub\Core\Admin\WelcomeMailSettingsPage())->registerHooks();
+        (new \SwissTRClub\Core\Mail\MailLog())->registerHooks();
+        (new \SwissTRClub\Core\Mail\MailLayout())->registerHooks();
+        (new \SwissTRClub\Core\Mail\MailTemplatesEndpoint())->registerHooks();
+        (new \SwissTRClub\Core\Shop\WooMailTemplates())->registerHooks();
         (new \SwissTRClub\Core\Mail\ApplicationNotification())->registerHooks();
         (new \SwissTRClub\Core\Mail\NewsletterEndpoint())->registerHooks();
 

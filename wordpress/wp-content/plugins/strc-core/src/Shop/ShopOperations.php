@@ -25,6 +25,46 @@ final class ShopOperations
         if(is_wp_error($id))throw new \RuntimeException('Produktbild konnte nicht gespeichert werden.');
         return (int)$id;
     }
+    private static function cost(string $value): string
+    {
+        return trim($value) === '' ? '' : self::money($value);
+    }
+    /** Validate the entire form before uploading or persisting anything. */
+    private static function variants(string $json, array $children = []): array
+    {
+        $rows = json_decode($json, true);
+        if (!is_array($rows) || !array_is_list($rows) || count($rows) > 30) throw new \InvalidArgumentException('Bitte höchstens 30 gültige Varianten angeben.');
+        $sizes = []; $ids = [];
+        foreach ($rows as &$row) {
+            if (!is_array($row) || !is_string($row['size'] ?? null)) throw new \InvalidArgumentException('Bitte gültige Varianten angeben.');
+            $size = sanitize_text_field($row['size']);
+            $sizeKey = mb_strtolower($size);
+            if ($size === '' || mb_strlen($size) > 50 || in_array($sizeKey, $sizes, true) || !ctype_digit((string)($row['stock'] ?? '')) || (int)$row['stock'] > 999999) throw new \InvalidArgumentException('Varianten benötigen eindeutige Grössen, Preise und Lagerbestände.');
+            $variantId = absint($row['id'] ?? 0);
+            if ($variantId && (!in_array($variantId, $children, true) || in_array($variantId, $ids, true))) throw new \InvalidArgumentException('Unbekannte oder doppelte Variante.');
+            $row = ['id'=>$variantId, 'size'=>$size, 'price'=>self::money((string)($row['price'] ?? '')), 'stock'=>(int)$row['stock'], 'cost'=>self::cost((string)($row['cost'] ?? ''))];
+            $sizes[] = $sizeKey; if ($variantId) $ids[] = $variantId;
+        }
+        unset($row);
+        return $rows;
+    }
+    private static function editable(\WC_Product $product): void
+    {
+        if (!$product->is_type('variable')) return;
+        $variationAttributes = array_filter($product->get_attributes(), static fn($attribute) => $attribute->get_variation());
+        $attribute = reset($variationAttributes);
+        if (count($variationAttributes) !== 1 || $attribute->is_taxonomy() || $attribute->get_name() !== 'Grösse' || $product->managing_stock()) throw new \InvalidArgumentException('Dieser Artikel verwendet andere Varianten oder gemeinsamen Bestand. Bitte in WooCommerce bearbeiten.');
+    }
+    private static function revision(\WC_Product $product): string
+    {
+        $data = [$product->get_data()];
+        if ($product->is_type('variable')) foreach ($product->get_children() as $id) $data[] = wc_get_product($id)?->get_data();
+        return hash('sha256', wp_json_encode($data));
+    }
+    private static function clearProducts(array $ids): void
+    {
+        foreach (array_unique($ids) as $id) { clean_post_cache($id); wc_delete_product_transients($id); }
+    }
     /** Reihenfolge im Sortiment: ids als JSON-Liste in der gewünschten Reihenfolge, gespeichert als menu_order 1…n. */
     public static function sortProducts(array $input): array
     {
@@ -41,22 +81,99 @@ final class ShopOperations
     {
         return FormStore::locked('shop-products',static function()use($input):array{
             $request=$input['requestId']??wp_generate_uuid4();if(!preg_match('/^[a-f0-9-]{36}$/D',$request))throw new \InvalidArgumentException('Ungültige Artikelanfrage.');
-            $requestKey='strc_product_'.hash('sha256',get_current_user_id().':'.$request);$existing=(int)get_option($requestKey);if($existing&&wc_get_product($existing))return ['id'=>$existing,'message'=>'Dieser Artikelentwurf ist bereits gespeichert.','editUrl'=>admin_url('post.php?post='.$existing.'&action=edit')];
+            $requestKey='strc_product_'.hash('sha256',get_current_user_id().':'.$request);$existing=(int)get_option($requestKey);if($existing&&wc_get_product($existing))return ['id'=>$existing,'message'=>'Dieser Artikelentwurf ist bereits gespeichert.','editUrl'=>''];
             $title=sanitize_text_field($input['title']??'');if(!$title||mb_strlen($title)>160)throw new \InvalidArgumentException('Bitte einen Artikelnamen angeben.');
-            $price=self::money($input['price']??'');$stock=$input['stock']??'0';if(!ctype_digit($stock)||(int)$stock>999999)throw new \InvalidArgumentException('Bitte einen gültigen Lagerbestand angeben.');
+            $price=null;$stock=$input['stock']??'0';if(!ctype_digit($stock)||(int)$stock>999999)throw new \InvalidArgumentException('Bitte einen gültigen Lagerbestand angeben.');
             $rows=json_decode($input['variants']??'[]',true);if(!is_array($rows)||!array_is_list($rows)||count($rows)>30)throw new \InvalidArgumentException('Bitte höchstens 30 gültige Varianten angeben.');
-            $sizes=[];foreach($rows as &$row){if(!is_array($row)||empty($row['size'])||mb_strlen($row['size'])>50||in_array($row['size'],$sizes,true)||!ctype_digit((string)($row['stock']??''))||(int)$row['stock']>999999)throw new \InvalidArgumentException('Varianten benötigen eindeutige Grössen, Preise und Lagerbestände.');$row['size']=sanitize_text_field($row['size']);$row['price']=self::money((string)($row['price']??''));$sizes[]=$row['size'];}unset($row);
+            $rows=self::variants($input['variants']??'[]');$sizes=array_column($rows,'size');if(!$rows)$price=self::money($input['price']??'');$cost=self::cost((string)($input['cost']??''));
             $ids=[];$images=[];
             try{
                 $image=self::photo('image');if($image)$images[]=$image;
+                $variantImages=[];foreach($rows as $index=>$row){$variantImages[$index]=self::photo('variant_image_'.$index);if($variantImages[$index])$images[]=$variantImages[$index];}
                 $product=$rows?new \WC_Product_Variable():new \WC_Product_Simple();
-                $product->update_meta_data('_strc_cost_price',trim($input['cost']??'')!==''?self::money($input['cost']):'');$product->set_name($title);$product->set_description(wp_kses_post($input['description']??''));$product->set_status('draft');$product->set_image_id($image);$product->set_sku(sanitize_text_field($input['sku']??''));
+                $product->update_meta_data('_strc_cost_price',$cost);$product->set_name($title);$product->set_description(wp_kses_post($input['description']??''));$product->set_status('draft');$product->set_image_id($image);$product->set_sku(sanitize_text_field($input['sku']??''));
                 if($rows){$attribute=new \WC_Product_Attribute();$attribute->set_name('Grösse');$attribute->set_options($sizes);$attribute->set_visible(true);$attribute->set_variation(true);$product->set_attributes([$attribute]);$product->set_manage_stock(false);}else{$product->set_regular_price($price);$product->set_manage_stock(true);$product->set_stock_quantity((int)$stock);$product->set_backorders('no');}
                 $id=$product->save();$ids[]=$id;wp_update_post(['ID'=>$id,'post_author'=>get_current_user_id()]);
-                foreach($rows as $index=>$row){$variant=new \WC_Product_Variation();$variant->set_parent_id($id);$variant->set_attributes([sanitize_title('Grösse')=>$row['size']]);$variant->set_regular_price($row['price']);$variant->update_meta_data('_strc_cost_price',trim($row['cost']??'')!==''?self::money((string)$row['cost']):'');$variant->set_manage_stock(true);$variant->set_stock_quantity((int)$row['stock']);$variant->set_backorders('no');$variantImage=self::photo('variant_image_'.$index);if($variantImage)$images[]=$variantImage;$variant->set_image_id($variantImage?:$image);$ids[]=$variant->save();}
+                foreach($rows as $index=>$row){$variant=new \WC_Product_Variation();$variant->set_parent_id($id);$variant->set_attributes([sanitize_title('Grösse')=>$row['size']]);$variant->set_regular_price($row['price']);$variant->update_meta_data('_strc_cost_price',$row['cost']);$variant->set_manage_stock(true);$variant->set_stock_quantity((int)$row['stock']);$variant->set_backorders('no');$variantImage=$variantImages[$index];$variant->set_image_id($variantImage?:$image);$ids[]=$variant->save();}
                 if($rows)\WC_Product_Variable::sync($id);update_option($requestKey,$id,false);
-                return ['id'=>$id,'message'=>'Artikelentwurf mit Bildern und Varianten gespeichert. Veröffentlichung und weitere Pflege erfolgen in der Artikelverwaltung.','editUrl'=>admin_url('post.php?post='.$id.'&action=edit')];
+                return ['id'=>$id,'message'=>'Artikelentwurf mit Bildern und Varianten gespeichert. Unter «Bestehende Artikel» prüfen und veröffentlichen.','editUrl'=>''];
             }catch(\Throwable $e){foreach(array_reverse($ids) as $id)wp_delete_post($id,true);foreach($images as $id)wp_delete_attachment($id,true);throw $e;}
+        });
+    }
+    /** Alle Artikel (auch Entwürfe) für die Artikelpflege auf der Website. */
+    public static function productList(): array
+    {
+        $rows=[];
+        foreach(wc_get_products(['limit'=>200,'type'=>['simple','variable'],'status'=>['publish','draft','pending','private'],'orderby'=>'menu_order','order'=>'ASC'])as$product){
+            $image=$product->get_image_id()?wp_get_attachment_image_url($product->get_image_id(),'thumbnail'):'';
+            $stock=$product->is_type('variable')?array_sum(array_map(static fn($id)=>(int)(wc_get_product($id)?->get_stock_quantity()??0),$product->get_children())):$product->get_stock_quantity();
+            $rows[]=['id'=>$product->get_id(),'name'=>$product->get_name(),'status'=>$product->get_status(),'type'=>$product->get_type(),'price'=>$product->get_price(),'stock'=>$stock,'image'=>$image?:''];
+        }
+        return ['products'=>$rows];
+    }
+    private static function product(int $id): \WC_Product
+    {
+        $product=wc_get_product($id);
+        if(!$product||!in_array($product->get_type(),['simple','variable'],true)||!in_array($product->get_status(),['publish','draft','pending','private'],true))throw new \InvalidArgumentException('Artikel nicht gefunden.');
+        return $product;
+    }
+    public static function productDetail(array $input): array
+    {
+        $product=self::product(absint($input['id']??0));self::editable($product);$variants=[];
+        if($product->is_type('variable'))foreach($product->get_children() as $childId){$variant=wc_get_product($childId);if(!$variant)continue;$attributes=$variant->get_attributes();$variants[]=['id'=>$variant->get_id(),'size'=>(string)(reset($attributes)?:''),'price'=>$variant->get_regular_price(),'stock'=>(string)(int)$variant->get_stock_quantity(),'cost'=>(string)$variant->get_meta('_strc_cost_price'),'image'=>$variant->get_image_id()&&$variant->get_image_id()!==$product->get_image_id()?(string)wp_get_attachment_image_url($variant->get_image_id(),'thumbnail'):''];}
+        return ['revision'=>self::revision($product),'id'=>$product->get_id(),'type'=>$product->get_type(),'status'=>$product->get_status(),'title'=>$product->get_name(),'description'=>$product->get_description(),'sku'=>$product->get_sku(),'price'=>$product->is_type('variable')?'':$product->get_regular_price(),'stock'=>$product->is_type('variable')?'':(string)(int)$product->get_stock_quantity(),'cost'=>(string)$product->get_meta('_strc_cost_price'),'image'=>$product->get_image_id()?(string)wp_get_attachment_image_url($product->get_image_id(),'medium'):'','variants'=>$variants,'permalink'=>$product->get_status()==='publish'?get_permalink($product->get_id()):''];
+    }
+    /** Bestehenden Artikel auf der Website pflegen: Texte, Preise, Bestand, Bilder, Varianten und Veröffentlichung. */
+    public static function updateProduct(array $input): array
+    {
+        return FormStore::locked('shop-products',static function()use($input):array{
+            global $wpdb;
+            $product=self::product(absint($input['id']??0));self::editable($product);$id=$product->get_id();
+            if(!hash_equals(self::revision($product),(string)($input['revision']??'')))throw new \InvalidArgumentException('Artikel oder Bestand wurden inzwischen geändert. Bitte den aktuellen Artikel neu öffnen und vergleichen.');
+            $title=sanitize_text_field($input['title']??'');if(!$title||mb_strlen($title)>160)throw new \InvalidArgumentException('Bitte einen Artikelnamen angeben.');
+            $status=$input['status']??$product->get_status();if(!in_array($status,['publish','draft','pending','private'],true))throw new \InvalidArgumentException('Bitte einen gültigen Status wählen.');
+            $sku=sanitize_text_field($input['sku']??'');
+            if($sku!==''&&function_exists('wc_get_product_id_by_sku')){$other=(int)wc_get_product_id_by_sku($sku);if($other&&$other!==$id)throw new \InvalidArgumentException('Diese SKU wird bereits von einem anderen Artikel verwendet.');}
+            $cost=self::cost((string)($input['cost']??''));$variable=$product->is_type('variable');$children=$variable?array_map('intval',$product->get_children()):[];
+            $rows=$variable?self::variants($input['variants']??'[]',$children):[];
+            if($variable&&!$rows)throw new \InvalidArgumentException('Ein Artikel mit Varianten braucht mindestens eine Variante.');
+            if(!$variable){$price=self::money((string)($input['price']??''));$stock=(string)($input['stock']??'');if(!ctype_digit($stock)||(int)$stock>999999)throw new \InvalidArgumentException('Bitte einen gültigen Lagerbestand angeben.');}
+            $images=[];$touched=[$id,...$children];$transaction=false;
+            try{
+                // Store every upload first; a later invalid image must not leave half an article saved.
+                $image=self::photo('image');if($image)$images[]=$image;
+                $variantImages=[];foreach($rows as $index=>$row){$variantImages[$index]=self::photo('variant_image_'.$index);if($variantImages[$index])$images[]=$variantImages[$index];}
+                if($wpdb->query('START TRANSACTION')===false)throw new \RuntimeException('Artikeländerung konnte nicht gestartet werden.');$transaction=true;
+                // WooCommerce stock writers use these rows too. Re-read only after locking them.
+                $ids=implode(',',array_map('intval',$touched));
+                if($wpdb->query("SELECT ID FROM {$wpdb->posts} WHERE ID IN ($ids) ORDER BY ID FOR UPDATE")===false || $wpdb->query("SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id IN ($ids) ORDER BY meta_id FOR UPDATE")===false)throw new \RuntimeException('Artikel konnte nicht gesperrt werden.');
+                self::clearProducts($touched);$product=self::product($id);
+                if(!hash_equals(self::revision($product),(string)($input['revision']??'')))throw new \InvalidArgumentException('Artikel oder Bestand wurden inzwischen geändert. Bitte den aktuellen Artikel neu öffnen und vergleichen.');
+                $product->set_name($title);$product->set_description(wp_kses_post($input['description']??''));$product->set_sku($sku);$product->update_meta_data('_strc_cost_price',$cost);
+                if($image)$product->set_image_id($image);elseif(($input['removeImage']??'')==='1')$product->set_image_id(0);
+                if($variable){
+                    $attributes=$product->get_attributes();
+                    foreach($attributes as $attribute)if($attribute->get_variation())$attribute->set_options(array_column($rows,'size'));
+                    $product->set_attributes($attributes);
+                    $defaults=$product->get_default_attributes();foreach($defaults as $name=>$value)if(!in_array($value,array_column($rows,'size'),true))unset($defaults[$name]);$product->set_default_attributes($defaults);
+                }else{$product->set_regular_price($price);$product->set_manage_stock(true);$product->set_stock_quantity((int)$stock);}
+                $product->set_status($status);$product->save();
+                if($variable){
+                    $keep=[];
+                    foreach($rows as $index=>$row){
+                        $variant=$row['id']?wc_get_product($row['id']):new \WC_Product_Variation();
+                        if(!$row['id'])$variant->set_parent_id($id);
+                        $variant->set_attributes([sanitize_title('Grösse')=>$row['size']]);$variant->set_regular_price($row['price']);$variant->update_meta_data('_strc_cost_price',$row['cost']);
+                        $variant->set_manage_stock(true);$variant->set_stock_quantity($row['stock']);if(!$row['id']){$variant->set_backorders('no');$variant->set_status('publish');}
+                        if($variantImages[$index])$variant->set_image_id($variantImages[$index]);elseif(!$row['id'])$variant->set_image_id($product->get_image_id());
+                        $saved=$variant->save();if(!$saved)throw new \RuntimeException('Variante konnte nicht gespeichert werden.');$keep[]=$saved;$touched[]=$saved;
+                    }
+                    foreach(array_diff($children,$keep) as $removed){$old=wc_get_product($removed);if($old&&!$old->delete(false))throw new \RuntimeException('Variante konnte nicht entfernt werden.');}
+                    \WC_Product_Variable::sync($id);
+                }
+                if($wpdb->query('COMMIT')===false)throw new \RuntimeException('Artikeländerung konnte nicht bestätigt werden.');$transaction=false;self::clearProducts($touched);
+                return ['id'=>$id,'message'=>$status==='publish'?'Artikel gespeichert und veröffentlicht.':'Artikel gespeichert.'];
+            }catch(\Throwable $e){if($transaction)$wpdb->query('ROLLBACK');self::clearProducts($touched);foreach($images as $imageId)wp_delete_attachment($imageId,true);throw $e;}
         });
     }
     public static function choices(): array
@@ -108,7 +225,9 @@ final class ShopOperations
                 $order->update_status($free||$method!=='invoice'?($fulfilment==='handover'?'completed':'processing'):'on-hold');wc_reduce_stock_levels($order->get_id());wc_release_stock_for_order($order);
                 if(!$free&&$method!=='invoice'){$order->set_date_paid(time());$order->save();}
                 update_option($key,$order->get_id(),false);
-                return ['id'=>$order->get_id(),'message'=>'Bestellung #'.$order->get_order_number().' gespeichert; Lagerbestand aktualisiert.','url'=>$order->get_edit_order_url()];
+                $message='Bestellung #'.$order->get_order_number().' gespeichert; Lagerbestand aktualisiert.';$invoice=null;
+                if(!$free&&$method==='invoice'){$invoice=ShopInvoice::create($order->get_id(),true);$message.=$invoice['url']!==''?' Rechnung '.$invoice['number'].($invoice['sent']?' erstellt und an '.$order->get_billing_email().' gesendet.':' erstellt (keine E-Mail-Adresse, bitte herunterladen).'):' Keine Rechnung: '.$invoice['reason'];}
+                return ['id'=>$order->get_id(),'message'=>$message,'url'=>$order->get_edit_order_url(),'invoiceUrl'=>$invoice['url']??''];
             }catch(\Throwable $e){if($order instanceof \WC_Order){wc_maybe_increase_stock_levels($order->get_id());wc_release_stock_for_order($order);$order->delete(true);}throw $e;}
         });
     }

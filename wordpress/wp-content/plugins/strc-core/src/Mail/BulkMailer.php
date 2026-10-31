@@ -62,6 +62,7 @@ final class BulkMailer
         );
 
         foreach ($rows as $row) {
+            \SwissTRClub\Core\Mail\MailLog::context('Rundmail');
             $sent = wp_mail((string) $row['email'], (string) $row['subject'], wpautop((string) $row['body']), array('Content-Type: text/html; charset=UTF-8'));
             $wpdb->update(
                 $table,

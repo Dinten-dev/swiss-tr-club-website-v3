@@ -142,7 +142,6 @@ function ClubApp() {
 
     {(memberSession?.canEditContent||memberSession?.authenticated)&&<div className="editorial-access-bar">{memberSession.canEditContent&&<><a href="#redaktion">{t("Redaktion öffnen")}</a>{memberSession.editableDocuments?.includes(editorialKey)&&<a href={`#redaktion/${editorialKey}`}>{t("Diese Seite bearbeiten")}</a>}</>}{memberSession.memberAccess&&!memberSession.canEditContent&&<a href="#mitglieder">{t("Mein Dashboard")}</a>}</div>}
     <Breadcrumbs page={page} subroute={subroute}/>
-    {memberSession?.memberAccess&&<nav className="member-navigation" aria-label={t('Mitgliedermenü')}>{[['#mitglieder','Übersicht'],['#profil','Profil bearbeiten'],['#forum','Forum'],['#galerie','Galerie'],['#bibliothek','Bibliothek'],['#marktplatz/meine','Meine Inserate']].map(([url,label])=><a key={url} href={url}>{t(label)}</a>)}</nav>}
     {page==='editorial'&&(memberSession?.canEditContent?<EditorialDashboard nonce={memberSession.editorialNonce||''} canManageEvents={!!memberSession.canManageEvents}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {page==='home' && <HomePage memberAccess={!!memberSession?.memberAccess} navigate={navigate} events={events} eventsState={eventsState} openEvent={setSelectedEvent}/>}
     {page==='club' && <ClubLanding canEdit={!!memberSession?.canEditContent} memberAccess={!!memberSession?.memberAccess}/>}

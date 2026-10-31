@@ -19,7 +19,7 @@ namespace SwissTRClub\Core\Members {final class MembershipRepository {public fun
 namespace {
  if(defined('ABSPATH'))throw new RuntimeException('Run this fixture without WordPress.');
  const ARRAY_A='ARRAY_A';const DAY_IN_SECONDS=86400;
- class WP_Post {public function __construct(public int $ID,public string $post_type,public string $post_status='publish',public int $post_author=1,public string $post_title='QA',public string $post_content='') {}}
+ class WP_Post {public string $post_date_gmt='';public int $post_parent=0;public function __construct(public int $ID,public string $post_type,public string $post_status='publish',public int $post_author=1,public string $post_title='QA',public string $post_content='') {}}
  class WP_Error {public function __construct(public string $code,public string $message,public array $data=[]){}public function get_error_message():string{return $this->message;}}
  class StreamedFile extends RuntimeException {}
  function is_wp_error(mixed $value):bool{return $value instanceof WP_Error;}
@@ -30,7 +30,9 @@ namespace {
  function wp_get_current_user():object{return get_userdata(get_current_user_id())?: (object)['ID'=>0,'user_email'=>''];}
  function get_user_locale(int $id):string{return 'de_CH';}
  function get_user_meta(int $id,string $key,bool $single=true):mixed{return $GLOBALS['userMeta'][$id][$key]??'';}
- function get_posts(array $args):array{if(($args['meta_key']??'')==='strc_ad_request'){foreach($GLOBALS['meta'] as $id=>$values)if(($values['strc_ad_request']??'')===($args['meta_value']??null))return [$id];}return [];}
+ function get_posts(array $args):array{if(($args['post_type']??'')==='strc_album')return $GLOBALS['teaserAlbums']??[];if(($args['meta_key']??'')==='strc_ad_request'){foreach($GLOBALS['meta'] as $id=>$values)if(($values['strc_ad_request']??'')===($args['meta_value']??null))return [$id];}return [];}
+ function admin_url(string $path):string{return 'https://qa.invalid/wp-admin/'.$path;}
+ function add_query_arg(array $args,string $url):string{return $url.'?'.http_build_query($args);}
  function get_terms(array $args):array{return [(object)['slug'=>'bern','name'=>'Bern'],(object)['slug'=>'triungsters','name'=>'TRiungsters']];}
  function is_email(string $v):bool{return (bool)filter_var($v,FILTER_VALIDATE_EMAIL);}
  function sanitize_email(string $v):string{return $v;}
@@ -70,7 +72,8 @@ namespace {
   public function get_results(string $sql,string $format):array{return array_map(fn($row)=>$row+['display_name'=>get_userdata($row['user_id'])->display_name],array_values($GLOBALS['memberships']));}
  };
  $base=dirname(__DIR__,2).'/wordpress/wp-content/plugins/strc-core/src/';
- foreach(['Http/UserLanguage.php','Forms/FormFields.php','Members/MembershipTypePolicy.php','Forms/EventPayments.php','Forms/EventRegistration.php','Community/CommunityEndpoint.php','Marketplace/MarketplaceEndpoint.php','Events/RegionDirectory.php','Integrations/Fairgate/FairgateApplications.php']as$file)require $base.$file;
+ if(!function_exists('get_option')){function get_option(string $key,mixed $default=false):mixed{return $GLOBALS['options'][$key]??$default;}}
+ foreach(['Mail/WelcomeMailSettings.php','Mail/MailLog.php','Mail/MailTemplates.php','Http/UserLanguage.php','Forms/FormFields.php','Members/MembershipTypePolicy.php','Forms/EventPayments.php','Forms/EventRegistration.php','Community/CommunityEndpoint.php','Marketplace/MarketplaceEndpoint.php','Events/RegionDirectory.php','Integrations/Fairgate/FairgateApplications.php']as$file)require $base.$file;
  function invoke(object $object,string $method,mixed ...$args):mixed{return (new ReflectionMethod($object,$method))->invoke($object,...$args);}
  $checks=[];
  function check(bool $condition,string $label):void{if(!$condition)throw new RuntimeException('FAILED: '.$label);$GLOBALS['checks'][]=$label;}
@@ -88,11 +91,43 @@ namespace {
  $libraryRead=false;rejects(fn()=>invoke($community,'file',20,'qa-pdf'),'Archive classification remains protected',404);$libraryRead=true;
  $posts[30]=new WP_Post(30,'strc_event');$meta[30]=['strc_registration_required'=>true,'strc_start_at'=>gmdate(DATE_ATOM,time()+86400)];$events=new \SwissTRClub\Core\Forms\EventRegistration();$settings=\SwissTRClub\Core\Forms\EventRegistration::settings(30);$settings=array_replace($settings,['vehicle'=>false,'fee'=>1000,'guestFee'=>2000,'copilotFee'=>500,'guestCopilotFee'=>1500,'feeDouble'=>800,'guestFeeDouble'=>1600,'copilotFeeDouble'=>400,'guestCopilotFeeDouble'=>1200]);
  $member=fn($id)=>['type'=>'member','firstName'=>$userMeta[$id]['first_name'],'lastName'=>'Test','memberNumber'=>(string)(100+$id)];$guest=['type'=>'guest','firstName'=>'Guest','lastName'=>'Test'];
- foreach([false,true]as$meeting)foreach([false,true]as$weekend)foreach(['guest','member']as$pilot)foreach(['guest','member']as$copilot){$s=array_replace($settings,['meeting'=>$meeting,'weekend'=>$weekend]);$input=['crews'=>json_encode([['room'=>'single'],['pilot'=>$pilot==='member'?$member(2):$guest,'copilot'=>$copilot==='member'?$member(3):$guest,'room'=>'double']])];$out=invoke($events,'submission',$posts[30],$s,$input);$expected=1000+($pilot==='member'?($weekend?800:1000):($weekend?1600:2000))+($copilot==='member'?($weekend?400:500):($weekend?1200:1500));check($out['total']===$expected&&$out['headcount']===3,"Tariffs meeting=$meeting weekend=$weekend $pilot/$copilot");}
+ // New bookings follow the 2+2 policy, including meeting/weekend prices.
+ foreach([false,true]as$meeting)foreach([false,true]as$weekend)foreach(['guest','member']as$companion){
+  $s=array_replace($settings,['meeting'=>$meeting,'weekend'=>$weekend]);
+  $input=['crews'=>json_encode([['copilot'=>$companion==='member'?$member(2):$guest,'room'=>'double'],['pilot'=>$guest,'copilot'=>$guest,'room'=>'double']])];
+  $out=invoke($events,'submission',$posts[30],$s,$input);
+  $expected=($weekend?800:1000)+($companion==='member'?($weekend?400:500):($weekend?1200:1500))+($weekend?1600:2000)+($weekend?1200:1500);
+  check($out['total']===$expected&&$out['headcount']===4,"New booking tariffs meeting=$meeting weekend=$weekend companion=$companion");
+ }
+ // Legacy identity references originate exclusively from the authenticated stored registration.
+ $editing=new WP_Post(50,'strc_registration','private',1);$editing->post_parent=30;
+ foreach([false,true]as$meeting)foreach([false,true]as$weekend)foreach(['guest','member']as$pilot)foreach(['guest','member']as$copilot){
+  $registrationData[50]=['state'=>'confirmed','participants'=>[['kind'=>'member','userId'=>1,'crew'=>1],['kind'=>$pilot,'userId'=>$pilot==='member'?2:0,'crew'=>2],['kind'=>$copilot==='member'?'copilot':'guest-copilot','userId'=>$copilot==='member'?3:0,'crew'=>2]]];
+  $s=array_replace($settings,['meeting'=>$meeting,'weekend'=>$weekend]);$input=['crews'=>json_encode([['room'=>'single'],['existingCrew'=>2,'pilot'=>$pilot==='member'?$member(2):$guest,'copilot'=>$copilot==='member'?$member(3):$guest,'room'=>'double']])];
+  $out=invoke($events,'submission',$posts[30],$s,$input,$editing);$expected=1000+($pilot==='member'?($weekend?800:1000):($weekend?1600:2000))+($copilot==='member'?($weekend?400:500):($weekend?1200:1500));
+  check($out['total']===$expected&&$out['headcount']===3,"Legacy tariffs meeting=$meeting weekend=$weekend $pilot/$copilot");
+ }
  $legacy=['crews'=>json_encode([[],['pilot'=>['firstName'=>'Legacy','lastName'=>'Guest']]])];check(invoke($events,'submission',$posts[30],$settings,$legacy)['participants'][1]['kind']==='guest','Old crew input remains a guest');
- $duplicate=['crews'=>json_encode([[],['pilot'=>$member(1)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$duplicate),'Duplicate member within booking rejected');
- $duplicate=['crews'=>json_encode([[],['pilot'=>$member(2),'copilot'=>$member(2)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$duplicate),'Duplicate member across roles rejected');
- $GLOBALS['registrations']=[new WP_Post(40,'strc_registration','private',4)];$GLOBALS['registrationData'][40]=['state'=>'confirmed','participants'=>[['userId'=>2]]];$input=['crews'=>json_encode([[],['pilot'=>$member(2)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$input),'Member in another active booking rejected',409);
+ $input=['crews'=>json_encode([[],['pilot'=>$member(2)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$input),'New extra member pilot rejected');
+ $input=['crews'=>json_encode([[],['pilot'=>$guest,'copilot'=>$member(2)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$input),'New extra member companion rejected');
+ $input=['crews'=>json_encode([[],['pilot'=>$guest],['pilot'=>$guest]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$input),'New third crew rejected');
+ rejects(fn()=>invoke($events,'submission',$posts[30],array_replace($settings,['guests'=>0]),$legacy),'Organiser can disable extra guests');
+ $meta[30]['strc_registration_form']=['guests'=>2];check(\SwissTRClub\Core\Forms\EventRegistration::settings(30)['guests']===1,'Old organiser limit two is capped at one');
+ $registrationData[50]=['state'=>'confirmed','participants'=>[['kind'=>'member','userId'=>1,'crew'=>1],['kind'=>'guest','crew'=>2],['kind'=>'member','userId'=>2,'crew'=>3],['kind'=>'copilot','userId'=>3,'crew'=>3]]];
+ $old=['crews'=>json_encode([[],['existingCrew'=>2,'pilot'=>$guest],['existingCrew'=>3,'pilot'=>$member(2),'copilot'=>$member(3)]])];
+ check(invoke($events,'submission',$posts[30],$settings,$old,$editing)['headcount']===4,'Existing third crew and member identities remain editable');
+ $retained=['crews'=>json_encode([[],['existingCrew'=>3,'pilot'=>$member(2),'copilot'=>$member(3)]])];
+ check(invoke($events,'submission',$posts[30],$settings,$retained,$editing)['headcount']===3,'Removing preceding crew preserves stable member identities');
+ rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$retained),'Client reference without trusted edit cannot bypass policy');
+ $forged=['crews'=>json_encode([[],['existingCrew'=>3,'pilot'=>$member(4)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$forged,$editing),'Legacy pilot cannot be replaced by another member');
+ $forged=['crews'=>json_encode([[],['existingCrew'=>3,'pilot'=>$member(2),'copilot'=>$member(4)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$forged,$editing),'Legacy companion cannot be replaced by another member');
+ $forged=['crews'=>json_encode([[],['existingCrew'=>3,'pilot'=>$guest],['existingCrew'=>3,'pilot'=>$guest]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$forged,$editing),'Legacy reference cannot be reused');
+ $forged=['crews'=>json_encode([[],['existingCrew'=>99,'pilot'=>$guest]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$forged,$editing),'Unknown legacy reference rejected');
+ $foreign=clone $editing;$foreign->post_author=4;rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$retained,$foreign),'Foreign booking cannot grant legacy rights',404);
+ $foreign=clone $editing;$foreign->post_parent=99;rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$retained,$foreign),'Other event cannot grant legacy rights',404);
+ $registrationData[50]['state']='cancelled';rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$retained,$editing),'Cancelled booking cannot grant legacy rights',404);$registrationData[50]['state']='confirmed';
+ $duplicate=['crews'=>json_encode([['copilot'=>$member(1)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$duplicate),'Duplicate member within booking rejected');
+ $GLOBALS['registrations']=[new WP_Post(40,'strc_registration','private',4)];$GLOBALS['registrationData'][40]=['state'=>'confirmed','participants'=>[['userId'=>2]]];$input=['crews'=>json_encode([['copilot'=>$member(2)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$input),'Member in another active booking rejected',409);
  $GLOBALS['registrationData'][40]['state']='cancelled';check(invoke($events,'submission',$posts[30],$settings,$input)['headcount']===2,'Cancelled booking does not block rebooking');
  $memberships[2]['status']='inactive';rejects(fn()=>invoke($events,'memberPerson',$member(2)),'Inactive membership rejected');$memberships[2]['status']='active';$forged=$member(2);$forged['firstName']='Forged';rejects(fn()=>invoke($events,'memberPerson',$forged),'Forged member identity rejected');
  $search=invoke($events,'searchMembers','Te');check(array_keys($search['members'][0])===['name','firstName','lastName','memberNumber'],'Member search exposes names and membership numbers only');check(invoke($events,'searchMembers','T')['members']===[],'Member search requires two characters');
@@ -126,5 +161,10 @@ namespace {
  $currentUser=1;$capabilities=['strc_access_member_area'=>true,'review-library'=>true];$posts[20]->post_status='publish';
  foreach(['magazine','newsletter'] as $type){$meta[20]['strc_document_type']=$type;rejects(fn()=>invoke($community,'status','trash',20),'Periodical cannot be archived: '.$type,422);}
  check(\SwissTRClub\Core\Community\CommunityEndpoint::portraitModel('TR6 PI 1973')==='TR6 PI','Portrait filter chooses longest matching model');
+ $teaserAlbums=[new WP_Post(50,'strc_album'),new WP_Post(51,'strc_album')];
+ $teaserAlbums[0]->post_date_gmt='2020-01-01 12:00:00';$teaserAlbums[1]->post_date_gmt='2025-01-01 12:00:00';
+ $meta[50]['strc_private_files']=[['key'=>'new-selection','public'=>true,'publicAt'=>'2026-10-30T12:00:00Z','caption'=>'Newest selection'],['key'=>'hidden','public'=>true,'reviewStatus'=>'rejected','caption'=>'Hidden']];
+ $meta[51]['strc_private_files']=[['key'=>'legacy-selection','public'=>true,'caption'=>'Legacy selection']];
+ $teasers=invoke($community,'teasers');check(count($teasers)===2&&array_column($teasers,'caption')===['Newest selection','Legacy selection'],'Newest selected photo sorts before legacy selections; hidden photos remain private');
  echo json_encode(['passed'=>count($checks),'checks'=>$checks],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
 }

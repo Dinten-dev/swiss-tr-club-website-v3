@@ -93,10 +93,10 @@ try{
  update_post_meta($doc,'strc_pre_archive_status','publish');
  foreach(['adminrole','superrole']as$label){
   wp_set_current_user($users[$label]);
-  qaCheck('Admin override grants board access '.$label,!current_user_can('strc_access_board_documents')&&in_array('restricted',LibraryPolicy::classes(),true)&&qaPrivate($community,'post',$doc,true)->ID===$doc&&qaPrivate($community,'canEdit',get_post($doc))&&qaPrivate($community,'canReview',get_post($doc)));
-  qaDenied('Admin cannot permanently delete board archive '.$label,fn()=>qaPrivate($community,'deleteTopic',$doc));
-  qaPrivate($community,'status','restore',$doc);qaCheck('Admin restores board document '.$label,get_post_status($doc)==='publish');
-  qaPrivate($community,'status','trash',$doc);qaCheck('Admin archives board document '.$label,get_post_status($doc)==='trash');
+  qaCheck('Admin alone has no board access '.$label,!current_user_can('strc_access_board_documents')&&!in_array('restricted',LibraryPolicy::classes(),true));
+  qaDenied('Admin alone cannot read board archive '.$label,fn()=>qaPrivate($community,'post',$doc,true),404);
+  foreach(['restore','trash'] as $operation)qaDenied('Admin alone cannot '.$operation.' board document '.$label,fn()=>qaPrivate($community,'status',$operation,$doc),404);
+
  }
  wp_set_current_user($users['board']);
  $openDraft=wp_insert_post(['post_type'=>'strc_document','post_status'=>'draft','post_title'=>$tag.' Foreign open draft','post_author'=>$users['owner']]);$postIds[]=$openDraft;
@@ -117,6 +117,14 @@ try{
  qaPrivate($community,'status','approve',$doc);qaCheck('Actual moderator approves document',get_post_status($doc)==='publish');
  qaPrivate($community,'status','trash',$doc);qaCheck('Actual moderator archives document',get_post_status($doc)==='trash');
  qaPrivate($community,'status','restore',$doc);qaCheck('Actual moderator restores original status',get_post_status($doc)==='publish');
+ // Only the synthetic, file-free document is purged; the transaction restores its database rows.
+ qaPrivate($community,'status','trash',$doc);$deleteRevision=qaPrivate($community,'deletionRevision',get_post($doc));
+ wp_set_current_user($users['board']);qaDenied('Board reader cannot permanently delete',fn()=>qaPrivate($community,'deleteTopic',$doc,$deleteRevision));
+ wp_set_current_user($users['library']);qaDenied('Library alone cannot permanently delete board archive',fn()=>qaPrivate($community,'deleteTopic',$doc,$deleteRevision),404);
+ wp_set_current_user($users['board_library']);qaDenied('Stale delete revision rejected',fn()=>qaPrivate($community,'deleteTopic',$doc,str_repeat('0',64)),409);
+ qaCheck('Stale delete leaves document intact',get_post_status($doc)==='trash');
+ $deleted=qaPrivate($community,'deleteTopic',$doc,$deleteRevision);$audit=get_option('strc_board_deletion_log',[]);$audit=end($audit);
+ qaCheck('Board plus library deletes with durable audit',!empty($deleted['deleted'])&&!get_post($doc)&&$audit['state']==='deleted'&&$audit['documentId']===$doc&&$audit['actorId']===$users['board_library']);
  $newsletter=new NewsletterEndpoint();$table=$wpdb->prefix.'strc_newsletter_subscribers';$email=$tag.'@example.invalid';
  $oldUnsubscribe=str_repeat('b',64);$legacyConfirmation=str_repeat('a',64);
  $wpdb->insert($table,['email'=>$email,'display_name'=>'Original consent','status'=>'confirmed','confirmation_hash'=>hash('sha256',$legacyConfirmation),'unsubscribe_hash'=>hash('sha256',$oldUnsubscribe),'consent_source'=>'website-form','requested_at'=>'2025-01-01 10:00:00','confirmed_at'=>'2025-01-01 11:00:00','brevo_status'=>'synced']);
@@ -140,7 +148,7 @@ try{
  qaCheck('Pre-migration pending DOI still confirms',qaLink($newsletter,$legacyEmail,'confirm',$legacyConfirmation)==='confirmed');
 }catch(Throwable $e){$failure=['type'=>get_class($e),'message'=>$e->getMessage(),'line'=>$e->getLine()];}
 finally{
- foreach($userIds as$id)clean_user_cache($id);foreach($postIds as$id)clean_post_cache($id);$wpdb->query('ROLLBACK');wp_cache_delete('cron','options');wp_set_current_user($originalUser);
+ foreach($userIds as$id)clean_user_cache($id);foreach($postIds as$id)clean_post_cache($id);$wpdb->query('ROLLBACK');wp_cache_delete('cron','options');wp_cache_delete('strc_board_deletion_log','options');wp_cache_delete('alloptions','options');wp_cache_delete('notoptions','options');wp_set_current_user($originalUser);
 }
 $remainingUsers=(int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->users} WHERE user_login LIKE %s",$wpdb->esc_like($tag).'%'));
 $remainingPosts=(int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_title LIKE %s",$wpdb->esc_like($tag).'%'));

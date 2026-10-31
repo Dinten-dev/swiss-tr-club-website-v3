@@ -3609,3 +3609,78 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .personal-dashboard .dashboard-welcome.has-cockpit::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--dashboard-art) 60% center/auto 135% no-repeat;opacity:.55;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.4) 28%,#000 45%,#000 66%,rgba(0,0,0,.2) 84%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.4) 28%,#000 45%,#000 66%,rgba(0,0,0,.2) 84%,transparent 100%)}
 @media(max-width:640px){.personal-dashboard .dashboard-welcome.has-cockpit::before{background-size:auto 100%;background-position:70% center;opacity:.32;-webkit-mask-image:none;mask-image:none}}
 @media print{.personal-dashboard .dashboard-welcome.has-cockpit::before{display:none}}
+
+/* Rückweg zur Ausgangsseite im Seitenpfad. */
+.site-breadcrumbs .site-back-link{display:inline-flex;align-items:center;gap:4px;margin:0 0 6px;padding:0;border:0;background:none;color:var(--blue);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.site-breadcrumbs .site-back-link:hover,.site-breadcrumbs .site-back-link:focus-visible{color:var(--red)}
+
+/* Forum: Kurzanleitung, «Meine Beiträge», Ersatzteilsuche als schwarzes Brett. */
+.forum-guide{margin:0 0 18px;padding:12px 16px;border:1px solid #cfdfec;border-radius:10px;background:#f3f8fc}
+.forum-guide summary{cursor:pointer;font-weight:700;color:var(--blue)}
+.forum-guide ol{margin:10px 0 0;padding-left:20px;display:grid;gap:6px}
+.forum-mine-title{margin:0;font-size:20px}
+.forum-board-body{margin-top:10px;display:grid;gap:10px}
+.forum-board-body .rich-html,.forum-board-body p{margin:0}
+.forum-board-images{display:flex;flex-wrap:wrap;gap:8px}
+.forum-board-images img{width:160px;height:120px;object-fit:cover;border-radius:6px;border:1px solid #d9e3ec}
+.forum-board-files{margin:0;padding-left:18px}
+.forum-board-body>.club-secondary{justify-self:start}
+@media(max-width:640px){.forum-board-images img{width:calc(50vw - 40px);height:auto;aspect-ratio:4/3}}
+
+/* Bibliothek: Löschprotokoll im Vorstandsarchiv. */
+.board-deletion-log{margin-top:18px;padding:12px 16px;border:1px solid #e3d3d6;border-radius:10px;background:#fbf5f6}
+.board-deletion-log summary{cursor:pointer;font-weight:700}
+.board-deletion-log ul{margin:10px 0 0;padding-left:18px;display:grid;gap:6px}
+.board-deletion-log span{color:#5a6b78;font-size:14px}
+/* Dashboard: Profilbild im Avatar statt Initialen. */
+.dashboard-avatar.has-photo{position:relative;padding:0}
+.dashboard-avatar.has-photo img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+
+/* Shop: Artikelpflege auf der Website. */
+.shop-product-admin{margin-top:24px}
+.shop-product-admin h3{margin:0 0 10px}
+.shop-product-rows{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.shop-product-rows li{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid #d9e3ec;border-radius:8px;background:#fff}
+.shop-product-rows img,.shop-product-rows-empty{width:48px;height:48px;border-radius:6px;object-fit:cover;flex:0 0 48px;display:grid;place-items:center;background:#e7f0f8;color:var(--blue);font-weight:700}
+.shop-product-rows-name{flex:1;min-width:0;display:grid}
+.shop-product-rows-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shop-product-rows-name small{color:#5a6b78}
+.shop-editor-image{display:flex;align-items:center;gap:12px}
+.shop-editor-image img{width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #d9e3ec}
+.shop-product-edit{margin-top:6px}
+.shop-invoice-note{display:block;margin-top:4px;color:#5a6b78}
+@media(max-width:640px){.shop-product-rows li{flex-wrap:wrap}.shop-product-rows li .club-secondary{width:100%}}
+
+/* Anmeldung: gewähltes begleitendes Mitglied, Hinweis zu Gästen. */
+.registration-member-chosen{margin:6px 0 10px;padding:10px 12px;border:1px solid #cfdfec;border-radius:8px;background:#f3f8fc}
+.registration-member-chosen .market-text-button{margin-left:8px}
+.registration-guest-add{display:grid;gap:6px;justify-items:start;margin:8px 0}
+/* Galerie: Startseiten-Auswahl je Bild. */
+.thumb-pick{position:relative}
+.thumb-home{position:absolute;right:6px;top:6px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;font-size:14px;line-height:1;box-shadow:0 1px 4px #0004;pointer-events:none}
+.album-home-switch{margin:10px 0}
+
+/* Redaktion: E-Mail-Vorlagen und Versandprotokoll. */
+.mail-templates{display:grid;gap:14px}
+.mail-tabs{margin:4px 0 8px}
+.mail-tabs button{border:0;background:none;padding:10px 14px;font:inherit;font-weight:700;color:var(--blue);cursor:pointer;border-bottom:3px solid transparent}
+.mail-tabs button[aria-selected="true"]{border-bottom-color:var(--red);color:var(--navy)}
+.mail-group h3{margin:10px 0 8px}
+.mail-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.mail-list .editorial-card{width:100%;text-align:left}
+.mail-form{display:grid;gap:12px;max-width:860px}
+.mail-form>fieldset{display:grid;gap:12px;border:0;padding:0;margin:0;min-width:0}
+.mail-form h3{margin:0}
+.mail-form textarea{font:15px/1.5 var(--font-sans)}
+.mail-language{display:flex;gap:8px}
+.mail-placeholders{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0;font-size:14px}
+.mail-chip{border:1px solid #cfdfec;background:#f3f8fc;border-radius:999px;padding:3px 10px;font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--blue);cursor:pointer}
+.mail-chip.is-required{border-color:var(--red);color:var(--red)}
+.mail-preview{border:1px solid #d9e3ec;border-radius:10px;padding:14px 16px;background:#fff}
+.mail-preview pre{white-space:pre-wrap;font:15px/1.5 var(--font-sans);margin:8px 0 0}
+.mail-log-table{overflow-x:auto}
+.mail-log-table table{width:100%;border-collapse:collapse;font-size:14px}
+.mail-log-table th,.mail-log-table td{padding:8px 10px;border-bottom:1px solid #e3eaf0;text-align:left;vertical-align:top}
+.mail-log-table tr.is-failed td{background:#fdf1ef;color:#7a1d16}
+@media(max-width:640px){.mail-log-table th:nth-child(2),.mail-log-table td:nth-child(2){min-width:140px}}
+.mail-preview-frame{width:100%;min-height:520px;border:1px solid #d9e3ec;border-radius:8px;margin-top:8px;background:#eef2f5}

@@ -9,6 +9,7 @@ parser.add_argument('--ssh-port',default='2121')
 parser.add_argument('--ssh-key',required=True)
 parser.add_argument('--known-hosts',required=True)
 parser.add_argument('--site-path',required=True)
+parser.add_argument('--dry-run',action='store_true',help='Verify the local candidate and list changes without contacting the server')
 args=parser.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1]
 manifest_path=root/'deployment/staging/release.manifest.json'
@@ -21,6 +22,9 @@ for item in manifest['files']:
     actual=(root/item['path']).read_bytes()
     if hashlib.sha256(actual).hexdigest()!=item['sha256']:raise SystemExit('Candidate changed after its build: '+path)
     if path not in old or old[path]['sha256']!=item['sha256']:changed.append({**item,'path':path})
+if args.dry_run:
+    print(json.dumps({'changedFiles':len(changed),'paths':[item['path'] for item in changed],'target':args.site_path}))
+    raise SystemExit(0)
 ssh=['ssh','-p',args.ssh_port,'-i',args.ssh_key,'-o','IdentitiesOnly=yes','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','UserKnownHostsFile='+args.known_hosts,args.ssh_host]
 release='/private/strc-peter-release-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M%S')
 with tempfile.TemporaryDirectory(prefix='strc-release-') as temporary:
@@ -44,7 +48,13 @@ foreach($c['changed'] as $f)if(str_ends_with($f['path'],'.php')){exec(escapeshel
 // Existing recipient normalization must keep the same configured destination.
 foreach($c['changed'] as $f)if(str_ends_with($f['path'],'/Mail/ApplicationNotification.php')){
  $original=file_get_contents($site.'/'.$f['path']);preg_match("/public\\s+const\\s+RECIPIENT\\s*=\\s*'([^']+)'/",$original,$matches);
- if(empty($matches[1])||$matches[1]!==get_option('admin_email'))$fail('Recipient normalization needs review');
+ if(!empty($matches[1])){if($matches[1]!==get_option('admin_email'))$fail('Recipient normalization needs review');}
+ else {
+  // Newer releases already resolve the recipient from admin_email. Require the resolver to stay identical.
+  $candidate=file_get_contents($release.'/candidate/'.$f['path']);
+  $pattern='/private\\s+static\\s+function\\s+recipient\\(\\):\\s*string\\s*\\{(.*?)\\n    \\}/s';
+  if(!preg_match($pattern,$original,$beforeRecipient)||!preg_match($pattern,$candidate,$afterRecipient)||trim($beforeRecipient[1])!==trim($afterRecipient[1]))$fail('Recipient resolver changed; review destination first');
+ }
 }
 $ordered=$c['changed'];usort($ordered,static function($a,$b)use($baseline){
  $priority=static fn($f)=>!isset($baseline[$f['path']])?0:(str_ends_with($f['path'],'/strc-core.php')?1:(str_contains($f['path'],'/build/')?(str_ends_with($f['path'],'/app.js')?4:3):2));
