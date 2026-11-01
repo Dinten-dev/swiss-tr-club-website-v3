@@ -398,6 +398,11 @@
       "sha256": "8dcfb578aa503e9c28cd73beb6660ec3e5efaf1e9053334145555235770d65a1"
     },
     {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Zahls/WooWebhookGuard.php",
+      "bytes": 1395,
+      "sha256": "9bf3ad3aa76acd8882cd8a7af0749ac0e65e821f1ebc5ad177c363af71c5c2e8"
+    },
+    {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Zahls/ZahlsClient.php",
       "bytes": 3541,
       "sha256": "fb4f008d48131abb93924ce2ad38ce095c70de265d8fb3c10feeb43420c607c4"
@@ -529,8 +534,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Plugin.php",
-      "bytes": 6550,
-      "sha256": "20d10c8ccb22e756f78f41140b71299b82627b75413ef8ed4e713ee1f827b262"
+      "bytes": 6637,
+      "sha256": "7d2f06cbbccf660f599cdc457d5dafaf74c5eeed01b53ace38ffa89c956390fe"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleAssignments.php",
@@ -2443,9 +2448,7 @@
       "sha256": "6355c019a358f34e46406a5dad8f0057bae8d1bd0c530f0420d1d56a37087eb0"
     }
   ],
-  "status": "published",
-  "builtOn": "2026-11-01T18:39:34.904Z",
-  "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-11-01T18:45:30.015585+00:00",
-  "publishedFiles": 1
+  "status": "candidate",
+  "builtOn": "2026-11-01T20:03:49.582Z",
+  "baselineCapturedOn": "2026-10-13"
 }
