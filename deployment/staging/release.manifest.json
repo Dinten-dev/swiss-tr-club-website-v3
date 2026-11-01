@@ -574,8 +574,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopEndpoint.php",
-      "bytes": 20439,
-      "sha256": "9c258677cff1606d62c0d0134ffe66ac9066064433abee3753dc3edbe6c0e8d3"
+      "bytes": 20686,
+      "sha256": "4b47ca38b2fc39596a3af23402cdff0075d89130bfcd1a67624ef98b269602a5"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopInvoice.php",
@@ -2444,8 +2444,8 @@
     }
   ],
   "status": "published",
-  "builtOn": "2026-11-01T08:22:31.331Z",
+  "builtOn": "2026-11-01T18:39:34.904Z",
   "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-11-01T08:27:52.555448+00:00",
-  "publishedFiles": 9
+  "publishedOn": "2026-11-01T18:45:30.015585+00:00",
+  "publishedFiles": 1
 }
