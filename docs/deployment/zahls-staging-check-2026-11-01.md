@@ -25,3 +25,10 @@ Der Nutzer hat die vorgesehenen technischen Kontaktdaten bestätigt, besitzt abe
 Elf isolierte Prüfungen decken die drei unterstützten Schlüsselfelder, Fallback, fehlende Angaben, deaktiviertes Gateway, unbekanntes Gateway, fehlendes WooCommerce sowie den Schutz von Produktion und ausdrücklicher Freigabe ab. Der WordPress-Build und das Release-Manifest werden mit der Korrektur aktualisiert.
 
 Die Codekorrektur wird zuerst auf GitHub bereitgestellt. Eine Staging-Veröffentlichung betrifft ausschliesslich die Bereitschaftsprüfung, aktiviert keine Zahlung und ersetzt weder API-Lizenz noch Testmodus- oder Webhook-Abnahme. Konfiguration, Zugangsdaten und echte Clubdaten bleiben erhalten. Produktion bleibt unverändert.
+
+
+## Veröffentlichtes Prüfergebnis
+
+Die Korrektur ist am 01.11.2026 nach erfolgreicher GitHub-CI auf Staging veröffentlicht: eine PHP-Datei, vorherige Fassung und Rückfallprotokoll unter `/private/strc-peter-release-20261101184524`. Alle 483 Programmdateien entsprechen dem Release-Manifest. Die elf isolierten Prüfungen bestehen auch mit nativem PHP 8.3.36 auf Staging. Plugin-Einstellungen und Freigabeschalter sind unverändert; Online-Zahlung bleibt gesperrt.
+
+Ein nicht authentifizierter POST auf die genaue Webhook-Adresse antwortet mit HTTP 401. Der Webhook ist somit aktuell durch den Staging-Passwortschutz blockiert. Der Schutz wurde nicht global aufgehoben. Der abschliessende native Lesezugriff auf die Gateway-API bestätigt denselben Lizenzfehler wie die Provider-/Zahlungsmittelabfragen. Kein Checkout und keine Geldbewegung wurden ausgelöst.
