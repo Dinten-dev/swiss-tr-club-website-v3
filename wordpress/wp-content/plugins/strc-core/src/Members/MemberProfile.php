@@ -249,7 +249,7 @@ final class MemberProfile
         $status=['state'=>'sending','attemptedAt'=>gmdate(DATE_ATOM),'recipients'=>[$user->user_email]];update_post_meta($form,'strc_couple_member_notification',$status);
         $fr=(string)get_user_meta($user->ID,'strc_language',true)==='fr';
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
-        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('member.couple_active',$fr?'fr':'de',['vorname'=>$user->first_name,'copilot'=>$copilot,'beitrag'=>(string)($p['fee']??'CHF 160.–'),'link'=>$base.'/#profil']);
+        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('member.couple_active',$fr?'fr':'de',['vorname'=>$user->first_name,'geschlecht'=>\SwissTRClub\Core\Mail\MailTemplates::gender((int)$user->ID),'copilot'=>$copilot,'beitrag'=>(string)($p['fee']??'CHF 160.–'),'link'=>$base.'/#profil']);
         try{$accepted=wp_mail($user->user_email,$mail['subject'],$mail['body']."\n",['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
         catch(\Throwable $error){$status['state']='uncertain';}
         update_post_meta($form,'strc_couple_member_notification',$status);

@@ -150,7 +150,7 @@ final class EventPayments
         $lang=$fr?'fr':'de';
         $translatedTitle=$fr?(string)get_post_meta((int)$post->post_parent,'strc_title_fr',true):'';
         $eventTitle=trim($translatedTitle)!==''?$translatedTitle:$row['eventTitle'];
-        $memberMail=static function(string $key,array $values)use($lang,$user):array{$mail=\SwissTRClub\Core\Mail\MailTemplates::render($key,$lang,$values);return ['to'=>$user->user_email,'subject'=>$mail['subject'],'body'=>$mail['body'],'template'=>$key];};
+        $memberMail=static function(string $key,array $values)use($lang,$user):array{$mail=\SwissTRClub\Core\Mail\MailTemplates::render($key,$lang,$values+['geschlecht'=>\SwissTRClub\Core\Mail\MailTemplates::gender((int)$user->ID)]);return ['to'=>$user->user_email,'subject'=>$mail['subject'],'body'=>$mail['body'],'template'=>$key];};
         if (!$review && $row['state']==='reserved' && ($row['paymentWorkflow']??0)>=2) $messages['member_reserved']=$memberMail('event.reserved',['anlass'=>$eventTitle,'betrag'=>$amount,'link'=>$link]);
         if (!$review && $row['state']==='confirmed'){
             $paid=($row['paymentStatus']??'')==='paid';

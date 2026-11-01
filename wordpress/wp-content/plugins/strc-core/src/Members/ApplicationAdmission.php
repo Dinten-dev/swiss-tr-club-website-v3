@@ -217,7 +217,7 @@ final class ApplicationAdmission
             $base=defined('STRC_FRONTEND_ORIGIN')?rtrim(STRC_FRONTEND_ORIGIN,'/'):rtrim(home_url(),'/');
             $fr=$p['language']==='fr';$number=$r['official']['member_number'];
             $message=\SwissTRClub\Core\Mail\WelcomeMailSettings::render($fr?'fr':'de',array(
-                'first_name'=>$p['first_name'],'member_number'=>$number,'region'=>$d['payload']['region'],'password_url'=>$url,
+                'first_name'=>$p['first_name'],'gender'=>(string)($p['gender']??''),'member_number'=>$number,'region'=>$d['payload']['region'],'password_url'=>$url,
                 'dashboard_url'=>$base.'/#mitglieder','profile_url'=>$base.'/#profil','agenda_url'=>$base.'/#agenda',
                 'regions_url'=>$base.'/#regionen','forum_url'=>$base.'/#forum','gallery_url'=>$base.'/#galerie',
                 'library_url'=>$base.'/#bibliothek','marketplace_url'=>$base.'/#marktplatz','contact_url'=>$base.'/#kontakt',

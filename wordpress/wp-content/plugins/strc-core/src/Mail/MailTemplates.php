@@ -20,21 +20,21 @@ final class MailTemplates
         return array(
             'market.received' => array(
                 'group' => 'Marktplatz', 'label' => 'Inserat eingegangen (Fahrzeug, wird geprüft)', 'recipient' => 'Inserent',
-                'placeholders' => array('vorname', 'titel', 'link'), 'required' => array('link'),
-                'de' => array('subject' => 'Swiss TR-Club: Dein Inserat ist eingegangen', 'body' => "Hallo {{vorname}}\n\nVielen Dank für dein Inserat «{{titel}}».\n\nFahrzeuginserate prüft das Marktplatz-Team. Du erhältst eine Nachricht, sobald es freigegeben ist.\n\nMeine Inserate verwalten: {{link}}" . $sign),
-                'fr' => array('subject' => 'Swiss TR-Club : ton annonce a été reçue', 'body' => "Bonjour {{vorname}}\n\nMerci pour ton annonce «{{titel}}».\n\nLes annonces de véhicules sont vérifiées par l’équipe du marché. Tu recevras un message dès qu’elle sera publiée.\n\nGérer mes annonces : {{link}}" . $sign),
+                'placeholders' => array('anrede', 'vorname', 'titel', 'link'), 'required' => array('link'),
+                'de' => array('subject' => 'Swiss TR-Club: Dein Inserat ist eingegangen', 'body' => "{{anrede}}\n\nVielen Dank für dein Inserat «{{titel}}».\n\nFahrzeuginserate prüft das Marktplatz-Team. Du erhältst eine Nachricht, sobald es freigegeben ist.\n\nMeine Inserate verwalten: {{link}}" . $sign),
+                'fr' => array('subject' => 'Swiss TR-Club : ton annonce a été reçue', 'body' => "{{anrede}}\n\nMerci pour ton annonce «{{titel}}».\n\nLes annonces de véhicules sont vérifiées par l’équipe du marché. Tu recevras un message dès qu’elle sera publiée.\n\nGérer mes annonces : {{link}}" . $sign),
             ),
             'market.online' => array(
                 'group' => 'Marktplatz', 'label' => 'Inserat ist online', 'recipient' => 'Inserent',
-                'placeholders' => array('vorname', 'titel', 'link'), 'required' => array('link'),
-                'de' => array('subject' => 'Swiss TR-Club: Dein Inserat ist online', 'body' => "Hallo {{vorname}}\n\nVielen Dank für dein Inserat «{{titel}}».\n\nEs ist ab sofort während 90 Tagen im Marktplatz sichtbar.\n\nMeine Inserate verwalten: {{link}}" . $sign),
-                'fr' => array('subject' => 'Swiss TR-Club : ton annonce est en ligne', 'body' => "Bonjour {{vorname}}\n\nMerci pour ton annonce «{{titel}}».\n\nElle est désormais visible sur le marché pendant 90 jours.\n\nGérer mes annonces : {{link}}" . $sign),
+                'placeholders' => array('anrede', 'vorname', 'titel', 'link'), 'required' => array('link'),
+                'de' => array('subject' => 'Swiss TR-Club: Dein Inserat ist online', 'body' => "{{anrede}}\n\nVielen Dank für dein Inserat «{{titel}}».\n\nEs ist ab sofort während 90 Tagen im Marktplatz sichtbar.\n\nMeine Inserate verwalten: {{link}}" . $sign),
+                'fr' => array('subject' => 'Swiss TR-Club : ton annonce est en ligne', 'body' => "{{anrede}}\n\nMerci pour ton annonce «{{titel}}».\n\nElle est désormais visible sur le marché pendant 90 jours.\n\nGérer mes annonces : {{link}}" . $sign),
             ),
             'market.service' => array(
                 'group' => 'Marktplatz', 'label' => 'Inserat durch den Marktplatz-Service erstellt', 'recipient' => 'Inserent',
-                'placeholders' => array('vorname', 'titel', 'link'), 'required' => array('link'),
-                'de' => array('subject' => 'Swiss TR-Club: Dein Inserat ist online', 'body' => "Hallo {{vorname}}\n\nDer Marktplatz-Service des Swiss TR-Club hat in deinem Namen ein Inserat erstellt:\n«{{titel}}»\n\nKontaktanfragen von Interessierten erhältst du an diese E-Mail-Adresse. Unter «Meine Inserate» kannst du das Inserat bearbeiten, als verkauft markieren oder zurückziehen:\n{{link}}" . $sign),
-                'fr' => array('subject' => 'Swiss TR-Club : ton annonce est en ligne', 'body' => "Bonjour {{vorname}}\n\nLe service du marché du Swiss TR-Club a publié une annonce en ton nom :\n«{{titel}}»\n\nLes demandes des personnes intéressées arrivent à cette adresse e-mail. Sous « Mes annonces », tu peux modifier l’annonce, la marquer comme vendue ou la retirer :\n{{link}}" . $sign),
+                'placeholders' => array('anrede', 'vorname', 'titel', 'link'), 'required' => array('link'),
+                'de' => array('subject' => 'Swiss TR-Club: Dein Inserat ist online', 'body' => "{{anrede}}\n\nDer Marktplatz-Service des Swiss TR-Club hat in deinem Namen ein Inserat erstellt:\n«{{titel}}»\n\nKontaktanfragen von Interessierten erhältst du an diese E-Mail-Adresse. Unter «Meine Inserate» kannst du das Inserat bearbeiten, als verkauft markieren oder zurückziehen:\n{{link}}" . $sign),
+                'fr' => array('subject' => 'Swiss TR-Club : ton annonce est en ligne', 'body' => "{{anrede}}\n\nLe service du marché du Swiss TR-Club a publié une annonce en ton nom :\n«{{titel}}»\n\nLes demandes des personnes intéressées arrivent à cette adresse e-mail. Sous « Mes annonces », tu peux modifier l’annonce, la marquer comme vendue ou la retirer :\n{{link}}" . $sign),
             ),
             'market.contact_seller' => array(
                 'group' => 'Marktplatz', 'label' => 'Anfrage zu einem Inserat', 'recipient' => 'Verkäufer',
@@ -52,10 +52,10 @@ final class MailTemplates
             ),
             'shop.invoice' => array(
                 'group' => 'Shop', 'label' => 'Rechnung mit QR-Einzahlungsschein', 'recipient' => 'Käufer (Kopie Kasse)',
-                'placeholders' => array('vorname', 'rechnungsnummer', 'bestellnummer', 'betrag'), 'required' => array(),
+                'placeholders' => array('anrede', 'vorname', 'rechnungsnummer', 'bestellnummer', 'betrag'), 'required' => array(),
                 'note' => 'Die Rechnung wird als PDF angehängt.',
-                'de' => array('subject' => 'Swiss TR-Club: Rechnung {{rechnungsnummer}} – Bestellung #{{bestellnummer}}', 'body' => "Hallo {{vorname}}\n\nVielen Dank für deine Bestellung im TR-Shop. Die Rechnung mit QR-Einzahlungsschein liegt als PDF bei.\nBetrag: CHF {{betrag}}\n\nFreundliche Grüsse\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Swiss TR-Club : facture {{rechnungsnummer}} – commande #{{bestellnummer}}', 'body' => "Bonjour {{vorname}}\n\nMerci pour ta commande au TR-Shop. Tu trouveras la facture avec le bulletin de versement QR en pièce jointe.\nMontant : CHF {{betrag}}\n\nMeilleures salutations\nSwiss TR-Club"),
+                'de' => array('subject' => 'Swiss TR-Club: Rechnung {{rechnungsnummer}} – Bestellung #{{bestellnummer}}', 'body' => "{{anrede}}\n\nVielen Dank für deine Bestellung im TR-Shop. Die Rechnung mit QR-Einzahlungsschein liegt als PDF bei.\nBetrag: CHF {{betrag}}\n\nFreundliche Grüsse\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : facture {{rechnungsnummer}} – commande #{{bestellnummer}}', 'body' => "{{anrede}}\n\nMerci pour ta commande au TR-Shop. Tu trouveras la facture avec le bulletin de versement QR en pièce jointe.\nMontant : CHF {{betrag}}\n\nMeilleures salutations\nSwiss TR-Club"),
             ),
             'shop.woo_on_hold' => self::woo('Bestellung erhalten (Zahlung offen / Rechnung)'),
             'shop.woo_processing' => self::woo('Bestellung in Bearbeitung (bezahlt)'),
@@ -81,10 +81,10 @@ final class MailTemplates
             ),
             'event.invoice' => array(
                 'group' => 'Anlässe', 'label' => 'Rechnung für die Teilnahme', 'recipient' => 'Anmeldendes Mitglied (Kopie Kasse)',
-                'placeholders' => array('vorname', 'rechnungsnummer', 'anlass', 'betrag'), 'required' => array(),
+                'placeholders' => array('anrede', 'vorname', 'rechnungsnummer', 'anlass', 'betrag'), 'required' => array(),
                 'note' => 'Die Rechnung wird als PDF angehängt.',
-                'de' => array('subject' => 'Rechnung {{rechnungsnummer}}: {{anlass}}', 'body' => "Hallo {{vorname}}\n\nIm Anhang findest du die Rechnung mit QR-Einzahlungsschein für deine Teilnahme.\n\n{{anlass}}\nBetrag: CHF {{betrag}}\n\nFreundliche Grüsse\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Facture {{rechnungsnummer}} : {{anlass}}', 'body' => "Bonjour {{vorname}}\n\nTu trouveras en pièce jointe la facture avec le bulletin de versement QR pour ta participation.\n\n{{anlass}}\nMontant : CHF {{betrag}}\n\nMeilleures salutations\nSwiss TR-Club"),
+                'de' => array('subject' => 'Rechnung {{rechnungsnummer}}: {{anlass}}', 'body' => "{{anrede}}\n\nIm Anhang findest du die Rechnung mit QR-Einzahlungsschein für deine Teilnahme.\n\n{{anlass}}\nBetrag: CHF {{betrag}}\n\nFreundliche Grüsse\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Facture {{rechnungsnummer}} : {{anlass}}', 'body' => "{{anrede}}\n\nTu trouveras en pièce jointe la facture avec le bulletin de versement QR pour ta participation.\n\n{{anlass}}\nMontant : CHF {{betrag}}\n\nMeilleures salutations\nSwiss TR-Club"),
             ),
             'member.welcome' => array(
                 'group' => 'Mitgliedschaft', 'label' => 'Willkommen nach der Aufnahme', 'recipient' => 'Neues Mitglied',
@@ -106,16 +106,16 @@ final class MailTemplates
             ),
             'shop.shipped' => array(
                 'group' => 'Shop', 'label' => 'Bestellung ist unterwegs (Versand gemeldet)', 'recipient' => 'Käufer',
-                'placeholders' => array('vorname', 'bestellnummer', 'artikel', 'sendungsnummer'), 'required' => array(),
+                'placeholders' => array('anrede', 'vorname', 'bestellnummer', 'artikel', 'sendungsnummer'), 'required' => array(),
                 'note' => '{{sendungsnummer}} ist leer, wenn der Versandpartner keine Nummer erfasst hat.',
-                'de' => array('subject' => 'Deine Bestellung #{{bestellnummer}} ist unterwegs', 'body' => "Hallo {{vorname}}\n\nDeine Bestellung #{{bestellnummer}} ist unterwegs.\n\n{{artikel}}\n\nSendungsnummer: {{sendungsnummer}}\n\nVielen Dank für deine Bestellung im TR-Shop.\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Ta commande #{{bestellnummer}} est en route', 'body' => "Bonjour {{vorname}}\n\nTa commande #{{bestellnummer}} est en route.\n\n{{artikel}}\n\nNuméro de suivi : {{sendungsnummer}}\n\nMerci pour ta commande au TR-Shop.\nSwiss TR-Club"),
+                'de' => array('subject' => 'Deine Bestellung #{{bestellnummer}} ist unterwegs', 'body' => "{{anrede}}\n\nDeine Bestellung #{{bestellnummer}} ist unterwegs.\n\n{{artikel}}\n\nSendungsnummer: {{sendungsnummer}}\n\nVielen Dank für deine Bestellung im TR-Shop.\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Ta commande #{{bestellnummer}} est en route', 'body' => "{{anrede}}\n\nTa commande #{{bestellnummer}} est en route.\n\n{{artikel}}\n\nNuméro de suivi : {{sendungsnummer}}\n\nMerci pour ta commande au TR-Shop.\nSwiss TR-Club"),
             ),
             'member.couple_active' => array(
                 'group' => 'Mitgliedschaft', 'label' => 'Paarmitgliedschaft ist aktiv', 'recipient' => 'Hauptmitglied',
-                'placeholders' => array('vorname', 'copilot', 'beitrag', 'link'), 'required' => array(),
-                'de' => array('subject' => 'Swiss TR-Club: Paarmitgliedschaft aktiv', 'body' => "Hallo {{vorname}}\n\nEure Paarmitgliedschaft mit {{copilot}} ist jetzt aktiv. Neuer Jahresbeitrag: {{beitrag}}. Die Rechnung folgt separat.\n\nProfil: {{link}}\n\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Swiss TR-Club : affiliation en couple active', 'body' => "Bonjour {{vorname}}\n\nVotre affiliation en couple avec {{copilot}} est désormais active. Nouvelle cotisation annuelle : {{beitrag}}. La facture suit séparément.\n\nProfil : {{link}}\n\nSwiss TR-Club"),
+                'placeholders' => array('anrede', 'vorname', 'copilot', 'beitrag', 'link'), 'required' => array(),
+                'de' => array('subject' => 'Swiss TR-Club: Paarmitgliedschaft aktiv', 'body' => "{{anrede}}\n\nEure Paarmitgliedschaft mit {{copilot}} ist jetzt aktiv. Neuer Jahresbeitrag: {{beitrag}}. Die Rechnung folgt separat.\n\nProfil: {{link}}\n\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : affiliation en couple active', 'body' => "{{anrede}}\n\nVotre affiliation en couple avec {{copilot}} est désormais active. Nouvelle cotisation annuelle : {{beitrag}}. La facture suit séparément.\n\nProfil : {{link}}\n\nSwiss TR-Club"),
             ),
             'internal.submission' => array(
                 'group' => 'Intern', 'label' => 'Neue Einreichung zur Prüfung', 'recipient' => 'Moderation (Galerie, Bibliothek, Marktplatz)',
@@ -187,7 +187,7 @@ final class MailTemplates
     {
         return array(
             'group' => 'Shop', 'label' => 'WooCommerce: ' . $label, 'recipient' => 'Käufer', 'woo' => true,
-            'placeholders' => array('vorname', 'bestellnummer', 'betrag'), 'required' => array(),
+            'placeholders' => array('anrede', 'vorname', 'bestellnummer', 'betrag'), 'required' => array(),
             'note' => 'Leer lassen = WooCommerce-Standardtext. Die Bestellübersicht fügt WooCommerce automatisch ein; «Text» erscheint unter der Bestellung.',
             'de' => array('subject' => '', 'heading' => '', 'body' => ''),
             'fr' => array('subject' => '', 'heading' => '', 'body' => ''),
@@ -222,9 +222,32 @@ final class MailTemplates
     }
 
     /** Vorlage mit Werten füllen. Unbekannte Platzhalter werden entfernt. */
+    /** Anrede nach Geschlecht (Wunsch Redaktion 1.11.2026): «Liebe Monika», «Lieber Peter», sonst «Hallo Alex». */
+    public static function greeting(string $language, string $firstName, string $gender): string
+    {
+        $firstName = trim($firstName);
+        if ($language === 'fr') return ($gender === 'female' ? 'Chère' : ($gender === 'male' ? 'Cher' : 'Bonjour')) . ($firstName !== '' ? ' ' . $firstName : '');
+        return ($gender === 'female' ? 'Liebe' : ($gender === 'male' ? 'Lieber' : 'Hallo')) . ($firstName !== '' ? ' ' . $firstName : '');
+    }
+
+    /** Geschlecht aus dem Mitgliederprofil (female/male), über Konto-ID oder E-Mail-Adresse. */
+    public static function gender(int $userId = 0, string $email = ''): string
+    {
+        if (! $userId && $email !== '' && function_exists('get_user_by')) { $user = get_user_by('email', $email); $userId = $user ? (int) $user->ID : 0; }
+        $gender = $userId && function_exists('get_user_meta') ? (string) get_user_meta($userId, 'strc_gender', true) : '';
+        return in_array($gender, array('female', 'male'), true) ? $gender : '';
+    }
+
+    public static function orderGender(mixed $order): string
+    {
+        return $order instanceof \WC_Order ? self::gender((int) $order->get_customer_id(), (string) $order->get_billing_email()) : '';
+    }
+
     public static function render(string $key, string $language, array $values): array
     {
         MailLog::context($key);
+        if (array_key_exists('vorname', $values) && ! isset($values['anrede'])) $values['anrede'] = self::greeting($language, (string) $values['vorname'], (string) ($values['geschlecht'] ?? ''));
+        unset($values['geschlecht']);
         $template = self::template($key, $language);
         $replace = array();
         foreach ($values as $name => $value) $replace['{{' . $name . '}}'] = wp_strip_all_tags((string) $value);
@@ -244,7 +267,7 @@ final class MailTemplates
     {
         $base = rtrim(defined('STRC_FRONTEND_ORIGIN') ? STRC_FRONTEND_ORIGIN : home_url(), '/');
         return array(
-            'vorname' => 'Monika', 'name' => 'Monika Muster', 'titel' => 'TR6 Hardtop', 'nummer' => '123', 'preis' => 'CHF 1’200', 'link' => $base . '/#marktplatz/meine/123',
+            'vorname' => 'Monika', 'anrede' => 'Liebe Monika', 'name' => 'Monika Muster', 'titel' => 'TR6 Hardtop', 'nummer' => '123', 'preis' => 'CHF 1’200', 'link' => $base . '/#marktplatz/meine/123',
             'rechnungsnummer' => 'S-2026-0007', 'bestellnummer' => '1042', 'betrag' => "89.00",
             'anlass' => 'Herbstausfahrt Jura', 'teilnehmende' => 'Monika Muster, Peter Muster', 'zahlungshinweis' => 'Die Teilnahme ist bestätigt. Die Rechnung folgt separat; die Zahlung ist noch offen.', 'bedingungen' => 'Abmeldung bis 7 Tage vor dem Anlass kostenlos.',
             'artikel' => "Jacke (Hoody) Herren – M × 1", 'sendungsnummer' => '99.00.123456.78', 'copilot' => 'Peter Muster', 'beitrag' => 'CHF 160.–', 'status' => 'on-hold', 'kunde' => 'Monika Muster', 'email' => 'monika@example.ch', 'lieferadresse' => "Monika Muster\nBeispielweg 1\n8000 Zürich", 'telefon' => '079 000 00 00', 'auftrag' => 'Rechnung erstellen', 'mitglied' => 'Monika Muster', 'zahlungsstand' => 'outstanding', 'hinweis' => 'Bitte die Rechnung in Fairgate erstellen und versenden.', 'angaben' => "Mitgliedsnummer: 1234\nFairgate-ID: 173", 'datum' => '29.10.2026', 'first_name' => 'Monika', 'member_number' => '1234', 'region' => 'Zürich', 'password_url' => $base . '/wp-login.php?action=rp', 'dashboard_url' => $base . '/#mitglieder', 'profile_url' => $base . '/#profil', 'agenda_url' => $base . '/#agenda', 'regions_url' => $base . '/#regionen', 'forum_url' => $base . '/#forum', 'gallery_url' => $base . '/#galerie', 'library_url' => $base . '/#bibliothek', 'marketplace_url' => $base . '/#marktplatz', 'contact_url' => $base . '/#kontakt',
