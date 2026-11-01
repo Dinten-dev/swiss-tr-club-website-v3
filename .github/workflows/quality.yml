@@ -19,7 +19,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
-      - run: node --test ../scripts/tests/baur-reset-password.cjs ../scripts/tests/gallery-upload.cjs ../scripts/tests/agenda-slider.cjs ../scripts/tests/route-history.cjs ../scripts/tests/mail-editor.cjs ../scripts/tests/registration-policy.cjs
+      - run: node --test ../scripts/tests/baur-reset-password.cjs ../scripts/tests/gallery-upload.cjs ../scripts/tests/agenda-slider.cjs ../scripts/tests/route-history.cjs ../scripts/tests/mail-editor.cjs ../scripts/tests/registration-policy.cjs ../scripts/tests/shop-product-options.cjs
       - run: npx tsc --noEmit
       - run: npm run build
       - run: npm run build:wordpress
@@ -47,6 +47,7 @@ jobs:
       - run: php -l ../../../../scripts/tests/security-staging.php
       - run: php -l ../../../../scripts/tests/editorial-staging.php
       - run: php -l ../../../../scripts/tests/pr71-pr75-staging.php
+      - run: php -l ../../../../scripts/tests/pr77-staging.php
 
   structure:
     runs-on: ubuntu-latest
