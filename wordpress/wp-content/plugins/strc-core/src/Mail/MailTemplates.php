@@ -129,6 +129,13 @@ final class MailTemplates
                 'de' => array('subject' => 'TR-Club Forum', 'body' => "{{titel}}\n{{link}}\nBenachrichtigungen können im Forum angepasst werden."),
                 'fr' => array('subject' => 'TR-Club Forum', 'body' => "{{titel}}\n{{link}}\nLes notifications peuvent être modifiées dans le forum."),
             ),
+            'internal.shop_enquiry' => array(
+                'group' => 'Intern', 'label' => 'Shop: Anfrage zu einem Artikel', 'recipient' => 'shop@swisstrclub.ch',
+                'placeholders' => array('name', 'email', 'telefon', 'nachricht'), 'required' => array('nachricht'),
+                'note' => 'Antworten gehen direkt an die anfragende Person (Antwortadresse).',
+                'de' => array('subject' => 'Swiss TR-Club Shop: Anfrage von {{name}}', 'body' => "Neue Anfrage über das Kontaktformular (Betreff TR-Shop):\n\nName: {{name}}\nE-Mail: {{email}}\nTelefon: {{telefon}}\n\n{{nachricht}}"),
+                'fr' => array('subject' => 'Boutique Swiss TR-Club : demande de {{name}}', 'body' => "Nouvelle demande via le formulaire de contact (sujet Boutique TR) :\n\nNom : {{name}}\nE-mail : {{email}}\nTéléphone : {{telefon}}\n\n{{nachricht}}"),
+            ),
             'internal.shop_order' => array(
                 'group' => 'Intern', 'label' => 'Shop: neue Bestellung', 'recipient' => 'Shopverantwortliche / Kasse',
                 'placeholders' => array('bestellnummer', 'status', 'artikel', 'betrag', 'kunde', 'email', 'lieferadresse', 'telefon'), 'required' => array('bestellnummer'),
@@ -247,7 +254,7 @@ final class MailTemplates
             'vorname' => 'Monika', 'name' => 'Monika Muster', 'titel' => 'TR6 Hardtop', 'nummer' => '123', 'preis' => 'CHF 1’200', 'link' => $base . '/#marktplatz/meine/123',
             'rechnungsnummer' => 'S-2026-0007', 'bestellnummer' => '1042', 'betrag' => "89.00",
             'anlass' => 'Herbstausfahrt Jura', 'teilnehmende' => 'Monika Muster, Peter Muster', 'zahlungshinweis' => 'Die Teilnahme ist bestätigt. Die Rechnung folgt separat; die Zahlung ist noch offen.', 'bedingungen' => 'Abmeldung bis 7 Tage vor dem Anlass kostenlos.',
-            'artikel' => "Jacke (Hoody) Herren – M × 1", 'sendungsnummer' => '99.00.123456.78', 'copilot' => 'Peter Muster', 'beitrag' => 'CHF 160.–', 'status' => 'on-hold', 'kunde' => 'Monika Muster', 'email' => 'monika@example.ch', 'lieferadresse' => "Monika Muster\nBeispielweg 1\n8000 Zürich", 'telefon' => '079 000 00 00', 'auftrag' => 'Rechnung erstellen', 'mitglied' => 'Monika Muster', 'zahlungsstand' => 'outstanding', 'hinweis' => 'Bitte die Rechnung in Fairgate erstellen und versenden.', 'angaben' => "Mitgliedsnummer: 1234\nFairgate-ID: 173", 'datum' => '29.10.2026', 'first_name' => 'Monika', 'member_number' => '1234', 'region' => 'Zürich', 'password_url' => $base . '/wp-login.php?action=rp', 'dashboard_url' => $base . '/#mitglieder', 'profile_url' => $base . '/#profil', 'agenda_url' => $base . '/#agenda', 'regions_url' => $base . '/#regionen', 'forum_url' => $base . '/#forum', 'gallery_url' => $base . '/#galerie', 'library_url' => $base . '/#bibliothek', 'marketplace_url' => $base . '/#marktplatz', 'contact_url' => $base . '/#kontakt',
+            'artikel' => "Jacke (Hoody) Herren – M × 1", 'nachricht' => "Anfrage zum Artikel: Car-Pyjama (TR6, Rot, Logo Haube)\nIst er bis Ende Monat lieferbar?", 'email' => 'monika@example.invalid', 'telefon' => '079 000 00 00', 'sendungsnummer' => '99.00.123456.78', 'copilot' => 'Peter Muster', 'beitrag' => 'CHF 160.–', 'status' => 'on-hold', 'kunde' => 'Monika Muster', 'email' => 'monika@example.ch', 'lieferadresse' => "Monika Muster\nBeispielweg 1\n8000 Zürich", 'telefon' => '079 000 00 00', 'auftrag' => 'Rechnung erstellen', 'mitglied' => 'Monika Muster', 'zahlungsstand' => 'outstanding', 'hinweis' => 'Bitte die Rechnung in Fairgate erstellen und versenden.', 'angaben' => "Mitgliedsnummer: 1234\nFairgate-ID: 173", 'datum' => '29.10.2026', 'first_name' => 'Monika', 'member_number' => '1234', 'region' => 'Zürich', 'password_url' => $base . '/wp-login.php?action=rp', 'dashboard_url' => $base . '/#mitglieder', 'profile_url' => $base . '/#profil', 'agenda_url' => $base . '/#agenda', 'regions_url' => $base . '/#regionen', 'forum_url' => $base . '/#forum', 'gallery_url' => $base . '/#galerie', 'library_url' => $base . '/#bibliothek', 'marketplace_url' => $base . '/#marktplatz', 'contact_url' => $base . '/#kontakt',
         );
     }
 
