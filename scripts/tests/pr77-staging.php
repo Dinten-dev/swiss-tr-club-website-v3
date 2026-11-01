@@ -37,6 +37,16 @@ try{
  foreach($product->get_children()as$id){$child=shop77Product($id);shop77Check(!$child->managing_stock()&&$child->get_stock_status()==='onbackorder','Native on-order combination does not track stock: '.$id);}
  $input=shop77Input($parent);$input['stockMode']='stock';$input['outOfStock']='backorder';ShopOperations::updateProduct($input);$product=shop77Product($parent);
  foreach($product->get_children()as$id){$child=shop77Product($id);if($child->get_status()==='private')continue;shop77Check($child->backorders_allowed(),'Native backorder mode allows ordering beyond stock: '.$id);}
+ // Preview a manual sale inside a rolled-back transaction; it creates no order.
+ $wpdb->query('START TRANSACTION');
+ try{
+  $product->set_status('publish');$product->save();$available=null;foreach($product->get_children()as$id){$candidate=shop77Product($id);if($candidate->get_status()==='publish'){$available=$candidate;break;}}
+  if(!$available)throw new RuntimeException('No fixture combination for manual sale');
+  $manualInput=['requestId'=>wp_generate_uuid4(),'kind'=>'direct','payment'=>'cash','fulfilment'=>'handover','preview'=>'1','items'=>wp_json_encode([['id'=>$available->get_id(),'quantity'=>'10']])];$preview=ShopOperations::order($manualInput);
+  shop77Check($preview['total']==='290.00'&&!empty($preview['reviewToken']),'Native manual sale preview permits explicitly allowed backorders');
+  $product->update_meta_data('_strc_out_of_stock','request');$product->save();$blocked=false;try{ShopOperations::order($manualInput);}catch(InvalidArgumentException){$blocked=true;}
+  shop77Check($blocked,'Native manual sale preview rejects selling request stock beyond availability');
+ }finally{$wpdb->query('ROLLBACK');clean_post_cache($parent);wc_delete_product_transients($parent);$product=shop77Product($parent);}
  $idsBefore=$product->get_children();$input=shop77Input($parent);$input['attributes']=wp_json_encode([$attributes[2],$attributes[0],$attributes[1]]);$rows=json_decode($input['combinations'],true);foreach($rows as&$row)$row['values']=[$row['values'][2],$row['values'][0],$row['values'][1]];unset($row);$input['combinations']=wp_json_encode($rows);ShopOperations::updateProduct($input);
  shop77Check(shop77Product($parent)->get_children()===$idsBefore,'Native attribute reordering preserves all variation IDs');
  $valueImage=wp_insert_attachment(['post_title'=>$prefix.' value image','post_mime_type'=>'image/png','post_status'=>'inherit']);$attachmentIds[]=$valueImage;$product=shop77Product($parent);$product->update_meta_data('_strc_value_images',['Logo'=>['Ärmel'=>$valueImage]]);$product->save();

@@ -21,14 +21,16 @@ Quelle: [PR #77](https://github.com/Dinten-dev/swiss-tr-club-website-v3/pull/77)
 - Französische Variantenbezeichnungen nutzen den französischen Produktnamen mit den gewählten Werten. Bestandsgeführte Anfrageartikel erlauben keine Nachbestellung über den Bestand hinaus; ausdrücklich nachbestellbare Artikel funktionieren auch im manuellen Verkauf.
 - Alte, bereits geöffnete Variantenformulare müssen nach dem Schnittstellenwechsel neu geladen werden. So können fehlende neue Merkmalsangaben keine bestehenden Varianten entfernen.
 
-## Prüfungen vor Veröffentlichung
+## Prüfungen
 
 - 37 JavaScript-Prüfungen erfolgreich, einschliesslich Begrenzung der Kombinationsberechnung und stabiler Zuordnung bei umbenannten Merkmalen.
 - 298 isolierte PHP-Regressionen erfolgreich, davon 65 Shopprüfungen. PHPUnit: 93 Tests mit 403 Assertions erfolgreich mit lokalem PHP 8.3.33 über WebAssembly; der prozessisolierte Test wurde in einem separaten lokalen Prozess ausgeführt.
 - ESLint, TypeScript, Anwendungsbuild, WordPress-Build und Strukturprüfung erfolgreich. PHP-Syntax: 150 Dateien erfolgreich. Bekannte Buildhinweise zur Chunkgrösse und statischen Routenerkennung bleiben bestehen.
-- 41 native WooCommerce-Prüfungen mit dem Kandidaten auf Staging erfolgreich: acht Kombinationen, Lagerregeln, Anfrage-Link inklusive Umlauten, französische Varianten, Umordnen/Umbenennen, Wertbilder, Galerie, Typwechsel, wiederherstellbare Kombinationen und vollständiger Abbruch einer Neuanlage.
-- Alle nativen Testartikel waren privat. Testdatensätze wurden vollständig entfernt; echte Mails und externe Anfragen waren abgefangen. Bestehende Clubartikel wurden nicht zum Testen verändert.
-- GitHub-CI sowie die abschliessende Abnahme der veröffentlichten Dateien und Safari-Oberfläche folgen nach Veröffentlichung des Integrationszweigs.
+- 43 native WooCommerce-Prüfungen mit dem Kandidaten auf Staging erfolgreich: acht Kombinationen, Lagerregeln, Anfrage-Link inklusive Umlauten, französische Varianten, Umordnen/Umbenennen, Wertbilder, Galerie, Typwechsel, wiederherstellbare Kombinationen und vollständiger Abbruch einer Neuanlage. Zusätzlich: manueller Verkauf mit erlaubten Nachbestellungen und Ablehnung von Anfrageartikeln bei unzureichendem Bestand.
+- Die nativen Testartikel waren privat; der Veröffentlichungsstatus für zwei manuelle Verkaufsvorschauen wurde nur innerhalb einer zurückgerollten Datenbanktransaktion geändert. Testdatensätze wurden vollständig entfernt; echte Mails und externe Anfragen waren abgefangen. Bestehende Clubartikel wurden nicht zum Testen verändert.
+- GitHub-CI des ersten Integrationsstands erfolgreich: Frontend, WordPress-Plugin, Struktur und Geheimnisprüfung.
+- Nach der Veröffentlichung: insgesamt 486 native PHP-Prüfungen auf Staging erfolgreich, zusätzlich sechs HTTP-Prüfungen. Alle 483 Programmdateien entsprechen dem freigegebenen Manifest.
+- Safari: öffentliche Shopübersicht mit Artikeln, Merkmalen und Preisen lädt. Die Prüfung des angemeldeten Artikeleditors wartet auf die macOS-Bestätigung für das gespeicherte Passwort. Firefox wurde nicht verwendet.
 
 ## Sicherung und Veröffentlichung
 
@@ -36,4 +38,6 @@ Der Nutzer hat GitHub und Staging ausdrücklich freigegeben. Produktion ist nich
 
 Vorbereitung: Die 480 bisherigen Programmdateien auf Staging stimmen mit dem Ausgangsstand überein. Datenbank, vollständige Website und alle privaten Ablagen sind gesichert unter `/private/strc-staging-backups/20261101T080802Z-pr77`. Die Archive wurden entpackt und vollständig mit dem Serverbestand verglichen: 14’223 Website-Dateien und 330 private Dateien stimmen überein. Ein während der Sicherung neu hinzugekommener Clubdatensatz wurde erhalten; danach wurde die Datenbank nochmals bei stabilem Datenbestand exportiert (`database-current-1.sql`, 4’456’120 Bytes). Diese aktuelle SQL-Sicherung ist für eine Datenbankwiederherstellung massgeblich. Ein Datenbank-Neuimport wurde nicht durchgeführt.
 
-Die Veröffentlichung verwendet Dateiprüfsummen, atomare Dateiumbenennungen und einen eigenen Rückfallbestand. Datenbankschema und bestehende Migrationsstände bleiben unverändert. Vor einer Rücksetzung müssen spätere fremde Änderungen abgeglichen werden. Private Sicherungen, Zugangsdaten und detaillierte Testbelege werden nicht auf GitHub gespeichert.
+Veröffentlicht am 01.11.2026: neun Programmdateien, mit Dateiprüfsummen und atomaren Dateiumbenennungen kontrolliert. Rückfallbestand: `/private/strc-peter-release-20261101082747`. Das Release-Manifest ist als `published` markiert.
+
+Der abschliessende Vergleich bestätigt unveränderte Konten, Passwörter, Rollen, Funktionszuordnungen, 276 bestehende Inhalts-/Anmelde-/Produktdatensätze, Mailvorlagen, Löschprotokoll und alle 330 privaten Dateien. Datenbankschema und bestehende Migrationsstände bleiben unverändert. Vor einer Rücksetzung müssen spätere fremde Änderungen abgeglichen werden. Private Sicherungen, Zugangsdaten und detaillierte Testbelege werden nicht auf GitHub gespeichert.
