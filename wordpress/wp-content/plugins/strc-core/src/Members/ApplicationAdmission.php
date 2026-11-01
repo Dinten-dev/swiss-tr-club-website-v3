@@ -13,6 +13,9 @@ final class ApplicationAdmission
     public function registerHooks(): void
     {
         add_action('strc_admission_step',[$this,'run']);
+        // Beitragsrechnung: Zahlungseingang (online über zahls.ch oder vom Kassier als bezahlt markiert) setzt die Aufnahme fort.
+        foreach(['woocommerce_payment_complete','woocommerce_order_status_processing','woocommerce_order_status_completed'] as $hook)add_action($hook,[$this,'orderPaid'],30);
+        foreach(['new_order','customer_on_hold_order','customer_processing_order','customer_completed_order','customer_invoice'] as $email)add_filter('woocommerce_email_enabled_'.$email,static fn($enabled,$order=null)=>MembershipFee::isMembershipOrder($order)?false:$enabled,30,2);
         add_filter('login_redirect',static function($redirect,$requested,$user){
             if($user instanceof \WP_User&&in_array('strc_member',$user->roles,true)&&get_user_meta($user->ID,'strc_admission_id',true)&&($requested===''||str_starts_with($requested,admin_url()))){
                 return rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/').'/#mitglieder';
@@ -39,22 +42,36 @@ final class ApplicationAdmission
     {
         if(!wp_next_scheduled('strc_admission_step',[$id]))wp_schedule_single_event(time()+1,'strc_admission_step',[$id]);
     }
-    public function review(int $id,string $revision,string $operation,string $note,array $ids=[]): void
+    public function review(int $id,string $revision,string $operation,string $note,array $ids=[],string $message=''): void
     {
-        FormStore::locked('admission-'.$id,function()use($id,$revision,$operation,$note,$ids){
+        $outgoing=null;
+        FormStore::locked('admission-'.$id,function()use($id,$revision,$operation,$note,$ids,$message,&$outgoing){
             $post=self::record($id);$d=FormStore::data($post);
             if(!hash_equals(FormStore::revision($post),$revision))throw new \RuntimeException('Antrag inzwischen geändert. Bitte neu laden.',409);
             $state=$d['state']??'';
             if(in_array($operation,['clarification','rejected'],true)){
-                if(!in_array($state,['pending_review','clarification','approved_pending_sync','awaiting_configuration','queued'],true)||!empty($d['contacts']))throw new \RuntimeException('Übernahme bereits begonnen. Bitte zuerst mit Fairgate abgleichen.',409);
+                if(!in_array($state,['pending_review','clarification','approved_pending_sync','awaiting_configuration','queued','payment_pending'],true)||!empty($d['contacts']))throw new \RuntimeException('Übernahme bereits begonnen. Bitte zuerst mit Fairgate abgleichen.',409);
+                if($state==='payment_pending'&&$operation==='clarification')throw new \RuntimeException('Die Beitragsrechnung ist bereits versandt. Rückfragen bitte direkt per E-Mail.',409);
+                if($state==='payment_pending')$this->cancelInvoice($d);
                 $d['state']=$operation;
                 $this->releaseEmails($id,$d);
+                if(trim($message)!==''){$d['messages'][]=['type'=>$operation,'text'=>$message,'at'=>gmdate(DATE_ATOM),'by'=>get_current_user_id()];$outgoing=[$operation,$message];}
             }elseif($operation==='approve'){
                 if(!in_array($state,['pending_review','clarification','approved_pending_sync','awaiting_configuration'],true))throw new \RuntimeException('Dieser Antrag wurde bereits bearbeitet.',409);
                 if(empty($d['payload']['declarations']['statutes'])||empty($d['payload']['declarations']['privacy']))throw new \RuntimeException('Erforderliche Bestätigungen fehlen.');
                 $this->checkEmails($id,$d);
                 $this->reserveEmails($id,$d);
-                $d['state']=$this->ready($d['payload'])?'queued':'awaiting_configuration';$d['approvedAt']=gmdate(DATE_ATOM);$d['approvedBy']=get_current_user_id();
+                $d['approvedAt']=gmdate(DATE_ATOM);$d['approvedBy']=get_current_user_id();
+                if(function_exists('wc_create_order')&&MembershipFee::amount((string)($d['payload']['membershipType']??''))>0){
+                    // Entscheid 1.11.2026: zuerst Bestätigung mit Beitragsrechnung; die Mitgliedschaft beginnt mit der Zahlung.
+                    $order=MembershipFee::order($id,$d['payload']);
+                    $d['invoice']=['orderId'=>$order->get_id(),'year'=>(int)$order->get_meta('_strc_membership_year'),'amount'=>(string)$order->get_total()];
+                    $d['state']='payment_pending';$this->save($id,$d);
+                    $invoice=\SwissTRClub\Core\Shop\ShopInvoice::create($order->get_id(),true);
+                    $d=FormStore::data(self::record($id));
+                    $d['invoice']+=['number'=>$invoice['number']??'','sent'=>!empty($invoice['sent'])];
+                    if(empty($invoice['sent']))$d['error']='Bestätigung mit Rechnung wurde nicht versendet: '.(($invoice['reason']??'')?:'unbekannter Grund').' Rechnung unter Shop → Bestellungen prüfen.';else unset($d['error']);
+                }else $d['state']=$this->ready($d['payload'])?'queued':'awaiting_configuration';
             }elseif($operation==='reconcile'){
                 if(!in_array($state,['needs_reconciliation','sync_error'],true)||empty($d['approvedAt']))throw new \RuntimeException('Ein Abgleich ist hier nicht möglich.',409);
                 foreach($this->settings->slots($d['payload']) as $slot){
@@ -70,11 +87,69 @@ final class ApplicationAdmission
                 if(!in_array($state,['mail_error','mail_uncertain'],true))throw new \RuntimeException('Kein offener Mailversand.');
                 foreach($d['contacts'] as &$record)if(($record['mailState']??'')!=='sent')$record['mailState']='pending';unset($record);
                 $d['state']='mail_pending';unset($d['error']);
+            }elseif($operation==='paid'){
+                if($state!=='payment_pending')throw new \RuntimeException('Für diesen Antrag ist keine Zahlung offen.',409);
+                $order=function_exists('wc_get_order')?wc_get_order((int)($d['invoice']['orderId']??0)):null;
+                if($order instanceof \WC_Order){$order->update_meta_data('_strc_admission_paid',gmdate(DATE_ATOM));if(!$order->get_date_paid())$order->set_date_paid(time());$order->save();$order->update_status('completed','Mitgliederbeitrag als bezahlt bestätigt durch '.wp_get_current_user()->display_name.'.');}
+                $this->markPaid($d,'Bestätigt durch die Clubverwaltung');
             }else throw new \RuntimeException('Unbekannte Aktion.');
             $d['reviewNote']=$note;$d['reviewedAt']=gmdate(DATE_ATOM);$d['reviewedBy']=get_current_user_id();
             $d['audit'][]=['action'=>$operation,'at'=>gmdate(DATE_ATOM),'by'=>get_current_user_id()];
             $this->save($id,$d);if(in_array($d['state'],['queued','mail_pending'],true))$this->schedule($id);
+            if($operation==='paid')$this->notifyPaid($id,$d);
         });
+        if($outgoing)$this->messageApplicant($id,$outgoing[0],$outgoing[1]);
+    }
+    /** Zahlungseingang aus WooCommerce (online oder vom Kassier als bezahlt markiert). */
+    public function orderPaid(int $orderId): void
+    {
+        if(!function_exists('wc_get_order'))return;
+        $order=wc_get_order($orderId);
+        if(!MembershipFee::isMembershipOrder($order)||$order->get_meta('_strc_admission_paid')||!in_array($order->get_status(),['processing','completed'],true))return;
+        $id=(int)$order->get_meta('_strc_admission_id');
+        try{
+            FormStore::locked('admission-'.$id,function()use($id,$order){
+                $d=FormStore::data(self::record($id));
+                if(($d['state']??'')!=='payment_pending'||(int)($d['invoice']['orderId']??0)!==$order->get_id())return;
+                $order->update_meta_data('_strc_admission_paid',gmdate(DATE_ATOM));$order->save();
+                $this->markPaid($d,$order->get_payment_method_title()?:'Zahlung eingegangen');
+                $d['audit'][]=['action'=>'paid','at'=>gmdate(DATE_ATOM),'by'=>0];
+                $this->save($id,$d);if($d['state']==='queued')$this->schedule($id);
+                $this->notifyPaid($id,$d);
+            });
+        }catch(\Throwable $e){error_log('STRC admission payment '.$id.': '.$e->getMessage());}
+    }
+    private function markPaid(array &$d,string $method): void
+    {
+        $d['invoice']['paidAt']=gmdate(DATE_ATOM);$d['invoice']['method']=$method;
+        $d['state']=$this->ready($d['payload'])?'queued':'awaiting_configuration';unset($d['error']);
+    }
+    private function cancelInvoice(array $d): void
+    {
+        $order=function_exists('wc_get_order')?wc_get_order((int)($d['invoice']['orderId']??0)):null;
+        if($order instanceof \WC_Order&&$order->has_status(['pending','on-hold']))$order->update_status('cancelled','Mitgliedsantrag abgelehnt.');
+    }
+    /** «Beitrag bezahlt – in Fairgate freischalten» an Kassier und Aktuar. */
+    private function notifyPaid(int $id,array $d): void
+    {
+        $p=$d['payload']['person']??[];$type=(string)($d['payload']['membershipType']??'');
+        $name=trim(($p['first_name']??'').' '.($p['last_name']??''));if(!empty($d['payload']['copilot']))$name.=' / '.trim(($d['payload']['copilot']['first_name']??'').' '.($d['payload']['copilot']['last_name']??''));
+        $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
+        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('internal.membership_paid','de',['name'=>$name,'mitgliedschaft'=>MembershipFee::typeLabel($type,'de'),'jahr'=>(string)($d['invoice']['year']??''),'betrag'=>number_format((float)($d['invoice']['amount']??0),2,'.',"'"),'zahlungsart'=>(string)($d['invoice']['method']??''),'link'=>$base.'/#antraege']);
+        try{wp_mail(array_values(array_unique([MembershipFee::kassier(),MembershipFee::aktuar()])),$mail['subject'],$mail['body'],['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable $e){error_log('STRC admission paid mail '.$id.': '.$e->getMessage());}
+    }
+    /** Rückfrage oder Absage an den Interessenten; Antworten gehen an den Aktuar. */
+    private function messageApplicant(int $id,string $type,string $text): void
+    {
+        $d=FormStore::data(self::record($id));$p=$d['payload']['person']??[];$email=sanitize_email((string)($p['email']??''));
+        if(!is_email($email))return;
+        $lang=($p['language']??'de')==='fr'?'fr':'de';
+        $mail=$type==='rejected'
+            ?\SwissTRClub\Core\Mail\MailTemplates::render('member.application_rejected',$lang,['vorname'=>(string)($p['first_name']??''),'grund'=>$text])
+            :\SwissTRClub\Core\Mail\MailTemplates::render('member.application_question',$lang,['vorname'=>(string)($p['first_name']??''),'frage'=>$text]);
+        $sent=false;
+        try{$sent=wp_mail($email,$mail['subject'],$mail['body'],['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>','Reply-To: '.MembershipFee::aktuar()]);}catch(\Throwable $e){error_log('STRC admission message '.$id.': '.$e->getMessage());}
+        FormStore::locked('admission-'.$id,function()use($id,$sent){$d=FormStore::data(self::record($id));$last=array_key_last($d['messages']??[]);if($last!==null)$d['messages'][$last]['sent']=$sent;if(!$sent)$d['error']='Die E-Mail an die Person konnte nicht versendet werden. Bitte persönlich informieren.';$this->save($id,$d);});
     }
     private function checkEmails(int $id,array $d): void
     {

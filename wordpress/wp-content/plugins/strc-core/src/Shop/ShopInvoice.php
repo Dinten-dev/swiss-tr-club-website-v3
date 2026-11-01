@@ -68,7 +68,11 @@ final class ShopInvoice
                     $copies = ClubDocument::treasury();
                     $headers = array('Content-Type: text/plain; charset=UTF-8');
                     foreach ($copies as $copy) $headers[] = 'Bcc: ' . $copy;
-                    $mail = \SwissTRClub\Core\Mail\MailTemplates::render('shop.invoice', $lang, array('vorname' => $order->get_billing_first_name(), 'rechnungsnummer' => $number, 'bestellnummer' => $order->get_order_number(), 'betrag' => number_format((float) $order->get_total(), 2, '.', "'")));
+                    $amount = number_format((float) $order->get_total(), 2, '.', "'");
+                    $mail = \SwissTRClub\Core\Members\MembershipFee::isMembershipOrder($order)
+                        ? \SwissTRClub\Core\Mail\MailTemplates::render('member.application_approved', $lang, array('vorname' => $order->get_billing_first_name(), 'mitgliedschaft' => \SwissTRClub\Core\Members\MembershipFee::typeLabel((string) $order->get_meta('_strc_membership_type'), $lang), 'jahr' => (string) $order->get_meta('_strc_membership_year'), 'betrag' => $amount, 'rechnungsnummer' => $number, 'onlinezahlung' => \SwissTRClub\Core\Members\MembershipFee::onlinePayment($order, $lang)))
+                        : \SwissTRClub\Core\Mail\MailTemplates::render('shop.invoice', $lang, array('vorname' => $order->get_billing_first_name(), 'rechnungsnummer' => $number, 'bestellnummer' => $order->get_order_number(), 'betrag' => $amount));
+                    if (\SwissTRClub\Core\Members\MembershipFee::isMembershipOrder($order)) $headers[] = 'Reply-To: ' . \SwissTRClub\Core\Members\MembershipFee::aktuar();
                     $subject = $mail['subject'];
                     $body = $mail['body'] . "\n";
                     if (is_email($order->get_billing_email()) && wp_mail($order->get_billing_email(), $subject, $body, $headers, array($file))) {
@@ -148,10 +152,11 @@ final class ShopInvoice
         $shipping = (float) $order->get_shipping_total() + (float) $order->get_shipping_tax();
         if ($shipping > 0) $rows[] = array(ClubDocument::label('Versand', $lang) . ($order->get_shipping_method() ? ': ' . $order->get_shipping_method() : ''), 1, $shipping, $shipping);
         foreach ($order->get_fees() as $fee) $rows[] = array($fee->get_name(), 1, (float) $fee->get_total() + (float)$fee->get_total_tax(), (float) $fee->get_total() + (float)$fee->get_total_tax());
+        $membership = \SwissTRClub\Core\Members\MembershipFee::isMembershipOrder($order);
         ClubDocument::table($pdf, $rows, (float) $order->get_total(), $lang,
-            ClubDocument::label('Bitte bezahle den Betrag mit dem QR-Einzahlungsschein bis zum Fälligkeitsdatum. Vielen Dank für deinen Einkauf im TR-Shop.', $lang));
+            ClubDocument::label($membership ? 'Bitte bezahle den Mitgliederbeitrag mit dem QR-Einzahlungsschein bis zum Fälligkeitsdatum. Deine Mitgliedschaft beginnt mit dem Zahlungseingang. Herzlich willkommen im Swiss TR-Club.' : 'Bitte bezahle den Betrag mit dem QR-Einzahlungsschein bis zum Fälligkeitsdatum. Vielen Dank für deinen Einkauf im TR-Shop.', $lang));
         ClubDocument::paymentPart($pdf, array('name' => $order->get_billing_company() ?: $name, 'street' => $street, 'postcode' => $order->get_billing_postcode(), 'city' => $order->get_billing_city(), 'country' => $country),
-            (float) $order->get_total(), $reference, ClubDocument::label('Rechnung', $lang) . ' ' . $number . ' · TR-Shop #' . $order->get_order_number(), $lang);
+            (float) $order->get_total(), $reference, ClubDocument::label('Rechnung', $lang) . ' ' . $number . ($membership ? ' · ' . ClubDocument::label('Mitgliederbeitrag', $lang) . ' ' . $order->get_meta('_strc_membership_year') : ' · TR-Shop #' . $order->get_order_number()), $lang);
         return $pdf->Output('Rechnung-' . $number . '.pdf', 'S');
     }
 

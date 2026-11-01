@@ -91,7 +91,10 @@ final class ShopEndpoint
     public function availablePaymentGateways(array $gateways): array
     {
         $online=self::zahlsReady();
-        return array_filter($gateways,static fn($gateway):bool=>$gateway->id==='strc_invoice'||($online&&str_contains(strtolower((string)$gateway->id),'zahls')));
+        // Beitragsrechnung: auf der Zahlungsseite nur Online-Zahlung anbieten, die QR-Rechnung liegt bereits vor.
+        $membership=false;
+        if(function_exists('is_wc_endpoint_url')&&is_wc_endpoint_url('order-pay')){$order=wc_get_order(absint(get_query_var('order-pay')));$membership=\SwissTRClub\Core\Members\MembershipFee::isMembershipOrder($order);}
+        return array_filter($gateways,static fn($gateway):bool=>(!$membership&&$gateway->id==='strc_invoice')||($online&&str_contains(strtolower((string)$gateway->id),'zahls')));
     }
 
     public function validateAddToCart(bool $passed, int $productId, int $quantity): bool
@@ -235,7 +238,7 @@ final class ShopEndpoint
         return false;
     }
 
-    private static function zahlsReady(): bool
+    public static function zahlsReady(): bool
     {
         if (! function_exists('WC') || ! WC() || ! WC()->payment_gateways()) return false;
         $requiredMode = 'production' === wp_get_environment_type() ? 'LIVE' : 'TEST';
