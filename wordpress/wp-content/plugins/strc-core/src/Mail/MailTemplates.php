@@ -54,28 +54,28 @@ final class MailTemplates
                 'group' => 'Shop', 'label' => 'Rechnung mit QR-Einzahlungsschein', 'recipient' => 'Käufer (Kopie Kasse)',
                 'placeholders' => array('anrede', 'vorname', 'rechnungsnummer', 'bestellnummer', 'betrag'), 'required' => array(),
                 'note' => 'Die Rechnung wird als PDF angehängt.',
-                'de' => array('subject' => 'Swiss TR-Club: Rechnung {{rechnungsnummer}} – Bestellung #{{bestellnummer}}', 'body' => "{{anrede}}\n\nVielen Dank für deine Bestellung im TR-Shop. Die Rechnung mit QR-Einzahlungsschein liegt als PDF bei.\nBetrag: CHF {{betrag}}\n\nFreundliche Grüsse\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Swiss TR-Club : facture {{rechnungsnummer}} – commande #{{bestellnummer}}', 'body' => "{{anrede}}\n\nMerci pour ta commande au TR-Shop. Tu trouveras la facture avec le bulletin de versement QR en pièce jointe.\nMontant : CHF {{betrag}}\n\nMeilleures salutations\nSwiss TR-Club"),
+                'de' => array('subject' => 'Swiss TR-Club: Rechnung {{rechnungsnummer}} – Bestellung #{{bestellnummer}}', 'body' => "{{anrede}}\n\nVielen Dank für deine Bestellung im TR-Shop. Die Rechnung mit QR-Einzahlungsschein liegt als PDF bei.\nBetrag: {{betrag}}\n\nFreundliche Grüsse\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : facture {{rechnungsnummer}} – commande #{{bestellnummer}}', 'body' => "{{anrede}}\n\nMerci pour ta commande au TR-Shop. Tu trouveras la facture avec le bulletin de versement QR en pièce jointe.\nMontant : {{betrag}}\n\nMeilleures salutations\nSwiss TR-Club"),
             ),
             'shop.woo_on_hold' => self::woo('Bestellung erhalten (Zahlung offen / Rechnung)'),
             'shop.woo_processing' => self::woo('Bestellung in Bearbeitung (bezahlt)'),
             'shop.woo_completed' => self::woo('Bestellung abgeschlossen / versandt'),
             'event.reserved' => array(
                 'group' => 'Anlässe', 'label' => 'Teilnahme reserviert (Zahlung ausstehend)', 'recipient' => 'Anmeldendes Mitglied',
-                'placeholders' => array('anlass', 'betrag', 'link'), 'required' => array('anlass'),
-                'de' => array('subject' => 'Reservierung: {{anlass}}', 'body' => "Deine Teilnahme ist reserviert. Die Bestätigung folgt nach Zahlungseingang.\n\n{{anlass}}\nBetrag: {{betrag}}\nDie Kasse sendet dir die Rechnung separat.\n\n{{link}}"),
-                'fr' => array('subject' => 'Réservation : {{anlass}}', 'body' => "Ta participation est réservée. La confirmation suivra après réception du paiement.\n\n{{anlass}}\nMontant : {{betrag}}\nLa trésorerie t’enverra la facture séparément.\n\n{{link}}"),
+                'placeholders' => array('anrede', 'vorname', 'anlass', 'betrag', 'link'), 'required' => array('anlass'),
+                'de' => array('subject' => 'Reservierung: {{anlass}}', 'body' => "{{anrede}}\n\nDeine Teilnahme am Anlass «{{anlass}}» ist reserviert. Die Bestätigung folgt nach Zahlungseingang.\n\nBetrag: {{betrag}}\nDie Kasse sendet dir die Rechnung separat.\n\nAnmeldung und Kalender: {{link}}\n\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Réservation : {{anlass}}', 'body' => "{{anrede}}\n\nTa participation à « {{anlass}} » est réservée. La confirmation suivra après réception du paiement.\n\nMontant : {{betrag}}\nLa trésorerie t’enverra la facture séparément.\n\nInscription et calendrier : {{link}}\n\nSwiss TR-Club"),
             ),
             'event.confirmed' => array(
                 'group' => 'Anlässe', 'label' => 'Anmeldebestätigung', 'recipient' => 'Anmeldendes Mitglied',
-                'placeholders' => array('anlass', 'teilnehmende', 'betrag', 'zahlungshinweis', 'bedingungen', 'link'), 'required' => array('anlass'),
+                'placeholders' => array('anrede', 'vorname', 'anlass', 'teilnehmende', 'betrag', 'zahlungshinweis', 'bedingungen', 'link'), 'required' => array('anlass'),
                 'note' => '{{bedingungen}} stammt aus dem Anlass (Agenda verwalten → Anlass → Abschnitt «Teilnahme & Abmeldung» → Bedingungen). {{zahlungshinweis}} setzt die Website je nach Zahlungsstand: «Der Zahlungseingang ist bestätigt.», «Die Rechnung folgt separat …», «Der Beitrag wurde erlassen.» oder «Es ist keine Zahlung erforderlich.».',
-                'de' => array('subject' => 'Anmeldebestätigung: {{anlass}}', 'body' => "Deine Teilnahme ist bestätigt.\n\n{{anlass}}\n{{teilnehmende}}\nBetrag: {{betrag}}\n{{zahlungshinweis}}\n\n{{bedingungen}}\n\nAnmeldung und Kalender: {{link}}"),
-                'fr' => array('subject' => 'Confirmation d’inscription : {{anlass}}', 'body' => "Ta participation est confirmée.\n\n{{anlass}}\n{{teilnehmende}}\nMontant : {{betrag}}\n{{zahlungshinweis}}\n\n{{bedingungen}}\n\nInscription et calendrier : {{link}}"),
+                'de' => array('subject' => 'Anmeldebestätigung: {{anlass}}', 'body' => "{{anrede}}\n\nDie Teilnahme am Anlass «{{anlass}}» ist bestätigt für:\n{{teilnehmende}}\n\nBetrag: {{betrag}}\n{{zahlungshinweis}}\n\n{{bedingungen}}\n\nAnmeldung und Kalender: {{link}}\n\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Confirmation d’inscription : {{anlass}}', 'body' => "{{anrede}}\n\nLa participation à « {{anlass}} » est confirmée pour :\n{{teilnehmende}}\n\nMontant : {{betrag}}\n{{zahlungshinweis}}\n\n{{bedingungen}}\n\nInscription et calendrier : {{link}}\n\nSwiss TR-Club"),
             ),
             'event.waiting' => array(
                 'group' => 'Anlässe', 'label' => 'Warteliste', 'recipient' => 'Anmeldendes Mitglied',
-                'placeholders' => array('anlass', 'link'), 'required' => array('anlass'),
+                'placeholders' => array('anrede', 'vorname', 'anlass', 'link'), 'required' => array('anlass'),
                 'de' => array('subject' => 'Warteliste: {{anlass}}', 'body' => "Deine Anmeldung steht auf der Warteliste. Es ist noch keine Zahlung fällig.\n{{link}}"),
                 'fr' => array('subject' => 'Liste d’attente : {{anlass}}', 'body' => "Ton inscription figure sur la liste d’attente. Aucun paiement n’est encore dû.\n{{link}}"),
             ),
@@ -83,8 +83,8 @@ final class MailTemplates
                 'group' => 'Anlässe', 'label' => 'Rechnung für die Teilnahme', 'recipient' => 'Anmeldendes Mitglied (Kopie Kasse)',
                 'placeholders' => array('anrede', 'vorname', 'rechnungsnummer', 'anlass', 'betrag'), 'required' => array(),
                 'note' => 'Die Rechnung wird als PDF angehängt.',
-                'de' => array('subject' => 'Rechnung {{rechnungsnummer}}: {{anlass}}', 'body' => "{{anrede}}\n\nIm Anhang findest du die Rechnung mit QR-Einzahlungsschein für deine Teilnahme.\n\n{{anlass}}\nBetrag: CHF {{betrag}}\n\nFreundliche Grüsse\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Facture {{rechnungsnummer}} : {{anlass}}', 'body' => "{{anrede}}\n\nTu trouveras en pièce jointe la facture avec le bulletin de versement QR pour ta participation.\n\n{{anlass}}\nMontant : CHF {{betrag}}\n\nMeilleures salutations\nSwiss TR-Club"),
+                'de' => array('subject' => 'Rechnung {{rechnungsnummer}}: {{anlass}}', 'body' => "{{anrede}}\n\nIm Anhang findest du die Rechnung mit QR-Einzahlungsschein für deine Teilnahme.\n\n{{anlass}}\nBetrag: {{betrag}}\n\nFreundliche Grüsse\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Facture {{rechnungsnummer}} : {{anlass}}', 'body' => "{{anrede}}\n\nTu trouveras en pièce jointe la facture avec le bulletin de versement QR pour ta participation.\n\n{{anlass}}\nMontant : {{betrag}}\n\nMeilleures salutations\nSwiss TR-Club"),
             ),
             'member.welcome' => array(
                 'group' => 'Mitgliedschaft', 'label' => 'Willkommen nach der Aufnahme', 'recipient' => 'Neues Mitglied',
@@ -275,6 +275,7 @@ final class MailTemplates
         // Beispiel-Link passend zur Vorlage (Vorschau und Testmail).
         $links = array('event.' => '/#veranstaltung/42', 'shop.' => '/#tr-shop', 'member.' => '/#mitglieder', 'internal.application' => '/#antraege', 'internal.forum' => '/#forum/42');
         foreach ($links as $prefix => $path) if (str_starts_with($key, $prefix)) { $sample['link'] = $base . $path; break; }
+        if (str_starts_with($key, 'event.')) { $sample['betrag'] = 'CHF 89.00'; $sample['bedingungen'] = 'Eine Abmeldung ist bis 4 Tage vor dem Anlass kostenlos.'; }
         return $sample;
     }
 
