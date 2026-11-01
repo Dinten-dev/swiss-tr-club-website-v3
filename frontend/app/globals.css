@@ -3684,3 +3684,7 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .mail-log-table tr.is-failed td{background:#fdf1ef;color:#7a1d16}
 @media(max-width:640px){.mail-log-table th:nth-child(2),.mail-log-table td:nth-child(2){min-width:140px}}
 .mail-preview-frame{width:100%;min-height:520px;border:1px solid #d9e3ec;border-radius:8px;margin-top:8px;background:#eef2f5}
+/* Aktivitäten & Mitteilungen: Bereich über dem Eintrag (1.11.2026) */
+.db-feed .db-feed-area{display:block;margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#647987}
+.french-scope{display:contents}
+.regional-edit-field textarea{min-height:5.4em}

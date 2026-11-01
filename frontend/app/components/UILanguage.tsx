@@ -1,6 +1,6 @@
 'use client';
 import additionalTranslations from './ui-fr.json';
-import {createContext,useContext,useEffect,useState,type ReactNode} from 'react';
+import {createContext,useContext,useEffect,useRef,useState,type ReactNode} from 'react';
 const translations:Record<string,string>={
  'Startseitenübersicht':'Vue d’ensemble de l’accueil','Beiträge für «Das Neueste» auswählen':'Choisir les dernières nouvelles',
  'Magazin bedienen':'Commandes du magazine','Seite verkleinern':'Réduire la page','Seite vergrössern':'Agrandir la page','Für vorlesbaren Inhalt Textansicht wählen.':'Choisir la vue texte pour un contenu lisible à voix haute.','Diese Seite enthält keinen auslesbaren Text. Bitte die Seitenansicht verwenden.':'Cette page ne contient pas de texte extractible. Utiliser la vue de la page.',
@@ -63,3 +63,20 @@ export function UILanguageProvider({children}:{children:ReactNode}){const [langu
 export function LanguageSwitcher(){const {language,change}=useContext(Context);return <div className="language-switcher" role="group" aria-label="Sprache / Langue"><button aria-pressed={language==='de'} onClick={()=>change('de')}>DE</button><button aria-pressed={language==='fr'} onClick={()=>change('fr')}>FR</button></div>;}
 
 export function useUILanguage(){return useContext(Context);}
+/** Französisch unabhängig von der gewählten Sprache (z. B. Regionalseite Suisse romande). */
+export function tFr(value:string):string{return translations[value]||value;}
+/**
+ * Bereich, der auch auf der deutschen Website französisch erscheint (Wunsch Redaktion 1.11.2026, Region Suisse romande):
+ * feste Texte werden wie beim französischen Sicherheitsnetz ersetzt; redaktionelle Inhalte (.rich-content) bleiben, wie sie erfasst sind.
+ */
+export function FrenchScope({active,children}:{active:boolean;children:ReactNode}){
+ const {language}=useContext(Context);const ref=useRef<HTMLDivElement>(null);
+ useEffect(()=>{
+  const root=ref.current;if(!active||language==='fr'||!root||typeof MutationObserver==='undefined')return;
+  translateTree(root);
+  const observer=new MutationObserver(records=>{for(const record of records){if(record.type==='characterData')translateText(record.target);else if(record.type==='attributes')translateAttributes(record.target as Element);else record.addedNodes.forEach(translateTree);}forgetDetached();});
+  observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES});
+  return()=>{observer.disconnect();restoreOriginals();};
+ },[active,language]);
+ return <div ref={ref} lang={active?'fr':undefined} className="french-scope">{children}</div>;
+}

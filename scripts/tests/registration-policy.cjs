@@ -21,12 +21,12 @@ async function fixture(registration=null){
 }
 const legacy={id:50,eventId:30,revision:'v1',state:'confirmed',total:4000,paymentMethod:'invoice',paymentStatus:'outstanding',participants:[{kind:'member',userId:1,name:'Own Member',crew:1,room:'single',meal:'Vegetarisch'},{kind:'guest',name:'Old Guest',firstName:'Old',lastName:'Guest',crew:2,meal:'Fleisch'},{kind:'member',name:'Bob Test',firstName:'Bob',lastName:'Test',memberNumber:'102',userId:2,crew:3,room:'double',meal:'Vegetarisch'},{kind:'copilot',name:'Chloe Test',firstName:'Chloe',lastName:'Test',memberNumber:'103',userId:3,crew:3,meal:'Fleisch'}],notes:'Existing notes'};
 test('New booking offers one guest crew and member choice only for own companion',async()=>{
- const f=await fixture();f.button('＋ Gast-Buchung hinzufügen').props.onClick();f.render();assert.equal(f.button('＋ Gast-Buchung hinzufügen'),undefined);
+ const f=await fixture();f.button('＋ Weitere Person (Gast)').props.onClick();f.render();assert.equal(f.button('＋ Weitere Person (Gast)'),undefined);
  const selects=f.nodes().filter(n=>n.type==='select');const members=selects.filter(n=>JSON.stringify(n).includes('Anderes Mitglied'));assert.equal(members.length,1);
 });
-test('Legacy members remain visible with locked identities and saved notes',async()=>{
+test('Legacy members are flagged for removal; saved notes stay',async()=>{
  const f=await fixture(legacy);f.button('Anmeldung ändern').props.onClick();f.render();assert.ok(f.nodes().some(n=>n.type==='strong'&&n.props.children==='Bob Test'));
- assert.ok(f.nodes().some(n=>n.type==='select'&&n.props.value==='member'&&n.props.disabled===true));assert.equal(f.nodes().find(n=>n.type==='textarea').props.defaultValue,'Existing notes');
+ assert.ok(f.nodes().some(n=>n.type==='p'&&JSON.stringify(n.props.children).includes('Mitglieder melden sich neu selbst an')));assert.equal(f.nodes().find(n=>n.type==='textarea').props.defaultValue,'Existing notes');
 });
 test('Removing an earlier legacy guest preserves remaining crew identity and edit revision',async()=>{
  const f=await fixture(legacy);f.button('Anmeldung ändern').props.onClick();f.render();f.nodes().find(n=>n.type==='button'&&n.props.children==='Weitere Person entfernen').props.onClick();f.render();f.submit();await settle();
