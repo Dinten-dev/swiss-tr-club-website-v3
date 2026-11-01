@@ -149,13 +149,34 @@ final class MailTemplatesEndpoint
         foreach (MailTemplates::sample($key) as $name => $value) $replace['{{' . $name . '}}'] = $value;
         $subject = strtr($clean[$language]['subject'], $replace);
         $body = strtr($clean[$language]['body'], $replace);
-        if (! empty($entry['note'])) $body .= "\n\n[" . ($language === 'fr' ? 'Exemple' : 'Beispiel') . '] ' . $entry['note'];
-        if (! $send) return array('subject' => $subject, 'heading' => strtr($clean[$language]['heading'], $replace), 'body' => $body, 'html' => empty($entry['woo']) ? MailLayout::layout($subject, MailLayout::textToHtml($body)) : '');
+        $heading = strtr($clean[$language]['heading'], $replace);
+        $note = ! empty($entry['note']) ? '[' . ($language === 'fr' ? 'Exemple' : 'Beispiel') . '] ' . $entry['note'] : '';
+        // WooCommerce-Mails: Überschrift, Bestellübersicht (Beispiel) und Zusatztext wie in der echten Mail zeigen.
+        $inner = ! empty($entry['woo']) ? self::wooSample($heading, $body, $language) : MailLayout::textToHtml($body);
+        if ($note !== '') $inner .= '<p style="margin:18px 0 0;color:#6b7c88;font-size:13px">' . esc_html($note) . '</p>';
+        if (! $send) return array('subject' => $subject, 'heading' => $heading, 'body' => $body . ($note !== '' ? "\n\n" . $note : ''), 'html' => MailLayout::layout($subject, $inner, MailLayout::logoData()));
         $email = wp_get_current_user()->user_email;
         if (! is_email($email)) throw new \InvalidArgumentException('Für dein Konto ist keine gültige E-Mail-Adresse hinterlegt.');
         MailLog::context('Testmail: ' . MailTemplates::label($key));
-        $sent = wp_mail($email, '[Test] ' . ($subject !== '' ? $subject : MailTemplates::label($key)), $body, array('Content-Type: text/plain; charset=UTF-8', 'From: Swiss TR-Club <no-reply@swisstrclub.ch>'));
+        $title = '[Test] ' . ($subject !== '' ? $subject : MailTemplates::label($key));
+        $sent = wp_mail($email, $title, MailLayout::layout($title, $inner), array('Content-Type: text/html; charset=UTF-8', 'From: Swiss TR-Club <no-reply@swisstrclub.ch>'));
         if (! $sent) throw new \InvalidArgumentException('Die Testmail konnte nicht versendet werden.');
         return array('message' => 'Testmail an ' . $email . ' gesendet.');
+    }
+
+    /** Beispiel einer WooCommerce-Bestellmail: Überschrift, Bestellübersicht und Zusatztext (Vorschau und Testmail). */
+    private static function wooSample(string $heading, string $body, string $language): string
+    {
+        $fr = $language === 'fr';
+        $cell = 'padding:8px;border:1px solid #e3eaf0;text-align:left';
+        $html = '<h2 style="margin:0 0 14px;font:700 20px/1.3 Arial,Helvetica,sans-serif;color:' . MailLayout::BLUE . '">' . esc_html($heading !== '' ? $heading : ($fr ? '(titre WooCommerce)' : '(WooCommerce-Überschrift)')) . '</h2>';
+        $html .= '<p style="margin:0 0 8px;color:#6b7c88;font-size:13px">' . esc_html($fr ? '[Exemple] WooCommerce insère ici la commande :' : '[Beispiel] Hier fügt WooCommerce die Bestellung ein:') . '</p>';
+        $html .= '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14px">'
+            . '<tr><th style="' . $cell . '">' . ($fr ? 'Produit' : 'Produkt') . '</th><th style="' . $cell . '">' . ($fr ? 'Quantité' : 'Anzahl') . '</th><th style="' . $cell . '">' . ($fr ? 'Prix' : 'Preis') . '</th></tr>'
+            . '<tr><td style="' . $cell . '">TR-Club Polo – Navy, M, ' . ($fr ? 'Manche' : 'Ärmel') . '</td><td style="' . $cell . '">1</td><td style="' . $cell . '">CHF 29.00</td></tr>'
+            . '<tr><td style="' . $cell . '">TR-Club Cap</td><td style="' . $cell . '">2</td><td style="' . $cell . '">CHF 58.00</td></tr>'
+            . '<tr><th style="' . $cell . '" colspan="2">' . ($fr ? 'Total' : 'Gesamtsumme') . '</th><th style="' . $cell . '">CHF 87.00</th></tr></table>'
+            . '<p style="margin:0 0 16px;color:#6b7c88;font-size:13px">' . esc_html($fr ? '[Exemple] Adresses de facturation et de livraison' : '[Beispiel] Rechnungs- und Lieferadresse') . '</p>';
+        return $html . ($body !== '' ? MailLayout::textToHtml($body) : '<p style="color:#6b7c88">' . esc_html($fr ? '(texte WooCommerce standard)' : '(WooCommerce-Standardtext)') . '</p>');
     }
 }

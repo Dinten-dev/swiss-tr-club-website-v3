@@ -32,6 +32,9 @@ namespace {
  function home_url(string $path=''):string{return 'https://qa.invalid'.$path;}
  function content_url(string $path=''):string{return 'https://qa.invalid/wp-content'.$path;}
  function esc_html(string $text):string{return htmlspecialchars($text,ENT_QUOTES,'UTF-8');}
+ function esc_attr(string $text):string{return htmlspecialchars($text,ENT_QUOTES,'UTF-8');}
+ function get_user_meta(int $id,string $key,bool $single=false):mixed{return $GLOBALS['userMeta'][$id][$key]??'';}
+ function get_user_by(string $field,string $value):mixed{return null;}
  function esc_url(string $url):string{return htmlspecialchars($url,ENT_QUOTES,'UTF-8');}
  function add_filter(...$args):bool{return true;} function add_action(...$args):bool{return true;}
  function current_user_can(string $cap):bool{return !empty($GLOBALS['caps'][$cap]);}
@@ -98,5 +101,19 @@ namespace {
  $next=$layout->wrap(['subject'=>'Next','message'=>'Next normal mail','headers'=>[]]);
  check(str_contains($next['message'],'data-strc-mail'),'Woo mail cannot suppress the next normal mail layout');
  $layout->alternative($mailer);$layout->wrap($next);$layout->alternative($mailer);check($mailer->AltBody==='','Already wrapped mail clears reusable PHPMailer alternative');
+ // Anrede nach Geschlecht (1.11.2026).
+ check(MailTemplates::greeting('de','Monika','female')==='Liebe Monika'&&MailTemplates::greeting('de','Peter','male')==='Lieber Peter'&&MailTemplates::greeting('de','Alex','')==='Hallo Alex','German greeting follows the gender, neutral otherwise');
+ check(MailTemplates::greeting('fr','Luc','male')==='Cher Luc'&&MailTemplates::greeting('fr','Anne','female')==='Chère Anne'&&MailTemplates::greeting('fr','','')==='Bonjour','French greeting');
+ $GLOBALS['userMeta'][7]['strc_gender']='male';check(MailTemplates::gender(7)==='male'&&MailTemplates::gender(8)==='','Gender read from the member profile');
+ $options[MailTemplates::OPTION]=[];$mail=MailTemplates::render('market.online','de',['vorname'=>'Peter','geschlecht'=>'male','titel'=>'TR6','link'=>'L']);
+ check(str_starts_with($mail['body'],'Lieber Peter')&&!str_contains($mail['body'],'male'),'Default templates greet with {{anrede}}');
+ check(in_array('anrede',MailTemplates::registry()['shop.woo_on_hold']['placeholders'],true),'Anrede is offered wherever the first name is');
+ // Logo eingebettet.
+ $html=MailLayout::layout('S','<p>x</p>','cid:strc-logo');check(str_contains($html,'src="cid:strc-logo"'),'Layout can reference the embedded logo');
+ $html=MailLayout::layout('S','<p>x</p>','data:image/png;base64,AAAA');check(str_contains($html,'src="data:image/png;base64,AAAA"'),'Preview uses an inline logo');
+ require_once $base.'Events/RegionDirectory.php';
+ $options['strc_content_region-zuerich']=['published'=>['contactName'=>'Max Muster','contactRole'=>'Regionalleiter','contactEmail'=>'zuerich@example.invalid','contactPhone'=>'079 000 00 00']];
+ check(\SwissTRClub\Core\Events\RegionDirectory::contact('zuerich')==='Max Muster (Regionalleiter), zuerich@example.invalid, 079 000 00 00'&&\SwissTRClub\Core\Events\RegionDirectory::contact('bern')===''&&\SwissTRClub\Core\Events\RegionDirectory::name('zuerich')==='Zürich','Regional contact for the welcome mail comes from the published regional page');
+ check(in_array('regional_contact',\SwissTRClub\Core\Mail\WelcomeMailSettings::placeholders(),true),'Welcome mail offers {{regional_contact}}');
  echo json_encode(['passed'=>count($checks),'checks'=>$checks],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)."\n";
 }

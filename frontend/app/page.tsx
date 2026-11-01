@@ -1,5 +1,5 @@
 'use client';
-import {t,uiLocale,UILanguageProvider,LanguageSwitcher,useUILanguage} from './components/UILanguage';
+import {t,tFr,FrenchScope,uiLocale,UILanguageProvider,LanguageSwitcher,useUILanguage} from './components/UILanguage';
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
@@ -162,7 +162,7 @@ function ClubApp() {
     {page==='event-admin' && (memberSession?.canManageEvents?<EventManager session={memberSession} changed={retryEvents}/>:<MembersPage session={memberSession} navigate={navigate}/>)}
     {['contact','privacy','statutes'].includes(page) && <InformationPage key={page} page={page}/>}
 
-    <footer className="site-footer"><div className="footer-brand"><Image className="footer-logo" src={assetUrl(c('global.logo'))} width={954} height={954} alt={t("Swiss TR-Club Logo")}/><div><strong>{c('global.name')}</strong><p className="footer-tagline">{c('global.tagline')}</p>{c('global.footer').replace(/[^\p{L}\p{N}]+/gu,'').toLowerCase()!==c('global.tagline').replace(/[^\p{L}\p{N}]+/gu,'').toLowerCase()&&<p>{c('global.footer')}</p>}</div></div><div><strong>{t('Kontakt & Recht')}</strong><button onClick={() => navigate('contact')}>{t('Kontakt & Impressum')}</button><button onClick={() => navigate('privacy')}>{t('Datenschutz')}</button><button onClick={() => navigate('statutes')}>{t('Statuten')}</button></div></footer>
+    <footer className="site-footer"><div className="footer-brand"><Image className="footer-logo" src={assetUrl(c('global.logo'))} width={954} height={954} alt={t("Swiss TR-Club Logo")}/><div><strong>{c('global.name')}</strong><p className="footer-tagline">{c('global.tagline')}</p></div></div><div><strong>{t('Kontakt & Recht')}</strong><button onClick={() => navigate('contact')}>{t('Kontakt & Impressum')}</button><button onClick={() => navigate('privacy')}>{t('Datenschutz')}</button><button onClick={() => navigate('statutes')}>{t('Statuten')}</button></div></footer>
 
     {(selectedEvent||linkedEvent) && <EventDialog event={(selectedEvent||linkedEvent)!} memberAccess={!!memberSession?.memberAccess} close={() => {setSelectedEvent(null);if(linkedEvent)window.location.hash='#agenda';}}/>}
     {toast && <div className="toast" role="status">✓ {toast}</div>}
@@ -217,7 +217,9 @@ function RegionsPage({events,eventsState,retryEvents,openEvent,editableDocuments
   },[revision]);
   const region=regions.find(item=>item.slug===selected);
   const visible=events.filter(event=>event.region?.slug===selected);
-  return <><PageHero eyebrow={t("Lokal präsent – lokal aktiv")} title={region?`${t('Region')} ${t(region.name)}`:c('regions.title')} text={region?c(`region-${region.slug}.intro`,c('regions.intro')):c('regions.intro')} landscape={region?.slug}/>{!selected&&<LandingIntroduction documentKey="regions"/>}
+  // Suisse romande: feste Texte immer französisch (Wunsch Redaktion 1.11.2026).
+  const romandie=region?.slug==='suisse-romande';const rt=(value:string)=>romandie?tFr(value):t(value);
+  return <FrenchScope active={romandie}><PageHero eyebrow={rt("Lokal präsent – lokal aktiv")} title={region?`${rt('Region')} ${rt(region.name)}`:c('regions.title')} text={region?c(`region-${region.slug}.intro`,c('regions.intro')):c('regions.intro')} landscape={region?.slug}/>{!selected&&<LandingIntroduction documentKey="regions"/>}
     <section className="page-content">
       {state==='loading'&&<p role="status">{t("Regionen werden geladen …")}</p>}
       {state==='error'&&<div className="collection-state error" role="alert">{t("Regionen konnten nicht geladen werden.")}<button className="market-text-button" onClick={()=>{setState('loading');setRevision(value=>value+1);}}>{t('Erneut versuchen')}</button></div>}
@@ -226,7 +228,7 @@ function RegionsPage({events,eventsState,retryEvents,openEvent,editableDocuments
         <RegionalContent documentKey={'region-'+region.slug} values={values['region-'+region.slug]||{body:region.description}} canEdit={editableDocuments.includes('region-'+region.slug)} eventCount={eventsState==='ready'?visible.length:undefined} events={<><EventCollectionState state={eventsState} count={visible.length} retry={retryEvents}/><div className="events">{visible.map(event=><EventCard key={event.id} event={event} open={()=>openEvent(event)}/>)}</div></>}/>
 
       </>:<>{selected&&<p role="alert">{t("Diese Region wurde nicht gefunden. Bitte wählen Sie eine Region.")}</p>}<div className="regions-grid">{regions.map(item=><a key={item.slug} className="region-card" href={item.slug==='triungsters'?'#triungsters':`#regionen/${item.slug}`} style={regionalCardBackground(item.slug)}><h2>{t(item.name).replace('Nordwestschweiz','Nordwest\u00adschweiz')}</h2>{typeof item.memberCount==='number'&&Number.isFinite(item.memberCount)&&item.memberCount>=0&&<p key={item.memberCount} className="region-member-count">{item.memberCount} {t("Mitglieder")}</p>}</a>)}</div>{!regions.length&&<p className="collection-state">{t("Es sind noch keine Regionen hinterlegt.")}</p>}</>)}
-    </section></>;
+    </section></FrenchScope>;
 }
 
 function InformationPage({page}:{page:Page}) {const {text:c,error,refresh}=useSiteContent();return <><PageHero eyebrow={t("Swiss TR-Club")} title={c(`${page}.title`)} text={t("Informationen des Clubs")}/><section className="page-content"><div className="information-content">{error?<p role="alert">{error}<button onClick={()=>void refresh()}>{t('Erneut laden')}</button></p>:c(`${page}.body`)?<ContentBlock id={`${page}.body`}/>:<p>{t("Dieser Inhalt wurde noch nicht veröffentlicht.")}</p>}</div>{page==='contact'&&<ContactForm/>}</section></>;}

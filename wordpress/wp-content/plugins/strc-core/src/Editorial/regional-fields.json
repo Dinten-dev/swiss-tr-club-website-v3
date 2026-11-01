@@ -43,7 +43,7 @@
   },
   {
     "key": "meetSchedule",
-    "label": "Treffpunkt: Rhythmus und Uhrzeit (zwei Zeilen möglich)",
+    "label": "Treffpunkt: Rhythmus und Uhrzeit (drei Zeilen möglich)",
     "type": "textarea",
     "default": ""
   },

@@ -104,8 +104,10 @@ namespace {
  foreach([false,true]as$meeting)foreach([false,true]as$weekend)foreach(['guest','member']as$pilot)foreach(['guest','member']as$copilot){
   $registrationData[50]=['state'=>'confirmed','participants'=>[['kind'=>'member','userId'=>1,'crew'=>1],['kind'=>$pilot,'userId'=>$pilot==='member'?2:0,'crew'=>2],['kind'=>$copilot==='member'?'copilot':'guest-copilot','userId'=>$copilot==='member'?3:0,'crew'=>2]]];
   $s=array_replace($settings,['meeting'=>$meeting,'weekend'=>$weekend]);$input=['crews'=>json_encode([['room'=>'single'],['existingCrew'=>2,'pilot'=>$pilot==='member'?$member(2):$guest,'copilot'=>$copilot==='member'?$member(3):$guest,'room'=>'double']])];
-  $out=invoke($events,'submission',$posts[30],$s,$input,$editing);$expected=1000+($pilot==='member'?($weekend?800:1000):($weekend?1600:2000))+($copilot==='member'?($weekend?400:500):($weekend?1200:1500));
-  check($out['total']===$expected&&$out['headcount']===3,"Legacy tariffs meeting=$meeting weekend=$weekend $pilot/$copilot");
+  // Entscheid Redaktion 31.10.2026: Mitglieder melden sich selbst an – auch ältere Buchungen müssen bereinigt werden.
+  if($pilot==='member'||$copilot==='member'){rejects(fn()=>invoke($events,'submission',$posts[30],$s,$input,$editing),"Legacy member in extra crew must be removed meeting=$meeting weekend=$weekend $pilot/$copilot");continue;}
+  $out=invoke($events,'submission',$posts[30],$s,$input,$editing);$expected=1000+($weekend?1600:2000)+($weekend?1200:1500);
+  check($out['total']===$expected&&$out['headcount']===3,"Legacy guest tariffs meeting=$meeting weekend=$weekend");
  }
  $legacy=['crews'=>json_encode([[],['pilot'=>['firstName'=>'Legacy','lastName'=>'Guest']]])];check(invoke($events,'submission',$posts[30],$settings,$legacy)['participants'][1]['kind']==='guest','Old crew input remains a guest');
  $input=['crews'=>json_encode([[],['pilot'=>$member(2)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$input),'New extra member pilot rejected');
@@ -115,9 +117,10 @@ namespace {
  $meta[30]['strc_registration_form']=['guests'=>2];check(\SwissTRClub\Core\Forms\EventRegistration::settings(30)['guests']===1,'Old organiser limit two is capped at one');
  $registrationData[50]=['state'=>'confirmed','participants'=>[['kind'=>'member','userId'=>1,'crew'=>1],['kind'=>'guest','crew'=>2],['kind'=>'member','userId'=>2,'crew'=>3],['kind'=>'copilot','userId'=>3,'crew'=>3]]];
  $old=['crews'=>json_encode([[],['existingCrew'=>2,'pilot'=>$guest],['existingCrew'=>3,'pilot'=>$member(2),'copilot'=>$member(3)]])];
- check(invoke($events,'submission',$posts[30],$settings,$old,$editing)['headcount']===4,'Existing third crew and member identities remain editable');
+ rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$old,$editing),'Existing member crews must be removed before saving');
+ $guests=['crews'=>json_encode([[],['existingCrew'=>2,'pilot'=>$guest]])];check(invoke($events,'submission',$posts[30],$settings,$guests,$editing)['headcount']===2,'Older booking saves after removing the member crew');
  $retained=['crews'=>json_encode([[],['existingCrew'=>3,'pilot'=>$member(2),'copilot'=>$member(3)]])];
- check(invoke($events,'submission',$posts[30],$settings,$retained,$editing)['headcount']===3,'Removing preceding crew preserves stable member identities');
+ rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$retained,$editing),'Legacy member crew is not kept when other crews are removed');
  rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$retained),'Client reference without trusted edit cannot bypass policy');
  $forged=['crews'=>json_encode([[],['existingCrew'=>3,'pilot'=>$member(4)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$forged,$editing),'Legacy pilot cannot be replaced by another member');
  $forged=['crews'=>json_encode([[],['existingCrew'=>3,'pilot'=>$member(2),'copilot'=>$member(4)]])];rejects(fn()=>invoke($events,'submission',$posts[30],$settings,$forged,$editing),'Legacy companion cannot be replaced by another member');

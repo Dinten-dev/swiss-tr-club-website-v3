@@ -68,7 +68,7 @@ final class ShopInvoice
                     $copies = ClubDocument::treasury();
                     $headers = array('Content-Type: text/plain; charset=UTF-8');
                     foreach ($copies as $copy) $headers[] = 'Bcc: ' . $copy;
-                    $mail = \SwissTRClub\Core\Mail\MailTemplates::render('shop.invoice', $lang, array('vorname' => $order->get_billing_first_name(), 'rechnungsnummer' => $number, 'bestellnummer' => $order->get_order_number(), 'betrag' => number_format((float) $order->get_total(), 2, '.', "'")));
+                    $mail = \SwissTRClub\Core\Mail\MailTemplates::render('shop.invoice', $lang, array('vorname' => $order->get_billing_first_name(), 'geschlecht' => \SwissTRClub\Core\Mail\MailTemplates::orderGender($order), 'rechnungsnummer' => $number, 'bestellnummer' => $order->get_order_number(), 'betrag' => number_format((float) $order->get_total(), 2, '.', "'")));
                     $subject = $mail['subject'];
                     $body = $mail['body'] . "\n";
                     if (is_email($order->get_billing_email()) && wp_mail($order->get_billing_email(), $subject, $body, $headers, array($file))) {
