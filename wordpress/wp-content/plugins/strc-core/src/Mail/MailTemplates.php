@@ -69,7 +69,7 @@ final class MailTemplates
             'event.confirmed' => array(
                 'group' => 'Anlässe', 'label' => 'Anmeldebestätigung', 'recipient' => 'Anmeldendes Mitglied',
                 'placeholders' => array('anlass', 'teilnehmende', 'betrag', 'zahlungshinweis', 'bedingungen', 'link'), 'required' => array('anlass'),
-                'note' => '{{zahlungshinweis}} lautet je nach Fall z. B. «Der Zahlungseingang ist bestätigt.» oder «Die Rechnung folgt separat …».',
+                'note' => '{{bedingungen}} stammt aus dem Anlass (Agenda verwalten → Anlass → Abschnitt «Teilnahme & Abmeldung» → Bedingungen). {{zahlungshinweis}} setzt die Website je nach Zahlungsstand: «Der Zahlungseingang ist bestätigt.», «Die Rechnung folgt separat …», «Der Beitrag wurde erlassen.» oder «Es ist keine Zahlung erforderlich.».',
                 'de' => array('subject' => 'Anmeldebestätigung: {{anlass}}', 'body' => "Deine Teilnahme ist bestätigt.\n\n{{anlass}}\n{{teilnehmende}}\nBetrag: {{betrag}}\n{{zahlungshinweis}}\n\n{{bedingungen}}\n\nAnmeldung und Kalender: {{link}}"),
                 'fr' => array('subject' => 'Confirmation d’inscription : {{anlass}}', 'body' => "Ta participation est confirmée.\n\n{{anlass}}\n{{teilnehmende}}\nMontant : {{betrag}}\n{{zahlungshinweis}}\n\n{{bedingungen}}\n\nInscription et calendrier : {{link}}"),
             ),
@@ -96,13 +96,13 @@ final class MailTemplates
                 'group' => 'Marktplatz', 'label' => 'Inserat nach Prüfung veröffentlicht', 'recipient' => 'Inserent',
                 'placeholders' => array('titel', 'link'), 'required' => array(),
                 'de' => array('subject' => 'TR-Club: Ihr Inserat ist veröffentlicht', 'body' => "Guten Tag\n\nIhr Inserat «{{titel}}» wurde geprüft und ist jetzt veröffentlicht.\n\n{{link}}\n\nSwiss TR-Club"),
-                'fr' => array('subject' => 'TR-Club : annonce publiée', 'body' => "Bonjour,\n\nVotre annonce « {{titel}} » a été vérifiée et est maintenant publiée.\n\n{{link}}\n\nSwiss TR-Club"),
+                'fr' => array('subject' => 'TR-Club : annonce publiée', 'body' => "Bonjour,\n\nTon annonce « {{titel}} » a été vérifiée et est maintenant publiée.\n\n{{link}}\n\nSwiss TR-Club"),
             ),
             'market.decision_rejected' => array(
                 'group' => 'Marktplatz', 'label' => 'Inserat nach Prüfung nicht veröffentlicht', 'recipient' => 'Inserent',
                 'placeholders' => array('titel', 'link'), 'required' => array(),
                 'de' => array('subject' => 'TR-Club: Ihr Inserat wurde nicht veröffentlicht', 'body' => "Guten Tag\n\nIhr Inserat «{{titel}}» konnte in dieser Form nicht veröffentlicht werden. Sie können es bearbeiten und erneut absenden.\n\n{{link}}\n\nSwiss TR-Club"),
-                'fr' => array('subject' => 'TR-Club : annonce non publiée', 'body' => "Bonjour,\n\nVotre annonce « {{titel}} » n’a pas pu être publiée sous cette forme. Vous pouvez la modifier et la soumettre à nouveau.\n\n{{link}}\n\nSwiss TR-Club"),
+                'fr' => array('subject' => 'TR-Club : annonce non publiée', 'body' => "Bonjour,\n\nTon annonce « {{titel}} » n’a pas pu être publiée sous cette forme. Tu peux la modifier et la soumettre à nouveau.\n\n{{link}}\n\nSwiss TR-Club"),
             ),
             'shop.shipped' => array(
                 'group' => 'Shop', 'label' => 'Bestellung ist unterwegs (Versand gemeldet)', 'recipient' => 'Käufer',
@@ -115,7 +115,7 @@ final class MailTemplates
                 'group' => 'Mitgliedschaft', 'label' => 'Paarmitgliedschaft ist aktiv', 'recipient' => 'Hauptmitglied',
                 'placeholders' => array('anrede', 'vorname', 'copilot', 'beitrag', 'link'), 'required' => array(),
                 'de' => array('subject' => 'Swiss TR-Club: Paarmitgliedschaft aktiv', 'body' => "{{anrede}}\n\nEure Paarmitgliedschaft mit {{copilot}} ist jetzt aktiv. Neuer Jahresbeitrag: {{beitrag}}. Die Rechnung folgt separat.\n\nProfil: {{link}}\n\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Swiss TR-Club : affiliation en couple active', 'body' => "{{anrede}}\n\nVotre affiliation en couple avec {{copilot}} est désormais active. Nouvelle cotisation annuelle : {{beitrag}}. La facture suit séparément.\n\nProfil : {{link}}\n\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : affiliation en couple active', 'body' => "{{anrede}}\n\nTon affiliation en couple avec {{copilot}} est désormais active. Nouvelle cotisation annuelle : {{beitrag}}. La facture suit séparément.\n\nProfil : {{link}}\n\nSwiss TR-Club"),
             ),
             'internal.submission' => array(
                 'group' => 'Intern', 'label' => 'Neue Einreichung zur Prüfung', 'recipient' => 'Moderation (Galerie, Bibliothek, Marktplatz)',
@@ -159,7 +159,7 @@ final class MailTemplates
                 'group' => 'Intern', 'label' => 'Mitgliedschaft: neuer Antrag', 'recipient' => 'Mitgliederverwaltung',
                 'placeholders' => array('link'), 'required' => array('link'),
                 'de' => array('subject' => 'Swiss TR-Club: Neue Anmeldung', 'body' => "Sie haben eine neue Anmeldung erhalten.\n\nBitte prüfen Sie die Anmeldung im Clubportal und bestätigen Sie die Aufnahme.\n\nZum Clubportal:\n{{link}}\n\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Swiss TR-Club : nouvelle demande d’adhésion', 'body' => "Vous avez reçu une nouvelle demande d’adhésion.\n\nMerci de la vérifier dans le portail du club et de confirmer l’admission.\n\nVers le portail :\n{{link}}\n\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : nouvelle demande d’adhésion', 'body' => "Tu as reçu une nouvelle demande d’adhésion.\n\nMerci de la vérifier dans le portail du club et de confirmer l’admission.\n\nVers le portail :\n{{link}}\n\nSwiss TR-Club"),
             ),
             'internal.couple_switch' => array(
                 'group' => 'Intern', 'label' => 'Mitgliedschaft: Antrag Wechsel zur Paarmitgliedschaft', 'recipient' => 'Aktuar',
@@ -178,7 +178,7 @@ final class MailTemplates
                 'group' => 'Mitgliedschaft', 'label' => 'Konto aktivieren (Passwort festlegen)', 'recipient' => 'Mitglied',
                 'placeholders' => array('name', 'link'), 'required' => array('link'),
                 'de' => array('subject' => 'Ihr Konto beim Swiss TR-Club aktivieren', 'body' => "Guten Tag {{name}}\n\nIhr Konto beim Swiss TR-Club ist vorbereitet. Legen Sie über folgenden sicheren Link Ihr persönliches Passwort fest:\n\n{{link}}\n\nDer Link ist zeitlich begrenzt und nur einmal verwendbar."),
-                'fr' => array('subject' => 'Activer votre compte au Swiss TR-Club', 'body' => "Bonjour {{name}}\n\nVotre compte au Swiss TR-Club est prêt. Définissez votre mot de passe personnel via ce lien sécurisé :\n\n{{link}}\n\nLe lien est limité dans le temps et utilisable une seule fois."),
+                'fr' => array('subject' => 'Active ton compte au Swiss TR-Club', 'body' => "Bonjour {{name}}\n\nTon compte au Swiss TR-Club est prêt. Définis ton mot de passe personnel via ce lien sécurisé :\n\n{{link}}\n\nLe lien est limité dans le temps et utilisable une seule fois."),
             ),
         );
     }
@@ -266,12 +266,16 @@ final class MailTemplates
     public static function sample(string $key): array
     {
         $base = rtrim(defined('STRC_FRONTEND_ORIGIN') ? STRC_FRONTEND_ORIGIN : home_url(), '/');
-        return array(
+        $sample = array(
             'vorname' => 'Monika', 'anrede' => 'Liebe Monika', 'name' => 'Monika Muster', 'titel' => 'TR6 Hardtop', 'nummer' => '123', 'preis' => 'CHF 1’200', 'link' => $base . '/#marktplatz/meine/123',
             'rechnungsnummer' => 'S-2026-0007', 'bestellnummer' => '1042', 'betrag' => "89.00",
             'anlass' => 'Herbstausfahrt Jura', 'teilnehmende' => 'Monika Muster, Peter Muster', 'zahlungshinweis' => 'Die Teilnahme ist bestätigt. Die Rechnung folgt separat; die Zahlung ist noch offen.', 'bedingungen' => 'Abmeldung bis 7 Tage vor dem Anlass kostenlos.',
             'artikel' => "Jacke (Hoody) Herren – M × 1", 'sendungsnummer' => '99.00.123456.78', 'copilot' => 'Peter Muster', 'beitrag' => 'CHF 160.–', 'status' => 'on-hold', 'kunde' => 'Monika Muster', 'email' => 'monika@example.ch', 'lieferadresse' => "Monika Muster\nBeispielweg 1\n8000 Zürich", 'telefon' => '079 000 00 00', 'auftrag' => 'Rechnung erstellen', 'mitglied' => 'Monika Muster', 'zahlungsstand' => 'outstanding', 'hinweis' => 'Bitte die Rechnung in Fairgate erstellen und versenden.', 'angaben' => "Mitgliedsnummer: 1234\nFairgate-ID: 173", 'datum' => '29.10.2026', 'first_name' => 'Monika', 'member_number' => '1234', 'region' => 'Zürich', 'password_url' => $base . '/wp-login.php?action=rp', 'dashboard_url' => $base . '/#mitglieder', 'profile_url' => $base . '/#profil', 'agenda_url' => $base . '/#agenda', 'regions_url' => $base . '/#regionen', 'forum_url' => $base . '/#forum', 'gallery_url' => $base . '/#galerie', 'library_url' => $base . '/#bibliothek', 'marketplace_url' => $base . '/#marktplatz', 'contact_url' => $base . '/#kontakt',
         );
+        // Beispiel-Link passend zur Vorlage (Vorschau und Testmail).
+        $links = array('event.' => '/#veranstaltung/42', 'shop.' => '/#tr-shop', 'member.' => '/#mitglieder', 'internal.application' => '/#antraege', 'internal.forum' => '/#forum/42');
+        foreach ($links as $prefix => $path) if (str_starts_with($key, $prefix)) { $sample['link'] = $base . $path; break; }
+        return $sample;
     }
 
     public static function canManage(): bool
