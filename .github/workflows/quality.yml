@@ -44,6 +44,8 @@ jobs:
       - run: php ../../../../scripts/tests/editorial-pr66.php
       - run: php ../../../../scripts/tests/mail-templates.php
       - run: php ../../../../scripts/tests/shop-editing.php
+      - run: php ../../../../scripts/tests/zahls-readiness.php
+      - run: php ../../../../scripts/tests/zahls-readiness.php --disabled
       - run: php -l ../../../../scripts/tests/security-staging.php
       - run: php -l ../../../../scripts/tests/editorial-staging.php
       - run: php -l ../../../../scripts/tests/pr71-pr75-staging.php

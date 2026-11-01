@@ -244,7 +244,12 @@ final class ShopEndpoint
         foreach (WC()->payment_gateways()->payment_gateways() as $gateway) {
             if (! str_contains(strtolower((string) $gateway->id), 'zahls') || 'yes' !== ($gateway->enabled ?? 'no')) continue;
             $instance = method_exists($gateway, 'get_option') ? trim((string) $gateway->get_option('instance')) : '';
-            $apiKey = method_exists($gateway, 'get_option') ? trim((string) $gateway->get_option('api_key')) : '';
+            // The installed zahls.ch plugin reads apiKey, falling back to the legacy sid field.
+            $apiKey = '';
+            if (method_exists($gateway, 'get_option')) foreach (array('apiKey', 'sid', 'api_key') as $field) {
+                $apiKey = trim((string) $gateway->get_option($field));
+                if ($apiKey !== '') break;
+            }
             if ('' !== $instance && '' !== $apiKey) return true;
         }
         return false;
