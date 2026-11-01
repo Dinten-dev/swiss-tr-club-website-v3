@@ -17,6 +17,29 @@ final class RegionDirectory
         'triungsters' => 'TRiungsters',
     );
 
+    /** Name der Region aus dem Kürzel (z. B. «zuerich» → «Zürich»). */
+    public static function name(string $slug): string
+    {
+        return self::REGIONS[$slug] ?? $slug;
+    }
+
+    /**
+     * Ansprechperson der Region aus der veröffentlichten Regionalseite (Kontakt: Name, Funktion, E-Mail, Telefon),
+     * z. B. für die Willkommensmail: «Max Muster (Regionalleiter), zuerich@swisstrclub.ch, 079 123 45 67».
+     */
+    public static function contact(string $slug): string
+    {
+        if ($slug === '' || ! function_exists('get_option')) return '';
+        $stored = get_option('strc_content_region-' . $slug, array());
+        $values = is_array($stored) && is_array($stored['published'] ?? null) ? $stored['published'] : array();
+        $name = trim(wp_strip_all_tags((string) ($values['contactName'] ?? '')));
+        if ($name === '') return '';
+        $role = trim(wp_strip_all_tags((string) ($values['contactRole'] ?? '')));
+        $parts = array($name . ($role !== '' ? ' (' . $role . ')' : ''));
+        foreach (array('contactEmail', 'contactPhone') as $key) { $value = trim(wp_strip_all_tags((string) ($values[$key] ?? ''))); if ($value !== '') $parts[] = $value; }
+        return implode(', ', $parts);
+    }
+
     /** @return list<object> */
     public static function terms(): array
     {

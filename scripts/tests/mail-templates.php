@@ -111,5 +111,9 @@ namespace {
  // Logo eingebettet.
  $html=MailLayout::layout('S','<p>x</p>','cid:strc-logo');check(str_contains($html,'src="cid:strc-logo"'),'Layout can reference the embedded logo');
  $html=MailLayout::layout('S','<p>x</p>','data:image/png;base64,AAAA');check(str_contains($html,'src="data:image/png;base64,AAAA"'),'Preview uses an inline logo');
+ require_once $base.'Events/RegionDirectory.php';
+ $options['strc_content_region-zuerich']=['published'=>['contactName'=>'Max Muster','contactRole'=>'Regionalleiter','contactEmail'=>'zuerich@example.invalid','contactPhone'=>'079 000 00 00']];
+ check(\SwissTRClub\Core\Events\RegionDirectory::contact('zuerich')==='Max Muster (Regionalleiter), zuerich@example.invalid, 079 000 00 00'&&\SwissTRClub\Core\Events\RegionDirectory::contact('bern')===''&&\SwissTRClub\Core\Events\RegionDirectory::name('zuerich')==='Zürich','Regional contact for the welcome mail comes from the published regional page');
+ check(in_array('regional_contact',\SwissTRClub\Core\Mail\WelcomeMailSettings::placeholders(),true),'Welcome mail offers {{regional_contact}}');
  echo json_encode(['passed'=>count($checks),'checks'=>$checks],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)."\n";
 }

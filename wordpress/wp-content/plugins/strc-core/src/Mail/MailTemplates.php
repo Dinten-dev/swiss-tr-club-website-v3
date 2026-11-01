@@ -275,6 +275,7 @@ final class MailTemplates
         // Beispiel-Link passend zur Vorlage (Vorschau und Testmail).
         $links = array('event.' => '/#veranstaltung/42', 'shop.' => '/#tr-shop', 'member.' => '/#mitglieder', 'internal.application' => '/#antraege', 'internal.forum' => '/#forum/42');
         foreach ($links as $prefix => $path) if (str_starts_with($key, $prefix)) { $sample['link'] = $base . $path; break; }
+        if ($key === 'member.welcome') $sample += array('first_name' => 'Monika', 'member_number' => '1234', 'region' => 'Zürich', 'regional_contact' => 'Max Muster (Regionalleiter), zuerich@swisstrclub.ch, 079 123 45 67', 'password_url' => $base . '/wp-login.php?action=rp', 'dashboard_url' => $base . '/#mitglieder', 'profile_url' => $base . '/#profil', 'agenda_url' => $base . '/#agenda', 'regions_url' => $base . '/#regionen', 'forum_url' => $base . '/#forum', 'gallery_url' => $base . '/#galerie', 'library_url' => $base . '/#bibliothek', 'marketplace_url' => $base . '/#marktplatz', 'contact_url' => $base . '/#kontakt');
         if (str_starts_with($key, 'event.')) { $sample['betrag'] = 'CHF 89.00'; $sample['bedingungen'] = 'Eine Abmeldung ist bis 4 Tage vor dem Anlass kostenlos.'; }
         return $sample;
     }

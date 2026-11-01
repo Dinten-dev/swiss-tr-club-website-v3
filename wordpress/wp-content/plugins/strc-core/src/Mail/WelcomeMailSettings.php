@@ -46,7 +46,7 @@ final class WelcomeMailSettings
 
     public static function placeholders(): array
     {
-        return array('anrede', 'first_name', 'member_number', 'region', 'password_url', 'dashboard_url', 'profile_url', 'agenda_url', 'regions_url', 'forum_url', 'gallery_url', 'library_url', 'marketplace_url', 'contact_url');
+        return array('anrede', 'first_name', 'member_number', 'region', 'regional_contact', 'password_url', 'dashboard_url', 'profile_url', 'agenda_url', 'regions_url', 'forum_url', 'gallery_url', 'library_url', 'marketplace_url', 'contact_url');
     }
 
     public static function render(string $language, array $values): array
