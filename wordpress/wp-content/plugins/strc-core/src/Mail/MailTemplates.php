@@ -156,7 +156,7 @@ final class MailTemplates
                 'fr' => array('subject' => '{{auftrag}} : {{anlass}}', 'body' => "Inscription #{{nummer}}\nMembre : {{mitglied}}\nE-mail : {{email}}\nMontant : {{betrag}}\nStatut de paiement : {{zahlungsstand}}\n{{hinweis}}\n{{link}}"),
             ),
             'internal.application' => array(
-                'group' => 'Intern', 'label' => 'Mitgliedschaft: neuer Antrag', 'recipient' => 'Mitgliederverwaltung',
+                'group' => 'Intern', 'label' => 'Mitgliedschaft: neuer Antrag', 'recipient' => 'aktuar@swisstrclub.ch',
                 'placeholders' => array('link'), 'required' => array('link'),
                 'de' => array('subject' => 'Swiss TR-Club: Neue Anmeldung', 'body' => "Sie haben eine neue Anmeldung erhalten.\n\nBitte prüfen Sie die Anmeldung im Clubportal und bestätigen Sie die Aufnahme.\n\nZum Clubportal:\n{{link}}\n\nSwiss TR-Club"),
                 'fr' => array('subject' => 'Swiss TR-Club : nouvelle demande d’adhésion', 'body' => "Vous avez reçu une nouvelle demande d’adhésion.\n\nMerci de la vérifier dans le portail du club et de confirmer l’admission.\n\nVers le portail :\n{{link}}\n\nSwiss TR-Club"),
@@ -173,6 +173,31 @@ final class MailTemplates
                 'placeholders' => array('mitglied', 'angaben', 'copilot', 'beitrag', 'datum'), 'required' => array(),
                 'de' => array('subject' => 'Swiss TR-Club: Neue Paarmitgliedschaft – Beitrag anpassen', 'body' => "Neue Paarmitgliedschaft\n\nDer Aktuar hat den Co-Piloten in Fairgate als Paarmitglied verbunden; die Paarmitgliedschaft ist jetzt aktiv.\n\nHauptmitglied: {{mitglied}}\n{{angaben}}\nCo-Pilot (neues Paarmitglied): {{copilot}}\nNeuer Jahresbeitrag: {{beitrag}}\nAktiv seit: {{datum}}\n\nBitte den Beitrag für die Rechnungsstellung berücksichtigen.\n\nSwiss TR-Club"),
                 'fr' => array('subject' => 'Swiss TR-Club : nouvelle affiliation en couple – adapter la cotisation', 'body' => "Nouvelle affiliation en couple\n\nLe secrétaire a lié le co-pilote comme membre couple dans Fairgate; l’affiliation en couple est maintenant active.\n\nMembre principal : {{mitglied}}\n{{angaben}}\nCo-pilote (nouveau membre couple) : {{copilot}}\nNouvelle cotisation annuelle : {{beitrag}}\nActive depuis : {{datum}}\n\nMerci de tenir compte de la cotisation pour la facturation.\n\nSwiss TR-Club"),
+            ),
+            'member.application_question' => array(
+                'group' => 'Mitgliedschaft', 'label' => 'Antrag: Rückfrage des Aktuars', 'recipient' => 'Interessent/in (Antworten an den Aktuar)',
+                'placeholders' => array('vorname', 'frage'), 'required' => array('frage'),
+                'de' => array('subject' => 'Swiss TR-Club: Rückfrage zu deinem Mitgliedsantrag', 'body' => "Hallo {{vorname}}\n\nVielen Dank für deinen Mitgliedsantrag. Bevor wir ihn abschliessen können, haben wir eine Rückfrage:\n\n{{frage}}\n\nBitte antworte direkt auf diese E-Mail.\n\nFreundliche Grüsse\nAktuar Swiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : question concernant ta demande d’adhésion', 'body' => "Bonjour {{vorname}}\n\nMerci pour ta demande d’adhésion. Avant de pouvoir la finaliser, nous avons une question :\n\n{{frage}}\n\nMerci de répondre directement à cet e-mail.\n\nMeilleures salutations\nSecrétaire du Swiss TR-Club"),
+            ),
+            'member.application_rejected' => array(
+                'group' => 'Mitgliedschaft', 'label' => 'Antrag: Absage', 'recipient' => 'Interessent/in (Antworten an den Aktuar)',
+                'placeholders' => array('vorname', 'grund'), 'required' => array('grund'),
+                'de' => array('subject' => 'Swiss TR-Club: Dein Mitgliedsantrag', 'body' => "Hallo {{vorname}}\n\nVielen Dank für dein Interesse am Swiss TR-Club. Leider können wir deinen Mitgliedsantrag nicht annehmen.\n\n{{grund}}\n\nBei Fragen antworte bitte direkt auf diese E-Mail.\n\nFreundliche Grüsse\nAktuar Swiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : ta demande d’adhésion', 'body' => "Bonjour {{vorname}}\n\nMerci de ton intérêt pour le Swiss TR-Club. Nous ne pouvons malheureusement pas accepter ta demande d’adhésion.\n\n{{grund}}\n\nPour toute question, merci de répondre directement à cet e-mail.\n\nMeilleures salutations\nSecrétaire du Swiss TR-Club"),
+            ),
+            'member.application_approved' => array(
+                'group' => 'Mitgliedschaft', 'label' => 'Antrag angenommen: Bestätigung mit Beitragsrechnung', 'recipient' => 'Interessent/in',
+                'placeholders' => array('vorname', 'mitgliedschaft', 'jahr', 'betrag', 'rechnungsnummer', 'onlinezahlung'), 'required' => array('rechnungsnummer'),
+                'note' => 'Die QR-Rechnung wird als PDF angehängt. {{onlinezahlung}} enthält den Link «online bezahlen», sobald TWINT/Karte (zahls.ch) eingerichtet ist; sonst bleibt die Zeile leer.',
+                'de' => array('subject' => 'Swiss TR-Club: Dein Mitgliedsantrag ist angenommen', 'body' => "Hallo {{vorname}}\n\nWir freuen uns: Dein Antrag für die {{mitgliedschaft}} im Swiss TR-Club ist angenommen.\n\nIm Anhang findest du die Rechnung {{rechnungsnummer}} für den Mitgliederbeitrag {{jahr}} über CHF {{betrag}} mit QR-Einzahlungsschein.\n\n{{onlinezahlung}}\n\nDeine Mitgliedschaft beginnt mit dem Zahlungseingang. Danach erhältst du eine Willkommensmail mit dem Zugang zum Mitgliederbereich der Website.\n\nHerzliche Grüsse\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : ta demande d’adhésion est acceptée', 'body' => "Bonjour {{vorname}}\n\nNous nous réjouissons : ta demande pour l’{{mitgliedschaft}} au Swiss TR-Club est acceptée.\n\nTu trouveras en annexe la facture {{rechnungsnummer}} pour la cotisation {{jahr}} de CHF {{betrag}} avec bulletin de versement QR.\n\n{{onlinezahlung}}\n\nTon affiliation commence dès réception du paiement. Tu recevras ensuite un e-mail de bienvenue avec l’accès à l’espace membres du site.\n\nMeilleures salutations\nSwiss TR-Club"),
+            ),
+            'internal.membership_paid' => array(
+                'group' => 'Intern', 'label' => 'Mitgliedschaft: Beitrag bezahlt – in Fairgate freischalten', 'recipient' => 'Kassier und Aktuar',
+                'placeholders' => array('name', 'mitgliedschaft', 'jahr', 'betrag', 'zahlungsart', 'link'), 'required' => array('name'),
+                'de' => array('subject' => 'Swiss TR-Club: Beitrag bezahlt – {{name}}', 'body' => "Der Mitgliederbeitrag {{jahr}} ist eingegangen.\n\nNeues Mitglied: {{name}}\nMitgliedschaft: {{mitgliedschaft}}\nBetrag: CHF {{betrag}}\nZahlung: {{zahlungsart}}\n\nBitte das Mitglied in Fairgate freischalten. Danach richtet die Website das Konto ein und sendet die Willkommensmail.\n\nAntrag im Clubportal:\n{{link}}"),
+                'fr' => array('subject' => 'Swiss TR-Club : cotisation payée – {{name}}', 'body' => "La cotisation {{jahr}} a été reçue.\n\nNouveau membre : {{name}}\nAffiliation : {{mitgliedschaft}}\nMontant : CHF {{betrag}}\nPaiement : {{zahlungsart}}\n\nMerci d’activer le membre dans Fairgate. Le site crée ensuite le compte et envoie l’e-mail de bienvenue.\n\nDemande dans le portail du club :\n{{link}}"),
             ),
             'member.activation' => array(
                 'group' => 'Mitgliedschaft', 'label' => 'Konto aktivieren (Passwort festlegen)', 'recipient' => 'Mitglied',
@@ -244,7 +269,7 @@ final class MailTemplates
     {
         $base = rtrim(defined('STRC_FRONTEND_ORIGIN') ? STRC_FRONTEND_ORIGIN : home_url(), '/');
         return array(
-            'vorname' => 'Monika', 'name' => 'Monika Muster', 'titel' => 'TR6 Hardtop', 'nummer' => '123', 'preis' => 'CHF 1’200', 'link' => $base . '/#marktplatz/meine/123',
+            'vorname' => 'Monika', 'name' => 'Monika Muster', 'titel' => 'TR6 Hardtop', 'nummer' => '123', 'frage' => 'Welches Baujahr hat dein TR4?', 'grund' => 'Der Club nimmt nur Halterinnen und Halter eines Triumph TR auf.', 'mitgliedschaft' => 'Einzelmitgliedschaft', 'jahr' => '2027', 'onlinezahlung' => 'Oder bequem online bezahlen (TWINT/Karte): https://swisstrclub.ch/kasse/zahlen/', 'zahlungsart' => 'Online (zahls.ch)', 'preis' => 'CHF 1’200', 'link' => $base . '/#marktplatz/meine/123',
             'rechnungsnummer' => 'S-2026-0007', 'bestellnummer' => '1042', 'betrag' => "89.00",
             'anlass' => 'Herbstausfahrt Jura', 'teilnehmende' => 'Monika Muster, Peter Muster', 'zahlungshinweis' => 'Die Teilnahme ist bestätigt. Die Rechnung folgt separat; die Zahlung ist noch offen.', 'bedingungen' => 'Abmeldung bis 7 Tage vor dem Anlass kostenlos.',
             'artikel' => "Jacke (Hoody) Herren – M × 1", 'sendungsnummer' => '99.00.123456.78', 'copilot' => 'Peter Muster', 'beitrag' => 'CHF 160.–', 'status' => 'on-hold', 'kunde' => 'Monika Muster', 'email' => 'monika@example.ch', 'lieferadresse' => "Monika Muster\nBeispielweg 1\n8000 Zürich", 'telefon' => '079 000 00 00', 'auftrag' => 'Rechnung erstellen', 'mitglied' => 'Monika Muster', 'zahlungsstand' => 'outstanding', 'hinweis' => 'Bitte die Rechnung in Fairgate erstellen und versenden.', 'angaben' => "Mitgliedsnummer: 1234\nFairgate-ID: 173", 'datum' => '29.10.2026', 'first_name' => 'Monika', 'member_number' => '1234', 'region' => 'Zürich', 'password_url' => $base . '/wp-login.php?action=rp', 'dashboard_url' => $base . '/#mitglieder', 'profile_url' => $base . '/#profil', 'agenda_url' => $base . '/#agenda', 'regions_url' => $base . '/#regionen', 'forum_url' => $base . '/#forum', 'gallery_url' => $base . '/#galerie', 'library_url' => $base . '/#bibliothek', 'marketplace_url' => $base . '/#marktplatz', 'contact_url' => $base . '/#kontakt',

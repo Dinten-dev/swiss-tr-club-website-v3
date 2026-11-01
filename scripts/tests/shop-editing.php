@@ -82,6 +82,7 @@ namespace {
  function wp_nonce_url(string $url,string $nonce):string{return $url;}
  function admin_url(string $path):string{return 'https://example.invalid/'.$path;}
  function wp_mail(...$args):bool{$GLOBALS['mailCount']++;return $GLOBALS['mailResult'];}
+ require dirname(__DIR__,2).'/wordpress/wp-content/plugins/strc-core/src/Members/MembershipFee.php';
  require dirname(__DIR__,2).'/wordpress/wp-content/plugins/strc-core/src/Shop/ShopInvoice.php';
  use SwissTRClub\Core\Shop\ShopInvoice;
  $order=new WC_Order();$result=ShopInvoice::create(9,true);check($result['url']!==''&&!$result['sent']&&$result['reason']!==''&&$mailCount===1,'Failed invoice mail retains downloadable archived PDF and explicit failure');
