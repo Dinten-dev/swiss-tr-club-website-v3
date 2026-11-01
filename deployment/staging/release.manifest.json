@@ -399,8 +399,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Zahls/WooWebhookGuard.php",
-      "bytes": 1395,
-      "sha256": "9bf3ad3aa76acd8882cd8a7af0749ac0e65e821f1ebc5ad177c363af71c5c2e8"
+      "bytes": 1358,
+      "sha256": "ce175a581c127b196d82410e9d7ee7bb5fc18c2a7163340b171977dae1f6db21"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Integrations/Zahls/ZahlsClient.php",
@@ -2449,6 +2449,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-11-01T20:03:49.582Z",
+  "builtOn": "2026-11-01T20:04:05.161Z",
   "baselineCapturedOn": "2026-10-13"
 }

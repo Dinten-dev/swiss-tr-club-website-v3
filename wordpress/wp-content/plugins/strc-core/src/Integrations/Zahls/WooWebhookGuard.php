@@ -7,7 +7,7 @@ final class WooWebhookGuard
 {
     public static function valid(string $method,string $contentType,string $body,string $signature,string $key): bool
     {
-        return $method==='POST' && in_array(trim(strtolower(explode(';',$contentType,2)[0])),['application/x-www-form-urlencoded','multipart/form-data'],true)
+        return $method==='POST' && trim(strtolower(explode(';',$contentType,2)[0]))==='application/x-www-form-urlencoded'
             && strlen($body)<=65536 && $key!=='' && preg_match('/^[a-f0-9]{64}$/D',$signature)===1
             && hash_equals(hash_hmac('sha256',$body,$key),$signature);
     }
