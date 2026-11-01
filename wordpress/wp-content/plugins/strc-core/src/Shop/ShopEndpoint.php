@@ -63,7 +63,7 @@ final class ShopEndpoint
             'canManage' => $canManage,'canInspect'=>self::canInspect(),
             'productEditorUrl' => $canManage && post_type_exists('product') ? admin_url('post-new.php?post_type=product') : '',
             'loginUrl' => wp_login_url(home_url('/#tr-shop')),
-            'zahlsReady' => self::zahlsReady(),'checkoutReady'=>self::invoiceReady()||self::zahlsReady(),'nonce'=>$canManage?wp_create_nonce('strc_shop'):null,'ordersUrl'=>$canManage?admin_url('admin.php?page=wc-orders'):'','myOrdersUrl'=>function_exists('wc_get_account_endpoint_url')?wc_get_account_endpoint_url('orders'):'',
+            'zahlsReady' => self::zahlsReady(),'checkoutReady'=>self::invoiceReady()||self::zahlsReady(),'nonce'=>$canManage?wp_create_nonce('strc_shop'):null,'ordersUrl'=>$canManage?admin_url('admin.php?page=wc-orders'):'','myOrdersUrl'=>function_exists('wc_get_account_endpoint_url')?wc_get_account_endpoint_url('orders'):'','products'=>(object)ShopAvailability::frenchNames(),
         ));
     }
 

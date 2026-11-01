@@ -284,8 +284,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Forms/FormsEndpoint.php",
-      "bytes": 11219,
-      "sha256": "2945a06a7afea7c84ee248666b10d5a0969e4650e6c8e9ec819c941623f95241"
+      "bytes": 11229,
+      "sha256": "fd91d95dd99fd181be227cfc260e869d44a6612d14b7ce2c11b8da666257c07c"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Forms/FormStore.php",
@@ -529,8 +529,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Plugin.php",
-      "bytes": 6476,
-      "sha256": "5e763e9957d731e4e8a07b533aae4da7151b48d030860d63f1f29a8749395afc"
+      "bytes": 6550,
+      "sha256": "20d10c8ccb22e756f78f41140b71299b82627b75413ef8ed4e713ee1f827b262"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Roles/RoleAssignments.php",
@@ -568,9 +568,14 @@
       "sha256": "cd35247e0a8b61fa6040cc5c0cb28e8eb7cee9ce4409817c4a7095f931908958"
     },
     {
+      "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopAvailability.php",
+      "bytes": 6264,
+      "sha256": "14adf11a806ca9b1db9e67d567f5fef182c2d08e79202b3f0c8f41924f7c5cec"
+    },
+    {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopEndpoint.php",
-      "bytes": 20387,
-      "sha256": "3c27d4c81c06af1b32913189c189b5b144f35ef52b87112504f7c10f89f9dc9d"
+      "bytes": 20439,
+      "sha256": "9c258677cff1606d62c0d0134ffe66ac9066064433abee3753dc3edbe6c0e8d3"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopInvoice.php",
@@ -579,8 +584,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopOperations.php",
-      "bytes": 27338,
-      "sha256": "7f1448dbd09d4e49837353f33796157db822ad09670aba9c4789934b5c807cf2"
+      "bytes": 40994,
+      "sha256": "ff4b2a6599da6951fee7a72e984899c0b6d007aed6c9c51e27bb0c76a8864d11"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/WooMailTemplates.php",
@@ -704,13 +709,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 329995,
-      "sha256": "bb865149421759f3776bf6eb9d3b1ed612994d1911ff7eb3f4e2a32baad3f065"
+      "bytes": 331268,
+      "sha256": "b227cf5bc328e97439072ff24701d6ca95d52255cdba2816cd740a2759f02543"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 1002165,
-      "sha256": "08ba5441b0ee1163f1cbf2b1050c2c691b98a1b588d767bce6d2f0c65f86e2dd"
+      "bytes": 1011259,
+      "sha256": "0b02af5257e02202eb8f13de0456e9674d819cf821007da0aa62001d775aa853"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -1011,6 +1016,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DnlZ1knC.js",
       "bytes": 8199,
       "sha256": "e72010fe06229e656352049889ad3626265f8c392da24dbbac7e1a38c8cf1909"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DP2GNzUQ.js",
+      "bytes": 9934,
+      "sha256": "e700693c6a39692e16651712d9091024fb78a888a0f02f4520c7654b21ac4da4"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DUNlM3fB.js",
@@ -2273,6 +2283,11 @@
       "sha256": "e42d05c5e791cd1b70dc3c6dc91492b16444f9dbc99ce7386412623f9346b81d"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-_i0AU6r4.js",
+      "bytes": 158297,
+      "sha256": "908996ef4f70eb742d09de96148784470f79167e33547166f24fe2418ed662b1"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-1b9oExuB.js",
       "bytes": 147089,
       "sha256": "0ed32262c9a4b75f4d6599d8312fccd4c8ad7920ca930c2c87dc64bf8059978b"
@@ -2429,8 +2444,8 @@
     }
   ],
   "status": "published",
-  "builtOn": "2026-10-30T19:36:11.923Z",
+  "builtOn": "2026-11-01T08:22:31.331Z",
   "baselineCapturedOn": "2026-10-13",
-  "publishedOn": "2026-10-31T08:21:53.753705+00:00",
-  "publishedFiles": 31
+  "publishedOn": "2026-11-01T08:27:52.555448+00:00",
+  "publishedFiles": 9
 }
