@@ -151,6 +151,15 @@ namespace {
  check($products[2]->get_children()===$oldIds,'Reordering attributes retains every existing variation ID');
  $products[2]->data['meta']['_strc_value_images']=['Logo'=>['Ärmel'=>93]];
  $renamed=$reordered;$renamed[0]['previousName']='Logo';$renamed[0]['name']='Logo-Position';$stable['revision']=ShopOperations::productDetail(['id'=>'2'])['revision'];$stable['attributes']=json_encode($renamed);ShopOperations::updateProduct($stable);check($products[2]->get_children()===$oldIds,'Renaming an attribute label preserves existing variation IDs');check(($products[2]->get_meta('_strc_value_images')['Logo-Position']['Ärmel']??0)===93,'Renamed attributes retain their existing value images');
+ // Kombinationsbilder (Wunsch 2.11.): Farbe × Merkmal 1 ersetzt das Bild des Leitmerkmals; leere Kombinationen behalten das Leitbild.
+ $products[2]->data['meta']['_strc_combo_images']=['Farbe'=>['Navy'=>['Ärmel'=>95],'Weiss'=>['Gelöscht'=>96]]];$current=$renamed;unset($current[0]['previousName']);$stable['attributes']=json_encode($current);$stable['revision']=ShopOperations::productDetail(['id'=>'2'])['revision'];ShopOperations::updateProduct($stable);
+ $imageOf=function(string $logo,string $color)use(&$products):int{foreach($products[2]->get_children() as $child){$a=$products[$child]->get_attributes();if(($a['logo-position']??'')===$logo&&($a['farbe']??'')===$color)return (int)$products[$child]->get_image_id();}return -1;};
+ check($imageOf('Ärmel','Navy')===95,'Combination image replaces the lead image for that combination');
+ check($imageOf('Ärmel','Weiss')===93,'Combinations without own image keep the lead value image');
+ check(($products[2]->get_meta('_strc_combo_images')['Farbe']??null)===['Navy'=>['Ärmel'=>95]],'Combination images for unknown values are discarded');
+ check((array)(ShopOperations::productDetail(['id'=>'2'])['attributes'][1]['comboImages']->Navy??[])===['Ärmel'=>'/image/95'],'Editor receives existing combination images');
+ $removeCombo=$stable;$removeCombo['revision']=ShopOperations::productDetail(['id'=>'2'])['revision'];$removeCombo['removeComboImages']=json_encode([['Farbe','Navy','Ärmel']]);ShopOperations::updateProduct($removeCombo);
+ check($imageOf('Ärmel','Navy')===93&&!$products[2]->get_meta('_strc_combo_images'),'Removing a combination image falls back to the lead image');
  $oldStocks=array_map(fn($id)=>$products[$id]->get_stock_quantity(),$oldIds);check(in_array(3,$oldStocks,true),'Reordering attributes keeps stock attached to the same combination');
  $products[2]->data['meta']['_strc_name_fr']='Polo français';$locale='fr_FR';check(str_starts_with($availability->name('German variation',$products[$oldIds[0]]),'Polo français – '),'French variation name includes translated parent and its options');$locale='de_CH';
  $detail=ShopOperations::productDetail(['id'=>'2']);$simple=['id'=>'2','revision'=>$detail['revision'],'title'=>'Polo','status'=>'publish','price'=>'29','stock'=>'7','attributes'=>'[]','combinations'=>'[]'];ShopOperations::updateProduct($simple);

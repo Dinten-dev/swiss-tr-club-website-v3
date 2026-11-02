@@ -1,4 +1,4 @@
-export type Attribute={key:string;name:string;originalName?:string;valuesText:string;images:Record<string,string>};
+export type Attribute={key:string;name:string;originalName?:string;valuesText:string;images:Record<string,string>;comboImages?:Record<string,Record<string,string>>};
 export type Combo={values:string[];enabled:boolean;stock:string};
 export const valuesOf=(attribute:Attribute)=>{const seen=new Set<string>();return attribute.valuesText.split(',').map(value=>value.trim()).filter(value=>{const key=value.toLowerCase();if(!value||seen.has(key))return false;seen.add(key);return true;});};
 export const comboKey=(attributes:Attribute[],values:string[])=>JSON.stringify(Object.fromEntries(attributes.map((attribute,index)=>[(attribute.originalName||attribute.name).trim().toLowerCase(),(values[index]||'').toLowerCase()]).sort(([a],[b])=>a.localeCompare(b))));
