@@ -15,7 +15,7 @@ final class PrivateUploadStore
     }
 
     /** @return array<int,array<string,mixed>>|WP_Error */
-    public function save(array $files, bool $imagesOnly, bool $library = false, int $maxFiles = 6, int $minImageBytes = 0, int $maxImageBytes = 20971520, int $maxPdfBytes = 104857600): array|WP_Error
+    public function save(array $files, bool $imagesOnly, bool $library = false, int $maxFiles = 6, int $minImageBytes = 0, int $maxImageBytes = 20971520, int $maxPdfBytes = 104857600, bool $office = false): array|WP_Error
     {
         if (! $files) {
             return array();
@@ -42,11 +42,19 @@ final class PrivateUploadStore
             if (! $imagesOnly) {
                 $allowed['application/pdf'] = array('pdf');
             }
+            // Vorstandsunterlagen: Office-Dokumente im neuen Format, ohne Makros (Wunsch Redaktion 2.11.2026).
+            $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+            if ($office && isset(self::OFFICE[$extension])) {
+                if (! self::validOffice($tmp, $extension)) {
+                    return new WP_Error('office', 'Das Office-Dokument ist ungültig oder enthält Makros. Bitte als .docx, .xlsx oder .pptx ohne Makros speichern.');
+                }
+                $mime = self::OFFICE[$extension];
+                $allowed[$mime] = array($extension);
+            }
             $total += $size;
             if ($total > 120 * 1024 * 1024 || (str_starts_with((string)$mime,'image/') && $size > 20 * 1024 * 1024)) return new WP_Error('size','Bilder: maximal 20 MB; alle Dateien zusammen: maximal 120 MB.');
-            $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
             if (! isset($allowed[$mime]) || ! in_array($extension, $allowed[$mime], true)) {
-                return new WP_Error('type', $imagesOnly ? 'Nur JPG, PNG oder WebP sind erlaubt.' : 'Nur JPG, PNG, WebP oder PDF sind erlaubt.');
+                return new WP_Error('type', $imagesOnly ? 'Nur JPG, PNG oder WebP sind erlaubt.' : ($office ? 'Nur PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), JPG, PNG oder WebP sind erlaubt.' : 'Nur JPG, PNG, WebP oder PDF sind erlaubt.'));
             }
             if ($imagesOnly && ($size < $minImageBytes || $size > $maxImageBytes)) {
                 return new WP_Error('size', sprintf('Jedes Galeriebild muss zwischen %s und %s MB gross sein (Originalfoto, nicht aus WhatsApp).', number_format_i18n($minImageBytes/1000000,0), number_format_i18n($maxImageBytes/1048576,0)));
@@ -59,7 +67,7 @@ final class PrivateUploadStore
                 if (! self::completeImage($tmp, $mime, (int) $size)) {
                     return new WP_Error('image', 'Das Bild ist unvollständig übertragen oder beschädigt. Bitte erneut hochladen, wenn möglich über WLAN.');
                 }
-            } elseif (file_get_contents($tmp, false, null, 0, 5) !== '%PDF-') {
+            } elseif ($mime === 'application/pdf' && file_get_contents($tmp, false, null, 0, 5) !== '%PDF-') {
                 return new WP_Error('pdf', 'Die PDF-Datei ist ungültig.');
             }
             $checked[] = array('tmp' => $tmp, 'name' => sanitize_file_name($name), 'mime' => $mime, 'size' => $size, 'key' => bin2hex(random_bytes(20)));
@@ -87,6 +95,43 @@ final class PrivateUploadStore
     }
 
     /** Erkennt abgebrochene Übertragungen: Ein vollständiges Bild endet mit der Schlussmarke seines Formats. */
+    public const OFFICE = array(
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    );
+    private const OFFICE_PARTS = array('docx' => 'word/document.xml', 'xlsx' => 'xl/workbook.xml', 'pptx' => 'ppt/presentation.xml');
+
+    /** Echtes Office-Open-XML-Paket des erwarteten Typs (ZIP mit Hauptteil), ohne Makroprojekt. */
+    public static function validOffice(string $path, string $extension): bool
+    {
+        if (! isset(self::OFFICE_PARTS[$extension]) || file_get_contents($path, false, null, 0, 4) !== "PK\x03\x04") {
+            return false;
+        }
+        $detected = (string) (new \finfo(FILEINFO_MIME_TYPE))->file($path);
+        if (! in_array($detected, array(self::OFFICE[$extension], 'application/zip', 'application/octet-stream'), true)) {
+            return false;
+        }
+        if (! class_exists('ZipArchive')) {
+            $content = (string) file_get_contents($path);
+            return str_contains($content, '[Content_Types].xml') && str_contains($content, self::OFFICE_PARTS[$extension]) && ! str_contains($content, 'vbaProject.bin');
+        }
+        $zip = new \ZipArchive();
+        if ($zip->open($path, \ZipArchive::RDONLY) !== true) {
+            return false;
+        }
+        $valid = $zip->locateName('[Content_Types].xml') !== false && $zip->locateName(self::OFFICE_PARTS[$extension]) !== false;
+        for ($index = 0; $valid && $index < $zip->numFiles; $index++) {
+            $entry = (string) $zip->getNameIndex($index);
+            if (str_contains(strtolower($entry), 'vbaproject') || str_starts_with($entry, '/') || str_contains($entry, '..')) {
+                $valid = false;
+            }
+        }
+        $types = $valid ? (string) $zip->getFromName('[Content_Types].xml') : '';
+        $zip->close();
+        return $valid && ! str_contains(strtolower($types), 'macroenabled');
+    }
+
     public static function completeImage(string $path, string $mime, int $size): bool
     {
         if($size<16)return false;
@@ -220,7 +265,8 @@ final class PrivateUploadStore
         }
         $image = str_starts_with($file['mime'], 'image/');
         $pdf = ($file['mime']??'')==='application/pdf';
-        header('Content-Type: ' . ($image ? $file['mime'] : ($pdf ? 'application/pdf' : 'application/octet-stream')));
+        $office = in_array($file['mime'] ?? '', self::OFFICE, true);
+        header('Content-Type: ' . ($image ? $file['mime'] : ($pdf ? 'application/pdf' : ($office ? $file['mime'] : 'application/octet-stream'))));
         $length=(int)filesize($path);
         header('Accept-Ranges: bytes');
         header('Content-Disposition: ' . ($image||$pdf ? 'inline' : 'attachment') . '; filename="' . sanitize_file_name($file['name']) . '"');
