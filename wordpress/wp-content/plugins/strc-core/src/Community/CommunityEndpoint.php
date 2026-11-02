@@ -66,6 +66,8 @@ final class CommunityEndpoint
     {
         if (in_array(get_post_type($id), self::TYPES, true)) {
             (new PrivateUploadStore())->remove($this->files($id));
+            $removed = get_post_meta($id, 'strc_removed_files', true);
+            if (is_array($removed)) (new PrivateUploadStore())->remove($removed);
         }
     }
 
@@ -587,7 +589,7 @@ final class CommunityEndpoint
         }
         $magazine=$kind==='library'&&$classification['documentType']==='magazine';
         if($magazine&&(!is_array($_FILES['files']['name']??null)||count($_FILES['files']['name'])!==1||!is_uploaded_file($_FILES['files']['tmp_name'][0]??'')||(new \finfo(FILEINFO_MIME_TYPE))->file($_FILES['files']['tmp_name'][0])!=='application/pdf'))AjaxRequest::fail('Bitte ein PDF-Dokument bis 25 MB auswählen.',422);
-        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 0, 'gallery' === $kind ? 16777216 : 20971520, $magazine ? 25*1024*1024 : 100*1024*1024, $board);
+        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, in_array($kind, array('gallery', 'library'), true) ? 20 : 6, 0, 'gallery' === $kind ? 16777216 : 20971520, $magazine ? 25*1024*1024 : 100*1024*1024, $board);
         if (is_wp_error($savedFiles)) {
             AjaxRequest::fail($savedFiles->get_error_message());
         }
@@ -633,10 +635,31 @@ final class CommunityEndpoint
         if ('strc_topic' === $post->post_type && '' === $description) {
             AjaxRequest::fail('Bitte einen Beitragstext eingeben.');
         }
+        // Bibliothek als Mappe (Wunsch Redaktion 3.11.2026): Dateien eines Eintrags ergänzen oder entfernen, höchstens 20, mindestens eine.
+        $files=null;$added=[];$removed=[];
+        if($post->post_type==='strc_document'&&(!empty($_FILES['files']['name'])||!empty($input['removeFiles']))){
+            if(in_array((string)($classification['documentType']??''),['magazine','newsletter'],true))AjaxRequest::fail('TR-Magazin und TR-Newsletter bestehen aus genau einer Datei.',422);
+            $remove=json_decode((string)($input['removeFiles']??'[]'),true);if(!is_array($remove)||!array_is_list($remove))AjaxRequest::fail('Ungültige Dateiauswahl.',422);
+            $current=$this->files((int)$post->ID);
+            $removed=array_values(array_filter($current,static fn($file)=>in_array($file['key']??'',$remove,true)));
+            $files=array_values(array_filter($current,static fn($file)=>!in_array($file['key']??'',$remove,true)));
+            $count=is_array($_FILES['files']['name']??null)?count(array_filter($_FILES['files']['name'])):0;
+            if(count($files)+$count>20)AjaxRequest::fail('Höchstens 20 Dateien pro Eintrag.',422);
+            if($count){
+                $board=str_starts_with((string)($classification['documentType']??''),'board-')&&($classification['access']??'')==='restricted'&&current_user_can('strc_access_board_documents');
+                $added=(new PrivateUploadStore())->save($_FILES['files'],false,true,20,0,20971520,100*1024*1024,$board);
+                if(is_wp_error($added))AjaxRequest::fail($added->get_error_message());
+                $files=array_merge($files,$added);
+            }
+            if(!$files){(new PrivateUploadStore())->remove($added);AjaxRequest::fail('Mindestens eine Datei muss im Eintrag bleiben.',422);}
+        }
         $result = wp_update_post(wp_slash(array('ID' => $post->ID, 'post_title' => $title, 'post_content' => $description,'post_status'=>$post->post_type==='strc_topic'||$this->canReview($post)?$post->post_status:'pending')), true);
         if (is_wp_error($result)) {
+            if($added)(new PrivateUploadStore())->remove($added);
             AjaxRequest::fail('Änderungen konnten nicht gespeichert werden.', 500);
         }
+        // Entfernte Dateien bleiben gespeichert (nicht sichtbar) und werden erst beim endgültigen Löschen des Eintrags entfernt.
+        if($files!==null){update_post_meta($post->ID,'strc_private_files',$files);if($removed){$archive=get_post_meta($post->ID,'strc_removed_files',true);$archive=is_array($archive)?$archive:[];foreach($removed as $file)$archive[]=$file+['removedBy'=>get_current_user_id(),'removedAt'=>gmdate(DATE_ATOM)];update_post_meta($post->ID,'strc_removed_files',$archive);}}
         update_post_meta($post->ID,'strc_form_classification',$classification);
         if($post->post_type==='strc_album')update_post_meta($post->ID,'strc_album_date',$classification['date']?:substr($post->post_date,0,10));
         if($post->post_type==='strc_document')LibraryPolicy::index((int)$post->ID,$classification,$title,$description,$this->files((int)$post->ID));

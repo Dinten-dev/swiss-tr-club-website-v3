@@ -21,7 +21,7 @@ final class PrivateUploadStore
             return array();
         }
         if (! isset($files['name'], $files['tmp_name'], $files['error'], $files['size']) || ! is_array($files['name']) || count($files['name']) > $maxFiles) {
-            return new WP_Error('files', $imagesOnly && $maxFiles === 20 ? 'Bitte höchstens 20 Galeriebilder auswählen.' : 'Bitte höchstens sechs Dateien auswählen.');
+            return new WP_Error('files', $imagesOnly && $maxFiles === 20 ? 'Bitte höchstens 20 Galeriebilder auswählen.' : ($maxFiles === 20 ? 'Bitte höchstens 20 Dateien auswählen.' : 'Bitte höchstens sechs Dateien auswählen.'));
         }
         $checked = array(); $total = 0;
         foreach ($files['name'] as $index => $name) {
