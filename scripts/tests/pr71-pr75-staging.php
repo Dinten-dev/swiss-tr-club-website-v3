@@ -56,12 +56,12 @@ try{
  $size=new WC_Product_Attribute();$size->set_name('Grösse');$size->set_options(['M','L']);$size->set_visible(true);$size->set_variation(true);
  $brand=new WC_Product_Attribute();$brand->set_name('Hersteller');$brand->set_options(['Club']);$brand->set_visible(true);$brand->set_variation(false);$product->set_attributes([$size,$brand]);$id=$product->save();$productIds[]=$id;
  foreach(['M','L']as$i=>$value){$variant=new WC_Product_Variation();$variant->set_parent_id($id);$variant->set_status($i?'publish':'private');$variant->set_attributes([sanitize_title('Grösse')=>$value]);$variant->set_regular_price('20');$variant->set_manage_stock(true);$variant->set_stock_quantity(5);$productIds[]=$variant->save();}
- WC_Product_Variable::sync($id);$detail=ShopOperations::productDetail(['id'=>$id]);prCheck(count($detail['variants'])===2,'Native product detail includes both variation statuses');
- $input=['id'=>(string)$id,'revision'=>$detail['revision'],'title'=>$prefix.' Updated','description'=>'Synthetic acceptance','status'=>'private','sku'=>'','cost'=>'10','variants'=>wp_json_encode(array_map(static fn($row)=>array_replace($row,['price'=>'25','stock'=>'4','cost'=>'10']),$detail['variants']))];
+ WC_Product_Variable::sync($id);$detail=ShopOperations::productDetail(['id'=>$id]);prCheck(count($detail['combinations'])===2,'Native product detail includes both variation statuses');
+ $input=['id'=>(string)$id,'revision'=>$detail['revision'],'title'=>$prefix.' Updated','description'=>'Synthetic acceptance','status'=>'private','sku'=>'','cost'=>'10','price'=>'25','stockMode'=>'stock','outOfStock'=>'none','attributes'=>wp_json_encode(array_map(static fn($row)=>['name'=>$row['name'],'values'=>$row['values']],$detail['attributes'])),'combinations'=>wp_json_encode(array_map(static fn($row)=>array_replace($row,['stock'=>'4']),$detail['combinations']))];
  ShopOperations::updateProduct($input);$fresh=prProduct($id);prCheck($fresh->get_status()==='private'&&isset($fresh->get_attributes()['hersteller']),'Native edit preserves private status and unrelated attributes');
  prCheck(prProduct($productIds[1])->get_status()==='private'&&prProduct($productIds[2])->get_status()==='publish','Native edit preserves variation statuses');
  prReject(fn()=>ShopOperations::updateProduct($input),'Native stale product revision rejected');
- $detail=ShopOperations::productDetail(['id'=>$id]);$input['revision']=$detail['revision'];$input['variants']=wp_json_encode($detail['variants']);$input['title']=$prefix.' Must roll back';
+ $detail=ShopOperations::productDetail(['id'=>$id]);$input['revision']=$detail['revision'];$input['combinations']=wp_json_encode($detail['combinations']);$input['title']=$prefix.' Must roll back';
  $before=[];foreach($productIds as$target)$before[$target]=[$wpdb->get_row($wpdb->prepare("SELECT post_title,post_status FROM {$wpdb->posts} WHERE ID=%d",$target),ARRAY_A),get_post_meta($target)];
  $failId=$productIds[2];$failureReached=false;$fail=static function($object)use($failId,&$failureReached){if($object->get_id()===$failId){$failureReached=true;throw new RuntimeException('Synthetic variation storage failure');}};add_action('woocommerce_before_product_object_save',$fail,PHP_INT_MAX);
  try{prReject(fn()=>ShopOperations::updateProduct($input),'Native late variation failure aborts update');}finally{remove_action('woocommerce_before_product_object_save',$fail,PHP_INT_MAX);}
@@ -74,7 +74,7 @@ try{
   $mailSuccess=false;$result=ShopInvoice::create($order->get_id(),true);prCheck(!$result['sent']&&$result['url']!==''&&$result['reason']!=='','Invoice send failure remains retryable with same PDF');
   $mailSuccess=true;$result=ShopInvoice::create($order->get_id(),true);$mailCount=count($captured);prCheck($result['sent']&&hash_file('sha256',$path)===$archive['sha256'],'Invoice retry succeeds without replacing archived PDF');ShopInvoice::create($order->get_id(),true);prCheck(count($captured)===$mailCount,'Already-sent native invoice is not mailed twice');
  }else $skipped[]='QR PDF generation: issuer, QR-IBAN or PDF library not configured';
-}catch(Throwable $error){$failure=['message'=>$error->getMessage(),'file'=>basename($error->getFile()),'line'=>$error->getLine(),'fixtureVariants'=>$detail['variants']??[]];}
+}catch(Throwable $error){$failure=['message'=>$error->getMessage(),'file'=>basename($error->getFile()),'line'=>$error->getLine(),'fixtureCombinations'=>$detail['combinations']??[]];}
 finally{
  foreach(array_reverse($orderIds)as$id){$order=wc_get_order($id);if($order&&$order->get_created_via()===$prefix)$order->delete(true);}
  foreach(array_reverse($productIds)as$id){$post=get_post($id);if($post&&($post->post_parent===($productIds[0]??0)||str_starts_with($post->post_title,$prefix)))wp_delete_post($id,true);}
