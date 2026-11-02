@@ -15,7 +15,7 @@ final class ApplicationInbox
     }
     public function respond(): void
     {
-        [$operation,$input]=AjaxRequest::read('strc_applications',['approve','clarification','rejected','reconcile','retry_mail','process','couple-state']);
+        [$operation,$input]=AjaxRequest::read('strc_applications',['approve','clarification','rejected','reconcile','retry_mail','paid','process','couple-state']);
         if(!current_user_can('strc_manage_members'))AjaxRequest::fail('Nur die zuständige Clubverwaltung kann Anträge einsehen.',403);
         try{
             $id=absint($input['id']??0);
@@ -27,9 +27,9 @@ final class ApplicationInbox
             if($operation==='couples')wp_send_json_success(['items'=>self::couples()]);
             if($operation==='couple-state'){self::coupleState($id,sanitize_key($input['state']??''),FormFields::text($input,'note',2000),(string)($input['revision']??''));wp_send_json_success(['items'=>self::couples(),'message'=>'Bearbeitungsstand gespeichert.']);}
             if($operation==='process')$this->admission->run($id);
-            elseif($operation!=='detail')$this->admission->review($id,$input['revision']??'',$operation,FormFields::text($input,'note',2000),['person'=>$input['personId']??'','copilot'=>$input['copilotId']??'']);
+            elseif($operation!=='detail')$this->admission->review($id,$input['revision']??'',$operation,FormFields::text($input,'note',2000),['person'=>$input['personId']??'','copilot'=>$input['copilotId']??''],FormFields::text($input,'message',3000));
             $post=ApplicationAdmission::record($id);$d=FormStore::data($post);
-            wp_send_json_success(['application'=>$d+['id'=>$id,'revision'=>FormStore::revision($post),'date'=>$post->post_date,'ready'=>$this->admission->ready($d['payload']??[]),'mailEnabled'=>\SwissTRClub\Core\Mail\WelcomeMailSettings::enabled()]]);
+            wp_send_json_success(['application'=>$d+['id'=>$id,'revision'=>FormStore::revision($post),'date'=>$post->post_date,'ready'=>$this->admission->ready($d['payload']??[]),'mailEnabled'=>\SwissTRClub\Core\Mail\WelcomeMailSettings::enabled(),'fee'=>self::fee($d)]]);
         }catch(\Throwable $e){AjaxRequest::fail($e->getMessage(),in_array($e->getCode(),[403,404,409],true)?$e->getCode():422);}
     }
 
@@ -62,5 +62,15 @@ final class ApplicationInbox
         $data['state']=$state;$data['reviewedAt']=gmdate(DATE_ATOM);$data['reviewedBy']=get_current_user_id();$data['reviewNote']=$note;
         FormStore::save('strc_form',$data,(int)$post->post_author,0,$post,$revision);
         // Mitglied und Kassier werden nicht hier, sondern erst bei der Aktivierung aus dem Fairgate-Abgleich informiert (MemberProfile::activateCouple).
+    }
+
+    /** Beitrag für die Anzeige: vorgesehen (vor der Bestätigung) bzw. Rechnung mit Download und Zahlungsstand. */
+    private static function fee(array $d): array
+    {
+        $type=(string)($d['payload']['membershipType']??'');$invoice=(array)($d['invoice']??[]);
+        $fee=['year'=>(int)($invoice['year']??\SwissTRClub\Core\Members\MembershipFee::year()),'amount'=>(string)($invoice['amount']??\SwissTRClub\Core\Members\MembershipFee::amount($type)),'number'=>(string)($invoice['number']??''),'sent'=>!empty($invoice['sent']),'paidAt'=>(string)($invoice['paidAt']??''),'method'=>(string)($invoice['method']??''),'url'=>''];
+        $order=!empty($invoice['orderId'])&&function_exists('wc_get_order')?wc_get_order((int)$invoice['orderId']):null;
+        if($order instanceof \WC_Order&&$order->get_meta('_strc_invoice_pdf')&&\SwissTRClub\Core\Shop\ShopInvoice::canDownload($order))$fee['url']=\SwissTRClub\Core\Shop\ShopInvoice::url($order);
+        return $fee;
     }
 }

@@ -15,7 +15,8 @@ final class ApplicationNotification
 
     private static function recipient(): string
     {
-        $recipient = sanitize_email((string) get_option('admin_email', ''));
+        // Entscheid Redaktion 1.11.2026: neue Anträge gehen an den Aktuar.
+        $recipient = sanitize_email(\SwissTRClub\Core\Members\MembershipFee::aktuar());
         return is_email($recipient) ? $recipient : '';
     }
 

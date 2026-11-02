@@ -98,7 +98,8 @@ final class ClubDocument
             'Zahlbar bis' => 'Payable jusqu’au', 'Bestellung' => 'Commande', 'Anlass' => 'Manifestation', 'Position' => 'Désignation',
             'Anzahl' => 'Quantité', 'Preis' => 'Prix', 'Betrag' => 'Montant', 'Total' => 'Total', 'Versand' => 'Frais d’envoi',
             'Artikel-Nr.' => 'N° d’article', 'Artikel' => 'Article', 'Lieferadresse' => 'Adresse de livraison', 'Versandart' => 'Mode d’envoi',
-            'Referenz' => 'Référence', 'Kunde' => 'Client',
+            'Referenz' => 'Référence', 'Kunde' => 'Client', 'Mitgliederbeitrag' => 'Cotisation',
+            'Bitte bezahle den Mitgliederbeitrag mit dem QR-Einzahlungsschein bis zum Fälligkeitsdatum. Deine Mitgliedschaft beginnt mit dem Zahlungseingang. Herzlich willkommen im Swiss TR-Club.' => 'Merci de régler la cotisation avec le bulletin de versement QR jusqu’à l’échéance. Ton affiliation commence dès réception du paiement. Bienvenue au Swiss TR-Club.',
             'Bitte bezahle den Betrag mit dem QR-Einzahlungsschein bis zum Fälligkeitsdatum. Vielen Dank für deinen Einkauf im TR-Shop.' => 'Merci de régler le montant avec le bulletin de versement QR jusqu’à l’échéance. Merci pour ton achat au TR-Shop.',
             'Bitte bezahle den Betrag mit dem QR-Einzahlungsschein bis zum Fälligkeitsdatum. Wir freuen uns auf deine Teilnahme.' => 'Merci de régler le montant avec le bulletin de versement QR jusqu’à l’échéance. Nous nous réjouissons de ta participation.',
         );
