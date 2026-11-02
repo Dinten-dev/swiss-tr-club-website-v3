@@ -47,8 +47,10 @@ try{
   $invalid=['crews'=>wp_json_encode([[],['pilot'=>$member($userIds[1])]])];prReject(fn()=>prInvoke($registration,'submission',get_post($event),$settings,$invalid),'New extra member is rejected against native membership data');
   $legacy=['state'=>'confirmed','participants'=>[['kind'=>'member','name'=>'Fixture0 Member','userId'=>$userIds[0],'crew'=>1],['kind'=>'guest','name'=>'Old Guest','crew'=>2],['kind'=>'member','name'=>'Fixture1 Member','userId'=>$userIds[1],'crew'=>3],['kind'=>'copilot','name'=>'Fixture2 Member','userId'=>$userIds[2],'crew'=>3]]];
   $id=FormStore::save('strc_registration',$legacy,$userIds[0],$event);$postIds[]=$id;
-  $edited=prInvoke($registration,'submission',get_post($event),$settings,['crews'=>wp_json_encode([[],['existingCrew'=>3,'pilot'=>$member($userIds[1]),'copilot'=>$member($userIds[2])]])],get_post($id));
-  prCheck(array_column($edited['participants'],'userId')===$userIds&&$edited['total']===2500,'Legacy member mapping survives removal of an earlier guest crew');
+  // Entscheid Redaktion 31.10.2026: Mitglieder in älteren Buchungen müssen entfernt werden; die Gastbesatzung bleibt.
+  prReject(fn()=>prInvoke($registration,'submission',get_post($event),$settings,['crews'=>wp_json_encode([[],['existingCrew'=>3,'pilot'=>$member($userIds[1]),'copilot'=>$member($userIds[2])]])],get_post($id)),'Legacy member crew must be removed');
+  $edited=prInvoke($registration,'submission',get_post($event),$settings,['crews'=>wp_json_encode([[],['existingCrew'=>2,'pilot'=>$guest]])],get_post($id));
+  prCheck(count($edited['participants'])===2,'Older booking saves once only guests remain');
  }finally{$wpdb->query('ROLLBACK');foreach($userIds as$id)clean_user_cache($id);foreach($postIds as$id)clean_post_cache($id);foreach(array_keys($oldOptions)as$key)wp_cache_delete($key,'options');wp_cache_delete('alloptions','options');wp_cache_delete('notoptions','options');wp_set_current_user($admin->ID);}
  foreach($oldOptions as$key=>$value)prCheck(get_option($key,null)===$value,'Template option restored: '.$key);
  // Product operations commit internally; create private fixtures and delete their exact IDs in finally.

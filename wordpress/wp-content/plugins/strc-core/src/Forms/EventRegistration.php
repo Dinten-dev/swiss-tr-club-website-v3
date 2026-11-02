@@ -181,7 +181,8 @@ final class EventRegistration
                 $pilotType=$pilot['type']??'guest';
                 if(!in_array($pilotType,['guest','member'],true))throw new \InvalidArgumentException('Bitte Mitglied oder Gast wählen.');
                 $person=($pilotType==='member'?$this->memberPerson($pilot):$this->guestPerson($pilot))+['kind'=>$pilotType,'role'=>$pilotType==='member'?'Mitglied':'Gast','crew'=>$index+1,'room'=>$room];
-                if($pilotType==='member'&&(int)($original['pilot']??0)!==(int)$person['userId'])throw new \InvalidArgumentException('Weitere Mitglieder melden sich mit ihrem eigenen Konto an.');
+                // Entscheid Redaktion 31.10.2026: Mitglieder melden sich grundsätzlich selbst an – auch in älteren Buchungen.
+                if($pilotType==='member')throw new \InvalidArgumentException('Mitglieder melden sich selbst an. Bitte das Mitglied aus der Buchung entfernen.');
                 $model=FormFields::text(is_array($crew['pilot']??null)?$crew['pilot']:[],'vehicle',80);
                 if($model)$person['vehicle']=$model;
                 $person['fee']=$pilotType==='member'?$this->participantFee((int)$person['userId'],$settings,self::roleFee($settings,'member',$room)):self::roleFee($settings,'guest',$room);
@@ -196,7 +197,7 @@ final class EventRegistration
                 $person['fee']=$this->participantFee($partner,$settings,self::roleFee($settings,'copilot',$room));
             }elseif($type==='member'){
                 $person=$this->memberPerson($copilot)+['kind'=>'copilot','role'=>'Co-Pilot Mitglied'];
-                if(!$own&&(int)($original['copilot']??0)!==(int)$person['userId'])throw new \InvalidArgumentException('Die zusätzliche Gast-Buchung erlaubt nur eine Gastbegleitung.');
+                if(!$own)throw new \InvalidArgumentException('Die Begleitung eines Gastes ist ebenfalls Gast. Mitglieder melden sich selbst an.');
                 $person['fee']=$this->participantFee((int)$person['userId'],$settings,self::roleFee($settings,'copilot',$room));
             }elseif($type==='guest'){
                 $person=$this->guestPerson($copilot)+['kind'=>$own?'copilot-guest':'guest-copilot','role'=>'Co-Pilot Gast'];

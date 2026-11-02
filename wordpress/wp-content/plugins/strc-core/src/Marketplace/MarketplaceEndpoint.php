@@ -104,7 +104,7 @@ final class MarketplaceEndpoint
         $fr=\SwissTRClub\Core\Http\UserLanguage::french((int)$owner->ID);
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
         $name=$owner->first_name?:$owner->display_name;$title=html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8');
-        $mail=\SwissTRClub\Core\Mail\MailTemplates::render($status==='pending'?'market.received':'market.online',$fr?'fr':'de',['vorname'=>$name,'titel'=>$title,'link'=>$base.'/#marktplatz/meine/'.$id]);$subject=$mail['subject'];$body=$mail['body'];
+        $mail=\SwissTRClub\Core\Mail\MailTemplates::render($status==='pending'?'market.received':'market.online',$fr?'fr':'de',['vorname'=>$name,'geschlecht'=>\SwissTRClub\Core\Mail\MailTemplates::gender((int)$owner->ID),'titel'=>$title,'link'=>$base.'/#marktplatz/meine/'.$id]);$subject=$mail['subject'];$body=$mail['body'];
         try{$sent=wp_mail($owner->user_email,$subject,$body,['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable){$sent=false;}
         return $sent?'':'Dein Inserat wurde gespeichert. Die Bestätigungsmail konnte nicht versendet werden. Du findest es unter «Meine Inserate».';
     }
@@ -336,7 +336,7 @@ final class MarketplaceEndpoint
         $post=get_post($id);$owner=$post?get_userdata((int)$post->post_author):null;
         if(!$owner||!is_email($owner->user_email))return;
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
-        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('market.service',\SwissTRClub\Core\Http\UserLanguage::french((int)$owner->ID)?'fr':'de',['vorname'=>$owner->first_name?:$owner->display_name,'titel'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8'),'link'=>$base.'/#marktplatz/meine']);
+        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('market.service',\SwissTRClub\Core\Http\UserLanguage::french((int)$owner->ID)?'fr':'de',['vorname'=>$owner->first_name?:$owner->display_name,'geschlecht'=>\SwissTRClub\Core\Mail\MailTemplates::gender((int)$owner->ID),'titel'=>html_entity_decode($post->post_title,ENT_QUOTES|ENT_HTML5,'UTF-8'),'link'=>$base.'/#marktplatz/meine']);
         try{wp_mail($owner->user_email,$mail['subject'],$mail['body'],['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);}catch(\Throwable $error){error_log('STRC marketplace service mail failed for ad '.$id.'.');}
     }
 

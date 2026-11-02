@@ -10,7 +10,7 @@ final class PublicDocumentUpload
     public static function listing(string $key): array
     {
         $files=get_posts(['post_type'=>'attachment','post_status'=>'inherit','post_mime_type'=>'application/pdf','posts_per_page'=>100,'meta_key'=>'strc_public_document_page','meta_value'=>$key,'orderby'=>'date','order'=>'DESC']);
-        return ['documents'=>array_map(static fn($file)=>['id'=>$file->ID,'title'=>get_the_title($file),'url'=>wp_get_attachment_url($file->ID)],$files)];
+        return ['documents'=>array_map(static fn($file)=>['id'=>$file->ID,'title'=>html_entity_decode(get_the_title($file),ENT_QUOTES|ENT_HTML5,'UTF-8'),'url'=>wp_get_attachment_url($file->ID)],$files)];
     }
 
     public static function receive(string $key): array
@@ -29,7 +29,7 @@ final class PublicDocumentUpload
         if(is_wp_error($id))AjaxRequest::fail('Das PDF konnte nicht hochgeladen werden. Bitte erneut versuchen.');
         if(!add_post_meta($id,'strc_public_document_page',$key,true)){wp_delete_attachment($id,true);AjaxRequest::fail('Das PDF konnte nicht zugeordnet werden.');}
         if($title!=='')wp_update_post(['ID'=>$id,'post_title'=>$title]);
-        return ['id'=>$id,'title'=>get_the_title($id),'url'=>wp_get_attachment_url($id)];
+        return ['id'=>$id,'title'=>html_entity_decode(get_the_title($id),ENT_QUOTES|ENT_HTML5,'UTF-8'),'url'=>wp_get_attachment_url($id)];
     }
 
     /** Nur PDFs dieser Seite; das Dokument wird endgültig aus der Mediathek entfernt. */

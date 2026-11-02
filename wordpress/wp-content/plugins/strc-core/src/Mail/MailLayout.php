@@ -23,6 +23,20 @@ final class MailLayout
         add_filter('option_woocommerce_email_base_color', static fn () => self::BLUE);
     }
 
+    /** Logo als Datei im Theme; wird in jede Mail eingebettet (cid), damit es auch ohne Bildfreigabe und auf Staging erscheint. */
+    public static function logoFile(): string
+    {
+        $file = (defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR : '') . '/themes/strc-app/build/strc-logo.png';
+        return is_readable($file) ? $file : '';
+    }
+
+    /** Logo als Daten-URL für die Vorschau im Browser (ohne Zugriff auf den passwortgeschützten Server). */
+    public static function logoData(): string
+    {
+        $file = self::logoFile();
+        return $file !== '' ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($file)) : self::logo();
+    }
+
     public static function logo(): string
     {
         return content_url('/themes/strc-app/build/strc-logo.png');
@@ -63,6 +77,9 @@ final class MailLayout
     {
         if (is_object($mailer)) $mailer->AltBody = self::$alternative;
         self::$alternative = '';
+        if (is_object($mailer) && isset($mailer->Body) && str_contains((string) $mailer->Body, 'cid:strc-logo') && self::logoFile() !== '' && method_exists($mailer, 'addEmbeddedImage')) {
+            $mailer->addEmbeddedImage(self::logoFile(), 'strc-logo', 'strc-logo.png', 'base64', 'image/png');
+        }
     }
 
     /** Recognise the actual WooCommerce HTML message, never the next unrelated mail. */
@@ -79,15 +96,17 @@ final class MailLayout
         return implode('', array_map(static fn ($paragraph) => '<p style="margin:0 0 14px">' . nl2br($paragraph) . '</p>', $paragraphs));
     }
 
-    public static function layout(string $subject, string $inner): string
+    public static function layout(string $subject, string $inner, ?string $logo = null): string
     {
+        $logo ??= self::logoFile() !== '' ? 'cid:strc-logo' : self::logo();
+        $logoSrc = str_starts_with($logo, 'cid:') || str_starts_with($logo, 'data:image/') ? esc_attr($logo) : esc_url($logo);
         $site = esc_url(rtrim(defined('STRC_FRONTEND_ORIGIN') ? STRC_FRONTEND_ORIGIN : home_url(), '/'));
         return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . esc_html($subject) . '</title></head>'
             . '<body style="margin:0;padding:0;background:#eef2f5" data-strc-mail="1">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f5"><tr><td align="center" style="padding:24px 12px">'
             . '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden">'
             . '<tr><td style="background:' . self::BLUE . ';padding:16px 24px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
-            . '<td style="padding-right:12px"><img src="' . esc_url(self::logo()) . '" width="48" height="48" alt="" style="display:block;border:0"></td>'
+            . '<td style="padding-right:12px"><img src="' . $logoSrc . '" width="48" height="48" alt="" style="display:block;border:0"></td>'
             . '<td style="font:700 20px/1.2 Arial,Helvetica,sans-serif;color:#ffffff">Swiss TR-Club<br><span style="font:400 11px/1.6 Arial,Helvetica,sans-serif;letter-spacing:2px;color:#cfe3f1">PASSION SINCE 1975</span></td>'
             . '</tr></table></td></tr>'
             . '<tr><td style="padding:24px;font:15px/1.55 Arial,Helvetica,sans-serif;color:#13202b">' . $inner . '</td></tr>'

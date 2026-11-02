@@ -141,7 +141,7 @@ final class EventPayments
         $row['state']=self::participationState($row);
         if (!$user || !in_array($row['state'],['confirmed','reserved','waiting','payment_review','cancelled'],true)) return;
         $link=home_url('/').'#veranstaltung/'.$post->post_parent;
-        $amount=number_format($row['total']/100,2,'.',"'").' CHF';
+        $amount='CHF '.number_format($row['total']/100,2,'.',"'");
         $review=!in_array($row['state'],['confirmed','reserved','waiting'],true)||in_array($row['paymentStatus'],['refund_pending','review_required'],true);
         $treasury=defined('STRC_EVENT_TREASURY_EMAIL')?(string)STRC_EVENT_TREASURY_EMAIL:(string)getenv('STRC_EVENT_TREASURY_EMAIL');
         $fr=\SwissTRClub\Core\Http\UserLanguage::french((int)$user->ID);
@@ -150,7 +150,7 @@ final class EventPayments
         $lang=$fr?'fr':'de';
         $translatedTitle=$fr?(string)get_post_meta((int)$post->post_parent,'strc_title_fr',true):'';
         $eventTitle=trim($translatedTitle)!==''?$translatedTitle:$row['eventTitle'];
-        $memberMail=static function(string $key,array $values)use($lang,$user):array{$mail=\SwissTRClub\Core\Mail\MailTemplates::render($key,$lang,$values);return ['to'=>$user->user_email,'subject'=>$mail['subject'],'body'=>$mail['body'],'template'=>$key];};
+        $memberMail=static function(string $key,array $values)use($lang,$user):array{$mail=\SwissTRClub\Core\Mail\MailTemplates::render($key,$lang,$values+['vorname'=>(string)($user->first_name?:$user->display_name),'geschlecht'=>\SwissTRClub\Core\Mail\MailTemplates::gender((int)$user->ID)]);return ['to'=>$user->user_email,'subject'=>$mail['subject'],'body'=>$mail['body'],'template'=>$key];};
         if (!$review && $row['state']==='reserved' && ($row['paymentWorkflow']??0)>=2) $messages['member_reserved']=$memberMail('event.reserved',['anlass'=>$eventTitle,'betrag'=>$amount,'link'=>$link]);
         if (!$review && $row['state']==='confirmed'){
             $paid=($row['paymentStatus']??'')==='paid';
