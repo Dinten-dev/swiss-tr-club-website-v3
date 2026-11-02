@@ -145,8 +145,8 @@ final class ApplicationAdmission
         if(!is_email($email))return;
         $lang=($p['language']??'de')==='fr'?'fr':'de';
         $mail=$type==='rejected'
-            ?\SwissTRClub\Core\Mail\MailTemplates::render('member.application_rejected',$lang,['vorname'=>(string)($p['first_name']??''),'grund'=>$text])
-            :\SwissTRClub\Core\Mail\MailTemplates::render('member.application_question',$lang,['vorname'=>(string)($p['first_name']??''),'frage'=>$text]);
+            ?\SwissTRClub\Core\Mail\MailTemplates::render('member.application_rejected',$lang,['vorname'=>(string)($p['first_name']??''),'geschlecht'=>(['Frau'=>'female','Herr'=>'male'][(string)($p['salutation']??'')]??''),'grund'=>$text])
+            :\SwissTRClub\Core\Mail\MailTemplates::render('member.application_question',$lang,['vorname'=>(string)($p['first_name']??''),'geschlecht'=>(['Frau'=>'female','Herr'=>'male'][(string)($p['salutation']??'')]??''),'frage'=>$text]);
         $sent=false;
         try{$sent=wp_mail($email,$mail['subject'],$mail['body'],['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>','Reply-To: '.MembershipFee::aktuar()]);}catch(\Throwable $e){error_log('STRC admission message '.$id.': '.$e->getMessage());}
         FormStore::locked('admission-'.$id,function()use($id,$sent){$d=FormStore::data(self::record($id));$last=array_key_last($d['messages']??[]);if($last!==null)$d['messages'][$last]['sent']=$sent;if(!$sent)$d['error']='Die E-Mail an die Person konnte nicht versendet werden. Bitte persönlich informieren.';$this->save($id,$d);});
@@ -292,7 +292,7 @@ final class ApplicationAdmission
             $base=defined('STRC_FRONTEND_ORIGIN')?rtrim(STRC_FRONTEND_ORIGIN,'/'):rtrim(home_url(),'/');
             $fr=$p['language']==='fr';$number=$r['official']['member_number'];
             $message=\SwissTRClub\Core\Mail\WelcomeMailSettings::render($fr?'fr':'de',array(
-                'first_name'=>$p['first_name'],'member_number'=>$number,'region'=>$d['payload']['region'],'password_url'=>$url,
+                'first_name'=>$p['first_name'],'gender'=>(string)($p['gender']??''),'member_number'=>$number,'region'=>\SwissTRClub\Core\Events\RegionDirectory::name((string)$d['payload']['region']),'regional_contact'=>\SwissTRClub\Core\Events\RegionDirectory::contact((string)$d['payload']['region']),'password_url'=>$url,
                 'dashboard_url'=>$base.'/#mitglieder','profile_url'=>$base.'/#profil','agenda_url'=>$base.'/#agenda',
                 'regions_url'=>$base.'/#regionen','forum_url'=>$base.'/#forum','gallery_url'=>$base.'/#galerie',
                 'library_url'=>$base.'/#bibliothek','marketplace_url'=>$base.'/#marktplatz','contact_url'=>$base.'/#kontakt',

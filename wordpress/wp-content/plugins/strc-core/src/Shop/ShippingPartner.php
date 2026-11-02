@@ -213,7 +213,7 @@ final class ShippingPartner
         $fr = CustomerLanguage::language($order) === 'fr';
         $items = array();
         foreach ($order->get_items() as $item) $items[] = $item->get_name() . ' × ' . (int) $item->get_quantity();
-        $mail = \SwissTRClub\Core\Mail\MailTemplates::render('shop.shipped', $fr ? 'fr' : 'de', array('vorname' => $order->get_billing_first_name(), 'bestellnummer' => $order->get_order_number(), 'artikel' => implode("\n", $items), 'sendungsnummer' => $tracking));
+        $mail = \SwissTRClub\Core\Mail\MailTemplates::render('shop.shipped', $fr ? 'fr' : 'de', array('vorname' => $order->get_billing_first_name(), 'geschlecht' => \SwissTRClub\Core\Mail\MailTemplates::orderGender($order), 'bestellnummer' => $order->get_order_number(), 'artikel' => implode("\n", $items), 'sendungsnummer' => $tracking));
         $subject = $mail['subject'];
         $lines = $tracking === '' ? array_filter(explode("\n", $mail['body']), static fn ($line) => !preg_match('/(Sendungsnummer|Numéro de suivi)\s*:?\s*$/u', trim($line))) : explode("\n", $mail['body']);
         $body = nl2br(esc_html(implode("\n", $lines)));

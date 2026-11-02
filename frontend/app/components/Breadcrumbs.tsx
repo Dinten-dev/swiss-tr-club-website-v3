@@ -1,15 +1,11 @@
 'use client';
 import {t} from './UILanguage';
 import {useSiteContent} from './SiteContent';
-import {useEffect,useSyncExternalStore} from 'react';
+import {useEffect} from 'react';
 
-import {previousRoute,subscribeRoutes} from './RouteHistory';
+import {previousRoute} from './RouteHistory';
 
-function BackLink(){
- const previous=useSyncExternalStore(subscribeRoutes,previousRoute,()=>'');
- if(!previous)return null;
- return <button type="button" className="site-back-link" onClick={()=>window.history.back()}>← {t(previous==='#'?'Zurück zur Startseite':'Zurück')}</button>;
-}
+/* «← Zurück» über dem Seitenpfad entfernt (Wunsch Redaktion 1.11.2026): der Seitenpfad genügt, der Browser-Zurückknopf stellt die Position wieder her. */
 const names:Record<string,string>={history:'Club-Geschichte',news:'Neuigkeiten',applications:'Anträge',registration:'Anmeldung',profile:'Mitgliedschafts-Profil',triungsters:'TRiungsters',organisation:'Organisation',mission:'Leitbild',membership:'Mitglied werden',models:'TR-Modelle',shop:'TR-Shop',club:'Club',agenda:'Agenda',regions:'Regionen',market:'Marktplatz',members:'Mitgliederbereich',forum:'Forum',gallery:'Galerie',library:'Bibliothek',clubdocs:'Clubdokumente',directory:'Mitgliederverzeichnis',contact:'Kontakt',privacy:'Datenschutz',statutes:'Statuten','event-admin':'Agenda verwalten',finance:'Kasse',editorial:'Redaktion'};
 const routes:Record<string,string>={regions:'regionen',models:'tr-modelle',editorial:'redaktion',market:'marktplatz',shop:'tr-shop'};
 const marketSections:Record<string,string>={fahrzeuge:'Fahrzeuge',ersatzteile:'Ersatzteile',meine:'Meine Inserate',pruefung:'In Prüfung'};
@@ -28,5 +24,5 @@ export default function Breadcrumbs({page,subroute}:{page:string;subroute:string
   :page==='market'?marketSections[subroute]||''
   :page==='shop'?shopSections[subroute]||''
   :'';
- return <nav className="site-breadcrumbs" aria-label={t("Seitenpfad")}><BackLink/><ol><li><a href="#">{t("Startseite")}</a></li>{parents.map(([url,label])=><li key={url}><a href={url}>{t(label)}</a></li>)}{detail?<><li><a href={'#'+(routes[page]||'')}>{t(names[page])}</a></li><li aria-current="page">{t(detail)}</li></>:<li aria-current="page">{t(names[page]||'Swiss TR-Club')}</li>}</ol></nav>;
+ return <nav className="site-breadcrumbs" aria-label={t("Seitenpfad")}><ol><li><a href="#">{t("Startseite")}</a></li>{parents.map(([url,label])=><li key={url}><a href={url}>{t(label)}</a></li>)}{detail?<><li><a href={'#'+(routes[page]||'')}>{t(names[page])}</a></li><li aria-current="page">{t(detail)}</li></>:<li aria-current="page">{t(names[page]||'Swiss TR-Club')}</li>}</ol></nav>;
 }

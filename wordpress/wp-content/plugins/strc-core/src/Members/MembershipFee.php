@@ -92,6 +92,7 @@ final class MembershipFee
         $order->update_meta_data('_strc_membership_year', $year);
         $order->update_meta_data('_strc_membership_type', $type);
         $order->update_meta_data('_strc_customer_language', $language);
+        $order->update_meta_data('_strc_gender', array('Frau' => 'female', 'Herr' => 'male')[(string) ($person['salutation'] ?? '')] ?? '');
         $order->calculate_totals(false);
         $order->set_status('pending');
         $order->save();

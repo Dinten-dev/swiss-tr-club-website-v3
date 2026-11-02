@@ -92,7 +92,7 @@ add_action('wp', static function (): void {
             echo '<p class="strc-product-meta">' . implode(' · ', $parts) . '</p>'; // Teile einzeln escaped
         }
     }, 40);
-    add_filter('woocommerce_product_related_products_heading', static fn (): string => get_locale() === 'fr_FR' ? 'Vous aimerez aussi' : 'Das könnte dich auch interessieren');
+    add_filter('woocommerce_product_related_products_heading', static fn (): string => get_locale() === 'fr_FR' ? 'Tu aimeras aussi' : 'Das könnte dich auch interessieren');
     add_filter('woocommerce_output_related_products_args', static function (array $args): array {
         $args['posts_per_page'] = 4;
         $args['columns'] = 4;

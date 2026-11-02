@@ -3,7 +3,7 @@
 declare(strict_types=1);
 namespace {if(defined('ABSPATH'))throw new \RuntimeException('Run without WordPress.');}
 namespace SwissTRClub\Core\Forms {final class FormStore {public static function locked(string $key,callable $work):mixed{return $work();}}}
-namespace SwissTRClub\Core\Mail {final class MailTemplates {public static function render(...$args):array{return ['subject'=>'Invoice','body'=>'Fixture'];}}}
+namespace SwissTRClub\Core\Mail {final class MailTemplates {public static function render(...$args):array{return ['subject'=>'Invoice','body'=>'Fixture'];}public static function orderGender(mixed $order):string{return '';}public static function gender(int $id=0,string $email=''):string{return '';}}}
 namespace SwissTRClub\Core\Finance {
  final class ClubDocument {
   public static function archived(array $stored):string{if(empty($stored['valid']))throw new \RuntimeException('PRIVATE archive path');return '%PDF-fixture';}
