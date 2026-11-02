@@ -26,7 +26,7 @@ final class FormsEndpoint
                 $origin=rtrim($_SERVER['HTTP_ORIGIN']??'','/');$allowed=[rtrim(home_url(),'/')];if(defined('STRC_FRONTEND_ORIGIN'))$allowed[]=rtrim(STRC_FRONTEND_ORIGIN,'/');
                 if($origin&&!in_array($origin,$allowed,true))throw new \RuntimeException('Anfrage nicht erlaubt.',403);
                 if(!empty($input['website']))throw new \InvalidArgumentException('Die Anfrage konnte nicht verarbeitet werden.');
-                $data=['name'=>FormFields::text($input,'name',160,true),'email'=>FormFields::text($input,'email',200,true),'phone'=>FormFields::text($input,'phone',40),'subject'=>FormFields::choice($input,'subject',['Allgemeine Frage','Mitgliedschaft','Regionen','Veranstaltungen','Website']),'message'=>FormFields::text($input,'message',5000,true)];
+                $data=['name'=>FormFields::text($input,'name',160,true),'email'=>FormFields::text($input,'email',200,true),'phone'=>FormFields::text($input,'phone',40),'subject'=>FormFields::choice($input,'subject',['Allgemeine Frage','Mitgliedschaft','Regionen','Veranstaltungen','TR-Shop','Website']),'message'=>FormFields::text($input,'message',5000,true)];
                 if(!is_email($data['email']))throw new \InvalidArgumentException('Bitte eine gültige E-Mail-Adresse eingeben.');
                 FormStore::quota();FormStore::intake('contact',$data,$input['requestId']??'',get_current_user_id());
                 wp_send_json_success(['message'=>'Ihre Nachricht ist im Clubpostfach eingegangen. Der Club wird Ihre Anfrage bearbeiten.']);

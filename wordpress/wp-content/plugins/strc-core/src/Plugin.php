@@ -69,7 +69,9 @@ final class Plugin
         (new \SwissTRClub\Core\Content\HomepageEndpoint())->registerHooks();
         (new \SwissTRClub\Core\Content\MagazineEndpoint())->registerHooks();
         (new MarketplaceEndpoint())->registerHooks();
+        (new \SwissTRClub\Core\Integrations\Zahls\WooWebhookGuard())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShopEndpoint())->registerHooks();
+        (new \SwissTRClub\Core\Shop\ShopAvailability())->registerHooks();
         (new \SwissTRClub\Core\Shop\CustomerLanguage())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShippingPartner())->registerHooks();
         (new \SwissTRClub\Core\Shop\ShopInvoice())->registerHooks();
