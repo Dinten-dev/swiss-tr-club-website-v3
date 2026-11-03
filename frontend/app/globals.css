@@ -3755,3 +3755,9 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .db-cashbox{list-style:none;margin:0 0 12px;padding:12px 14px;border-left:4px solid var(--red,#bd2028);border-radius:8px;background:#fbf1e4}
 .db-cashbox p{margin:2px 0}
 .db-cashbox-links{display:flex;flex-wrap:wrap;gap:6px 16px}
+/* Kasse: Artikel und Ausführung in zwei Auswahlfeldern (3.11.2026) */
+.pos-pick{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,2fr) 90px auto;gap:10px;align-items:end;margin-top:8px}
+.pos-pick label{margin:0!important}
+.pos-pick select{width:100%}
+.pos-pick-quantity input{min-height:44px!important}
+@media(max-width:720px){.pos-pick{grid-template-columns:1fr}}
