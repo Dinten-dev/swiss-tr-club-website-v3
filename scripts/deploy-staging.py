@@ -9,6 +9,7 @@ parser.add_argument('--ssh-port',default='2121')
 parser.add_argument('--ssh-key',required=True)
 parser.add_argument('--known-hosts',required=True)
 parser.add_argument('--site-path',required=True)
+parser.add_argument('--application-recipient-transition', action='store_true', help='Allow the reviewed admin-to-Aktuar notification change')
 parser.add_argument('--dry-run',action='store_true',help='Verify the local candidate and list changes without contacting the server')
 args=parser.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1]
@@ -33,7 +34,7 @@ with tempfile.TemporaryDirectory(prefix='strc-release-') as temporary:
         for item in changed:bundle.add(root/'wordpress'/item['path'],arcname=item['path'])
     with archive.open('rb') as stream:
         subprocess.run(ssh+['umask 077; mkdir -p '+shlex.quote(release+'/candidate')+'; tar xzf - -C '+shlex.quote(release+'/candidate')],stdin=stream,check=True,timeout=180)
-    payload=json.dumps({'site':args.site_path,'release':release,'baseline':baseline,'changed':changed})
+    payload=json.dumps({'site':args.site_path,'release':release,'baseline':baseline,'changed':changed,'applicationRecipientTransition':args.application_recipient_transition})
     source='''<?php
 $c=json_decode(file_get_contents(__DIR__.'/configuration.json'),true);$site=$c['site'];$release=$c['release'];
 $fail=static function($message)use($release,$site){
@@ -53,7 +54,13 @@ foreach($c['changed'] as $f)if(str_ends_with($f['path'],'/Mail/ApplicationNotifi
   // Newer releases already resolve the recipient from admin_email. Require the resolver to stay identical.
   $candidate=file_get_contents($release.'/candidate/'.$f['path']);
   $pattern='/private\\s+static\\s+function\\s+recipient\\(\\):\\s*string\\s*\\{(.*?)\\n    \\}/s';
-  if(!preg_match($pattern,$original,$beforeRecipient)||!preg_match($pattern,$candidate,$afterRecipient)||trim($beforeRecipient[1])!==trim($afterRecipient[1]))$fail('Recipient resolver changed; review destination first');
+  if(!preg_match($pattern,$original,$beforeRecipient)||!preg_match($pattern,$candidate,$afterRecipient))$fail('Recipient resolver missing');
+  if(trim($beforeRecipient[1])!==trim($afterRecipient[1])){
+   $old=trim($beforeRecipient[1]);$new=trim($afterRecipient[1]);
+   $expectedOld="\$recipient = sanitize_email((string) get_option('admin_email', ''));\n        return is_email(\$recipient) ? \$recipient : '';";
+   $expectedNew="// Entscheid Redaktion 1.11.2026: neue Anträge gehen an den Aktuar.\n        \$recipient = sanitize_email(\\SwissTRClub\\Core\\Members\\MembershipFee::aktuar());\n        return is_email(\$recipient) ? \$recipient : '';";
+   if(empty($c['applicationRecipientTransition'])||$old!==$expectedOld||$new!==$expectedNew)$fail('Recipient resolver changed; review destination first');
+  }
  }
 }
 $ordered=$c['changed'];usort($ordered,static function($a,$b)use($baseline){
