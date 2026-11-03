@@ -132,9 +132,9 @@ export function HomeModels(){
  const step=(direction:number)=>{const node=track.current;if(node)node.scrollBy({left:direction*node.clientWidth*.8,behavior:scrollBehavior()});};
  return <section className="hx-models" aria-labelledby="hx-models-title"><div className="home-width">
   <div className="hx-head"><div><p className="eyebrow">{t('Die Triumph TR-Familie')}</p><h2 id="hx-models-title"><a href="#tr-modelle">{t('Vom TR2 bis zum TR8')}</a></h2></div><div className="hx-track-controls"><button type="button" aria-label={t('Vorherige Modelle')} onClick={()=>step(-1)}>←</button><button type="button" aria-label={t('Weitere Modelle')} onClick={()=>step(1)}>→</button></div></div>
-  <div className="hx-model-track" ref={track}>{trModels.map(model=>{const data=content(model);const image=modelText(data,'image');const years=factFromBody(data,['Bauzeit','Période de production'])||modelText(data,'years');const detail=factFromBody(data,['Motor','Moteur'])||[modelText(data,'engine'),modelText(data,'displacement')].filter(Boolean).join(' · ');return <a key={model} className="hx-model" href={`#tr-modelle/${model.toLowerCase()}`}>
+  <div className="hx-model-track" ref={track}>{trModels.map(model=>{const data=content(model);const image=modelText(data,'image');const years=factFromBody(data,['Bauzeit','Période de production'])||modelText(data,'years');return <a key={model} className="hx-model" href={`#tr-modelle/${model.toLowerCase()}`}>
    <span className="hx-model-image">{image?<Image src={assetUrl(image)} alt="" width={420} height={250} style={imageFrameStyle(data.imageFrame)}/>:<Placeholder model={model}/>}</span>
-   <strong>{modelText(data,'title')||model}</strong>{years&&<span className="hx-model-years">{years}</span>}{detail&&<small>{detail}</small>}
+   <strong>{modelText(data,'title')||model}</strong>{years&&<span className="hx-model-years">{years}</span>}
   </a>;})}</div>
  </div></section>;
 }

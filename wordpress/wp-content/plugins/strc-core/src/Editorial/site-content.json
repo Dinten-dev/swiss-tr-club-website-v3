@@ -1476,9 +1476,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -1600,9 +1600,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -1724,9 +1724,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -1848,9 +1848,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -1972,9 +1972,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -2096,9 +2096,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -2220,9 +2220,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -2344,9 +2344,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -2468,9 +2468,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
@@ -2592,9 +2592,9 @@
       },
       {
         "key": "exampleNote",
-        "label": "Beispielhinweis (nach Prüfung und Ersetzen aller Musterwerte leeren)",
+        "label": "Hinweis über dem Bild (optional, z. B. bei ungeprüften Angaben)",
         "type": "text",
-        "default": "Beispielansicht · Daten noch nicht bestätigt"
+        "default": ""
       },
       {
         "key": "factsTitle",
