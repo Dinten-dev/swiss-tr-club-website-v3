@@ -11,6 +11,8 @@ final class CommunityEndpoint
 {
     private const TYPES = array('forum' => 'strc_topic', 'gallery' => 'strc_album', 'library' => 'strc_document');
 
+    public const PHOTOS_PER_MEMBER = 20;
+
     public function registerHooks(): void
     {
         LibraryPolicy::registerHooks();
@@ -679,6 +681,12 @@ final class CommunityEndpoint
         if($request&&count(array_filter($tokens,static fn($batch)=>$batch===$request))>=20)AjaxRequest::fail('Höchstens 20 Bilder pro Upload.',422);
         if (($input['rights'] ?? '') !== '1') {
             AjaxRequest::fail('Bitte die Berechtigung zum Teilen des Materials bestätigen.', 422);
+        }
+        // Höchstens 20 Bilder pro Mitglied und Album (Vorgabe Redaktion); die Galerie-Moderation ist ausgenommen.
+        if(!$this->canReview($post)){
+            $own=count(array_filter($this->files((int)$post->ID),static fn($file)=>(int)($file['submittedBy']??$post->post_author)===get_current_user_id()&&($file['reviewStatus']??'approved')!=='rejected'));
+            $new=is_array($_FILES['files']['name']??null)?count(array_filter($_FILES['files']['name'])):0;
+            if($own+$new>self::PHOTOS_PER_MEMBER)AjaxRequest::fail(sprintf('Pro Mitglied sind höchstens %d Bilder pro Album möglich. Du hast hier bereits %d hochgeladen.',self::PHOTOS_PER_MEMBER,$own),422);
         }
         // Fotograf/in ist immer die hochladende Person.
         $photographer = wp_get_current_user()->display_name;
