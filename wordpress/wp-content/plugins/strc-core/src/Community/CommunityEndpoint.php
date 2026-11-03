@@ -578,14 +578,16 @@ final class CommunityEndpoint
         list($title, $description) = $this->texts($input);
         $classification=$this->classification($input,$kind);
         $replaces=$kind==='library'?absint($input['replaces']??0):0;
-        if($replaces){$old=get_post($replaces);if(!$old||$old->post_type!=='strc_document'||$old->post_status!=='publish'||!LibraryPolicy::canRead($replaces)||!$this->canReview($old))AjaxRequest::fail('Das zu ersetzende Dokument ist nicht verfügbar oder nicht freigegeben.',403);}
+        // Vorstandsunterlagen: Office-Dateien erlaubt; Vorstandsmitglieder dürfen eine neue Version eines Vorstandsdokuments einreichen.
+        $board=$kind==='library'&&str_starts_with((string)($classification['documentType']??''),'board-')&&($classification['access']??'')==='restricted'&&current_user_can('strc_access_board_documents');
+        if($replaces){$old=get_post($replaces);if(!$old||$old->post_type!=='strc_document'||$old->post_status!=='publish'||!LibraryPolicy::canRead($replaces)||!($this->canReview($old)||($board&&$this->canReadBoardDocument($old))))AjaxRequest::fail('Das zu ersetzende Dokument ist nicht verfügbar oder nicht freigegeben.',403);}
         if(($kind!=='forum'||!empty($_FILES['files']['name']))&&($input['rights']??'')!=='1')AjaxRequest::fail('Bitte die Berechtigung zum Teilen des Materials bestätigen.',422);
         if ('forum' === $kind && '' === $description) {
             AjaxRequest::fail('Bitte einen Beitragstext eingeben.');
         }
         $magazine=$kind==='library'&&$classification['documentType']==='magazine';
         if($magazine&&(!is_array($_FILES['files']['name']??null)||count($_FILES['files']['name'])!==1||!is_uploaded_file($_FILES['files']['tmp_name'][0]??'')||(new \finfo(FILEINFO_MIME_TYPE))->file($_FILES['files']['tmp_name'][0])!=='application/pdf'))AjaxRequest::fail('Bitte ein PDF-Dokument bis 25 MB auswählen.',422);
-        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 0, 'gallery' === $kind ? 16777216 : 20971520, $magazine ? 25*1024*1024 : 100*1024*1024);
+        $savedFiles = (new PrivateUploadStore())->save($_FILES['files'] ?? array(), 'gallery' === $kind, 'library' === $kind, 'gallery' === $kind ? 20 : 6, 0, 'gallery' === $kind ? 16777216 : 20971520, $magazine ? 25*1024*1024 : 100*1024*1024, $board);
         if (is_wp_error($savedFiles)) {
             AjaxRequest::fail($savedFiles->get_error_message());
         }
