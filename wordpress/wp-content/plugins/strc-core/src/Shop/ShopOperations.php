@@ -104,21 +104,26 @@ final class ShopOperations
         $attributes=self::attributes((string)($input['attributes']??'[]'));
         $stock=(string)($input['stock']??'0');if(!$attributes&&$mode==='stock'&&(!ctype_digit($stock)||(int)$stock>999999))throw new \InvalidArgumentException('Bitte einen gültigen Lagerbestand angeben.');
         $remove=json_decode((string)($input['removeValueImages']??'[]'),true);if(!is_array($remove)||!array_is_list($remove))throw new \InvalidArgumentException('Ungültige Bildangaben.');
+        $removeCombo=json_decode((string)($input['removeComboImages']??'[]'),true);if(!is_array($removeCombo)||!array_is_list($removeCombo))throw new \InvalidArgumentException('Ungültige Bildangaben.');
         return [
             'title'=>$title,'titleFr'=>$titleFr,'description'=>wp_kses_post($description),'descriptionFr'=>wp_kses_post($descriptionFr),
             'sku'=>sanitize_text_field($input['sku']??''),'status'=>$status,'price'=>self::money((string)($input['price']??'')),'cost'=>self::cost((string)($input['cost']??'')),
             'mode'=>$mode,'out'=>$mode==='order'?'none':$out,'stock'=>(int)$stock,'attributes'=>$attributes,
             'combos'=>self::comboSettings((string)($input['combinations']??'[]'),$attributes),
             'removeImage'=>($input['removeImage']??'')==='1','removeValueImages'=>array_values(array_filter($remove,'is_array')),
+            'removeComboImages'=>array_values(array_filter($removeCombo,'is_array')),
         ];
     }
     /** Bilder hochladen: Produktbild und optional ein Bild pro Merkmalswert (Feld value_image_{Merkmal}_{Wert}). */
     private static function uploads(array $form): array
     {
-        $images=['main'=>0,'values'=>[],'all'=>[]];
+        $images=['main'=>0,'values'=>[],'combos'=>[],'all'=>[]];
         try{
             $images['main']=self::photo('image');if($images['main'])$images['all'][]=$images['main'];
             foreach($form['attributes'] as $a=>$attribute)foreach($attribute['values'] as $v=>$value){$id=self::photo('value_image_'.$a.'_'.$v);if($id){$images['values'][$attribute['name']][$value]=$id;$images['all'][]=$id;}}
+            // Kombinationsbilder: Wert eines weiteren Merkmals je Wert von Merkmal 1 (Feld combo_image_{Merkmal}_{Wert}_{Wert Merkmal 1}), z. B. Ärmel · Navy.
+            $base=$form['attributes'][0]['values']??[];
+            foreach($form['attributes'] as $a=>$attribute)if($a>0)foreach($attribute['values'] as $v=>$value)foreach($base as $b=>$baseValue){$id=self::photo('combo_image_'.$a.'_'.$v.'_'.$b);if($id){$images['combos'][$attribute['name']][$value][$baseValue]=$id;$images['all'][]=$id;}}
         }catch(\Throwable $e){foreach($images['all'] as $id)wp_delete_attachment($id,true);throw $e;}
         return $images;
     }
@@ -153,6 +158,15 @@ final class ShopOperations
         $valueImages=(array)$product->get_meta('_strc_value_images');$keep=[];
         foreach($form['attributes'] as $attribute)foreach($attribute['values'] as $value){$id=(int)($images['values'][$attribute['name']][$value]??($valueImages[$attribute['previousName']?:$attribute['name']][$value]??0));foreach($form['removeValueImages'] as $pair)if(($pair[0]??null)===$attribute['name']&&($pair[1]??null)===$value&&empty($images['values'][$attribute['name']][$value]))$id=0;if($id)$keep[$attribute['name']][$value]=$id;}
         $product->update_meta_data('_strc_value_images',$keep);
+        // Bilder pro Kombination (weiteres Merkmal × Wert von Merkmal 1): ersetzen bei dieser Kombination das Bild des Leitmerkmals.
+        $comboImages=(array)$product->get_meta('_strc_combo_images');$keepCombo=[];$base=$form['attributes'][0]['values']??[];
+        foreach($form['attributes'] as $index=>$attribute){if($index===0)continue;$old=(array)($comboImages[$attribute['previousName']?:$attribute['name']]??[]);
+            foreach($attribute['values'] as $value)foreach($base as $baseValue){
+                $new=(int)($images['combos'][$attribute['name']][$value][$baseValue]??0);$id=$new?:(int)($old[$value][$baseValue]??0);
+                if(!$new)foreach($form['removeComboImages'] as $row)if(($row[0]??null)===$attribute['name']&&($row[1]??null)===$value&&($row[2]??null)===$baseValue)$id=0;
+                if($id)$keepCombo[$attribute['name']][$value][$baseValue]=$id;
+            }}
+        $product->update_meta_data('_strc_combo_images',$keepCombo);
         // Leitmerkmal = erstes Merkmal mit Bildern (meist Farbe): bestimmt das Bild jeder Kombination. Bilder weiterer Merkmale (z. B. Logo) kommen in die Galerie.
         $lead=null;foreach($form['attributes'] as $index=>$attribute)if(!empty($keep[$attribute['name']])){$lead=$index;break;}
         $managedImages=[];foreach($valueImages as $values)foreach((array)$values as $image)$managedImages[]=(int)$image;
@@ -177,7 +191,9 @@ final class ShopOperations
             $attributes=[];foreach($form['attributes'] as $index=>$row)$attributes[$row['slug']]=$combo['values'][$index];
             $variation->set_attributes($attributes);$variation->set_regular_price($form['price']);$variation->update_meta_data('_strc_cost_price',$form['cost']);
             self::stock($variation,$form,$combo['stock']);$variation->set_status($combo['enabled']?'publish':'private');
-            if($lead!==null)$variation->set_image_id((int)($keep[$form['attributes'][$lead]['name']][$combo['values'][$lead]]??0));elseif(!isset($existing[$key]))$variation->set_image_id(0);
+            $image=0;foreach($form['attributes'] as $index=>$row)if($index>0&&!empty($keepCombo[$row['name']][$combo['values'][$index]][$combo['values'][0]])){$image=(int)$keepCombo[$row['name']][$combo['values'][$index]][$combo['values'][0]];break;}
+            if(!$image&&$lead!==null)$image=(int)($keep[$form['attributes'][$lead]['name']][$combo['values'][$lead]]??0);
+            if($lead!==null||$keepCombo)$variation->set_image_id($image);elseif(!isset($existing[$key]))$variation->set_image_id(0);
             $saved=$variation->save();if(!$saved)throw new \RuntimeException('Kombination konnte nicht gespeichert werden.');$touched[]=$saved;$used[]=$saved;
         }
         foreach($product->get_children() as $child)if(!in_array((int)$child,$used,true)){$old=wc_get_product($child);if($old&&!$old->delete(false))throw new \RuntimeException('Kombination konnte nicht entfernt werden.');$touched[]=(int)$child;}
@@ -274,9 +290,9 @@ final class ShopOperations
     public static function productDetail(array $input): array
     {
         $product=self::product(absint($input['id']??0));self::editable($product);
-        $valueImages=(array)$product->get_meta('_strc_value_images');$attributes=[];$combinations=[];$price=$product->get_regular_price();$cost=(string)$product->get_meta('_strc_cost_price');
+        $valueImages=(array)$product->get_meta('_strc_value_images');$comboImages=(array)$product->get_meta('_strc_combo_images');$attributes=[];$combinations=[];$price=$product->get_regular_price();$cost=(string)$product->get_meta('_strc_cost_price');
         if($product->is_type('variable')){
-            foreach($product->get_attributes() as $attribute)if($attribute->get_variation()){$name=$attribute->get_name();$images=[];foreach($attribute->get_options() as $value)if(!empty($valueImages[$name][$value]))$images[$value]=(string)wp_get_attachment_image_url((int)$valueImages[$name][$value],'thumbnail');$attributes[]=['name'=>$name,'slug'=>sanitize_title($name),'values'=>array_values(array_map('strval',$attribute->get_options())),'images'=>(object)$images];}
+            foreach($product->get_attributes() as $attribute)if($attribute->get_variation()){$name=$attribute->get_name();$images=[];foreach($attribute->get_options() as $value)if(!empty($valueImages[$name][$value]))$images[$value]=(string)wp_get_attachment_image_url((int)$valueImages[$name][$value],'thumbnail');$combos=[];foreach((array)($comboImages[$name]??[]) as $value=>$row){$urls=[];foreach((array)$row as $baseValue=>$id)if($id)$urls[(string)$baseValue]=(string)wp_get_attachment_image_url((int)$id,'thumbnail');if($urls)$combos[(string)$value]=(object)$urls;}$attributes[]=['name'=>$name,'slug'=>sanitize_title($name),'values'=>array_values(array_map('strval',$attribute->get_options())),'images'=>(object)$images,'comboImages'=>(object)$combos];}
             foreach($product->get_children() as $childId){$variation=wc_get_product($childId);if(!$variation)continue;$stored=$variation->get_attributes();$values=[];foreach($attributes as $attribute)$values[]=(string)($stored[sanitize_title(($attribute['previousName']??'')?:$attribute['name'])]??$stored[$attribute['slug']]??'');$combinations[]=['values'=>$values,'enabled'=>$variation->get_status()!=='private','stock'=>(string)(int)$variation->get_stock_quantity()];if($price==='')$price=$variation->get_regular_price();if($cost==='')$cost=(string)$variation->get_meta('_strc_cost_price');}
             $attributes=array_map(static function(array $attribute):array{unset($attribute['slug']);return $attribute;},$attributes);
         }
