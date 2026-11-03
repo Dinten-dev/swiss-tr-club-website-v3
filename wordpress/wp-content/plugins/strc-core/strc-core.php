@@ -51,6 +51,7 @@ require_once STRC_CORE_PATH . 'src/Marketplace/MarketplaceEndpoint.php';
 require_once STRC_CORE_PATH . 'src/Shop/ShopAccessPolicy.php';
 require_once STRC_CORE_PATH . 'src/Shop/ShopEndpoint.php';
 require_once STRC_CORE_PATH . 'src/Shop/ShopVariationImages.php';
+require_once STRC_CORE_PATH . 'src/Shop/PosSession.php';
 require_once STRC_CORE_PATH . 'src/Integrations/Fairgate/FairgateApiException.php';
 require_once STRC_CORE_PATH . 'src/Integrations/Fairgate/FairgateConfiguration.php';
 require_once STRC_CORE_PATH . 'src/Integrations/Fairgate/FairgateClient.php';

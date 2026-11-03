@@ -332,55 +332,90 @@ final class ShopOperations
     {
         $items=[];foreach(wc_get_products(['limit'=>-1,'status'=>'publish','orderby'=>'title','order'=>'ASC'])as$product){
             $choices=$product->is_type('variable')?array_filter(array_map('wc_get_product',$product->get_children())):[$product];
-            foreach($choices as $choice)if($choice->get_status()!=='private'&&!ShopAvailability::blocked($choice)&&$choice->is_in_stock()&&$choice->get_price()!=='')$items[]=['id'=>$choice->get_id(),'name'=>$choice->get_name(),'price'=>$choice->get_price(),'stock'=>$choice->get_stock_quantity()];
+            $names=[];foreach($product->get_attributes() as $slug=>$attribute)$names[$slug]=$attribute->get_name();
+            foreach($choices as $choice)if($choice->get_status()!=='private'&&!ShopAvailability::blocked($choice)&&$choice->is_in_stock()&&$choice->get_price()!=='')$items[]=['id'=>$choice->get_id(),'parent'=>$product->get_id(),'name'=>$choice->get_name(),'price'=>$choice->get_price(),'stock'=>$choice->get_stock_quantity(),'attributes'=>(object)($choice->is_type('variation')?array_combine(array_map(static fn($slug)=>$names[$slug]??$slug,array_keys($choice->get_attributes())),array_values(array_map('strval',$choice->get_attributes()))):[])];
         }
-        $members=[];foreach(get_users(['number'=>2000,'orderby'=>'display_name'])as$user)if(user_can($user,'strc_access_member_area'))$members[]=['id'=>(int)$user->ID,'name'=>$user->display_name,'board'=>user_can($user,'strc_access_board_documents')];
+        $members=[];foreach(get_users(['number'=>2000,'orderby'=>'display_name'])as$user)if(user_can($user,'strc_access_member_area'))$members[]=['id'=>(int)$user->ID,'name'=>$user->display_name,'city'=>(string)get_user_meta($user->ID,'strc_city',true),'board'=>user_can($user,'strc_access_board_documents')];
         $events=array_map(static fn($post)=>['id'=>(int)$post->ID,'title'=>$post->post_title],array_filter(get_posts(['post_type'=>'strc_event','post_status'=>'publish','posts_per_page'=>100]),static fn($post)=>strtotime((string)get_post_meta($post->ID,'strc_start_at',true))>=time()));
-        return ['products'=>$items,'members'=>$members,'events'=>array_values($events)];
+        return ['products'=>$items,'members'=>$members,'events'=>array_values($events),'session'=>PosSession::state(get_current_user_id()),'zahlsReady'=>ShopEndpoint::zahlsReady()];
     }
+    /**
+     * Direktverkauf an der Kasse, Telefonbestellung oder Geschenk (Ablauf Redaktion 3.11.2026):
+     * - Direktverkauf: nur mit geöffneter Kasse, Zahlung bar oder zahls.ch (QR-Code am Stand), keine Rechnung; Versand optional gratis.
+     * - Telefonbestellung: immer Rechnung; Versand oder Abholung am Anlass nach Zahlung.
+     * - Geschenk: Clubzweck Vorstand, Preisvergabe oder Anderes (mit Angabe), ohne Zahlung.
+     */
     public static function order(array $input): array
     {
         $token=$input['requestId']??'';if(!preg_match('/^[a-f0-9-]{36}$/D',$token))throw new \InvalidArgumentException('Ungültige Bestellanfrage.');
         return FormStore::locked('shop-direct-orders',static function()use($input,$token):array{
-            $key='strc_pos_'.hash('sha256',get_current_user_id().':'.$token);$existing=wc_get_order((int)get_option($key));if($existing)return ['id'=>$existing->get_id(),'message'=>'Diese Bestellung ist bereits gespeichert.','url'=>$existing->get_edit_order_url()];
-            $kind=$input['kind']??'direct';if(!in_array($kind,['direct','manual','board','gift'],true))throw new \InvalidArgumentException('Bitte eine gültige Transaktionsart wählen.');
+            $key='strc_pos_'.hash('sha256',get_current_user_id().':'.$token);$existing=wc_get_order((int)get_option($key));if($existing)return ['id'=>$existing->get_id(),'message'=>'Diese Bestellung ist bereits gespeichert.','url'=>$existing->get_edit_order_url()]+PosSession::payment($existing);
+            $kind=$input['kind']??'direct';$purpose=(string)($input['purpose']??'');
+            if($kind==='board'){$kind='gift';$purpose='board';}
+            if(!in_array($kind,['direct','manual','gift'],true))throw new \InvalidArgumentException('Bitte eine gültige Transaktionsart wählen.');
+            $session=null;if($kind==='direct'){$session=PosSession::current(get_current_user_id());if(!$session)throw new \InvalidArgumentException('Bitte zuerst die Kasse öffnen und den Verkäufer wählen.');}
             $customer=absint($input['customerId']??0);if($customer&&!user_can($customer,'strc_access_member_area'))throw new \InvalidArgumentException('Bitte ein aktives Mitglied wählen.');
-            if($kind==='board'&&(!$customer||!user_can($customer,'strc_access_board_documents')))throw new \InvalidArgumentException('Bitte einen berechtigten Empfänger für die Vorstandsabgabe wählen.');
-            $reason=sanitize_text_field($input['reason']??'');if(in_array($kind,['board','gift'],true)&&!$reason)throw new \InvalidArgumentException('Bitte den Grund der Gratisabgabe angeben.');
-            $method=$input['payment']??'invoice';if(!in_array($method,['invoice','cash','external'],true))throw new \InvalidArgumentException('Bitte Rechnung oder eine bereits eingegangene Zahlung wählen.');
-            if($method==='external'&&!trim($input['reference']??''))throw new \InvalidArgumentException('Bitte den Beleg der externen Zahlung angeben.');
+            if($kind==='gift'){
+                if(!in_array($purpose,['board','prize','other'],true))throw new \InvalidArgumentException('Bitte den Clubzweck des Geschenks wählen.');
+                if($purpose==='board'&&(!$customer||!user_can($customer,'strc_access_board_documents')))throw new \InvalidArgumentException('Bitte ein Vorstandsmitglied als Empfänger wählen.');
+            }
+            $reason=sanitize_text_field($input['reason']??'');if($kind==='gift'&&$purpose==='other'&&!$reason)throw new \InvalidArgumentException('Bitte den Clubzweck angeben.');
+            $purposeLabel=['board'=>'Vorstand','prize'=>'Preisvergabe','other'=>'Anderer Clubzweck'][$purpose]??'';
+            $method=$kind==='manual'?'invoice':($kind==='gift'?'none':(string)($input['payment']??'cash'));
+            if($kind==='direct'&&!in_array($method,['cash','zahls'],true))throw new \InvalidArgumentException('Bitte bar oder TWINT/Karte (zahls.ch) wählen.');
+            $gateway='';if($method==='zahls'){$gateway=PosSession::zahlsGateway();if($gateway===''||!ShopEndpoint::zahlsReady())throw new \InvalidArgumentException('TWINT/Karte über zahls.ch ist noch nicht eingerichtet. Bitte bar kassieren.');}
             $items=json_decode($input['items']??'[]',true);if(!is_array($items)||!array_is_list($items)||!$items||count($items)>30)throw new \InvalidArgumentException('Bitte Artikel und Mengen auswählen.');
             $selected=[];$seen=[];foreach($items as $row){if(!is_array($row))throw new \InvalidArgumentException('Ungültiger Artikel.');$id=absint($row['id']??0);$quantity=(string)($row['quantity']??'');if(!ctype_digit($quantity)||(int)$quantity<1||(int)$quantity>9999||isset($seen[$id]))throw new \InvalidArgumentException('Artikel müssen eindeutig sein und eine gültige Menge haben.');$seen[$id]=true;$product=wc_get_product($id);$parent=$product&&$product->is_type('variation')?wc_get_product($product->get_parent_id()):$product;if(!$product||!$parent||$parent->get_status()!=='publish'||$product->is_type('variable')||$product->get_status()==='private'||$product->get_price()===''||!$product->is_in_stock()||ShopAvailability::blocked($product))throw new \InvalidArgumentException('Ein ausgewählter Artikel ist nicht verfügbar.');if($product->managing_stock()&&!$product->backorders_allowed()&&(!$product->has_enough_stock((int)$quantity)||$product->get_stock_quantity()-wc_get_held_stock_quantity($product)<(int)$quantity))throw new \InvalidArgumentException('Der Lagerbestand reicht für die ausgewählte Menge nicht aus.');$selected[]=[$product,(int)$quantity];}
             $fulfilment=$input['fulfilment']??'handover';if(!in_array($fulfilment,['handover','pickup','shipping'],true))throw new \InvalidArgumentException('Bitte eine gültige Übergabeart wählen.');
+            if($kind==='manual'&&$fulfilment==='handover')throw new \InvalidArgumentException('Telefonbestellungen werden versendet oder an einem Anlass abgegeben.');
+            $freeShipping=$fulfilment==='shipping'&&$kind==='direct'&&($input['freeShipping']??'')==='1';
             $event=absint($input['eventId']??0);if($fulfilment==='pickup'&&(!$event||get_post_type($event)!=='strc_event'||get_post_status($event)!=='publish'||strtotime((string)get_post_meta($event,'strc_start_at',true))<time()))throw new \InvalidArgumentException('Bitte eine kommende Abholveranstaltung wählen.');
             $email=sanitize_email($input['email']??'');if($email&&!is_email($email))throw new \InvalidArgumentException('Bitte eine gültige E-Mail-Adresse angeben.');
-            if($fulfilment==='shipping'&&(!trim($input['street']??'')||!trim($input['postcode']??'')||!trim($input['city']??'')))throw new \InvalidArgumentException('Für den Versand bitte die Lieferadresse ergänzen.');
-            $free=in_array($kind,['board','gift'],true);$total=0;$regular=0;
+            // Adresse: Mitglied aus dem Profil (Eingaben übersteuern), Gast mit Name und Wohnort; Versand und Rechnung mit vollständiger Adresse.
+            $address=['first_name'=>sanitize_text_field($input['firstName']??''),'last_name'=>sanitize_text_field($input['lastName']??''),'email'=>$email,'phone'=>sanitize_text_field($input['phone']??''),'address_1'=>sanitize_text_field($input['street']??''),'postcode'=>sanitize_text_field($input['postcode']??''),'city'=>sanitize_text_field($input['city']??''),'country'=>'CH'];
+            if($customer){$member=self::memberAddress($customer);foreach($address as $field=>$value)if($value===''||in_array($field,['first_name','last_name','email'],true))$address[$field]=$member[$field]??$value;}
+            if(!$customer&&$kind!=='gift'&&(!$address['first_name']||!$address['last_name']||!$address['city']))throw new \InvalidArgumentException('Bitte Vorname, Nachname und Wohnort des Gastes angeben.');
+            if(($fulfilment==='shipping'||$kind==='manual')&&(!$address['address_1']||!$address['postcode']||!$address['city']))throw new \InvalidArgumentException($kind==='manual'?'Für die Rechnung bitte die vollständige Adresse angeben.':'Für den Versand bitte die Lieferadresse ergänzen.');
+            if($kind==='manual'&&!is_email($address['email']))throw new \InvalidArgumentException('Für die Rechnung bitte eine E-Mail-Adresse angeben.');
+            $free=$kind==='gift';$total=0;$regular=0;
             foreach($selected as [$product,$quantity]){$regular+=(float)$product->get_price()*$quantity;if(!$free)$total+=(float)$product->get_price()*$quantity;}
-            if($fulfilment==='shipping'&&!$free)$total+=(float)self::money($input['shipping']??'');
-            $review=hash_hmac('sha256',wp_json_encode([$customer,$kind,$method,$reason,$fulfilment,$event,$items,$email,$input['firstName']??'',$input['lastName']??'',$input['street']??'',$input['postcode']??'',$input['city']??'',$input['reference']??'',$total,$regular]),wp_salt('auth'));
-            if(($input['preview']??'')==='1')return ['total'=>wc_format_decimal($total,2),'regular'=>wc_format_decimal($regular,2),'reviewToken'=>$review];
+            $shippingCost=$fulfilment==='shipping'&&!$free&&!$freeShipping?self::money($input['shipping']??''):'0';
+            $total+=(float)$shippingCost;
+            $review=hash_hmac('sha256',wp_json_encode([$customer,$kind,$purpose,$method,$reason,$fulfilment,$freeShipping,$event,$items,$address,$input['reference']??'',$session['id']??'',$total,$regular]),wp_salt('auth'));
+            if(($input['preview']??'')==='1')return ['total'=>wc_format_decimal($total,2),'regular'=>wc_format_decimal($regular,2),'reviewToken'=>$review,'address'=>$address];
             if(!hash_equals($review,$input['reviewToken']??''))throw new \InvalidArgumentException('Artikel, Preis oder Angaben wurden geändert. Bitte nochmals prüfen.');
             $order=null;
             try{
                 $order=wc_create_order(['customer_id'=>$customer,'created_via'=>'strc_direct']);if(is_wp_error($order))throw new \RuntimeException('Bestellung konnte nicht angelegt werden.');
-                $address=['first_name'=>sanitize_text_field($input['firstName']??''),'last_name'=>sanitize_text_field($input['lastName']??''),'email'=>$email,'address_1'=>sanitize_text_field($input['street']??''),'postcode'=>sanitize_text_field($input['postcode']??''),'city'=>sanitize_text_field($input['city']??''),'country'=>'CH'];
-                if($customer){$user=get_userdata($customer);$address['email']=$user->user_email;$address['first_name']=(string)get_user_meta($customer,'first_name',true);$address['last_name']=(string)get_user_meta($customer,'last_name',true);}
-                $order->set_address($address,'billing');$order->set_address($address,'shipping');$order->set_currency('CHF');$free=in_array($kind,['board','gift'],true);$regular=0;$cost=0;$costKnown=true;
+                $order->set_address($address,'billing');$order->set_address($address,'shipping');$order->set_currency('CHF');$regular=0;$cost=0;$costKnown=true;
                 foreach($selected as [$product,$quantity]){$regular+=(float)$product->get_price()*$quantity;$unitCost=$product->get_meta('_strc_cost_price');if($unitCost==='')$costKnown=false;else$cost+=(float)$unitCost*$quantity;$order->add_product($product,$quantity,$free?['subtotal'=>0,'total'=>0]:[]);}
-                if($fulfilment==='shipping'){$shipping=new \WC_Order_Item_Shipping();$shipping->set_method_title('DHL · Schweiz');$shipping->set_method_id('flat_rate');$shipping->set_total($free?'0':self::money($input['shipping']??''));$order->add_item($shipping);}
+                if($fulfilment==='shipping'){$shipping=new \WC_Order_Item_Shipping();$shipping->set_method_title($freeShipping?'Gratisversand (Direktverkauf)':'DHL · Schweiz');$shipping->set_method_id('flat_rate');$shipping->set_total($shippingCost);$order->add_item($shipping);}
                 if($fulfilment==='pickup')$order->update_meta_data('_strc_pickup_event',$event);
-                $order->update_meta_data('_strc_transaction_kind',$kind);$order->update_meta_data('_strc_fulfilment',$fulfilment);$order->update_meta_data('_strc_regular_value',$regular);$order->update_meta_data('_strc_cost_value',$costKnown?$cost:'');$order->update_meta_data('_strc_pos_actor',get_current_user_id());$order->update_meta_data('_strc_reconciliation','pending');$order->update_meta_data('_strc_issue_reason',$reason);$order->update_meta_data('_strc_payment_reference',sanitize_text_field($input['reference']??''));
-                $order->set_payment_method($free?'strc_complimentary':($method==='invoice'?'strc_invoice':'strc_'.$method));$order->set_payment_method_title($free?'Gratisabgabe':(['invoice'=>'Rechnung','cash'=>'Barzahlung erhalten','external'=>'Externe Zahlung bestätigt'][$method]));$order->calculate_totals();$order->save();
+                $order->update_meta_data('_strc_transaction_kind',$kind);$order->update_meta_data('_strc_fulfilment',$fulfilment);$order->update_meta_data('_strc_regular_value',$regular);$order->update_meta_data('_strc_cost_value',$costKnown?$cost:'');$order->update_meta_data('_strc_pos_actor',get_current_user_id());$order->update_meta_data('_strc_reconciliation','pending');$order->update_meta_data('_strc_issue_reason',trim($purposeLabel.($reason!==''?': '.$reason:''),': '));$order->update_meta_data('_strc_payment_reference',sanitize_text_field($input['reference']??''));
+                if($purpose)$order->update_meta_data('_strc_gift_purpose',$purpose);
+                if($freeShipping)$order->update_meta_data('_strc_free_shipping',1);
+                if($session){$order->update_meta_data('_strc_pos_session',$session['id']);$order->update_meta_data('_strc_pos_seller',(int)$session['seller']);}
+                $titles=['cash'=>'Barzahlung (Kasse)','zahls'=>'TWINT/Karte (zahls.ch, Kasse)','invoice'=>'Rechnung'];
+                $order->set_payment_method($free?'strc_complimentary':($method==='invoice'?'strc_invoice':($method==='zahls'?$gateway:'strc_cash')));$order->set_payment_method_title($free?'Geschenk · '.$purposeLabel:$titles[$method]);$order->calculate_totals();$order->save();
                 wc_reserve_stock_for_order($order);
-                $order->add_order_note('Erfasst durch '.wp_get_current_user()->display_name.'. '.$reason);
-                $order->update_status($free||$method!=='invoice'?($fulfilment==='handover'?'completed':'processing'):'on-hold');wc_reduce_stock_levels($order->get_id());wc_release_stock_for_order($order);
-                if(!$free&&$method!=='invoice'){$order->set_date_paid(time());$order->save();}
+                $order->add_order_note('Erfasst durch '.wp_get_current_user()->display_name.($session?' an der Kasse von '.PosSession::sellerName($session):'').'. '.trim($purposeLabel.' '.$reason));
+                $status=match(true){$free,$method==='cash'=>$fulfilment==='handover'?'completed':'processing',$method==='zahls'=>'pending',default=>'on-hold'};
+                $order->update_status($status);wc_reduce_stock_levels($order->get_id());wc_release_stock_for_order($order);
+                if($method==='cash'){$order->set_date_paid(time());$order->save();}
                 update_option($key,$order->get_id(),false);
                 $message='Bestellung #'.$order->get_order_number().' gespeichert; Lagerbestand aktualisiert.';$invoice=null;
-                if(!$free&&$method==='invoice'){$invoice=ShopInvoice::create($order->get_id(),true);$message.=$invoice['url']!==''?' Rechnung '.$invoice['number'].($invoice['sent']?' erstellt und an '.$order->get_billing_email().' gesendet.':' erstellt (keine E-Mail-Adresse, bitte herunterladen).'):' Keine Rechnung: '.$invoice['reason'];}
-                return ['id'=>$order->get_id(),'message'=>$message,'url'=>$order->get_edit_order_url(),'invoiceUrl'=>$invoice['url']??''];
+                if($method==='zahls')$message='Bestellung #'.$order->get_order_number().' erfasst. Bitte den QR-Code scannen lassen; die Zahlung wird automatisch bestätigt.';
+                if($method==='invoice'){$invoice=ShopInvoice::create($order->get_id(),true);$message.=$invoice['url']!==''?' Rechnung '.$invoice['number'].($invoice['sent']?' erstellt und an '.$order->get_billing_email().' gesendet.':' erstellt (bitte herunterladen).'):' Keine Rechnung: '.$invoice['reason'];}
+                return ['id'=>$order->get_id(),'message'=>$message,'url'=>$order->get_edit_order_url(),'invoiceUrl'=>$invoice['url']??'']+PosSession::payment($order);
             }catch(\Throwable $e){if($order instanceof \WC_Order){wc_maybe_increase_stock_levels($order->get_id());wc_release_stock_for_order($order);$order->delete(true);}throw $e;}
         });
+    }
+
+    /** Adresse eines Mitglieds aus dem Profil (Fairgate-Abgleich). */
+    public static function memberAddress(int $userId): array
+    {
+        $user=get_userdata($userId);if(!$user)return [];
+        $meta=static fn(string $key):string=>(string)get_user_meta($userId,$key,true);
+        return ['first_name'=>$meta('first_name'),'last_name'=>$meta('last_name'),'email'=>(string)$user->user_email,'phone'=>$meta('strc_phone'),'address_1'=>$meta('strc_street'),'postcode'=>$meta('strc_postcode'),'city'=>$meta('strc_city'),'country'=>preg_match('/^[A-Z]{2}$/',strtoupper($meta('strc_country')))?strtoupper($meta('strc_country')):'CH'];
     }
 }

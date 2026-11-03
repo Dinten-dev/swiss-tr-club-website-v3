@@ -3716,3 +3716,42 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .gallery-mode label{margin:0!important}
 .crew-room label:has(>input[type=radio]){display:inline-flex;margin:0 8px 0 0}
 .gallery-limit-note{margin:12px 0;padding:10px 14px;border-left:4px solid var(--blue,#114973);border-radius:6px;background:#eaf2f9;font-size:15px;line-height:1.45}
+
+/* Kasse / Direktverkauf (3.11.2026) */
+.pos{display:grid;gap:18px}
+.pos h3{margin:0 0 8px;font-size:18px}
+.pos-session{display:grid;gap:12px;padding:16px 18px;border:1px solid #d6e0e7;border-radius:12px;background:#f6f9fb}
+.pos-session.is-open{border-color:#9cc3a4;background:#eef7f0}
+.pos-session .eyebrow{margin:0 0 2px}
+.pos-session p{margin:0}
+.pos-close-confirm{padding:12px 14px;border:1px solid #eed9b8;border-radius:10px;background:#fbf1e4}
+.pos-sales ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.pos-sales li{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto auto;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;background:#fff;font-size:14px}
+@media(max-width:700px){.pos-sales li{grid-template-columns:1fr}}
+.pos-bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin:0 0 16px;padding:10px 14px;border:1px solid #9cc3a4;border-radius:10px;background:#eef7f0}
+.pos-checkout section{display:grid;gap:8px;padding:14px 0;border-top:1px solid #e3eaf0}
+.pos-kinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.pos-kinds label{margin:0!important}
+.pos-kinds label.is-disabled{opacity:.55;cursor:not-allowed}
+.pos-cart ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pos-cart li{display:grid;grid-template-columns:minmax(0,1fr) 72px auto auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid #e3eaf0;border-radius:8px;background:#fff}
+.pos-cart li input[type=number]{min-height:36px!important;padding:4px 8px!important}
+.pos-pick{display:flex;gap:8px;align-items:center}
+.pos-pick select{flex:1}
+.pos-total{margin:4px 0 0;text-align:right;font-size:17px}
+.pos-member-chip{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid var(--blue,#114973);border-radius:10px;background:#eaf2f9}
+.pos-shortlist{list-style:none;margin:6px 0 0;padding:0;border:1px solid #c9d6df;border-radius:10px;overflow:hidden;background:#fff}
+.pos-shortlist li+li{border-top:1px solid #eef1f4}
+.pos-shortlist button{display:flex;width:100%;gap:10px;align-items:baseline;justify-content:space-between;padding:10px 14px;border:0;background:none;font:inherit;text-align:left;cursor:pointer}
+.pos-shortlist button:hover,.pos-shortlist button:focus-visible{background:#eaf2f9}
+.pos-shortlist small{color:#5d7181}
+.pos-result{display:grid;gap:10px;justify-items:start;padding:18px;border:1px solid #d6e0e7;border-radius:12px;background:#fff}
+.pos-qr{width:240px;height:240px;border:1px solid #e3eaf0;border-radius:10px;background:#fff}
+.pos-add-form{display:grid;gap:10px}
+.pos-match{margin:0;font-weight:700}
+.pos-added{display:block;color:#2f7a45;font-weight:700}
+.pos-overview table{width:100%;border-collapse:collapse}
+.pos-overview th,.pos-overview td{padding:8px;border-bottom:1px solid #eef1f4;text-align:left;vertical-align:top}
+.db-cashbox{list-style:none;margin:0 0 12px;padding:12px 14px;border-left:4px solid var(--red,#bd2028);border-radius:8px;background:#fbf1e4}
+.db-cashbox p{margin:2px 0}
+.db-cashbox-links{display:flex;flex-wrap:wrap;gap:6px 16px}
