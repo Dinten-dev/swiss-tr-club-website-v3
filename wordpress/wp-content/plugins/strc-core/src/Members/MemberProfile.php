@@ -143,7 +143,9 @@ final class MemberProfile
         if($house['mode']!=='single'||!$m||!in_array(MembershipTypePolicy::normalize((string)$m['membership_type']),['individual','youth'],true))throw new \RuntimeException('Der Wechsel zur Paarmitgliedschaft ist für dieses Konto nicht möglich.',409);
         if(in_array(self::coupleRequest($actor)['state'],['pending','active'],true))throw new \RuntimeException('Der Wechsel wurde bereits beantragt.',409);
         $copilot=self::guestCopilot($actor)['values'];
-        foreach(['first_name','last_name','email','phone','street','postcode','city','country'] as $field)if(trim($copilot[$field])==='')throw new \InvalidArgumentException('Bitte zuerst die Angaben des Co-Piloten vollständig erfassen und speichern.');
+        // Paarmitgliedschaft = zwei Personen an derselben Adresse: Der Co-Pilot übernimmt die Adresse des Hauptmitglieds (Vorgabe Redaktion 3.11.2026).
+        foreach(['street','postcode','city','country'] as $field){$own=trim((string)get_user_meta($actor,'strc_'.$field,true));if($own===''&&$field!=='country')throw new \InvalidArgumentException('Bitte zuerst deine eigene Adresse im Profil vervollständigen.');$copilot[$field]=$own!==''?$own:($copilot[$field]?:'CH');}
+        foreach(['first_name','last_name','email','phone','birth_date'] as $field)if(trim((string)$copilot[$field])==='')throw new \InvalidArgumentException($field==='birth_date'?'Bitte das Geburtsdatum des Co-Piloten erfassen und speichern.':'Bitte zuerst die Angaben des Co-Piloten vollständig erfassen und speichern.');
         $user=get_userdata($actor);$number=(string)$m['member_number'];if(str_starts_with($number,'FG:'))$number='';
         // c) Co-Pilot-Angaben in die vorbereiteten Fairgate-Felder beim Mitglied übertragen, damit der Aktuar sie dort findet.
         $contactId=(string)($m['fairgate_contact_id']??'');
@@ -153,7 +155,7 @@ final class MemberProfile
         $payload=['member'=>['name'=>$user->display_name,'memberNumber'=>$number,'email'=>$user->user_email,'fairgateContactId'=>(string)($m['fairgate_contact_id']??'')],'copilot'=>$copilot,'newMembership'=>'Paarmitgliedschaft','fee'=>'CHF 160.–','task'=>self::COUPLE_TASK,'copilotInFairgate'=>$inFairgate];
         $form=FormStore::intake('couple',$payload,wp_generate_uuid4(),$actor);
         update_user_meta($actor,'strc_couple_request',['state'=>'pending','at'=>gmdate(DATE_ATOM),'formId'=>$form]);
-        self::notifyAktuar($form,$user->display_name,trim($copilot['first_name'].' '.$copilot['last_name']),$inFairgate);
+        self::notifyAktuar($form,$user->display_name.($number!==''?' (Nr. '.$number.')':''),trim($copilot['first_name'].' '.$copilot['last_name']),$inFairgate,$copilot);
         return ['message'=>'Wechsel zur Paarmitgliedschaft beantragt. Der Aktuar verbindet euch in Fairgate; sobald die Paarmitgliedschaft aktiv ist, erhältst du eine Bestätigung.'];
     }
 
@@ -277,13 +279,16 @@ final class MemberProfile
         return $status['state']==='accepted';
     }
 
-    private static function notifyAktuar(int $form,string $member,string $copilot,bool $inFairgate=false): void
+    private static function notifyAktuar(int $form,string $member,string $copilot,bool $inFairgate=false,array $details=[]): void
     {
         $status=['state'=>'sending','attemptedAt'=>gmdate(DATE_ATOM),'recipients'=>self::aktuarRecipients()];
         update_post_meta($form,'strc_couple_notification',$status);
         $base=rtrim(defined('STRC_FRONTEND_ORIGIN')?STRC_FRONTEND_ORIGIN:home_url(),'/');
-        $hint=$inFairgate?"Die Angaben des Co-Piloten stehen in Fairgate beim Mitglied unter «Haushalt/Partner» (Co-Pilot-Felder) bereit. Bitte dort prüfen und den Co-Piloten als Paarmitglied verbinden.":"Die Angaben des Co-Piloten konnten nicht automatisch nach Fairgate übertragen werden; sie stehen auf der Website unter «Anträge bearbeiten». Bitte in Fairgate erfassen und den Co-Piloten als Paarmitglied verbinden.";
-        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('internal.couple_switch','de',['mitglied'=>$member,'copilot'=>$copilot,'hinweis'=>$hint,'link'=>$base.'/#antraege/paar']);
+        $hint=($inFairgate?"Name, E-Mail und Telefon des Co-Piloten stehen bereits in den Co-Pilot-Feldern beim Mitglied in Fairgate.":"Die Co-Pilot-Angaben konnten nicht automatisch in die Fairgate-Felder übertragen werden.")
+            ."\n\nSo in Fairgate verbinden:\n1. Co-Pilot als neuen Kontakt anlegen (Angaben oben; E-Mail-Adresse genau übernehmen, damit die Website das Konto zuordnet).\n2. Beim Mitglied unter «Haushalt/Partner» den neuen Kontakt wählen und verbinden.\n3. Mitgliedschaft beider auf «Paar» stellen.";
+        $d=array_map('strval',$details+array_fill_keys(['salutation','first_name','last_name','birth_date','email','phone','street','postcode','city','country'],''));
+        $lines=array_filter([trim($d['salutation'].' '.$d['first_name'].' '.$d['last_name']),$d['birth_date']!==''?'Geburtsdatum: '.$d['birth_date']:'',$d['email']!==''?'E-Mail: '.$d['email']:'',$d['phone']!==''?'Telefon: '.$d['phone']:'',$d['street']!==''?'Adresse (wie Mitglied): '.$d['street'].', '.trim($d['postcode'].' '.$d['city']).($d['country']!==''&&$d['country']!=='CH'?', '.$d['country']:''):'']);
+        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('internal.couple_switch','de',['mitglied'=>$member,'copilot'=>$copilot,'angaben'=>implode("\n",$lines),'hinweis'=>$hint,'link'=>$base.'/#antraege/paar']);
         try{$accepted=wp_mail($status['recipients'],$mail['subject'],$mail['body']."\n",['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>']);$status['state']=$accepted?'accepted':'failed';}
         catch(\Throwable $error){$status['state']='uncertain';}
         update_post_meta($form,'strc_couple_notification',$status);

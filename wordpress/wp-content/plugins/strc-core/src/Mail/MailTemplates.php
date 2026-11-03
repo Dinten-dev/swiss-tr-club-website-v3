@@ -177,10 +177,10 @@ final class MailTemplates
             ),
             'internal.couple_switch' => array(
                 'group' => 'Intern', 'label' => 'Mitgliedschaft: Antrag Wechsel zur Paarmitgliedschaft', 'recipient' => 'Aktuar',
-                'placeholders' => array('mitglied', 'copilot', 'hinweis', 'link'), 'required' => array('link'),
-                'note' => '{{hinweis}} sagt, ob die Co-Pilot-Angaben bereits in Fairgate stehen.',
-                'de' => array('subject' => 'Swiss TR-Club: Wechsel zur Paarmitgliedschaft', 'body' => "Neuer Antrag: Wechsel zur Paarmitgliedschaft\n\nMitglied: {{mitglied}}\nCo-Pilot: {{copilot}}\n\n{{hinweis}} Beim nächsten Abgleich wird die Paarmitgliedschaft auf der Website aktiv; das Mitglied und der Kassier werden dann automatisch informiert.\n\nAlle Angaben und Rückfragen unter «Anträge bearbeiten» → Paarmitgliedschaften:\n{{link}}\n\nSwiss TR-Club"),
-                'fr' => array('subject' => 'Swiss TR-Club : passage à l’affiliation en couple', 'body' => "Nouvelle demande : passage à l’affiliation en couple\n\nMembre : {{mitglied}}\nCo-pilote : {{copilot}}\n\n{{hinweis}} Lors de la prochaine synchronisation, l’affiliation en couple sera active sur le site; le membre et le caissier seront alors informés automatiquement.\n\nToutes les données et questions sous « Traiter les demandes » → Affiliations en couple :\n{{link}}\n\nSwiss TR-Club"),
+                'placeholders' => array('mitglied', 'copilot', 'angaben', 'hinweis', 'link'), 'required' => array('link'),
+                'note' => '{{angaben}} enthält alle Co-Pilot-Angaben; {{hinweis}} sagt, ob sie bereits in Fairgate stehen, und nennt die Schritte.',
+                'de' => array('subject' => 'Swiss TR-Club: Wechsel zur Paarmitgliedschaft', 'body' => "Neuer Antrag: Wechsel zur Paarmitgliedschaft\n\nMitglied: {{mitglied}}\n\nCo-Pilot:\n{{angaben}}\n\n{{hinweis}}\n\nBeim nächsten Abgleich wird die Paarmitgliedschaft auf der Website aktiv; das Mitglied und der Kassier werden dann automatisch informiert.\n\nAlle Angaben und Rückfragen unter «Anträge bearbeiten» → Paarmitgliedschaften:\n{{link}}\n\nSwiss TR-Club"),
+                'fr' => array('subject' => 'Swiss TR-Club : passage à l’affiliation en couple', 'body' => "Nouvelle demande : passage à l’affiliation en couple\n\nMembre : {{mitglied}}\n\nCo-pilote :\n{{angaben}}\n\n{{hinweis}}\n\nLors de la prochaine synchronisation, l’affiliation en couple sera active sur le site; le membre et le caissier seront alors informés automatiquement.\n\nToutes les données et questions sous « Traiter les demandes » → Affiliations en couple :\n{{link}}\n\nSwiss TR-Club"),
             ),
             'internal.couple_fee' => array(
                 'group' => 'Intern', 'label' => 'Mitgliedschaft: neue Paarmitgliedschaft – Beitrag anpassen', 'recipient' => 'Kassier',
