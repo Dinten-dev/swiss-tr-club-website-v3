@@ -3770,3 +3770,4 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .mission-copy{grid-area:copy}
 .mission-layout .mission-picture{grid-area:pic}
 @media(max-width:760px){.mission-layout{grid-template-areas:"pano" "copy" "pic"}.mission-panorama{min-height:0;aspect-ratio:16/7}}
+.couple-steps ol{margin:8px 0 10px;padding-left:20px;display:grid;gap:4px}
