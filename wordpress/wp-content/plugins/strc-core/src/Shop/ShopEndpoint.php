@@ -33,7 +33,17 @@ final class ShopEndpoint
 
     public function respond(): void
     {
-        [$operation,$input] = AjaxRequest::read('strc_shop', array('product-save','product-update','order-save','product-order','invoice-issue'));
+        [$operation,$input] = AjaxRequest::read('strc_shop', array('product-save','product-update','order-save','product-order','invoice-issue','pos-open','pos-close','pos-cancel','pos-paid'));
+        // Kasse (Direktverkauf): öffnen, Zahlungsstand, Storno und Schliessen durch die Shopverwaltung; Einzahlung bestätigen auch durch den Kassier.
+        if($operation==='pos-qr'){if(!self::canManageShop()||!function_exists('wc_get_order'))AjaxRequest::fail('Keine Berechtigung für die Kasse.',403);PosSession::qr(absint($input['id']??0));}
+        if(in_array($operation,['pos-open','pos-close','pos-cancel','pos-sale','pos-paid','pos-overview'],true)){
+            $finance=current_user_can('strc_access_member_area')&&current_user_can('strc_manage_finance');
+            $allowed=match($operation){'pos-paid'=>self::canManageShop()||$finance,'pos-overview'=>self::canInspect()||$finance,default=>self::canManageShop()};
+            if(!$allowed||!function_exists('wc_get_order'))AjaxRequest::fail('Keine Berechtigung für die Kasse.',403);
+            try{wp_send_json_success(match($operation){'pos-open'=>PosSession::open($input),'pos-close'=>PosSession::close($input),'pos-cancel'=>PosSession::cancelSale($input),'pos-sale'=>PosSession::saleStatus($input),'pos-paid'=>PosSession::markPaid($input),default=>PosSession::overview()});}
+            catch(\InvalidArgumentException $e){AjaxRequest::fail($e->getMessage(),422);}
+            catch(\Throwable $e){error_log('STRC pos: '.$e->getMessage());AjaxRequest::fail('Kassenvorgang konnte nicht abgeschlossen werden. Bitte neu laden und erneut versuchen.',409);}
+        }
         if(in_array($operation,['product-save','product-update','product-list','product-detail','order-save','order-options','product-order'],true)){
             if(!self::canManageShop()||!function_exists('wc_get_product'))AjaxRequest::fail('Keine Shopberechtigung.',403);
             try{wp_send_json_success(match($operation){'product-save'=>ShopOperations::saveProduct($input),'product-update'=>ShopOperations::updateProduct($input),'product-list'=>ShopOperations::productList(),'product-detail'=>ShopOperations::productDetail($input),'order-save'=>ShopOperations::order($input),'product-order'=>ShopOperations::sortProducts($input),default=>ShopOperations::choices()});}
@@ -93,7 +103,7 @@ final class ShopEndpoint
         $online=self::zahlsReady();
         // Beitragsrechnung: auf der Zahlungsseite nur Online-Zahlung anbieten, die QR-Rechnung liegt bereits vor.
         $membership=false;
-        if(function_exists('is_wc_endpoint_url')&&is_wc_endpoint_url('order-pay')){$order=wc_get_order(absint(get_query_var('order-pay')));$membership=\SwissTRClub\Core\Members\MembershipFee::isMembershipOrder($order);}
+        if(function_exists('is_wc_endpoint_url')&&is_wc_endpoint_url('order-pay')){$order=wc_get_order(absint(get_query_var('order-pay')));$membership=\SwissTRClub\Core\Members\MembershipFee::isMembershipOrder($order)||PosSession::isSettlement($order)||($order instanceof \WC_Order&&PosSession::isPosPayment($order));}
         return array_filter($gateways,static fn($gateway):bool=>(!$membership&&$gateway->id==='strc_invoice')||($online&&str_contains(strtolower((string)$gateway->id),'zahls')));
     }
 
@@ -136,7 +146,7 @@ final class ShopEndpoint
         $args=['type'=>'shop_order','limit'=>50,'page'=>$page,'paginate'=>true,'orderby'=>'date','order'=>'DESC'];
         if($event)$args['meta_query']=[['key'=>'_strc_pickup_event','value'=>$event]];
         $result=wc_get_orders($args);$orders=[];
-        foreach($result->orders as $order){$pickup=(int)$order->get_meta('_strc_pickup_event');$orders[]=['id'=>$order->get_id(),'number'=>$order->get_order_number(),'date'=>$order->get_date_created()?->date(DATE_ATOM),'status'=>$order->get_status(),'customer'=>trim($order->get_billing_first_name().' '.$order->get_billing_last_name()),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'paymentMethod'=>$order->get_payment_method_title(),'pickupEvent'=>$pickup?get_the_title($pickup):'','shippedAt'=>(string)$order->get_meta('_strc_shipped_at'),'tracking'=>(string)$order->get_meta('_strc_tracking'),'items'=>array_values(array_map(static fn($item)=>$item->get_name().' × '.$item->get_quantity(),$order->get_items())),'invoice'=>$order->get_payment_method()===ShopInvoice::GATEWAY?(ShopInvoice::state($order)?:['number'=>'','url'=>'','sent'=>false,'reason'=>'']):null];}
+        foreach($result->orders as $order){if(PosSession::isSettlement($order))continue;$pickup=(int)$order->get_meta('_strc_pickup_event');$orders[]=['id'=>$order->get_id(),'number'=>$order->get_order_number(),'date'=>$order->get_date_created()?->date(DATE_ATOM),'status'=>$order->get_status(),'customer'=>trim($order->get_billing_first_name().' '.$order->get_billing_last_name()),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'paymentMethod'=>$order->get_payment_method_title(),'pickupEvent'=>$pickup?get_the_title($pickup):'','shippedAt'=>(string)$order->get_meta('_strc_shipped_at'),'tracking'=>(string)$order->get_meta('_strc_tracking'),'items'=>array_values(array_map(static fn($item)=>$item->get_name().' × '.$item->get_quantity(),$order->get_items())),'invoice'=>$order->get_payment_method()===ShopInvoice::GATEWAY?(ShopInvoice::state($order)?:['number'=>'','url'=>'','sent'=>false,'reason'=>'']):null];}
         $stock=[];$products=wc_get_products(['limit'=>50,'page'=>max(1,absint($input['stockPage']??1)),'paginate'=>true,'status'=>['publish','draft','private']]);
         foreach($products->products as $product){$stock[]=['id'=>$product->get_id(),'name'=>$product->get_name(),'sku'=>$product->get_sku(),'quantity'=>$product->get_stock_quantity(),'stockStatus'=>$product->get_stock_status(),'type'=>$product->get_type()];if($product->is_type('variable'))foreach($product->get_children() as $variantId){$variant=wc_get_product($variantId);if($variant)$stock[]=['id'=>$variantId,'name'=>$variant->get_name(),'sku'=>$variant->get_sku(),'quantity'=>$variant->get_stock_quantity(),'stockStatus'=>$variant->get_stock_status(),'type'=>'variation'];}}
         $summary=null;
@@ -145,7 +155,7 @@ final class ShopEndpoint
             $summary=['count'=>0,'total'=>0.0,'paid'=>0.0,'open'=>0.0,'currency'=>function_exists('get_woocommerce_currency')?get_woocommerce_currency():'CHF','byMethod'=>[],'byPickup'=>[],'byStatus'=>[]];
             $byMethod=[];$byPickup=[];$byStatus=[];
             foreach(wc_get_orders(['limit'=>-1,'status'=>['pending','on-hold','processing','completed'],'type'=>'shop_order']) as $order){
-                $amount=(float)$order->get_total();$status=$order->get_status();$summary['count']++;$summary['total']+=$amount;
+                if(PosSession::isSettlement($order))continue;$amount=(float)$order->get_total();$status=$order->get_status();$summary['count']++;$summary['total']+=$amount;
                 if(in_array($status,['processing','completed'],true))$summary['paid']+=$amount;else $summary['open']+=$amount;
                 $method=$order->get_payment_method_title()?:'Ohne Zahlungsart';$pickup=(int)$order->get_meta('_strc_pickup_event');$place=$pickup?'Abholung: '.get_the_title($pickup):'Versand';
                 $add=static function(array &$bucket,string $key,float $amount):void{$bucket[$key]['count']=($bucket[$key]['count']??0)+1;$bucket[$key]['total']=round(($bucket[$key]['total']??0)+$amount,2);};
@@ -176,7 +186,7 @@ final class ShopEndpoint
     {
         if (! function_exists('wc_get_order') || ! function_exists('wc_get_product')) return;
         $order = wc_get_order($orderId);
-        if (! $order || !in_array($order->get_status(),['on-hold','processing','completed'],true) || ! add_post_meta($orderId, '_strc_shop_notification_lock', time(), true)) return;
+        if (! $order || PosSession::isSettlement($order) || !in_array($order->get_status(),['on-hold','processing','completed'],true) || ! add_post_meta($orderId, '_strc_shop_notification_lock', time(), true)) return;
 
         try {
             $sent = (array) $order->get_meta('_strc_shop_notifications_sent', true);
