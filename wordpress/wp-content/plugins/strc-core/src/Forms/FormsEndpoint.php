@@ -9,6 +9,7 @@ use SwissTRClub\Core\Community\PrivateUploadStore;
 
 final class FormsEndpoint
 {
+    public const SHOP_EMAIL='shop@swisstrclub.ch';
     public function registerHooks(): void
     {
         add_action('init',[FormStore::class,'register']);
@@ -28,7 +29,8 @@ final class FormsEndpoint
                 if(!empty($input['website']))throw new \InvalidArgumentException('Die Anfrage konnte nicht verarbeitet werden.');
                 $data=['name'=>FormFields::text($input,'name',160,true),'email'=>FormFields::text($input,'email',200,true),'phone'=>FormFields::text($input,'phone',40),'subject'=>FormFields::choice($input,'subject',['Allgemeine Frage','Mitgliedschaft','Regionen','Veranstaltungen','TR-Shop','Website']),'message'=>FormFields::text($input,'message',5000,true)];
                 if(!is_email($data['email']))throw new \InvalidArgumentException('Bitte eine gültige E-Mail-Adresse eingeben.');
-                FormStore::quota();FormStore::intake('contact',$data,$input['requestId']??'',get_current_user_id());
+                FormStore::quota();$record=FormStore::intake('contact',$data,$input['requestId']??'',get_current_user_id());
+                if($data['subject']==='TR-Shop')self::notifyShop($record,$data);
                 wp_send_json_success(['message'=>'Ihre Nachricht ist im Clubpostfach eingegangen. Der Club wird Ihre Anfrage bearbeiten.']);
             }
             if(!current_user_can('strc_access_member_area')) throw new \RuntimeException('Bitte mit einem aktiven Mitgliedskonto anmelden.',403);
@@ -118,5 +120,14 @@ final class FormsEndpoint
         else{$post=get_post(absint($input['id']??0));if(!$post||$post->post_type!=='strc_vehicle'||$post->post_status!=='private'||(int)$post->post_author!==self::vehicleOwner())throw new \RuntimeException('Bild nicht gefunden.',404);$file=FormStore::data($post)['file']??null;}
         if(!$file)throw new \RuntimeException('Bild nicht gefunden.',404);
         (new PrivateUploadStore())->stream($file);
+    }
+
+    /** Anfragen mit Betreff «TR-Shop» gehen zusätzlich an das Shop-Postfach; Antwort direkt an die anfragende Person. Einmal pro Anfrage. */
+    private static function notifyShop(int $record,array $data): void
+    {
+        if(!$record||!add_post_meta($record,'_strc_shop_notified',time(),true))return;
+        $mail=\SwissTRClub\Core\Mail\MailTemplates::render('internal.shop_enquiry','de',['name'=>$data['name'],'email'=>$data['email'],'telefon'=>$data['phone']?:'–','nachricht'=>$data['message']]);
+        $replyTo=str_replace(["\r","\n",'<','>'],'',$data['name']).' <'.sanitize_email($data['email']).'>';
+        try{wp_mail(self::SHOP_EMAIL,$mail['subject'],$mail['body'],['Content-Type: text/plain; charset=UTF-8','From: Swiss TR-Club <no-reply@swisstrclub.ch>','Reply-To: '.$replyTo]);}catch(\Throwable $error){error_log('STRC shop enquiry mail: '.$error->getMessage());}
     }
 }
