@@ -74,7 +74,7 @@ final class EditorialEndpoint
         $moderated = array(
             'meetName' => array('a', 'Treffpunkt: Name'),
             'meetAddress' => array('a', 'Treffpunkt: Adresse'),
-            'meetSchedule' => array('a', 'Treffpunkt: Rhythmus und Zeit (zwei Zeilen möglich)'),
+            'meetSchedule' => array('a', 'Treffpunkt: Rhythmus und Zeit (drei Zeilen möglich)'),
             'meetDates' => array('a', 'Nächste Treffen'),
             'body' => array('b', $triungsters ? 'Über die TRiungsters' : 'Weitere Termine'),
             'news' => array('c', 'Neuigkeiten'),

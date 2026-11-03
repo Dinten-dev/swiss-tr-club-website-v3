@@ -23,7 +23,7 @@ final class WooMailTemplates
     {
         if (! $order instanceof \WC_Order) return $value;
         $rendered = MailTemplates::render($key, CustomerLanguage::language($order), array(
-            'vorname' => $order->get_billing_first_name(), 'bestellnummer' => $order->get_order_number(),
+            'vorname' => $order->get_billing_first_name(), 'geschlecht' => MailTemplates::orderGender($order), 'bestellnummer' => $order->get_order_number(),
             'betrag' => number_format((float) $order->get_total(), 2, '.', "'"),
         ));
         return $rendered[$field] !== '' ? $rendered[$field] : $value;

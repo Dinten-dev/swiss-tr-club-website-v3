@@ -1,12 +1,11 @@
 'use client';
 import {t,uiLocale,useUILanguage} from './UILanguage';
 
-import {useEffect,useRef,useState,useSyncExternalStore,type MouseEvent} from 'react';
+import {useEffect,useRef,useState,useSyncExternalStore} from 'react';
 import Image from 'next/image';
 import {RichHtml,useSiteContent,assetUrl,regionalLandscape,type ContentImage,type ContentValues} from './SiteContent';
 import {imageFrameStyle} from './ImageFrame';
 import {query} from './ClubApi';
-import {scrollToHomeSection} from './HomepageOverview';
 import {trModels,Placeholder} from './VehicleModels';
 import {swissOutline,regionPins} from './swissOutline';
 import type {ClubEvent} from '../page';
@@ -33,7 +32,6 @@ export function HomeHero({nextEvent}:{nextEvent?:ClubEvent}){
  const [index,setIndex]=useState(0);const [paused,setPaused]=useState(false);const [visible,setVisible]=useState(true);
  useEffect(()=>{const update=()=>setVisible(!document.hidden);document.addEventListener('visibilitychange',update);return()=>document.removeEventListener('visibilitychange',update);},[]);
  useEffect(()=>{if(reduced||paused||!visible||Math.max(slides.length,leads.length)<2)return;const timer=window.setTimeout(()=>setIndex(current=>current+1),7000);return()=>window.clearTimeout(timer);},[reduced,paused,visible,slides.length,leads.length,index]);
- const toNext=(event:MouseEvent<HTMLAnchorElement>)=>{if(!nextEvent||!document.getElementById('home-next-event'))return;event.preventDefault();scrollToHomeSection('home-next-event');};
  const slideIndex=index%slides.length;
  const caption=photoAlt(slides[slideIndex]??slides[0],language);
  return <section className="hx-hero" aria-labelledby="home-arrival-title" onFocusCapture={()=>setPaused(true)} onBlurCapture={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setPaused(false);}}>
@@ -43,7 +41,7 @@ export function HomeHero({nextEvent}:{nextEvent?:ClubEvent}){
    <p className="hx-eyebrow">{c('home.eyebrow','Willkommen beim Swiss TR-Club')}</p>
    <h1 id="home-arrival-title">{c('home.title')}</h1>
    {leads.length>1&&!reduced?<div className="hx-hero-leads" aria-live="off">{leads.map((lead,position)=><RichHtml key={position} html={lead} className={`hx-hero-intro${position===index%leads.length?' is-active':''}`}/>)}</div>:leads.map((lead,position)=><RichHtml key={position} html={lead} className="hx-hero-intro is-active"/>)}
-   <div className="hx-hero-actions"><a className="hx-button hx-button-red" href="#anmeldung">{t('Mitglied werden')} <span aria-hidden="true">→</span></a><a className="hx-button hx-button-ghost" href="#agenda" onClick={toNext}>{t(nextEvent?'Nächster Anlass':'Zur Agenda')}</a></div>
+   <div className="hx-hero-actions"><a className="hx-button hx-button-red" href="#anmeldung">{t('Mitglied werden')} <span aria-hidden="true">→</span></a>{!nextEvent&&<a className="hx-button hx-button-ghost" href="#agenda">{t('Zur Agenda')}</a>}</div>
   </div>
   {slides.length>1&&<div className="home-width hx-hero-meta">{caption&&<span>{caption}</span>}<div className="hx-hero-dots" role="group" aria-label={t('Titelbild wählen')}>{slides.map((photo,slide)=><button key={photo.url+slide} type="button" aria-label={`${t('Bild')} ${slide+1}`} aria-current={slide===slideIndex} onClick={()=>setIndex(slide)}/>)}</div></div>}
  </section>;
