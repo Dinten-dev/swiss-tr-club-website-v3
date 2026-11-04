@@ -3771,3 +3771,9 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .mission-layout .mission-picture{grid-area:pic}
 @media(max-width:760px){.mission-layout{grid-template-areas:"pano" "copy" "pic"}.mission-panorama{min-height:0;aspect-ratio:16/7}}
 .couple-steps ol{margin:8px 0 10px;padding-left:20px;display:grid;gap:4px}
+
+/* Organisation: «Weitere Funktionen» in einer Reihe (bis 5 Karten, Wunsch Redaktion 4.11.2026) */
+.portrait-grid.portrait-row{grid-template-columns:repeat(var(--portrait-count,4),minmax(0,1fr));gap:20px}
+.portrait-row .portrait-email{overflow-wrap:anywhere}
+@media(max-width:1100px){.portrait-grid.portrait-row{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:699px){.portrait-grid.portrait-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}}

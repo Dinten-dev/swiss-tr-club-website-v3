@@ -70,7 +70,7 @@ export function StaticPageLayout({documentKey,values,preview=false}:{documentKey
  {vehicle&&(facts.length>0||preview)&&<aside className="landing-sidebar vehicle-facts"><h2>{t("Fahrzeugdaten")}</h2><dl>{(preview?vehicleFacts:facts).map(([key,label])=><div key={key}><dt>{t(label)}</dt><dd>{text(key)||t('Noch ergänzen')}</dd></div>)}</dl>{text('factsNote')&&<RichHtml html={text('factsNote')}/>}</aside>}
  {!vehicle&&(text('sidebar')||preview)&&<aside className="landing-sidebar"><h2>{text('sidebarTitle')||t('Auf einen Blick')}</h2>{text('sidebar')?<RichHtml html={text('sidebar')}/>:<p>{t("Platz für Kontakte und weitere Informationen.")}</p>}</aside>}
  </div>
- {documentKey==='organisation'&&<>{['board','functions'].map(group=><PortraitGroup key={group} title={text(group+'Title')} people={Array.isArray(values[group+'Portraits'])?values[group+'Portraits'] as ContentPerson[]:[]} preview={preview} slots={group==='board'?7:5}/>)}</>}
+ {documentKey==='organisation'&&<>{['board','functions'].map(group=><PortraitGroup key={group} title={text(group+'Title')} people={Array.isArray(values[group+'Portraits'])?values[group+'Portraits'] as ContentPerson[]:[]} preview={preview} slots={group==='board'?7:5} row={group==='functions'}/>)}</>}
 
  {documentKey==='membership'&&!preview&&<MembershipApplication/>}{documentKey==='shop'&&!preview&&<ShopAccess/>}
  </div></article>;
