@@ -189,8 +189,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Editorial/site-content.json",
-      "bytes": 80571,
-      "sha256": "e63690b24b4d47e199fc064bf7878a7620e373c959d5c8137c7e625e3cb13b25"
+      "bytes": 81116,
+      "sha256": "194abd6a3fd01d91dfb318088ac57ed23b960b1421d7c53b02924322d514ec38"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Events/EventArchiveRetention.php",
@@ -434,8 +434,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Mail/MailTemplates.php",
-      "bytes": 39410,
-      "sha256": "e58d5162cd5ac382b101d46367085413ce047f93df5aa7753b1335ef568d22f6"
+      "bytes": 39484,
+      "sha256": "7efbb3f1fb66a155f7ff0fb61018e08ab610a1fe1f9af1a95f7198797c37499d"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Mail/MailTemplatesEndpoint.php",
@@ -494,8 +494,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberProfile.php",
-      "bytes": 24891,
-      "sha256": "8a5ea1a0776cf2c106b4848c127c18f89d7ece96f4428fd9f8bef630afd922ed"
+      "bytes": 26216,
+      "sha256": "206cf11c54365408f3a934b47b4091d200500e935b68d9091cd6b85c72aaf557"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Members/MemberProfileFields.php",
@@ -569,8 +569,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/PosSession.php",
-      "bytes": 16860,
-      "sha256": "c481554674faea3abf10ea267ac035539c326a8c4a0968eaeea5580d8b73ef9d"
+      "bytes": 17102,
+      "sha256": "5967ff76c9082e8ac91288b3c05af67c81b870ebdbf0770f40d16c4e6d77a5c9"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShippingPartner.php",
@@ -599,8 +599,8 @@
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopOperations.php",
-      "bytes": 47444,
-      "sha256": "8f87d57601dbaa8970276c41efefd83a67dc37e674605025ca66298b346df5a5"
+      "bytes": 47639,
+      "sha256": "ecaf6cf11405bb91c43d38fd3bf669ef592492e41fb46d46ab1ed61e45bc1511"
     },
     {
       "path": "wordpress/wp-content/plugins/strc-core/src/Shop/ShopVariationImages.php",
@@ -729,13 +729,13 @@
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.css",
-      "bytes": 336422,
-      "sha256": "088fc22d3f2bce04cfc1e398505e824db7a99f91c0ccd872e027237118a5359f"
+      "bytes": 337720,
+      "sha256": "a2c13d7edb91a62da1b3b766e15a49b886d450517d56cf1c54196b6de3670a1c"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/app.js",
-      "bytes": 1046819,
-      "sha256": "79d239e9376208f92696016172bdc2431fbf53258fd60d14adeeea8420f9108e"
+      "bytes": 1051275,
+      "sha256": "6654aa7041f56dbc0aaeb9ccd2d1707f9b28bd4f906b105d8bb65978986f6a43"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/chunk-BPfpcrXh.js",
@@ -1051,6 +1051,11 @@
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DUNlM3fB.js",
       "bytes": 8199,
       "sha256": "d8dc61cb42893a0c1ac6404034d6b6aa136ea70b1c9daae017261d0a3ad204b4"
+    },
+    {
+      "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DVovrkGf.js",
+      "bytes": 9934,
+      "sha256": "4f84c55c5388fe17616987c317d04a1be4c356227dab3e8680302eeebb1f10cf"
     },
     {
       "path": "wordpress/wp-content/themes/strc-app/build/MagazineReader-DwnVq4gQ.js",
@@ -2383,6 +2388,11 @@
       "sha256": "8911af1d7553b1532ffc36aa70db63e74cfff6baace222d1dd8bf44b40883b90"
     },
     {
+      "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-CRVeYQdP.js",
+      "bytes": 186998,
+      "sha256": "e4acc657e93b019bbb370c9dbc416aefea10264423a26fcb5e8ed8a5db825c7d"
+    },
+    {
       "path": "wordpress/wp-content/themes/strc-app/build/UILanguage-CUSN4xVu.js",
       "bytes": 88034,
       "sha256": "ff48cf6d6796de03d9682c4aad6a0449cccb14e39ccde3ceb69ce558196aebe6"
@@ -2474,6 +2484,6 @@
     }
   ],
   "status": "candidate",
-  "builtOn": "2026-11-03T09:45:25.112Z",
+  "builtOn": "2026-11-05T09:36:39.030Z",
   "baselineCapturedOn": "2026-10-13"
 }
