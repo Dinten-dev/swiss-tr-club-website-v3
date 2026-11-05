@@ -498,6 +498,25 @@
         "default": ""
       },
       {
+        "key": "missionPanorama",
+        "label": "Leitbild: Panoramabild oben (links neben dem Bild)",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "missionPanoramaFrame",
+        "label": "Leitbild: Panoramabild: Einpassen",
+        "type": "imageFrame",
+        "default": "cover|50|50",
+        "imageKey": "missionPanorama"
+      },
+      {
+        "key": "missionPanoramaAlt",
+        "label": "Leitbild: Panoramabild – Bildbeschreibung",
+        "type": "text",
+        "default": ""
+      },
+      {
         "key": "joinEyebrow",
         "label": "Mitglied werden: rote Überschrift",
         "type": "text",

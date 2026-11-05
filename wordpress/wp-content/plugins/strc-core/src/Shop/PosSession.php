@@ -82,7 +82,7 @@ final class PosSession
             if ($method === 'strc_cash' && $paid) $cash += $amount;
             elseif ($method !== 'strc_cash' && $paid) $online += $amount;
             if ($status === 'pending') $pending++;
-            $items = array(); foreach ($order->get_items() as $item) $items[] = $item->get_name() . ' × ' . $item->get_quantity();
+            $items = array(); foreach ($order->get_items() as $item) { $options = array(); foreach ($item->get_formatted_meta_data() as $meta) $options[] = wp_strip_all_tags((string) $meta->display_value); $items[] = $item->get_name() . ($options && ! str_contains($item->get_name(), ' – ') ? ' (' . implode(', ', $options) . ')' : '') . ' × ' . $item->get_quantity(); }
             $rows[] = array('id' => $order->get_id(), 'number' => $order->get_order_number(), 'customer' => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()), 'items' => $items, 'total' => wc_format_decimal($amount, 2), 'method' => $method === 'strc_cash' ? 'cash' : 'zahls', 'status' => $status);
         }
         return array('orders' => $rows, 'cash' => round($cash, 2), 'online' => round($online, 2), 'pending' => $pending);

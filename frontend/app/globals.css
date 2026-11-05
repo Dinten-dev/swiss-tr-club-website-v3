@@ -3755,3 +3755,25 @@ main :is(h1,h2,h3,h4),.home-editorial :is(h1,h2,h3),.market-dialog-heading h2,.p
 .db-cashbox{list-style:none;margin:0 0 12px;padding:12px 14px;border-left:4px solid var(--red,#bd2028);border-radius:8px;background:#fbf1e4}
 .db-cashbox p{margin:2px 0}
 .db-cashbox-links{display:flex;flex-wrap:wrap;gap:6px 16px}
+/* Kasse: Artikel und Ausführung in zwei Auswahlfeldern (3.11.2026) */
+.pos-pick{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,2fr) 90px auto;gap:10px;align-items:end;margin-top:8px}
+.pos-pick label{margin:0!important}
+.pos-pick select{width:100%}
+.pos-pick-quantity input{min-height:44px!important}
+@media(max-width:720px){.pos-pick{grid-template-columns:1fr}}
+/* Leitbild (3.11.2026): Zwischentitel rot; oben Panoramabild links neben dem Bild, gleich hoch, Text darunter. */
+.mission-copy :is(h2,h3,h4){color:var(--red,#bd2028)}
+.mission-layout{grid-template-areas:"pano pic" "copy ."}
+.mission-panorama{grid-area:pano;align-self:stretch;margin:0;min-height:180px}
+.mission-panorama img{display:block;width:100%;height:100%;border-radius:10px}
+.mission-panorama .static-image-placeholder{height:100%;min-height:180px;margin:0;border-radius:10px}
+.mission-copy{grid-area:copy}
+.mission-layout .mission-picture{grid-area:pic}
+@media(max-width:760px){.mission-layout{grid-template-areas:"pano" "copy" "pic"}.mission-panorama{min-height:0;aspect-ratio:16/7}}
+.couple-steps ol{margin:8px 0 10px;padding-left:20px;display:grid;gap:4px}
+
+/* Organisation: «Weitere Funktionen» in einer Reihe (bis 5 Karten, Wunsch Redaktion 4.11.2026) */
+.portrait-grid.portrait-row{grid-template-columns:repeat(var(--portrait-count,4),minmax(0,1fr));gap:20px}
+.portrait-row .portrait-email{overflow-wrap:anywhere}
+@media(max-width:1100px){.portrait-grid.portrait-row{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:699px){.portrait-grid.portrait-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}}

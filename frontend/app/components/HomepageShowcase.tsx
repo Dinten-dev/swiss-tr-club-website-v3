@@ -25,7 +25,7 @@ export function HomeHero({nextEvent}:{nextEvent?:ClubEvent}){
  const reduced=useReducedMotion();
  const heroImage=c('home.heroImage').trim();
  const gallery=((values.home?.photos??[]) as ContentImage[]).filter(photo=>photo.url);
- const slides=[...(heroImage?[{url:heroImage,alt:''} as ContentImage]:[]),...gallery.filter(photo=>photo.url!==heroImage)].slice(0,4);
+ const slides=[...(heroImage?[{url:heroImage,alt:''} as ContentImage]:[]),...gallery.filter(photo=>photo.url!==heroImage)].slice(0,7);// Titelbild plus sechs Bilder aus «Einstieg – Bilder» (Wunsch Redaktion 3.11.2026)
  if(!slides.length)slides.push({url:'/club/scheinwerfer.jpg',alt:''});
  // Einstiegstext und Leitbild wechseln sich unter dem Titel ab, im Takt der Bilder.
  const leads=[c('home.intro'),c('home.mission')].filter(html=>html.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,'').trim());

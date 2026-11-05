@@ -34,7 +34,7 @@ export function ClubLanding({canEdit=false,memberAccess=false}:{canEdit?:boolean
 
 export function MissionPage() {
  const {text:c}=useSiteContent();
- return <><section className="page-hero"><p className="eyebrow">{c('club.missionLabel')}</p><h1>{c('club.missionTitle')}</h1></section><section className="page-content"><a className="page-back" href="#club">{t("← Zur Clubübersicht")}</a><div className="landing-layout"><article className="static-copy"><ContentBlock id="club.body"/></article><aside className="mission-picture">{c('club.missionImage')?<Image src={assetUrl(c('club.missionImage'))} alt={c('club.missionImageAlt')||t('Clubleben im Swiss TR-Club')} width={600} height={800} style={imageFrameStyle(c('club.missionImageFrame'))}/>:<div className="static-image-placeholder">{t("Ein Bild aus unserem Clubleben folgt.")}</div>}</aside></div></section></>;
+ return <><section className="page-hero"><p className="eyebrow">{c('club.missionLabel')}</p><h1>{c('club.missionTitle')}</h1></section><section className="page-content"><a className="page-back" href="#club">{t("← Zur Clubübersicht")}</a><div className="landing-layout mission-layout"><figure className="mission-panorama">{c('club.missionPanorama')?<Image src={assetUrl(c('club.missionPanorama'))} alt={c('club.missionPanoramaAlt')||t('Panorama aus dem Clubleben')} width={1400} height={500} style={imageFrameStyle(c('club.missionPanoramaFrame'),'cover')}/>:<div className="static-image-placeholder">{t('Panoramabild folgt.')}</div>}</figure><article className="static-copy mission-copy"><ContentBlock id="club.body"/></article><aside className="mission-picture">{c('club.missionImage')?<Image src={assetUrl(c('club.missionImage'))} alt={c('club.missionImageAlt')||t('Clubleben im Swiss TR-Club')} width={600} height={800} style={imageFrameStyle(c('club.missionImageFrame'))}/>:<div className="static-image-placeholder">{t("Ein Bild aus unserem Clubleben folgt.")}</div>}</aside></div></section></>;
 }
 
 export function StaticPage({documentKey,canEdit=false}:{documentKey:string;canEdit?:boolean}) {
@@ -70,7 +70,7 @@ export function StaticPageLayout({documentKey,values,preview=false}:{documentKey
  {vehicle&&(facts.length>0||preview)&&<aside className="landing-sidebar vehicle-facts"><h2>{t("Fahrzeugdaten")}</h2><dl>{(preview?vehicleFacts:facts).map(([key,label])=><div key={key}><dt>{t(label)}</dt><dd>{text(key)||t('Noch ergänzen')}</dd></div>)}</dl>{text('factsNote')&&<RichHtml html={text('factsNote')}/>}</aside>}
  {!vehicle&&(text('sidebar')||preview)&&<aside className="landing-sidebar"><h2>{text('sidebarTitle')||t('Auf einen Blick')}</h2>{text('sidebar')?<RichHtml html={text('sidebar')}/>:<p>{t("Platz für Kontakte und weitere Informationen.")}</p>}</aside>}
  </div>
- {documentKey==='organisation'&&<>{['board','functions'].map(group=><PortraitGroup key={group} title={text(group+'Title')} people={Array.isArray(values[group+'Portraits'])?values[group+'Portraits'] as ContentPerson[]:[]} preview={preview} slots={group==='board'?7:5}/>)}</>}
+ {documentKey==='organisation'&&<>{['board','functions'].map(group=><PortraitGroup key={group} title={text(group+'Title')} people={Array.isArray(values[group+'Portraits'])?values[group+'Portraits'] as ContentPerson[]:[]} preview={preview} slots={group==='board'?7:5} row={group==='functions'}/>)}</>}
 
  {documentKey==='membership'&&!preview&&<MembershipApplication/>}{documentKey==='shop'&&!preview&&<ShopAccess/>}
  </div></article>;
