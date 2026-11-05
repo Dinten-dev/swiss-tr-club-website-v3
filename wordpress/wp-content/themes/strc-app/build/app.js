@@ -1,5 +1,5 @@
 import { n as e, t } from "./chunk-C_CI6nMA.js";
-import { a as n, c as r, i, l as a, n as o, o as s, r as c, s as l, t as u } from "./UILanguage-hwj92mqe.js";
+import { a as n, c as r, i, l as a, n as o, o as s, r as c, s as l, t as u } from "./UILanguage-CRVeYQdP.js";
 //#region node_modules/scheduler/cjs/scheduler.production.js
 var d = /* @__PURE__ */ t(((e) => {
 	function t(e, t) {
@@ -482,7 +482,7 @@ var d = /* @__PURE__ */ t(((e) => {
 		B++, z[B] = e.current, e.current = t;
 	}
 	var W = V(null), G = V(null), ee = V(null), te = V(null);
-	function K(e, t) {
+	function ne(e, t) {
 		switch (U(ee, t), U(G, e), U(W, null), t.nodeType) {
 			case 9:
 			case 11:
@@ -501,26 +501,26 @@ var d = /* @__PURE__ */ t(((e) => {
 		}
 		H(W), U(W, e);
 	}
-	function ne() {
+	function re() {
 		H(W), H(G), H(ee);
 	}
-	function q(e) {
+	function K(e) {
 		e.memoizedState !== null && U(te, e);
 		var t = W.current, n = Hd(t, e.type);
 		t !== n && (U(G, e), U(W, n));
 	}
-	function re(e) {
+	function ie(e) {
 		G.current === e && (H(W), H(G)), te.current === e && (H(te), Qf._currentValue = R);
 	}
-	var ie, ae;
+	var q, ae;
 	function oe(e) {
-		if (ie === void 0) try {
+		if (q === void 0) try {
 			throw Error();
 		} catch (e) {
 			var t = e.stack.trim().match(/\n( *(at )?)/);
-			ie = t && t[1] || "", ae = -1 < e.stack.indexOf("\n    at") ? " (<anonymous>)" : -1 < e.stack.indexOf("@") ? "@unknown:0:0" : "";
+			q = t && t[1] || "", ae = -1 < e.stack.indexOf("\n    at") ? " (<anonymous>)" : -1 < e.stack.indexOf("@") ? "@unknown:0:0" : "";
 		}
-		return "\n" + ie + e + ae;
+		return "\n" + q + e + ae;
 	}
 	var se = !1;
 	function J(e, t) {
@@ -3833,14 +3833,14 @@ var d = /* @__PURE__ */ t(((e) => {
 	function xc(e, t, n) {
 		switch (t.tag) {
 			case 3:
-				K(t, t.stateNode.containerInfo), Fi(t, Ji, e.memoizedState.cache), ki();
+				ne(t, t.stateNode.containerInfo), Fi(t, Ji, e.memoizedState.cache), ki();
 				break;
 			case 27:
 			case 5:
-				q(t);
+				K(t);
 				break;
 			case 4:
-				K(t, t.stateNode.containerInfo);
+				ne(t, t.stateNode.containerInfo);
 				break;
 			case 10:
 				Fi(t, t.type, t.memoizedProps.value);
@@ -3897,7 +3897,7 @@ var d = /* @__PURE__ */ t(((e) => {
 			case 1: return r = t.type, a = Is(r, t.pendingProps), sc(e, t, r, a, n);
 			case 3:
 				a: {
-					if (K(t, t.stateNode.containerInfo), e === null) throw Error(i(387));
+					if (ne(t, t.stateNode.containerInfo), e === null) throw Error(i(387));
 					r = t.pendingProps;
 					var o = t.memoizedState;
 					a = o.element, ka(e, t), Ia(t, r, null, n);
@@ -3932,11 +3932,11 @@ var d = /* @__PURE__ */ t(((e) => {
 				}
 				return t;
 			case 26: return ic(e, t), e === null ? (n = kf(t.type, null, t.pendingProps, null)) ? t.memoizedState = n : xi || (n = t.type, e = t.pendingProps, r = Bd(ee.current).createElement(n), r[Ke] = t, r[qe] = e, Pd(r, n, e), at(r), t.stateNode = r) : t.memoizedState = kf(t.type, e.memoizedProps, t.pendingProps, e.memoizedState), null;
-			case 27: return q(t), e === null && xi && (r = t.stateNode = ff(t.type, t.pendingProps, ee.current), yi = t, Ci = !0, a = bi, Zd(t.type) ? (lf = a, bi = cf(r.firstChild)) : bi = a), Js(e, t, t.pendingProps.children, n), ic(e, t), e === null && (t.flags |= 4194304), t.child;
-			case 5: return e === null && xi && ((a = r = bi) && (r = tf(r, t.type, t.pendingProps, Ci), r === null ? a = !1 : (t.stateNode = r, yi = t, bi = cf(r.firstChild), Ci = !1, a = !0)), a || Ti(t)), q(t), a = t.type, o = t.pendingProps, s = e === null ? null : e.memoizedProps, r = o.children, Ud(a, o) ? r = null : s !== null && Ud(a, s) && (t.flags |= 32), t.memoizedState !== null && (a = fo(e, t, ho, null, null, n), Qf._currentValue = a), ic(e, t), Js(e, t, r, n), t.child;
+			case 27: return K(t), e === null && xi && (r = t.stateNode = ff(t.type, t.pendingProps, ee.current), yi = t, Ci = !0, a = bi, Zd(t.type) ? (lf = a, bi = cf(r.firstChild)) : bi = a), Js(e, t, t.pendingProps.children, n), ic(e, t), e === null && (t.flags |= 4194304), t.child;
+			case 5: return e === null && xi && ((a = r = bi) && (r = tf(r, t.type, t.pendingProps, Ci), r === null ? a = !1 : (t.stateNode = r, yi = t, bi = cf(r.firstChild), Ci = !1, a = !0)), a || Ti(t)), K(t), a = t.type, o = t.pendingProps, s = e === null ? null : e.memoizedProps, r = o.children, Ud(a, o) ? r = null : s !== null && Ud(a, s) && (t.flags |= 32), t.memoizedState !== null && (a = fo(e, t, ho, null, null, n), Qf._currentValue = a), ic(e, t), Js(e, t, r, n), t.child;
 			case 6: return e === null && xi && ((e = n = bi) && (n = nf(n, t.pendingProps, Ci), n === null ? e = !1 : (t.stateNode = n, yi = t, bi = null, e = !0)), e || Ti(t)), null;
 			case 13: return fc(e, t, n);
-			case 4: return K(t, t.stateNode.containerInfo), r = t.pendingProps, e === null ? t.child = Ta(t, null, r, n) : Js(e, t, r, n), t.child;
+			case 4: return ne(t, t.stateNode.containerInfo), r = t.pendingProps, e === null ? t.child = Ta(t, null, r, n) : Js(e, t, r, n), t.child;
 			case 11: return Ys(e, t, t.type, t.pendingProps, n);
 			case 7: return Js(e, t, t.pendingProps, n), t.child;
 			case 8: return Js(e, t, t.pendingProps.children, n), t.child;
@@ -4009,12 +4009,12 @@ var d = /* @__PURE__ */ t(((e) => {
 			case 9:
 			case 14: return Oc(t), null;
 			case 1: return Oc(t), null;
-			case 3: return n = t.stateNode, r = null, e !== null && (r = e.memoizedState.cache), t.memoizedState.cache !== r && (t.flags |= 2048), Ii(Ji), ne(), n.pendingContext && (n.context = n.pendingContext, n.pendingContext = null), (e === null || e.child === null) && (Oi(t) ? Cc(t) : e === null || e.memoizedState.isDehydrated && !(t.flags & 256) || (t.flags |= 1024, Ai())), Oc(t), null;
+			case 3: return n = t.stateNode, r = null, e !== null && (r = e.memoizedState.cache), t.memoizedState.cache !== r && (t.flags |= 2048), Ii(Ji), re(), n.pendingContext && (n.context = n.pendingContext, n.pendingContext = null), (e === null || e.child === null) && (Oi(t) ? Cc(t) : e === null || e.memoizedState.isDehydrated && !(t.flags & 256) || (t.flags |= 1024, Ai())), Oc(t), null;
 			case 26:
 				var a = t.type, o = t.memoizedState;
 				return e === null ? (Cc(t), o === null ? (Oc(t), wc(t, a, null, r, n)) : (Oc(t), Tc(t, o))) : o ? o === e.memoizedState ? (Oc(t), t.flags &= -16777217) : (Cc(t), Oc(t), Tc(t, o)) : (e = e.memoizedProps, e !== r && Cc(t), Oc(t), wc(t, a, e, r, n)), null;
 			case 27:
-				if (re(t), n = ee.current, a = t.type, e !== null && t.stateNode != null) e.memoizedProps !== r && Cc(t);
+				if (ie(t), n = ee.current, a = t.type, e !== null && t.stateNode != null) e.memoizedProps !== r && Cc(t);
 				else {
 					if (!r) {
 						if (t.stateNode === null) throw Error(i(166));
@@ -4024,7 +4024,7 @@ var d = /* @__PURE__ */ t(((e) => {
 				}
 				return Oc(t), null;
 			case 5:
-				if (re(t), a = t.type, e !== null && t.stateNode != null) e.memoizedProps !== r && Cc(t);
+				if (ie(t), a = t.type, e !== null && t.stateNode != null) e.memoizedProps !== r && Cc(t);
 				else {
 					if (!r) {
 						if (t.stateNode === null) throw Error(i(166));
@@ -4127,7 +4127,7 @@ var d = /* @__PURE__ */ t(((e) => {
 					if (!a) return t.flags & 256 ? (Xa(t), t) : (Xa(t), null);
 				}
 				return Xa(t), t.flags & 128 ? (t.lanes = n, t) : (n = r !== null, e = e !== null && e.memoizedState !== null, n && (r = t.child, a = null, r.alternate !== null && r.alternate.memoizedState !== null && r.alternate.memoizedState.cachePool !== null && (a = r.alternate.memoizedState.cachePool.pool), o = null, r.memoizedState !== null && r.memoizedState.cachePool !== null && (o = r.memoizedState.cachePool.pool), o !== a && (r.flags |= 2048)), n !== e && n && (t.child.flags |= 8192), Ec(t, t.updateQueue), Oc(t), null);
-			case 4: return ne(), e === null && xd(t.stateNode.containerInfo), Oc(t), null;
+			case 4: return re(), e === null && xd(t.stateNode.containerInfo), Oc(t), null;
 			case 10: return Ii(t.type), Oc(t), null;
 			case 19:
 				if (H(Za), r = t.memoizedState, r === null) return Oc(t), null;
@@ -4160,10 +4160,10 @@ var d = /* @__PURE__ */ t(((e) => {
 	function Ac(e, t) {
 		switch (_i(t), t.tag) {
 			case 1: return e = t.flags, e & 65536 ? (t.flags = e & -65537 | 128, t) : null;
-			case 3: return Ii(Ji), ne(), e = t.flags, e & 65536 && !(e & 128) ? (t.flags = e & -65537 | 128, t) : null;
+			case 3: return Ii(Ji), re(), e = t.flags, e & 65536 && !(e & 128) ? (t.flags = e & -65537 | 128, t) : null;
 			case 26:
 			case 27:
-			case 5: return re(t), null;
+			case 5: return ie(t), null;
 			case 31:
 				if (t.memoizedState !== null) {
 					if (Xa(t), t.alternate === null) throw Error(i(340));
@@ -4177,7 +4177,7 @@ var d = /* @__PURE__ */ t(((e) => {
 				}
 				return e = t.flags, e & 65536 ? (t.flags = e & -65537 | 128, t) : null;
 			case 19: return H(Za), null;
-			case 4: return ne(), null;
+			case 4: return re(), null;
 			case 10: return Ii(t.type), null;
 			case 22:
 			case 23: return Xa(t), Ua(), e !== null && H(aa), e = t.flags, e & 65536 ? (t.flags = e & -65537 | 128, t) : null;
@@ -4189,15 +4189,15 @@ var d = /* @__PURE__ */ t(((e) => {
 	function jc(e, t) {
 		switch (_i(t), t.tag) {
 			case 3:
-				Ii(Ji), ne();
+				Ii(Ji), re();
 				break;
 			case 26:
 			case 27:
 			case 5:
-				re(t);
+				ie(t);
 				break;
 			case 4:
-				ne();
+				re();
 				break;
 			case 31:
 				t.memoizedState !== null && Xa(t);
@@ -8538,7 +8538,7 @@ function te({ value: e, onChange: t, application: n = !1 }) {
 		})] })
 	] });
 }
-function K() {
+function ne() {
 	return /* @__PURE__ */ (0, y.jsxs)("p", {
 		className: "club-hint",
 		children: [
@@ -8553,7 +8553,7 @@ function K() {
 		]
 	});
 }
-function ne() {
+function re() {
 	return /* @__PURE__ */ (0, y.jsx)("div", {
 		className: "application-honeypot",
 		"aria-hidden": "true",
@@ -8566,7 +8566,7 @@ function ne() {
 }
 //#endregion
 //#region app/components/ZoomImage.tsx
-function q({ src: e, alt: t, children: n }) {
+function K({ src: e, alt: t, children: n }) {
 	let [r, a] = (0, _.useState)(!1), [o, s] = (0, _.useState)(1);
 	return /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [/* @__PURE__ */ (0, y.jsxs)("button", {
 		type: "button",
@@ -8626,7 +8626,7 @@ function q({ src: e, alt: t, children: n }) {
 		})]
 	})] });
 }
-var re = {
+var ie = {
 	home: {
 		title: "Startseite",
 		route: "#",
@@ -9122,6 +9122,25 @@ var re = {
 			{
 				key: "missionImageAlt",
 				label: "Leitbild: Bildbeschreibung",
+				type: "text",
+				default: ""
+			},
+			{
+				key: "missionPanorama",
+				label: "Leitbild: Panoramabild oben (links neben dem Bild)",
+				type: "image",
+				default: ""
+			},
+			{
+				key: "missionPanoramaFrame",
+				label: "Leitbild: Panoramabild: Einpassen",
+				type: "imageFrame",
+				default: "cover|50|50",
+				imageKey: "missionPanorama"
+			},
+			{
+				key: "missionPanoramaAlt",
+				label: "Leitbild: Panoramabild – Bildbeschreibung",
 				type: "text",
 				default: ""
 			},
@@ -11534,7 +11553,7 @@ var re = {
 			}
 		]
 	}
-}, ie = re, ae = Object.fromEntries(Object.entries(re).map(([e, t]) => [e, "initialStatus" in t && t.initialStatus === "draft" ? {} : Object.fromEntries(t.fields.map((e) => [e.key, e.default]))])), oe = Object.fromEntries(Object.entries(re).map(([e, t]) => [e, !("initialStatus" in t && t.initialStatus === "draft")]));
+}, q = ie, ae = Object.fromEntries(Object.entries(ie).map(([e, t]) => [e, "initialStatus" in t && t.initialStatus === "draft" ? {} : Object.fromEntries(t.fields.map((e) => [e.key, e.default]))])), oe = Object.fromEntries(Object.entries(ie).map(([e, t]) => [e, !("initialStatus" in t && t.initialStatus === "draft")]));
 function se(e) {
 	return Object.fromEntries(Object.keys({
 		...ae,
@@ -11725,7 +11744,7 @@ function he({ documentKey: e, contained: t = !1 }) {
 	if (!r && !a) return null;
 	let o = r ? /* @__PURE__ */ (0, y.jsxs)("figure", {
 		className: "static-cover",
-		children: [e === "agenda" ? /* @__PURE__ */ (0, y.jsx)(q, {
+		children: [e === "agenda" ? /* @__PURE__ */ (0, y.jsx)(K, {
 			src: Z(r),
 			alt: n(e + ".landingImageAlt"),
 			children: /* @__PURE__ */ (0, y.jsx)(b, {
@@ -12178,23 +12197,23 @@ function we({ section: e, session: t, notify: n }) {
 	] });
 }
 function Te({ ad: e, session: t, initialCategory: n, close: r, created: a }) {
-	let o = R(), s = (0, _.useRef)(crypto.randomUUID()), [c, l] = (0, _.useState)(e?.title || ""), [u, d] = (0, _.useState)(e?.price || ""), [f, p] = (0, _.useState)(String(e?.details.offerType || "sale")), [m, h] = (0, _.useState)(String(e?.details.priceMode || "fixed")), [g, v] = (0, _.useState)(e?.description || ""), [x, S] = (0, _.useState)(e?.category || n), [C, w] = (0, _.useState)(Array.isArray(e?.details.parts) ? e.details.parts.join("\n") : ""), [T, E] = (0, _.useState)(e?.imageIds || []), [D, O] = (0, _.useState)([]), [k, A] = (0, _.useState)((e?.documents || []).map((e) => e.key)), [j, M] = (0, _.useState)([]), N = (0, _.useRef)(/* @__PURE__ */ new Set()), [P, F] = (0, _.useState)(!1), [I, L] = (0, _.useState)(!1), z = (0, _.useRef)(!1), [V, H] = (0, _.useState)(""), [U, W] = (0, _.useState)(""), [G, ee] = (0, _.useState)(!1), te = (0, _.useRef)(null), [K, ne] = (0, _.useState)(!1), [q, re] = (0, _.useState)(null), [ie, ae] = (0, _.useState)(""), [oe, se] = (0, _.useState)([]);
+	let o = R(), s = (0, _.useRef)(crypto.randomUUID()), [c, l] = (0, _.useState)(e?.title || ""), [u, d] = (0, _.useState)(e?.price || ""), [f, p] = (0, _.useState)(String(e?.details.offerType || "sale")), [m, h] = (0, _.useState)(String(e?.details.priceMode || "fixed")), [g, v] = (0, _.useState)(e?.description || ""), [x, S] = (0, _.useState)(e?.category || n), [C, w] = (0, _.useState)(Array.isArray(e?.details.parts) ? e.details.parts.join("\n") : ""), [T, E] = (0, _.useState)(e?.imageIds || []), [D, O] = (0, _.useState)([]), [k, A] = (0, _.useState)((e?.documents || []).map((e) => e.key)), [j, M] = (0, _.useState)([]), N = (0, _.useRef)(/* @__PURE__ */ new Set()), [P, F] = (0, _.useState)(!1), [I, L] = (0, _.useState)(!1), z = (0, _.useRef)(!1), [V, H] = (0, _.useState)(""), [U, W] = (0, _.useState)(""), [G, ee] = (0, _.useState)(!1), te = (0, _.useRef)(null), [ne, re] = (0, _.useState)(!1), [K, ie] = (0, _.useState)(null), [q, ae] = (0, _.useState)(""), [oe, se] = (0, _.useState)([]);
 	(0, _.useEffect)(() => {
 		if (e) return;
 		let t = new AbortController();
-		return Se({ operation: "config" }, t.signal).then((e) => ne(!!e.canReview)).catch(() => {}), () => t.abort();
+		return Se({ operation: "config" }, t.signal).then((e) => re(!!e.canReview)).catch(() => {}), () => t.abort();
 	}, [e]), (0, _.useEffect)(() => {
-		if (!K || ie.trim().length < 2) return;
+		if (!ne || q.trim().length < 2) return;
 		let e = new AbortController(), t = setTimeout(() => {
 			Se({
 				operation: "members",
-				q: ie.trim()
+				q: q.trim()
 			}, e.signal).then((e) => se(e.members)).catch(() => {});
 		}, 250);
 		return () => {
 			clearTimeout(t), e.abort();
 		};
-	}, [K, ie]), (0, _.useEffect)(() => {
+	}, [ne, q]), (0, _.useEffect)(() => {
 		let e = N.current;
 		return () => {
 			e.forEach((e) => URL.revokeObjectURL(e));
@@ -12245,7 +12264,7 @@ function Te({ ad: e, session: t, initialCategory: n, close: r, created: a }) {
 				}
 				z.current = !0, L(!0), H("");
 				let r = new FormData(n.currentTarget);
-				r.set("requestId", s.current), r.set("offerType", f), r.set("priceMode", m), r.set("operation", e ? "edit" : "create"), !e && q && r.set("onBehalfOf", String(q.id)), e && (r.set("retainedDocumentKeys", JSON.stringify(k)), r.set("id", String(e.id)), r.set("retainedImageIds", JSON.stringify(T))), r.set("title", c), r.set("price", u), r.set("description", g), r.set("category", x), r.set("parts", C), r.set("models", JSON.stringify(r.getAll("models[]"))), r.delete("models[]"), j.forEach((e) => r.append("images[]", e.file)), D.forEach((e) => r.append("documents[]", e));
+				r.set("requestId", s.current), r.set("offerType", f), r.set("priceMode", m), r.set("operation", e ? "edit" : "create"), !e && K && r.set("onBehalfOf", String(K.id)), e && (r.set("retainedDocumentKeys", JSON.stringify(k)), r.set("id", String(e.id)), r.set("retainedImageIds", JSON.stringify(T))), r.set("title", c), r.set("price", u), r.set("description", g), r.set("category", x), r.set("parts", C), r.set("models", JSON.stringify(r.getAll("models[]"))), r.delete("models[]"), j.forEach((e) => r.append("images[]", e.file)), D.forEach((e) => r.append("documents[]", e));
 				try {
 					a(await Ce(r, t.marketplaceNonce));
 				} catch (e) {
@@ -12259,24 +12278,24 @@ function Te({ ad: e, session: t, initialCategory: n, close: r, created: a }) {
 					className: "market-form-intro",
 					children: "In wenigen Schritten online. Pflichtfelder sind mit * markiert. Gesuche gehören ins Forum."
 				}),
-				K && !e && /* @__PURE__ */ (0, y.jsxs)("div", {
+				ne && !e && /* @__PURE__ */ (0, y.jsxs)("div", {
 					className: "market-service",
 					children: [
 						/* @__PURE__ */ (0, y.jsx)("strong", { children: i("Service: Inserat für ein Mitglied erstellen") }),
-						q ? /* @__PURE__ */ (0, y.jsxs)("p", {
+						K ? /* @__PURE__ */ (0, y.jsxs)("p", {
 							className: "market-service-chosen",
 							children: [
 								i("Inserat im Namen von"),
 								" ",
-								/* @__PURE__ */ (0, y.jsx)("b", { children: q.name }),
-								q.memberNumber ? ` · Nr. ${q.memberNumber}` : "",
-								q.city ? ` · ${q.city}` : "",
+								/* @__PURE__ */ (0, y.jsx)("b", { children: K.name }),
+								K.memberNumber ? ` · Nr. ${K.memberNumber}` : "",
+								K.city ? ` · ${K.city}` : "",
 								" ",
 								/* @__PURE__ */ (0, y.jsx)("button", {
 									type: "button",
 									className: "market-text-button",
 									onClick: () => {
-										re(null), ae(""), se([]);
+										ie(null), ae(""), se([]);
 									},
 									children: i("ändern")
 								})
@@ -12284,7 +12303,7 @@ function Te({ ad: e, session: t, initialCategory: n, close: r, created: a }) {
 						}) : /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [
 							/* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Mitglied suchen (optional)"), /* @__PURE__ */ (0, y.jsx)("input", {
 								type: "search",
-								value: ie,
+								value: q,
 								onChange: (e) => {
 									ae(e.target.value), e.target.value.trim().length < 2 && se([]);
 								},
@@ -12295,14 +12314,14 @@ function Te({ ad: e, session: t, initialCategory: n, close: r, created: a }) {
 								children: oe.map((e) => /* @__PURE__ */ (0, y.jsx)("li", { children: /* @__PURE__ */ (0, y.jsxs)("button", {
 									type: "button",
 									onClick: () => {
-										re(e), se([]);
+										ie(e), se([]);
 									},
 									children: [e.name, /* @__PURE__ */ (0, y.jsx)("small", { children: [e.memberNumber && "Nr. " + e.memberNumber, e.city].filter(Boolean).join(" · ") })]
 								}) }, e.id))
 							}),
-							ie.trim().length >= 2 && !oe.length && /* @__PURE__ */ (0, y.jsx)("small", { children: i("Kein Mitglied gefunden.") })
+							q.trim().length >= 2 && !oe.length && /* @__PURE__ */ (0, y.jsx)("small", { children: i("Kein Mitglied gefunden.") })
 						] }),
-						/* @__PURE__ */ (0, y.jsx)("small", { children: i(q ? "Das Inserat gehört dem Mitglied, ist sofort online und Kontaktanfragen gehen an seine E-Mail. Das Mitglied wird per E-Mail informiert." : "Leer lassen, um ein eigenes Inserat zu erstellen.") })
+						/* @__PURE__ */ (0, y.jsx)("small", { children: i(K ? "Das Inserat gehört dem Mitglied, ist sofort online und Kontaktanfragen gehen an seine E-Mail. Das Mitglied wird per E-Mail informiert." : "Leer lassen, um ein eigenes Inserat zu erstellen.") })
 					]
 				}),
 				/* @__PURE__ */ (0, y.jsxs)("fieldset", {
@@ -12375,7 +12394,7 @@ function Te({ ad: e, session: t, initialCategory: n, close: r, created: a }) {
 									}, e))]
 								})] }) }), /* @__PURE__ */ (0, y.jsx)("div", { children: /* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Standort *"), /* @__PURE__ */ (0, y.jsx)("input", {
 									name: "location",
-									defaultValue: String(e?.details.location || (!e && !q ? t?.contact?.city : "") || ""),
+									defaultValue: String(e?.details.location || (!e && !K ? t?.contact?.city : "") || ""),
 									required: !0,
 									maxLength: 160,
 									placeholder: i("Ort / Region")
@@ -12507,7 +12526,7 @@ function Te({ ad: e, session: t, initialCategory: n, close: r, created: a }) {
 								className: "market-form-row",
 								children: [/* @__PURE__ */ (0, y.jsx)("div", { children: /* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Standort *"), /* @__PURE__ */ (0, y.jsx)("input", {
 									name: "location",
-									defaultValue: String(e?.details.location || (!e && !q ? t?.contact?.city : "") || ""),
+									defaultValue: String(e?.details.location || (!e && !K ? t?.contact?.city : "") || ""),
 									required: !0,
 									maxLength: 160,
 									placeholder: "Ort / Region"
@@ -15534,17 +15553,18 @@ function _t({ html: e, photos: t }) {
 		}, t))]
 	});
 }
-function vt({ title: e, people: t, preview: n = !1, slots: r = 0 }) {
-	let a = (r ? Array.from({ length: Math.max(r, t.length) }, (e, n) => t[n] || {
+function vt({ title: e, people: t, preview: n = !1, slots: r = 0, row: a = !1 }) {
+	let o = (r ? Array.from({ length: Math.max(r, t.length) }, (e, n) => t[n] || {
 		image: "",
 		name: "",
 		role: ""
 	}) : n ? t : t.filter((e) => e.name || e.image || e.role)).filter((e) => e.name || e.image || e.role || e.email);
-	return a.length ? /* @__PURE__ */ (0, y.jsxs)("section", {
+	return o.length ? /* @__PURE__ */ (0, y.jsxs)("section", {
 		className: "organisation-people",
 		children: [/* @__PURE__ */ (0, y.jsx)("h2", { children: e }), /* @__PURE__ */ (0, y.jsx)("div", {
-			className: "portrait-grid",
-			children: a.map((e, t) => /* @__PURE__ */ (0, y.jsxs)("article", {
+			className: "portrait-grid" + (a ? " portrait-row" : ""),
+			style: a ? { "--portrait-count": o.length } : void 0,
+			children: o.map((e, t) => /* @__PURE__ */ (0, y.jsxs)("article", {
 				className: "portrait-card",
 				children: [
 					e.image && /* @__PURE__ */ (0, y.jsx)(b, {
@@ -15588,7 +15608,7 @@ var yt = [
 	["production", "Stückzahl"]
 ], xt = (e, t) => typeof e[t] == "string" ? e[t] : "";
 function St(e) {
-	let t = ie[e];
+	let t = q[e];
 	return t ? Object.fromEntries(t.fields.map((e) => [e.key, e.default])) : {};
 }
 function Ct({ model: e }) {
@@ -16460,7 +16480,7 @@ function Lt({ members: e, value: t, change: n, label: r, filter: a }) {
 	});
 }
 function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
-	let [o, s] = (0, _.useState)("direct"), [c, l] = (0, _.useState)(0), [u, d] = (0, _.useState)(!1), [f, p] = (0, _.useState)("handover"), [m, h] = (0, _.useState)(!1), [g, v] = (0, _.useState)("cash"), [b, S] = (0, _.useState)(""), [C, w] = (0, _.useState)(null), [O, k] = (0, _.useState)(null), [A, j] = (0, _.useState)(!1), [M, N] = (0, _.useState)(!1), [P, F] = (0, _.useState)(""), [I, L] = (0, _.useState)(""), [R, z] = (0, _.useState)(0), [B, V] = (0, _.useState)(""), [H, U] = (0, _.useState)(!1), [W, G] = (0, _.useState)(""), ee = (0, _.useRef)(crypto.randomUUID()), te = (0, _.useRef)(null), K = t?.session || null, ne = o === "manual" && f === "handover" ? "shipping" : f;
+	let [o, s] = (0, _.useState)("direct"), [c, l] = (0, _.useState)(0), [u, d] = (0, _.useState)(!1), [f, p] = (0, _.useState)("handover"), [m, h] = (0, _.useState)(!1), [g, v] = (0, _.useState)("cash"), [b, S] = (0, _.useState)(""), [C, w] = (0, _.useState)(null), [O, k] = (0, _.useState)(null), [A, j] = (0, _.useState)(!1), [M, N] = (0, _.useState)(!1), [P, F] = (0, _.useState)(""), [I, L] = (0, _.useState)(""), [R, z] = (0, _.useState)(0), [B, V] = (0, _.useState)(""), [H, U] = (0, _.useState)(!1), [W, G] = (0, _.useState)(""), [ee, te] = (0, _.useState)(""), [ne, re] = (0, _.useState)(1), K = (0, _.useRef)(crypto.randomUUID()), ie = (0, _.useRef)(null), q = t?.session || null, ae = o === "manual" && f === "handover" ? "shipping" : f;
 	if ((0, _.useEffect)(() => {
 		if (!O?.payUrl || A) return;
 		let e = window.setInterval(() => {
@@ -16480,10 +16500,10 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 		role: "status",
 		children: i("Kasse wird geladen …")
 	});
-	let q = r.reduce((e, t) => e + Number(t.price) * t.quantity, 0), re = () => {
-		w(null), k(null), j(!1), l(0), d(!1), p("handover"), h(!1), S(""), F(""), ee.current = crypto.randomUUID(), te.current?.reset();
+	let oe = r.reduce((e, t) => e + Number(t.price) * t.quantity, 0), se = () => {
+		w(null), k(null), j(!1), l(0), d(!1), p("handover"), h(!1), S(""), F(""), K.current = crypto.randomUUID(), ie.current?.reset();
 	};
-	async function ie(t, n, r) {
+	async function J(t, n, r) {
 		N(!0), F("");
 		try {
 			r(await E("strc_shop", e, D({
@@ -16496,15 +16516,23 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 			N(!1);
 		}
 	}
-	async function ae() {
-		if (!te.current || M) return;
+	async function ce() {
+		if (!ie.current || M) return;
+		if (o === "direct" && !q) {
+			F(i("Für den Direktverkauf zuerst oben die Kasse öffnen."));
+			return;
+		}
+		if (!u && !c && o !== "gift") {
+			F(i("Bitte ein Mitglied wählen oder «Gast» anklicken."));
+			return;
+		}
 		if (!r.length) {
 			F(i("Die Kasse ist leer. Artikel im Sortiment mit «In die Kasse» hinzufügen."));
 			return;
 		}
 		N(!0), F("");
-		let t = new FormData(te.current);
-		t.set("operation", "order-save"), t.set("requestId", ee.current), t.set("kind", o), t.set("fulfilment", ne), t.set("items", JSON.stringify(r.map((e) => ({
+		let t = new FormData(ie.current);
+		t.set("operation", "order-save"), t.set("requestId", K.current), t.set("kind", o), t.set("fulfilment", ae), t.set("items", JSON.stringify(r.map((e) => ({
 			id: e.id,
 			quantity: String(e.quantity)
 		})))), t.set("customerId", u ? "0" : String(c)), t.set("payment", g), t.set("purpose", b), t.set("freeShipping", m ? "1" : "0"), t.set("preview", C ? "0" : "1"), C && t.set("reviewToken", C.reviewToken);
@@ -16520,19 +16548,19 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 			N(!1);
 		}
 	}
-	let oe = [
+	let le = [
 		["direct", "Direktverkauf (Kasse)"],
 		["manual", "Telefonbestellung"],
 		["gift", "Geschenk"]
-	], se = () => {
+	], Y = () => {
 		w(null), F("");
 	};
 	return /* @__PURE__ */ (0, y.jsxs)("div", {
 		className: "pos",
 		children: [
 			/* @__PURE__ */ (0, y.jsx)("section", {
-				className: "pos-session" + (K ? " is-open" : ""),
-				children: K ? /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [
+				className: "pos-session" + (q ? " is-open" : ""),
+				children: q ? /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [
 					/* @__PURE__ */ (0, y.jsxs)("div", { children: [
 						/* @__PURE__ */ (0, y.jsx)("p", {
 							className: "eyebrow",
@@ -16541,28 +16569,28 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 						/* @__PURE__ */ (0, y.jsxs)("h3", { children: [
 							i("Verkäufer"),
 							": ",
-							K.sellerName
+							q.sellerName
 						] }),
 						/* @__PURE__ */ (0, y.jsxs)("p", { children: [
-							K.label ? `${K.label} · ` : "",
+							q.label ? `${q.label} · ` : "",
 							i("seit"),
 							" ",
-							new Date(K.openedAt).toLocaleString("de-CH", {
+							new Date(q.openedAt).toLocaleString("de-CH", {
 								dateStyle: "short",
 								timeStyle: "short"
 							}),
 							" · ",
-							K.orders.length,
+							q.orders.length,
 							" ",
 							i("Verkäufe"),
 							" · ",
 							i("Bar"),
 							" ",
-							Nt(K.cash),
+							Nt(q.cash),
 							" · ",
 							i("TWINT/Karte"),
 							" ",
-							Nt(K.online)
+							Nt(q.online)
 						] })
 					] }),
 					H ? /* @__PURE__ */ (0, y.jsxs)("div", {
@@ -16570,14 +16598,14 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 						children: [/* @__PURE__ */ (0, y.jsxs)("p", { children: [
 							i("Kasse schliessen?"),
 							" ",
-							K.cash > 0 ? /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [
+							q.cash > 0 ? /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [
 								i("Die Bareinnahmen von"),
 								" ",
-								/* @__PURE__ */ (0, y.jsx)("strong", { children: Nt(K.cash) }),
+								/* @__PURE__ */ (0, y.jsx)("strong", { children: Nt(q.cash) }),
 								" ",
 								i("werden"),
 								" ",
-								K.sellerName,
+								q.sellerName,
 								" ",
 								i("per E-Mail mit QR-Einzahlungsschein in Rechnung gestellt.")
 							] }) : i("Es gibt keine Bareinnahmen abzurechnen.")
@@ -16592,7 +16620,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 								type: "button",
 								className: "market-primary",
 								disabled: M,
-								onClick: () => void ie("pos-close", { session: K.id }, (e) => {
+								onClick: () => void J("pos-close", { session: q.id }, (e) => {
 									U(!1), L(e.message || ""), n();
 								}),
 								children: i("Kasse jetzt schliessen")
@@ -16601,14 +16629,14 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 					}) : /* @__PURE__ */ (0, y.jsx)("button", {
 						type: "button",
 						className: "club-secondary",
-						disabled: M || K.pending > 0,
-						title: K.pending > 0 ? i("Zuerst offene TWINT-/Kartenzahlungen abschliessen.") : "",
+						disabled: M || q.pending > 0,
+						title: q.pending > 0 ? i("Zuerst offene TWINT-/Kartenzahlungen abschliessen.") : "",
 						onClick: () => U(!0),
 						children: i("Kasse schliessen")
 					}),
-					K.orders.length > 0 && /* @__PURE__ */ (0, y.jsxs)("details", {
+					q.orders.length > 0 && /* @__PURE__ */ (0, y.jsxs)("details", {
 						className: "pos-sales",
-						children: [/* @__PURE__ */ (0, y.jsx)("summary", { children: i("Verkäufe dieser Kasse") }), /* @__PURE__ */ (0, y.jsx)("ul", { children: K.orders.map((e) => /* @__PURE__ */ (0, y.jsxs)("li", { children: [
+						children: [/* @__PURE__ */ (0, y.jsx)("summary", { children: i("Verkäufe dieser Kasse") }), /* @__PURE__ */ (0, y.jsx)("ul", { children: q.orders.map((e) => /* @__PURE__ */ (0, y.jsxs)("li", { children: [
 							/* @__PURE__ */ (0, y.jsxs)("span", { children: [
 								"#",
 								e.number,
@@ -16626,7 +16654,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 								type: "button",
 								className: "market-text-button",
 								disabled: M,
-								onClick: () => void ie("pos-cancel", { id: String(e.id) }, (e) => {
+								onClick: () => void J("pos-cancel", { id: String(e.id) }, (e) => {
 									L(e.message || ""), n();
 								}),
 								children: i("Stornieren")
@@ -16662,7 +16690,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 							type: "button",
 							className: "market-primary",
 							disabled: !R || M,
-							onClick: () => void ie("pos-open", {
+							onClick: () => void J("pos-open", {
 								seller: String(R),
 								label: B
 							}, () => {
@@ -16707,8 +16735,8 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 							type: "button",
 							className: "club-secondary",
 							disabled: M,
-							onClick: () => void ie("pos-cancel", { id: String(O.id) }, (e) => {
-								L(e.message || ""), re(), n();
+							onClick: () => void J("pos-cancel", { id: String(O.id) }, (e) => {
+								L(e.message || ""), se(), n();
 							}),
 							children: i("Verkauf stornieren")
 						})
@@ -16727,17 +16755,17 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 						}), /* @__PURE__ */ (0, y.jsx)("button", {
 							type: "button",
 							className: "market-primary",
-							onClick: re,
+							onClick: se,
 							children: i("Nächster Verkauf")
 						})]
 					})
 				] })
 			}) : /* @__PURE__ */ (0, y.jsxs)("form", {
-				ref: te,
+				ref: ie,
 				className: "club-form pos-checkout",
-				onChange: se,
+				onChange: Y,
 				onSubmit: (e) => {
-					e.preventDefault(), ae();
+					e.preventDefault(), ce();
 				},
 				children: [
 					/* @__PURE__ */ (0, y.jsxs)("fieldset", {
@@ -16747,16 +16775,16 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 								className: "pos-kinds",
 								role: "radiogroup",
 								"aria-label": i("Transaktionsart"),
-								children: oe.map(([e, t]) => /* @__PURE__ */ (0, y.jsxs)("label", { children: [/* @__PURE__ */ (0, y.jsx)("input", {
+								children: le.map(([e, t]) => /* @__PURE__ */ (0, y.jsxs)("label", { children: [/* @__PURE__ */ (0, y.jsx)("input", {
 									type: "radio",
 									name: "kindChoice",
 									checked: o === e,
 									onChange: () => {
-										s(e), p(e === "manual" ? "shipping" : "handover"), se();
+										s(e), p(e === "manual" ? "shipping" : "handover"), Y();
 									}
 								}), i(t)] }, e))
 							}),
-							o === "direct" && !K && /* @__PURE__ */ (0, y.jsx)("p", {
+							o === "direct" && !q && /* @__PURE__ */ (0, y.jsx)("p", {
 								className: "club-notice",
 								role: "alert",
 								children: i("Für den Direktverkauf zuerst oben die Kasse öffnen.")
@@ -16783,7 +16811,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 												a((t) => t.map((t) => t.id === e.id ? {
 													...t,
 													quantity: n
-												} : t)), se();
+												} : t)), Y();
 											}
 										}),
 										/* @__PURE__ */ (0, y.jsx)("strong", { children: Nt(Number(e.price) * e.quantity) }),
@@ -16791,7 +16819,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 											type: "button",
 											className: "market-text-button",
 											onClick: () => {
-												a((t) => t.filter((t) => t.id !== e.id)), se();
+												a((t) => t.filter((t) => t.id !== e.id)), Y();
 											},
 											children: i("Entfernen")
 										})
@@ -16799,48 +16827,79 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 										className: "club-hint",
 										children: i("Noch leer. Im Sortiment bei einem Artikel «In die Kasse» wählen oder hier einen Artikel hinzufügen.")
 									}),
-									/* @__PURE__ */ (0, y.jsxs)("div", {
+									/* @__PURE__ */ (0, y.jsx)("div", {
 										className: "pos-pick",
-										children: [/* @__PURE__ */ (0, y.jsxs)("select", {
-											value: W,
-											"aria-label": i("Artikel hinzufügen"),
-											onChange: (e) => G(e.target.value),
-											children: [/* @__PURE__ */ (0, y.jsx)("option", {
-												value: "",
-												children: i("Artikel hinzufügen …")
-											}), t.products.map((e) => /* @__PURE__ */ (0, y.jsxs)("option", {
-												value: e.id,
-												children: [
-													e.name,
-													" · ",
-													Nt(e.price)
-												]
-											}, e.id))]
-										}), /* @__PURE__ */ (0, y.jsx)("button", {
-											type: "button",
-											className: "club-secondary",
-											disabled: !W,
-											onClick: () => {
-												let e = t.products.find((e) => String(e.id) === W);
-												e && (a((t) => t.find((t) => t.id === e.id) ? t.map((t) => t.id === e.id ? {
-													...t,
-													quantity: t.quantity + 1
-												} : t) : [...t, {
-													id: e.id,
-													name: e.name,
-													price: e.price,
-													quantity: 1
-												}]), G(""), se());
-											},
-											children: "＋"
-										})]
+										children: (() => {
+											let e = Array.from(new Set(t.products.map((e) => e.parent))), n = t.products.filter((e) => String(e.parent) === W), r = n.length === 1 && !Object.keys(n[0].attributes).length, o = r ? n[0] : n.find((e) => String(e.id) === ee), s = (e) => Object.values(e.attributes).filter(Boolean).join(" · ") || e.name;
+											return /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [
+												/* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Artikel"), /* @__PURE__ */ (0, y.jsxs)("select", {
+													value: W,
+													onChange: (e) => {
+														G(e.target.value), te("");
+													},
+													children: [/* @__PURE__ */ (0, y.jsx)("option", {
+														value: "",
+														children: i("Artikel wählen …")
+													}), e.map((e) => {
+														let n = t.products.find((t) => t.parent === e);
+														return /* @__PURE__ */ (0, y.jsx)("option", {
+															value: e,
+															children: n.parentName || n.name
+														}, e);
+													})]
+												})] }),
+												W && !r && /* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Ausführung / Grösse"), /* @__PURE__ */ (0, y.jsxs)("select", {
+													value: ee,
+													onChange: (e) => te(e.target.value),
+													children: [/* @__PURE__ */ (0, y.jsx)("option", {
+														value: "",
+														children: i("Bitte wählen")
+													}), n.map((e) => /* @__PURE__ */ (0, y.jsxs)("option", {
+														value: e.id,
+														children: [
+															s(e),
+															" · ",
+															Nt(e.price),
+															e.stock === null ? "" : ` · ${i("Bestand")} ${e.stock}`
+														]
+													}, e.id))]
+												})] }),
+												/* @__PURE__ */ (0, y.jsxs)("label", {
+													className: "pos-pick-quantity",
+													children: [i("Menge"), /* @__PURE__ */ (0, y.jsx)("input", {
+														type: "number",
+														min: 1,
+														max: 99,
+														value: ne,
+														onChange: (e) => re(Math.max(1, Math.min(99, Number(e.target.value) || 1)))
+													})]
+												}),
+												/* @__PURE__ */ (0, y.jsxs)("button", {
+													type: "button",
+													className: "club-secondary",
+													disabled: !o,
+													onClick: () => {
+														o && (a((e) => e.find((e) => e.id === o.id) ? e.map((e) => e.id === o.id ? {
+															...e,
+															quantity: e.quantity + ne
+														} : e) : [...e, {
+															id: o.id,
+															name: o.name,
+															price: o.price,
+															quantity: ne
+														}]), G(""), te(""), re(1), Y());
+													},
+													children: [i("In die Kasse"), " ＋"]
+												})
+											] });
+										})()
 									}),
 									r.length > 0 && o !== "gift" && /* @__PURE__ */ (0, y.jsxs)("p", {
 										className: "pos-total",
 										children: [
 											i("Total Artikel"),
 											": ",
-											/* @__PURE__ */ (0, y.jsx)("strong", { children: Nt(q) })
+											/* @__PURE__ */ (0, y.jsx)("strong", { children: Nt(oe) })
 										]
 									})
 								]
@@ -16854,14 +16913,14 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 										name: "customerType",
 										checked: !u,
 										onChange: () => {
-											d(!1), se();
+											d(!1), Y();
 										}
 									}), i("Mitglied")] }), /* @__PURE__ */ (0, y.jsxs)("label", { children: [/* @__PURE__ */ (0, y.jsx)("input", {
 										type: "radio",
 										name: "customerType",
 										checked: u,
 										onChange: () => {
-											d(!0), l(0), se();
+											d(!0), l(0), Y();
 										}
 									}), i(o === "gift" ? "Externe Person" : "Gast (nicht Mitglied)")] })]
 								}),
@@ -16889,7 +16948,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 									members: t.members,
 									value: c,
 									change: (e) => {
-										l(e), se();
+										l(e), Y();
 									},
 									label: i("Mitglied suchen"),
 									filter: o === "gift" && b === "board" ? (e) => e.board : void 0
@@ -16897,17 +16956,17 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 									className: "club-hint",
 									children: i("Name, E-Mail und Adresse werden aus dem Mitgliederprofil übernommen; leere Felder unten ergänzen das Profil nur für diese Bestellung.")
 								})] }),
-								(u || ne === "shipping" || o === "manual") && /* @__PURE__ */ (0, y.jsxs)("div", {
+								(u || ae === "shipping" || o === "manual") && /* @__PURE__ */ (0, y.jsxs)("div", {
 									className: "club-form-row",
 									children: [
-										(ne === "shipping" || o === "manual") && /* @__PURE__ */ (0, y.jsxs)("label", { children: [i(u ? "Strasse *" : "Strasse (falls abweichend)"), /* @__PURE__ */ (0, y.jsx)("input", {
+										(ae === "shipping" || o === "manual") && /* @__PURE__ */ (0, y.jsxs)("label", { children: [i(u ? "Strasse *" : "Strasse (falls abweichend)"), /* @__PURE__ */ (0, y.jsx)("input", {
 											name: "street",
 											required: u,
 											maxLength: 200
 										})] }),
-										/* @__PURE__ */ (0, y.jsxs)("label", { children: [i(u && (ne === "shipping" || o === "manual") ? "PLZ *" : "PLZ"), /* @__PURE__ */ (0, y.jsx)("input", {
+										/* @__PURE__ */ (0, y.jsxs)("label", { children: [i(u && (ae === "shipping" || o === "manual") ? "PLZ *" : "PLZ"), /* @__PURE__ */ (0, y.jsx)("input", {
 											name: "postcode",
-											required: u && (ne === "shipping" || o === "manual"),
+											required: u && (ae === "shipping" || o === "manual"),
 											maxLength: 15
 										})] }),
 										/* @__PURE__ */ (0, y.jsxs)("label", { children: [i(u ? "Wohnort *" : "Ort (falls abweichend)"), /* @__PURE__ */ (0, y.jsx)("input", {
@@ -16931,7 +16990,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 										name: "purposeChoice",
 										checked: b === e,
 										onChange: () => {
-											S(e), se();
+											S(e), Y();
 										}
 									}), i(t)] }, e))
 								}),
@@ -16952,33 +17011,33 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 									]).map(([e, t]) => /* @__PURE__ */ (0, y.jsxs)("label", { children: [/* @__PURE__ */ (0, y.jsx)("input", {
 										type: "radio",
 										name: "fulfilmentChoice",
-										checked: ne === e,
+										checked: ae === e,
 										onChange: () => {
-											p(e), se();
+											p(e), Y();
 										}
 									}), i(t)] }, e))
 								}),
-								ne === "shipping" && o === "direct" && /* @__PURE__ */ (0, y.jsxs)("label", {
+								ae === "shipping" && o === "direct" && /* @__PURE__ */ (0, y.jsxs)("label", {
 									className: "application-consent",
 									children: [/* @__PURE__ */ (0, y.jsx)("input", {
 										type: "checkbox",
 										checked: m,
 										onChange: (e) => {
-											h(e.target.checked), se();
+											h(e.target.checked), Y();
 										}
 									}), i("Gratisversand (nur beim Direktverkauf)")]
 								}),
-								ne === "shipping" && o !== "gift" && !m && /* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Versandkosten CHF *"), /* @__PURE__ */ (0, y.jsx)("input", {
+								ae === "shipping" && o !== "gift" && !m && /* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Versandkosten CHF *"), /* @__PURE__ */ (0, y.jsx)("input", {
 									name: "shipping",
 									required: !0,
 									inputMode: "decimal",
 									defaultValue: (/* @__PURE__ */ new Date()).getFullYear() >= 2027 ? "12.00" : "10.00"
 								})] }),
-								ne === "shipping" && /* @__PURE__ */ (0, y.jsx)("p", {
+								ae === "shipping" && /* @__PURE__ */ (0, y.jsx)("p", {
 									className: "club-hint",
 									children: i("Der Lieferschein geht wie bei Online-Bestellungen an Brunau.")
 								}),
-								ne === "pickup" && /* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Veranstaltung *"), /* @__PURE__ */ (0, y.jsxs)("select", {
+								ae === "pickup" && /* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Veranstaltung *"), /* @__PURE__ */ (0, y.jsxs)("select", {
 									name: "eventId",
 									required: !0,
 									children: [/* @__PURE__ */ (0, y.jsx)("option", {
@@ -16999,7 +17058,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 										name: "paymentChoice",
 										checked: g === "cash",
 										onChange: () => {
-											v("cash"), se();
+											v("cash"), Y();
 										}
 									}), i("Bar")] }), /* @__PURE__ */ (0, y.jsxs)("label", {
 										className: t.zahlsReady ? "" : "is-disabled",
@@ -17009,7 +17068,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 											disabled: !t.zahlsReady,
 											checked: g === "zahls",
 											onChange: () => {
-												v("zahls"), se();
+												v("zahls"), Y();
 											}
 										}), i("TWINT / Karte (zahls.ch)")]
 									})]
@@ -17048,7 +17107,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 							] }),
 							/* @__PURE__ */ (0, y.jsx)("p", {
 								className: "club-hint",
-								children: i(ne === "handover" ? "Beim Speichern wird der Lagerbestand reduziert." : "Beim Speichern wird der Lagerbestand reserviert und reduziert.")
+								children: i(ae === "handover" ? "Beim Speichern wird der Lagerbestand reduziert." : "Beim Speichern wird der Lagerbestand reserviert und reduziert.")
 							})
 						]
 					}),
@@ -17065,7 +17124,7 @@ function Rt({ nonce: e, options: t, reload: n, cart: r, setCart: a }) {
 							children: i("Zurück")
 						}), /* @__PURE__ */ (0, y.jsx)("button", {
 							className: "market-primary",
-							disabled: M || o === "direct" && !K || !r.length,
+							disabled: M,
 							children: i(M ? "Wird verarbeitet …" : C ? o === "direct" && g === "zahls" ? "Speichern und QR-Code anzeigen" : "Verbindlich speichern" : "Prüfen")
 						})]
 					})
@@ -17236,7 +17295,7 @@ function Ut() {
 			}
 		}
 	}
-	let K = R || d, ne = [
+	let ne = R || d, re = [
 		[
 			"",
 			"Sortiment",
@@ -17267,23 +17326,23 @@ function Ut() {
 			"Abrechnung",
 			!!(p?.canManage || p?.canInspect)
 		]
-	].filter((e) => e[2]), q = ne.some((t) => t[0] === e) ? e : "", re = {
+	].filter((e) => e[2]), K = re.some((t) => t[0] === e) ? e : "", ie = {
 		"": ["Das Sortiment", "Zubehör und ausgewählte Artikel des Clubs."],
 		artikel: ["Artikel", "Neue Artikel anlegen und bestehende Artikel bearbeiten: Preis, Lagerbestand, Bilder, Varianten und Veröffentlichung."],
 		lager: ["Lagerbewirtschaftung", "Aktueller Bestand pro Artikel und Variante."],
 		bestellungen: ["Bestellungen", "Alle Shop-Bestellungen mit Zahlungs- und Lieferstand. Filter nach Abholung oder Zahlungsstand, Export als CSV."],
 		direktverkauf: ["Direktverkauf", "Verkauf am Anlass oder manuelle Bestellung erfassen; der Lagerbestand wird automatisch angepasst."],
 		abrechnung: ["Abrechnung", "Umsatz, bezahlte und offene Beträge, nach Zahlungsart und Abholung."]
-	}[q];
+	}[K];
 	return /* @__PURE__ */ (0, y.jsxs)("section", {
 		className: "form-section shop-catalog",
 		children: [
-			ne.length > 1 && /* @__PURE__ */ (0, y.jsx)("nav", {
+			re.length > 1 && /* @__PURE__ */ (0, y.jsx)("nav", {
 				className: "shop-tabs",
 				"aria-label": i("Shop-Bereiche"),
-				children: ne.map(([e, t]) => /* @__PURE__ */ (0, y.jsx)("a", {
+				children: re.map(([e, t]) => /* @__PURE__ */ (0, y.jsx)("a", {
 					href: "#tr-shop" + (e ? "/" + e : ""),
-					"aria-current": q === e ? "page" : void 0,
+					"aria-current": K === e ? "page" : void 0,
 					children: i(t)
 				}, e))
 			}),
@@ -17294,18 +17353,18 @@ function Ut() {
 						className: "eyebrow",
 						children: "Swiss TR-Club · Shop"
 					}),
-					/* @__PURE__ */ (0, y.jsx)("h2", { children: i(re[0]) }),
-					/* @__PURE__ */ (0, y.jsx)("p", { children: i(re[1]) })
+					/* @__PURE__ */ (0, y.jsx)("h2", { children: i(ie[0]) }),
+					/* @__PURE__ */ (0, y.jsx)("p", { children: i(ie[1]) })
 				] }), /* @__PURE__ */ (0, y.jsxs)("div", {
 					className: "shop-catalog-actions",
-					children: [q === "" && p?.canManage && d.length > 1 && !R && /* @__PURE__ */ (0, y.jsxs)("button", {
+					children: [K === "" && p?.canManage && d.length > 1 && !R && /* @__PURE__ */ (0, y.jsxs)("button", {
 						type: "button",
 						className: "club-secondary shop-sort-toggle",
 						onClick: () => {
 							G(""), z(d);
 						},
 						children: ["⇅ ", i("Reihenfolge ändern")]
-					}), q === "" && p?.checkoutReady && p.cartUrl && /* @__PURE__ */ (0, y.jsxs)("a", {
+					}), K === "" && p?.checkoutReady && p.cartUrl && /* @__PURE__ */ (0, y.jsxs)("a", {
 						className: "club-secondary shop-cart-link",
 						href: p.cartUrl,
 						children: [
@@ -17320,7 +17379,7 @@ function Ut() {
 					})]
 				})]
 			}),
-			q === "artikel" && p ? /* @__PURE__ */ (0, y.jsxs)("div", {
+			K === "artikel" && p ? /* @__PURE__ */ (0, y.jsxs)("div", {
 				className: "shop-admin-view",
 				children: [
 					/* @__PURE__ */ (0, y.jsx)("div", {
@@ -17343,13 +17402,13 @@ function Ut() {
 						}
 					})
 				]
-			}) : q === "lager" && p ? /* @__PURE__ */ (0, y.jsxs)("div", {
+			}) : K === "lager" && p ? /* @__PURE__ */ (0, y.jsxs)("div", {
 				className: "shop-admin-view",
 				children: [/* @__PURE__ */ (0, y.jsx)(Gt, { view: "stock" }), p.canManage && /* @__PURE__ */ (0, y.jsx)("p", { children: /* @__PURE__ */ (0, y.jsx)("a", {
 					href: "#tr-shop/artikel",
 					children: i("Bestand und Preise unter «Artikel» anpassen →")
 				}) })]
-			}) : q === "bestellungen" && p ? /* @__PURE__ */ (0, y.jsxs)("div", {
+			}) : K === "bestellungen" && p ? /* @__PURE__ */ (0, y.jsxs)("div", {
 				className: "shop-admin-view",
 				children: [/* @__PURE__ */ (0, y.jsx)(Gt, {
 					view: "orders",
@@ -17358,7 +17417,7 @@ function Ut() {
 					href: p.ordersUrl,
 					children: i("Alle Bestellungen in WooCommerce →")
 				}) })]
-			}) : q === "direktverkauf" && p ? /* @__PURE__ */ (0, y.jsx)("div", {
+			}) : K === "direktverkauf" && p ? /* @__PURE__ */ (0, y.jsx)("div", {
 				className: "shop-admin-view",
 				children: /* @__PURE__ */ (0, y.jsx)(Rt, {
 					nonce: p.nonce || "",
@@ -17367,7 +17426,7 @@ function Ut() {
 					cart: N,
 					setCart: P
 				})
-			}) : q === "abrechnung" && p ? /* @__PURE__ */ (0, y.jsxs)("div", {
+			}) : K === "abrechnung" && p ? /* @__PURE__ */ (0, y.jsxs)("div", {
 				className: "shop-admin-view",
 				children: [/* @__PURE__ */ (0, y.jsx)(Gt, { view: "summary" }), /* @__PURE__ */ (0, y.jsx)(zt, { nonce: p.nonce || "" })]
 			}) : h ? /* @__PURE__ */ (0, y.jsx)("p", {
@@ -17425,7 +17484,7 @@ function Ut() {
 				}),
 				/* @__PURE__ */ (0, y.jsx)("div", {
 					className: "shop-product-grid" + (R ? " is-sorting" : ""),
-					children: K.map((e, t) => {
+					children: ne.map((e, t) => {
 						let r = p.products?.[String(e.id)], o = n === "fr" && r?.nameFr ? r.nameFr : e.name, s = e.attributes.filter((e) => e.terms.length > 0).map((e) => `${i(e.name)}: ${e.terms.map((e) => e.name).join(", ")}`), c = !!e.is_on_backorder && r?.availability === "request", l = !!e.is_on_backorder && !c, u = e.permalink, d = p.checkoutReady ? e.is_in_stock ? c ? "Ansehen & anfragen →" : "Auswählen & bestellen →" : "Ausverkauft" : "Checkout wird eingerichtet";
 						return /* @__PURE__ */ (0, y.jsxs)("article", {
 							className: "shop-product-card" + (B === e.id ? " is-dragging" : ""),
@@ -17455,7 +17514,7 @@ function Ut() {
 										/* @__PURE__ */ (0, y.jsx)("button", {
 											type: "button",
 											"aria-label": i("Nach hinten verschieben"),
-											disabled: t === K.length - 1 || H,
+											disabled: t === ne.length - 1 || H,
 											onClick: () => ee(e.id, t + 1),
 											children: "▶"
 										})
@@ -17931,7 +17990,7 @@ function Kt() {
 								className: "market-sr-only",
 								children: "Mitgliedsantrag"
 							}),
-							/* @__PURE__ */ (0, y.jsx)(X, { html: e("membership.fees", ie.membership.fields.find((e) => e.key === "fees")?.default || "") }),
+							/* @__PURE__ */ (0, y.jsx)(X, { html: e("membership.fees", q.membership.fields.find((e) => e.key === "fees")?.default || "") }),
 							/* @__PURE__ */ (0, y.jsxs)("section", {
 								className: "form-section",
 								children: [/* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Gewünschte Mitgliedschaft *"), /* @__PURE__ */ (0, y.jsxs)("select", {
@@ -18102,7 +18161,7 @@ function Kt() {
 									})
 								]
 							}),
-							/* @__PURE__ */ (0, y.jsx)(ne, {})
+							/* @__PURE__ */ (0, y.jsx)(re, {})
 						]
 					}),
 					/* @__PURE__ */ (0, y.jsx)(U, { error: g }),
@@ -18148,7 +18207,7 @@ function Kt() {
 //#endregion
 //#region app/components/LandingPages.tsx
 function qt(e) {
-	return e in ie && "template" in ie[e];
+	return e in q && "template" in q[e];
 }
 function Jt({ href: e, title: t, text: n }) {
 	return /* @__PURE__ */ (0, y.jsxs)("a", {
@@ -18284,28 +18343,44 @@ function Xt() {
 			href: "#club",
 			children: i("← Zur Clubübersicht")
 		}), /* @__PURE__ */ (0, y.jsxs)("div", {
-			className: "landing-layout",
-			children: [/* @__PURE__ */ (0, y.jsx)("article", {
-				className: "static-copy",
-				children: /* @__PURE__ */ (0, y.jsx)(ue, { id: "club.body" })
-			}), /* @__PURE__ */ (0, y.jsx)("aside", {
-				className: "mission-picture",
-				children: e("club.missionImage") ? /* @__PURE__ */ (0, y.jsx)(b, {
-					src: Z(e("club.missionImage")),
-					alt: e("club.missionImageAlt") || i("Clubleben im Swiss TR-Club"),
-					width: 600,
-					height: 800,
-					style: pe(e("club.missionImageFrame"))
-				}) : /* @__PURE__ */ (0, y.jsx)("div", {
-					className: "static-image-placeholder",
-					children: i("Ein Bild aus unserem Clubleben folgt.")
+			className: "landing-layout mission-layout",
+			children: [
+				/* @__PURE__ */ (0, y.jsx)("figure", {
+					className: "mission-panorama",
+					children: e("club.missionPanorama") ? /* @__PURE__ */ (0, y.jsx)(b, {
+						src: Z(e("club.missionPanorama")),
+						alt: e("club.missionPanoramaAlt") || i("Panorama aus dem Clubleben"),
+						width: 1400,
+						height: 500,
+						style: pe(e("club.missionPanoramaFrame"), "cover")
+					}) : /* @__PURE__ */ (0, y.jsx)("div", {
+						className: "static-image-placeholder",
+						children: i("Panoramabild folgt.")
+					})
+				}),
+				/* @__PURE__ */ (0, y.jsx)("article", {
+					className: "static-copy mission-copy",
+					children: /* @__PURE__ */ (0, y.jsx)(ue, { id: "club.body" })
+				}),
+				/* @__PURE__ */ (0, y.jsx)("aside", {
+					className: "mission-picture",
+					children: e("club.missionImage") ? /* @__PURE__ */ (0, y.jsx)(b, {
+						src: Z(e("club.missionImage")),
+						alt: e("club.missionImageAlt") || i("Clubleben im Swiss TR-Club"),
+						width: 600,
+						height: 800,
+						style: pe(e("club.missionImageFrame"))
+					}) : /* @__PURE__ */ (0, y.jsx)("div", {
+						className: "static-image-placeholder",
+						children: i("Ein Bild aus unserem Clubleben folgt.")
+					})
 				})
-			})]
+			]
 		})]
 	})] });
 }
 function Zt({ documentKey: e, canEdit: t = !1 }) {
-	let { values: n, published: r, loading: a, error: o, refresh: s } = Y(), c = ie[e];
+	let { values: n, published: r, loading: a, error: o, refresh: s } = Y(), c = q[e];
 	return !c || !qt(e) ? /* @__PURE__ */ (0, y.jsxs)("section", {
 		className: "page-content",
 		children: [/* @__PURE__ */ (0, y.jsx)("h1", { children: i("Seite nicht gefunden") }), /* @__PURE__ */ (0, y.jsx)("a", {
@@ -18495,7 +18570,8 @@ function Qt({ documentKey: e, values: t, preview: n = !1 }) {
 					title: r(e + "Title"),
 					people: Array.isArray(t[e + "Portraits"]) ? t[e + "Portraits"] : [],
 					preview: n,
-					slots: e === "board" ? 7 : 5
+					slots: e === "board" ? 7 : 5,
+					row: e === "functions"
 				}, e)) }),
 				e === "membership" && !n && /* @__PURE__ */ (0, y.jsx)(Kt, {}),
 				e === "shop" && !n && /* @__PURE__ */ (0, y.jsx)(Ut, {})
@@ -21979,7 +22055,7 @@ function Jn({ members: t, detail: n, loading: r }) {
 }
 //#endregion
 //#region app/components/StrcFlipbook.tsx
-var Yn = (0, _.lazy)(() => import("./MagazineReader-C0p_vFAM.js")), Xn = window.strcSettings.assetBase ?? "";
+var Yn = (0, _.lazy)(() => import("./MagazineReader-DVovrkGf.js")), Xn = window.strcSettings.assetBase ?? "";
 function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !0 }) {
 	let [s, c] = (0, _.useState)(!1), l = (r || []).join(","), u = (0, _.useRef)(null), [d, f] = (0, _.useState)(!1), [p, m] = (0, _.useState)(""), h = (0, _.useRef)(0), [g, v] = (0, _.useState)(""), [b, x] = (0, _.useState)(null), [S, C] = (0, _.useState)(!1), w = (0, _.useRef)({}), T = (0, _.useRef)({}), [E, D] = (0, _.useState)(null), [O, k] = (0, _.useState)(""), [A, j] = (0, _.useState)(null), [M, N] = (0, _.useState)({}), [P, F] = (0, _.useState)(1), [I, L] = (0, _.useState)(null), [R, z] = (0, _.useState)(() => typeof window < "u" && window.innerWidth < 760), [B, V] = (0, _.useState)(null), [H, U] = (0, _.useState)(1), W = (0, _.useRef)(null), G = (0, _.useRef)(null), ee = (e) => {
 		let t = W.current, n = Math.max(1, Math.min(3, Math.round(e * 4) / 4)), r = t ? (t.scrollLeft + t.clientWidth / 2) / Math.max(1, t.scrollWidth) : .5, i = t ? (t.scrollTop + t.clientHeight / 2) / Math.max(1, t.scrollHeight) : .5;
@@ -21987,12 +22063,12 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 			let e = W.current;
 			e && (e.scrollLeft = r * e.scrollWidth - e.clientWidth / 2, e.scrollTop = i * e.scrollHeight - e.clientHeight / 2);
 		});
-	}, te = (0, _.useRef)({}), K = (0, _.useRef)(/* @__PURE__ */ new Set()), ne = (0, _.useRef)(null), q = (0, _.useRef)(null), re = (0, _.useRef)([]), ie = (0, _.useRef)(0);
+	}, te = (0, _.useRef)({}), ne = (0, _.useRef)(/* @__PURE__ */ new Set()), re = (0, _.useRef)(null), K = (0, _.useRef)(null), ie = (0, _.useRef)([]), q = (0, _.useRef)(0);
 	(0, _.useEffect)(() => () => {
-		re.current.forEach(clearTimeout), ie.current++;
+		ie.current.forEach(clearTimeout), q.current++;
 	}, []), (0, _.useEffect)(() => {
 		let t = !1;
-		re.current.forEach(clearTimeout), re.current = [], ie.current++, te.current = {}, K.current.clear(), q.current = null, w.current = {}, T.current = {};
+		ie.current.forEach(clearTimeout), ie.current = [], q.current++, te.current = {}, ne.current.clear(), K.current = null, w.current = {}, T.current = {};
 		let n;
 		return (async () => {
 			let r = await import("./pdf-CnPiFuPD.js");
@@ -22033,7 +22109,7 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 				});
 			}
 			let o = l ? l.split(",").map(Number).map((e) => a[e - 1]).filter((e) => !!e) : a;
-			q.current = o, j(o), D(i);
+			K.current = o, j(o), D(i);
 		})().catch(() => {
 			t || k(i("Das PDF konnte nicht geöffnet werden. Bitte erneut versuchen."));
 		}), () => {
@@ -22047,18 +22123,18 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 		m(""), document.fullscreenElement ? document.exitFullscreen() : u.current?.requestFullscreen ? u.current.requestFullscreen().catch(() => m(i("Vollbild ist in diesem Browser nicht verfügbar."))) : m(i("Vollbild ist in diesem Browser nicht verfügbar."));
 	}
 	async function oe() {
-		let e = g.trim().toLocaleLowerCase("de-CH"), t = q.current;
+		let e = g.trim().toLocaleLowerCase("de-CH"), t = K.current;
 		if (!E || !t || e.length < 2) {
 			x(null);
 			return;
 		}
 		C(!0);
-		let n = ie.current, r = ++h.current, i = [];
+		let n = q.current, r = ++h.current, i = [];
 		try {
 			for (let a = 1; a <= E.numPages; a++) {
 				if (!w.current[a]) {
 					let e = await E.getPage(a), t = await e.getTextContent();
-					if (n !== ie.current || r !== h.current) return;
+					if (n !== q.current || r !== h.current) return;
 					T.current[a] = e.getViewport({ scale: 1 }).width, w.current[a] = t.items.map((e) => "str" in e ? {
 						str: e.str,
 						x: e.transform[4]
@@ -22067,7 +22143,7 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 						x: 0
 					});
 				}
-				if (n !== ie.current || r !== h.current) return;
+				if (n !== q.current || r !== h.current) return;
 				let o = w.current[a], s = T.current[a];
 				for (let n of [
 					"left",
@@ -22085,13 +22161,13 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 			}
 			x(i);
 		} catch {
-			n === ie.current && r === h.current && x([]);
+			n === q.current && r === h.current && x([]);
 		} finally {
-			n === ie.current && r === h.current && C(!1);
+			n === q.current && r === h.current && C(!1);
 		}
 	}
 	function se(e) {
-		re.current.forEach(clearTimeout), re.current = [], L(null), F(e);
+		ie.current.forEach(clearTimeout), ie.current = [], L(null), F(e);
 	}
 	(0, _.useEffect)(() => {
 		let e = () => z(window.innerWidth < 760);
@@ -22118,16 +22194,16 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 		}
 	}
 	async function _e(e) {
-		let t = q.current, n = t?.[e - 1];
-		if (!E || !n || te.current[`${n.p}:${n.part}`] || K.current.has(n.p)) return;
-		K.current.add(n.p);
-		let r = ie.current;
+		let t = K.current, n = t?.[e - 1];
+		if (!E || !n || te.current[`${n.p}:${n.part}`] || ne.current.has(n.p)) return;
+		ne.current.add(n.p);
+		let r = q.current;
 		try {
 			let e = await E.getPage(n.p), i = e.getViewport({ scale: 1 }), a = e.getViewport({ scale: Math.min(2.2, 1300 / i.height) }), o = document.createElement("canvas");
 			if (o.width = Math.floor(a.width), o.height = Math.floor(a.height), await e.render({
 				canvas: o,
 				viewport: a
-			}).promise, r !== ie.current) return;
+			}).promise, r !== q.current) return;
 			let s = {};
 			if (n.part === "full") s[`${n.p}:full`] = o.toDataURL("image/jpeg", .86);
 			else if (s[`${n.p}:left`] = he(o, 0, o.width / 2), s[`${n.p}:right`] = he(o, o.width / 2, o.width / 2), n.edge) if (l || ge(o)) s[`${n.p}:center`] = he(o, o.width / 4, o.width / 2);
@@ -22141,16 +22217,16 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 					part: "right",
 					r: e.r
 				}] : [e]);
-				q.current = e, j(e);
+				K.current = e, j(e);
 			}
 			te.current = {
 				...te.current,
 				...s
 			}, N(te.current), e.cleanup(), o.width = 0;
 		} catch {
-			r === ie.current && k(i("Die Seite konnte nicht geladen werden. Bitte lade das Magazin erneut."));
+			r === q.current && k(i("Die Seite konnte nicht geladen werden. Bitte lade das Magazin erneut."));
 		} finally {
-			r === ie.current && K.current.delete(n.p);
+			r === q.current && ne.current.delete(n.p);
 		}
 	}
 	(0, _.useEffect)(() => {
@@ -22198,10 +22274,10 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 				side: "left"
 			},
 			go: !1
-		}), re.current.push(setTimeout(() => L((e) => e && {
+		}), ie.current.push(setTimeout(() => L((e) => e && {
 			...e,
 			go: !0
-		}), 30)), re.current.push(setTimeout(() => {
+		}), 30)), ie.current.push(setTimeout(() => {
 			F(t), L(null);
 		}, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 40 : 680));
 	}
@@ -22418,19 +22494,19 @@ function Zn({ url: e, title: t, classic: n, pages: r, download: a, search: o = !
 					},
 					onClick: (e) => {
 						if (H > 1) return;
-						if (ne.current === "swiped") {
-							ne.current = null;
+						if (re.current === "swiped") {
+							re.current = null;
 							return;
 						}
 						let t = e.currentTarget.getBoundingClientRect();
 						ye(e.clientX - t.left > t.width / 2 ? 1 : -1);
 					},
 					onPointerDown: (e) => {
-						ne.current = e.clientX;
+						re.current = e.clientX;
 					},
 					onPointerUp: (e) => {
-						let t = ne.current;
-						ne.current = null, !(H > 1) && typeof t == "number" && Math.abs(e.clientX - t) > 50 && (ne.current = "swiped", ye(e.clientX < t ? 1 : -1));
+						let t = re.current;
+						re.current = null, !(H > 1) && typeof t == "number" && Math.abs(e.clientX - t) > 50 && (re.current = "swiped", ye(e.clientX < t ? 1 : -1));
 					},
 					children: [
 						J ? be(xe[0], "fb-single") : /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [be(xe[0], "fb-left"), be(xe[1], "fb-right")] }),
@@ -24258,7 +24334,7 @@ function Ar({ item: e, nonce: t, close: n, saved: r, deleted: a }) {
 }
 //#endregion
 //#region app/components/Community.tsx
-var jr = (0, _.lazy)(() => import("./MagazineReader-C0p_vFAM.js")), Mr = "strc_community", Nr = {
+var jr = (0, _.lazy)(() => import("./MagazineReader-DVovrkGf.js")), Mr = "strc_community", Nr = {
 	events: "Veranstaltungen",
 	portraits: "Mitgliedergalerie",
 	restorations: "Fahrzeugrestaurationen",
@@ -24366,7 +24442,7 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 		items: [],
 		total: 0,
 		pages: 0
-	}), [f, p] = (0, _.useState)(r), [m, h] = (0, _.useState)(""), [g, v] = (0, _.useState)(""), [x, S] = (0, _.useState)(""), [C, w] = (0, _.useState)(""), [O, k] = (0, _.useState)(""), [A, M] = (0, _.useState)({}), [N, P] = (0, _.useState)(!1), [F, I] = (0, _.useState)(1), [L, z] = (0, _.useState)(0), [V, H] = (0, _.useState)(!0), [U, W] = (0, _.useState)(""), [G, ee] = (0, _.useState)(""), [te, K] = (0, _.useState)(""), [ne, q] = (0, _.useState)(void 0), [re, ie] = (0, _.useState)(null), [ae, oe] = (0, _.useState)(void 0), [se, J] = (0, _.useState)(() => n || null), [ce, le] = (0, _.useState)(null), [X, ue] = (0, _.useState)(null), [Z, de] = (0, _.useState)(!1), [fe, pe] = (0, _.useState)(null), [me, he] = (0, _.useState)(null), ge = hr(e === "forum"), [_e, ve] = (0, _.useState)(""), [ye, be] = (0, _.useState)(""), [xe, Se] = (0, _.useState)(""), Ce = e === "forum" && o === "experten", we = o === "pruefung", Te = o === "meine", [Ee, De] = (0, _.useState)(""), [Oe, ke] = (0, _.useState)(""), Ae = ["magazine", "newsletter"].includes(f), je = !Ae, Me = (u.accessClasses || []).includes("restricted"), Ne = !!u.canReview, Pe = e === "library" && {
+	}), [f, p] = (0, _.useState)(r), [m, h] = (0, _.useState)(""), [g, v] = (0, _.useState)(""), [x, S] = (0, _.useState)(""), [C, w] = (0, _.useState)(""), [O, k] = (0, _.useState)(""), [A, M] = (0, _.useState)({}), [N, P] = (0, _.useState)(!1), [F, I] = (0, _.useState)(1), [L, z] = (0, _.useState)(0), [V, H] = (0, _.useState)(!0), [U, W] = (0, _.useState)(""), [G, ee] = (0, _.useState)(""), [te, ne] = (0, _.useState)(""), [re, K] = (0, _.useState)(void 0), [ie, q] = (0, _.useState)(null), [ae, oe] = (0, _.useState)(void 0), [se, J] = (0, _.useState)(() => n || null), [ce, le] = (0, _.useState)(null), [X, ue] = (0, _.useState)(null), [Z, de] = (0, _.useState)(!1), [fe, pe] = (0, _.useState)(null), [me, he] = (0, _.useState)(null), ge = hr(e === "forum"), [_e, ve] = (0, _.useState)(""), [ye, be] = (0, _.useState)(""), [xe, Se] = (0, _.useState)(""), Ce = e === "forum" && o === "experten", we = o === "pruefung", Te = o === "meine", [Ee, De] = (0, _.useState)(""), [Oe, ke] = (0, _.useState)(""), Ae = ["magazine", "newsletter"].includes(f), je = !Ae, Me = (u.accessClasses || []).includes("restricted"), Ne = !!u.canReview, Pe = e === "library" && {
 		technical: !0,
 		travel: !0,
 		club: Me || Ne,
@@ -24445,7 +24521,7 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 		}) : pe(t);
 	}
 	function He(e = "") {
-		K(e), H(!0), z((e) => e + 1);
+		ne(e), H(!0), z((e) => e + 1);
 	}
 	let [Ue, We] = (0, _.useState)(0);
 	async function Ge(e) {
@@ -24507,7 +24583,7 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 				close: () => J(null),
 				updated: () => He(),
 				addPhotos: (e) => {
-					le(e), q(null);
+					le(e), K(null);
 				}
 			})
 		}) : /* @__PURE__ */ (0, y.jsxs)("section", {
@@ -24523,7 +24599,7 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 							children: ["＋ ", i("Mitgliederporträt erfassen")]
 						}), /* @__PURE__ */ (0, y.jsx)("button", {
 							className: "market-primary",
-							onClick: () => q(null),
+							onClick: () => K(null),
 							children: i(Lr[e].create)
 						})]
 					})]
@@ -24648,7 +24724,7 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 							forum: ge
 						}), /* @__PURE__ */ (0, y.jsxs)("button", {
 							className: "market-primary",
-							onClick: () => q(null),
+							onClick: () => K(null),
 							children: ["✎ ", i("Thema erstellen")]
 						})]
 					}),
@@ -24790,7 +24866,7 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 							Pe && /* @__PURE__ */ (0, y.jsxs)("button", {
 								className: "market-primary lib-upload",
 								onClick: () => {
-									Fe.length === 1 && h(Fe[0]), q(null);
+									Fe.length === 1 && h(Fe[0]), K(null);
 								},
 								children: [i("Dokument hochladen"), " ＋"]
 							})
@@ -24924,7 +25000,7 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 													className: "club-actions",
 													children: [/* @__PURE__ */ (0, y.jsx)("button", {
 														className: "market-text-button",
-														onClick: () => q(t),
+														onClick: () => K(t),
 														children: i("Bearbeiten")
 													}), /* @__PURE__ */ (0, y.jsx)("button", {
 														className: "market-text-button",
@@ -25052,11 +25128,11 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 												children: i("Definitiv löschen")
 											}))] }) : /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [Ie(t) && /* @__PURE__ */ (0, y.jsx)("button", {
 												className: "market-text-button",
-												onClick: () => ie(t),
+												onClick: () => q(t),
 												children: i("Neue Version hochladen")
 											}), t.canEdit && /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [/* @__PURE__ */ (0, y.jsx)("button", {
 												className: "market-text-button",
-												onClick: () => Or(t) ? oe(t) : q(t),
+												onClick: () => Or(t) ? oe(t) : K(t),
 												children: i("Bearbeiten")
 											}), e !== "gallery" && (e !== "library" || t.canReview && !["magazine", "newsletter"].includes(f)) && /* @__PURE__ */ (0, y.jsx)("button", {
 												className: "market-text-button",
@@ -25101,27 +25177,27 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 				] })
 			]
 		}),
-		re && /* @__PURE__ */ (0, y.jsx)(Wr, {
+		ie && /* @__PURE__ */ (0, y.jsx)(Wr, {
 			kind: e,
 			item: null,
-			versionOf: re,
-			initialDocumentType: j(Rr(re.classification.documentType)),
+			versionOf: ie,
+			initialDocumentType: j(Rr(ie.classification.documentType)),
 			accessClasses: u.accessClasses || ["open"],
 			nonce: t,
-			close: () => ie(null),
+			close: () => q(null),
 			saved: (e) => {
-				ie(null), He(e.status === "pending" ? "Neue Version zur Prüfung eingereicht. Bei der Freigabe wird die bisherige Fassung archiviert." : "Neue Version gespeichert."), J(e.id);
+				q(null), He(e.status === "pending" ? "Neue Version zur Prüfung eingereicht. Bei der Freigabe wird die bisherige Fassung archiviert." : "Neue Version gespeichert."), J(e.id);
 			}
 		}),
-		ne !== void 0 && /* @__PURE__ */ (0, y.jsx)(Wr, {
+		re !== void 0 && /* @__PURE__ */ (0, y.jsx)(Wr, {
 			kind: e,
-			item: ne,
+			item: re,
 			photoLimit: Ne ? 1e3 : 20,
 			replaceable: e === "library" && Ne && !N ? u.items.filter((e) => e.status === "publish").map((e) => ({
 				id: e.id,
 				title: e.title
 			})) : [],
-			appendTo: ne === null ? ce : null,
+			appendTo: re === null ? ce : null,
 			initialArea: g,
 			groupTypes: e === "library" ? Fe : [],
 			suggestedTitle: e === "library" && f === "magazine" ? Re() : "",
@@ -25129,11 +25205,11 @@ function Ur({ kind: e, nonce: t, selectedId: n, initialGroup: r = "", title: a, 
 			accessClasses: u.accessClasses || ["open"],
 			nonce: t,
 			close: () => {
-				q(void 0), le(null);
+				K(void 0), le(null);
 			},
 			saved: (t) => {
-				let n = ne === null;
-				q(void 0), le(null), He(e === "gallery" ? "Fotos hochgeladen und in der Galerie sichtbar." : t.status === "pending" ? "Beitrag zur Prüfung eingereicht." : e === "forum" && n ? "Dein Beitrag ist jetzt im Forum veröffentlicht." : "Beitrag gespeichert."), e === "forum" && n || J(t.id);
+				let n = re === null;
+				K(void 0), le(null), He(e === "gallery" ? "Fotos hochgeladen und in der Galerie sichtbar." : t.status === "pending" ? "Beitrag zur Prüfung eingereicht." : e === "forum" && n ? "Dein Beitrag ist jetzt im Forum veröffentlicht." : "Beitrag gespeichert."), e === "forum" && n || J(t.id);
 			}
 		}),
 		me && /* @__PURE__ */ (0, y.jsx)(Q, {
@@ -25222,7 +25298,7 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 		"board",
 		"confidential",
 		"operations"
-	].includes(S) || S.startsWith("board-")), [z, V] = (0, _.useState)([]), [H, U] = (0, _.useState)(p ? String(p.id) : ""), [W, G] = (0, _.useState)("add"), [ee, te] = (0, _.useState)([]), [K, ne] = (0, _.useState)(""), [q, re] = (0, _.useState)("");
+	].includes(S) || S.startsWith("board-")), [z, V] = (0, _.useState)([]), [H, U] = (0, _.useState)(p ? String(p.id) : ""), [W, G] = (0, _.useState)("add"), [ee, te] = (0, _.useState)([]), [ne, re] = (0, _.useState)(""), [K, ie] = (0, _.useState)("");
 	(0, _.useEffect)(() => {
 		if (e !== "gallery" || t) return;
 		let n = new AbortController();
@@ -25232,9 +25308,9 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 		}, n.signal).then(te).catch(() => {}), fetch(`${x}/wp-admin/admin-ajax.php?action=strc_session`, {
 			credentials: "include",
 			signal: n.signal
-		}).then(async (e) => await e.json()).then((e) => re(e.displayName || "")).catch(() => {}), () => n.abort();
+		}).then(async (e) => await e.json()).then((e) => ie(e.displayName || "")).catch(() => {}), () => n.abort();
 	}, [e, t]);
-	let [ie, ae] = (0, _.useState)({}), [oe, se] = (0, _.useState)(""), [J, ce] = (0, _.useState)([]), [le, Y] = (0, _.useState)(""), [X, ue] = (0, _.useState)(!1), [Z, de] = (0, _.useState)(!1), fe = (0, _.useRef)(!1);
+	let [q, ae] = (0, _.useState)({}), [oe, se] = (0, _.useState)(""), [J, ce] = (0, _.useState)([]), [le, Y] = (0, _.useState)(""), [X, ue] = (0, _.useState)(!1), [Z, de] = (0, _.useState)(!1), fe = (0, _.useRef)(!1);
 	(0, _.useEffect)(() => {
 		if (e !== "gallery" || t) return;
 		let n = new AbortController();
@@ -25308,7 +25384,7 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 					for (let t of J) {
 						let s = new FormData();
 						for (let [e, t] of r.entries()) s.append(e, t);
-						s.set("operation", n ? "append" : "create"), n && s.set("id", n), v.current.has(t) || v.current.set(t, crypto.randomUUID()), s.set("fileToken", v.current.get(t)), se(`${J.indexOf(t) + 1} / ${J.length} · ${t.name}`), s.set("caption", ie[t.name + "-" + t.size] || "");
+						s.set("operation", n ? "append" : "create"), n && s.set("id", n), v.current.has(t) || v.current.set(t, crypto.randomUUID()), s.set("fileToken", v.current.get(t)), se(`${J.indexOf(t) + 1} / ${J.length} · ${t.name}`), s.set("caption", q[t.name + "-" + t.size] || "");
 						try {
 							let r = b.current.get(t);
 							r || (r = await Tr(t), b.current.set(t, r)), s.append("files[]", r.file), s.set("optimized", r.optimized ? "1" : "0"), e = await E(Mr, a, s), b.current.delete(t), n = String(e.id), U(n);
@@ -25379,7 +25455,7 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 								name: "galleryMode",
 								checked: W === "new",
 								onChange: () => {
-									G("new"), U(""), ne("");
+									G("new"), U(""), re("");
 								}
 							}), i("Neues Album anlegen")] })]
 						}),
@@ -25387,10 +25463,10 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 							i("Veranstaltung *"),
 							/* @__PURE__ */ (0, y.jsxs)("select", {
 								required: !0,
-								value: K,
+								value: ne,
 								onChange: (e) => {
 									let t = e.target.value;
-									ne(t);
+									re(t);
 									let n = z.find((e) => String(e.eventId || "") === t);
 									U(n ? String(n.id) : "");
 								},
@@ -25404,8 +25480,8 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 							}),
 							/* @__PURE__ */ (0, y.jsx)("small", { children: i(H ? "Die Bilder werden dem bestehenden Album dieser Veranstaltung hinzugefügt." : "Für diese Veranstaltung wird ein Album angelegt.") })
 						] }),
-						e === "gallery" && !t && !p && W === "add" && K && !H && (() => {
-							let e = ee.find((e) => String(e.id) === K);
+						e === "gallery" && !t && !p && W === "add" && ne && !H && (() => {
+							let e = ee.find((e) => String(e.id) === ne);
 							return /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [
 								/* @__PURE__ */ (0, y.jsx)("input", {
 									type: "hidden",
@@ -25415,7 +25491,7 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 								/* @__PURE__ */ (0, y.jsx)("input", {
 									type: "hidden",
 									name: "eventId",
-									value: K
+									value: ne
 								}),
 								/* @__PURE__ */ (0, y.jsx)("input", {
 									type: "hidden",
@@ -25521,7 +25597,7 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 							children: [
 								i("Fotograf/in"),
 								": ",
-								/* @__PURE__ */ (0, y.jsx)("strong", { children: q || Rr(t?.classification?.photographer) || i("Ihr Name") }),
+								/* @__PURE__ */ (0, y.jsx)("strong", { children: K || Rr(t?.classification?.photographer) || i("Ihr Name") }),
 								" ",
 								/* @__PURE__ */ (0, y.jsxs)("small", { children: [
 									"(",
@@ -25669,7 +25745,7 @@ function Wr({ kind: e, item: t, versionOf: n = null, photoLimit: r = 20, nonce: 
 								] }),
 								e === "gallery" && /* @__PURE__ */ (0, y.jsxs)("label", { children: [i("Bildbeschriftung"), /* @__PURE__ */ (0, y.jsx)("input", {
 									maxLength: 240,
-									value: ie[t.name + "-" + t.size] || "",
+									value: q[t.name + "-" + t.size] || "",
 									onChange: (e) => ae((n) => ({
 										...n,
 										[t.name + "-" + t.size]: e.target.value
@@ -25799,7 +25875,7 @@ function Kr({ id: e, nonce: t, close: n, updated: r, inline: a = !1, addPhotos: 
 		key: e,
 		label: i(Ir[e] || e),
 		value: u(e, t)
-	})), ee = N && N.key === W[j]?.key ? N.value : W[j]?.caption || "", [te, K] = (0, _.useState)(!1), [ne, q] = (0, _.useState)(!1), [re, ie] = (0, _.useState)([]), [ae, oe] = (0, _.useState)(null), [se, J] = (0, _.useState)(null);
+	})), ee = N && N.key === W[j]?.key ? N.value : W[j]?.caption || "", [te, ne] = (0, _.useState)(!1), [re, K] = (0, _.useState)(!1), [ie, q] = (0, _.useState)([]), [ae, oe] = (0, _.useState)(null), [se, J] = (0, _.useState)(null);
 	async function ce(n, i) {
 		A(!0);
 		try {
@@ -25839,13 +25915,13 @@ function Kr({ id: e, nonce: t, close: n, updated: r, inline: a = !1, addPhotos: 
 			children: i("Beitrag wird geladen …")
 		}) : /* @__PURE__ */ (0, y.jsx)(y.Fragment, { children: d && Or(d) ? /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [/* @__PURE__ */ (0, y.jsx)(kr, {
 			item: d,
-			edit: () => q(!0)
-		}), ne && /* @__PURE__ */ (0, y.jsx)(Ar, {
+			edit: () => K(!0)
+		}), re && /* @__PURE__ */ (0, y.jsx)(Ar, {
 			item: d,
 			nonce: t,
-			close: () => q(!1),
+			close: () => K(!1),
 			saved: () => {
-				q(!1), g((e) => e + 1), r();
+				K(!1), g((e) => e + 1), r();
 			},
 			deleted: () => {
 				r(), n();
@@ -26036,8 +26112,8 @@ function Kr({ id: e, nonce: t, close: n, updated: r, inline: a = !1, addPhotos: 
 												className: "thumb-check",
 												children: [/* @__PURE__ */ (0, y.jsx)("input", {
 													type: "checkbox",
-													checked: re.includes(e.key),
-													onChange: (t) => ie((n) => t.target.checked ? [...n, e.key] : n.filter((t) => t !== e.key))
+													checked: ie.includes(e.key),
+													onChange: (t) => q((n) => t.target.checked ? [...n, e.key] : n.filter((t) => t !== e.key))
 												}), /* @__PURE__ */ (0, y.jsxs)("span", {
 													className: "market-sr-only",
 													children: [
@@ -26062,15 +26138,15 @@ function Kr({ id: e, nonce: t, close: n, updated: r, inline: a = !1, addPhotos: 
 									}) : /* @__PURE__ */ (0, y.jsxs)("button", {
 										type: "button",
 										className: "market-primary",
-										disabled: !re.length,
-										onClick: () => Gr(W.filter((e) => re.includes(e.key)).map((e) => ({
+										disabled: !ie.length,
+										onClick: () => Gr(W.filter((e) => ie.includes(e.key)).map((e) => ({
 											url: e.url,
 											name: e.name
 										}))),
 										children: [
 											i("Bildauswahl herunterladen"),
 											" (",
-											re.length,
+											ie.length,
 											")"
 										]
 									}), d.kind === "gallery" && W.some((e) => e.originalUrl) && /* @__PURE__ */ (0, y.jsxs)("button", {
@@ -26421,14 +26497,14 @@ function Kr({ id: e, nonce: t, close: n, updated: r, inline: a = !1, addPhotos: 
 									/* @__PURE__ */ (0, y.jsx)("button", {
 										className: "club-secondary",
 										disabled: k,
-										onClick: () => K(!1),
+										onClick: () => ne(!1),
 										children: i("Abbrechen")
 									})
 								]
 							}) : /* @__PURE__ */ (0, y.jsx)("button", {
 								className: "market-text-button",
 								disabled: k,
-								onClick: () => K(!0),
+								onClick: () => ne(!0),
 								children: i("Thema löschen")
 							})]
 						})
@@ -26905,10 +26981,10 @@ function li() {
 								maxLength: 5e3,
 								defaultValue: d ? `${i("Anfrage zum Artikel")}: ${d}\n\n` : ""
 							})] }),
-							/* @__PURE__ */ (0, y.jsx)(ne, {})
+							/* @__PURE__ */ (0, y.jsx)(re, {})
 						]
 					}),
-					/* @__PURE__ */ (0, y.jsx)(K, {}),
+					/* @__PURE__ */ (0, y.jsx)(ne, {}),
 					/* @__PURE__ */ (0, y.jsx)(U, { error: n }),
 					/* @__PURE__ */ (0, y.jsx)("button", {
 						className: "market-primary",
@@ -27132,10 +27208,7 @@ function _i() {
 		"last_name",
 		"email",
 		"phone",
-		"street",
-		"postcode",
-		"city",
-		"country"
+		"birth_date"
 	].every((e) => t.copilot.values[e]);
 	return /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [/* @__PURE__ */ (0, y.jsxs)("section", {
 		className: "page-hero",
@@ -27291,7 +27364,7 @@ function _i() {
 										] }),
 										/* @__PURE__ */ (0, y.jsx)("span", {
 											className: "profile-status is-pending",
-											children: "pending"
+											children: i("In Bearbeitung")
 										})
 									]
 								}),
@@ -27299,7 +27372,7 @@ function _i() {
 									className: "profile-couple is-active",
 									children: [/* @__PURE__ */ (0, y.jsx)("strong", { children: i("Paarmitgliedschaft aktiv") }), /* @__PURE__ */ (0, y.jsx)("span", {
 										className: "profile-status is-active",
-										children: "active"
+										children: i("Aktiv")
 									})]
 								}),
 								t.couple.available && t.canEdit && !["pending", "active"].includes(t.couple.state) && t.copilot.kind === "guest" && /* @__PURE__ */ (0, y.jsxs)("div", {
@@ -27321,7 +27394,11 @@ function _i() {
 										/* @__PURE__ */ (0, y.jsx)(X, { html: e("profile.coupleText") }),
 										!L && /* @__PURE__ */ (0, y.jsx)("p", {
 											className: "club-hint",
-											children: i("Dafür bitte zuerst E-Mail, Mobilnummer und Adresse des Co-Piloten erfassen.")
+											children: i("Dafür bitte zuerst Name, Geburtsdatum, E-Mail und Mobilnummer des Co-Piloten erfassen.")
+										}),
+										/* @__PURE__ */ (0, y.jsx)("p", {
+											className: "club-hint",
+											children: i("Eine Paarmitgliedschaft gilt für zwei Personen an derselben Adresse: Für den Co-Piloten wird deine Adresse übernommen.")
 										}),
 										O && /* @__PURE__ */ (0, y.jsx)("button", {
 											className: "market-primary",
@@ -28250,12 +28327,40 @@ function wi({ nonce: e }) {
 						t.country ? ", " + t.country : ""
 					] })] })]
 				}),
-				n && /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [/* @__PURE__ */ (0, y.jsxs)("p", {
-					className: "club-notice",
+				n && /* @__PURE__ */ (0, y.jsxs)(y.Fragment, { children: [/* @__PURE__ */ (0, y.jsxs)("div", {
+					className: "club-notice couple-steps",
 					children: [
-						i("In Fairgate beim Mitglied unter «Haushalt/Partner» die Co-Pilot-Angaben prüfen und den Co-Piloten als Paarmitglied verbinden. Beim nächsten Abgleich wird die Paarmitgliedschaft hier aktiv; das Mitglied und der Kassier werden dann automatisch informiert."),
-						/* @__PURE__ */ (0, y.jsx)("br", {}),
-						/* @__PURE__ */ (0, y.jsx)("strong", { children: i(e.copilotInFairgate ? "Co-Pilot-Angaben in Fairgate übertragen." : "Co-Pilot-Angaben noch nicht in Fairgate – bitte aus den Angaben oben erfassen.") })
+						/* @__PURE__ */ (0, y.jsx)("strong", { children: i("So in Fairgate verbinden:") }),
+						/* @__PURE__ */ (0, y.jsxs)("ol", { children: [
+							/* @__PURE__ */ (0, y.jsx)("li", { children: i("Co-Pilot zuerst als neuen Kontakt anlegen (Kontakte → Neuer Kontakt) – die Haushaltsauswahl zeigt nur bestehende Kontakte. Die Angaben lassen sich unten kopieren.") }),
+							/* @__PURE__ */ (0, y.jsx)("li", { children: i("Beim Hauptmitglied unter «Haushalt/Partner» den neuen Kontakt aus der Liste wählen und verbinden.") }),
+							/* @__PURE__ */ (0, y.jsx)("li", { children: i("Mitgliedschaft beider auf «Paar» stellen. Beim nächsten Abgleich wird die Paarmitgliedschaft hier aktiv; Mitglied und Kassier werden automatisch informiert.") })
+						] }),
+						/* @__PURE__ */ (0, y.jsx)("button", {
+							type: "button",
+							className: "club-secondary",
+							onClick: () => {
+								let e = [
+									[
+										t.salutation,
+										t.first_name,
+										t.last_name
+									].filter(Boolean).join(" "),
+									t.birth_date ? `${i("Geburtsdatum")}: ${t.birth_date}` : "",
+									t.email,
+									t.phone,
+									t.street,
+									[t.postcode, t.city].filter(Boolean).join(" "),
+									t.country
+								].filter(Boolean).join("\n");
+								navigator.clipboard?.writeText(e).then(() => s(i("Co-Pilot-Angaben kopiert."))).catch(() => a(i("Kopieren nicht möglich – bitte Angaben oben abschreiben.")));
+							},
+							children: i("Co-Pilot-Angaben kopieren")
+						}),
+						e.copilotInFairgate && /* @__PURE__ */ (0, y.jsx)("p", {
+							className: "club-hint",
+							children: i("Die Co-Pilot-Felder beim Hauptmitglied sind bereits in Fairgate übertragen; der eigene Kontakt fehlt noch.")
+						})
 					]
 				}), /* @__PURE__ */ (0, y.jsxs)("div", {
 					className: "club-form couple-review",
@@ -28357,7 +28462,7 @@ function Mi({ nextEvent: e }) {
 	let { text: t, values: n } = Y(), { language: r } = l(), a = ki(), o = t("home.heroImage").trim(), s = (n.home?.photos ?? []).filter((e) => e.url), c = [...o ? [{
 		url: o,
 		alt: ""
-	}] : [], ...s.filter((e) => e.url !== o)].slice(0, 4);
+	}] : [], ...s.filter((e) => e.url !== o)].slice(0, 7);
 	c.length || c.push({
 		url: "/club/scheinwerfer.jpg",
 		alt: ""
@@ -28962,7 +29067,7 @@ function Gi() {
 }
 //#endregion
 //#region app/components/Magazine.tsx
-var Ki = (0, _.lazy)(() => import("./MagazineReader-C0p_vFAM.js"));
+var Ki = (0, _.lazy)(() => import("./MagazineReader-DVovrkGf.js"));
 function qi({ issue: e, loading: t, error: n, retry: r }) {
 	let { text: a } = Y(), o = a("home.magazinePreviewPages", "1,3,4,12,13,18,19").split(/[^0-9]+/).map(Number).filter((e) => e > 0).slice(0, 12), { language: s } = l(), c = (e, t) => s === "fr" ? t : e, [u, d] = (0, _.useState)(!1), [f, p] = (0, _.useState)(!1), [m, h] = (0, _.useState)(0), [g, v] = (0, _.useState)(!1), x = (0, _.useRef)(null), S = (0, _.useRef)(!1), C = e?.previewPages || [], w = !!e?.cover && !C.includes(e.cover), T = [...w && e?.cover ? [e.cover] : [], ...C].slice(0, 6), E = Math.min(m, Math.max(0, T.length - 1)), D = w && E === 0 ? `${c("Titelseite", "Couverture")} · ${e?.title || ""}` : e?.previewCaptions?.[E - +!!w] || `${c("Vorschau", "Aperçu")} ${E + 1} · ${e?.title || ""}`;
 	(0, _.useEffect)(() => {
