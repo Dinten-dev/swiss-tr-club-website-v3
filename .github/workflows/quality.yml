@@ -51,6 +51,7 @@ jobs:
       - run: php ../../../../scripts/tests/zahls-readiness.php
       - run: php ../../../../scripts/tests/zahls-readiness.php --disabled
       - run: php ../../../../scripts/tests/zahls-webhook.php
+      - run: php -l ../../../../scripts/tests/copilot-partial-sync-staging.php
       - run: php -l ../../../../scripts/tests/security-staging.php
       - run: php -l ../../../../scripts/tests/editorial-staging.php
       - run: php -l ../../../../scripts/tests/pr71-pr75-staging.php
