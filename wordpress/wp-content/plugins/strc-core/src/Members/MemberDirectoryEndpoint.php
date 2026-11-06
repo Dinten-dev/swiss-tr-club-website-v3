@@ -9,6 +9,15 @@ use SwissTRClub\Core\Community\PrivateUploadStore;
 
 final class MemberDirectoryEndpoint
 {
+    /** Fahrzeugstatus (Wunsch Redaktion 6.11.2026): drei Werte; Admins/Superadmins dürfen ihn bei jedem Mitglied korrigieren. */
+    public const VEHICLE_STATUSES=['roadworthy','unroadworthy','restoration'];
+
+    public static function canEditVehicleStatus(): bool
+    {
+        $user=wp_get_current_user();
+        return $user&&$user->ID&&(bool)array_intersect(\SwissTRClub\Core\Roles\RoleDefinitions::ADMIN_ROLES,(array)$user->roles);
+    }
+
     public function registerHooks(): void
     {
         add_action('wp_ajax_strc_directory',[$this,'respond']);
@@ -47,7 +56,16 @@ final class MemberDirectoryEndpoint
 
     public function respond(): void
     {
-        [$operation,$input]=AjaxRequest::read('strc_directory',[]);
+        [$operation,$input]=AjaxRequest::read('strc_directory',['vehicle-status']);
+        if($operation==='vehicle-status'){
+            if(!self::canEditVehicleStatus())AjaxRequest::fail('Nur Admins können den Fahrzeugstatus ändern.',403);
+            $post=get_post(absint($input['vehicle']??0));$status=(string)($input['status']??'');
+            if(!$post||$post->post_type!=='strc_vehicle'||$post->post_status!=='private')AjaxRequest::fail('Fahrzeug nicht gefunden.',404);
+            if(!in_array($status,self::VEHICLE_STATUSES,true))AjaxRequest::fail('Ungültiger Fahrzeugstatus.',422);
+            $data=FormStore::data($post);$data['status']=$status;$data['statusChangedBy']=get_current_user_id();$data['statusChangedAt']=gmdate(DATE_ATOM);
+            try{FormStore::save('strc_vehicle',$data,(int)$post->post_author,0,$post,FormStore::revision($post));}catch(\Throwable $e){AjaxRequest::fail('Status konnte nicht gespeichert werden. Bitte neu laden.',409);}
+            wp_send_json_success(['message'=>'Fahrzeugstatus gespeichert.','status'=>$status]);
+        }
         if(!current_user_can('strc_access_member_area'))AjaxRequest::fail('Bitte mit einem aktiven Mitgliederkonto anmelden.',403);
         if($operation==='location'){
             $postcode=sanitize_text_field($input['postcode']??'');
@@ -69,7 +87,7 @@ final class MemberDirectoryEndpoint
         if(in_array($operation,['detail','photo','vehicle-photo'],true)){
             $id=absint($input['id']??0);if(!self::visible($id))AjaxRequest::fail('Mitglied nicht gefunden.',404);
             $member=$this->member($id,true);
-            if($operation==='detail')wp_send_json_success($member);
+            if($operation==='detail')wp_send_json_success($member+['canEditVehicleStatus'=>self::canEditVehicleStatus(),'nonce'=>self::canEditVehicleStatus()?wp_create_nonce('strc_directory'):'']);
             if($operation==='photo')$file=get_user_meta($id,'strc_profile_photo',true);
             else{
                 $vehicle=absint($input['vehicle']??0);
