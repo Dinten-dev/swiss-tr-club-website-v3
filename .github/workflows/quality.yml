@@ -47,6 +47,7 @@ jobs:
       - run: php ../../../../scripts/tests/shop-pos.php
       - run: php ../../../../scripts/tests/board-office.php
       - run: php ../../../../scripts/tests/membership-admission.php
+      - run: php ../../../../scripts/tests/copilot-partial-sync.php
       - run: php ../../../../scripts/tests/zahls-readiness.php
       - run: php ../../../../scripts/tests/zahls-readiness.php --disabled
       - run: php ../../../../scripts/tests/zahls-webhook.php
