@@ -44,7 +44,7 @@ final class FormFields
     }
     public static function vehicle(array $input): array
     {
-        $result = ['model'=>self::choice($input, 'model', self::MODELS), 'status'=>self::choice($input, 'status', ['roadworthy','restoration'], 'roadworthy')];
+        $result = ['model'=>self::choice($input, 'model', self::MODELS), 'status'=>self::choice($input, 'status', ['roadworthy','unroadworthy','restoration'], 'roadworthy')];
         foreach (['details','year','colour','exteriorColour','interiorColour','chassisNumber','registration','notes'] as $key) $result[$key] = self::text($input, $key, $key === 'notes' ? 1000 : 160);
         // Bildausschnitt des Fahrzeugbilds («cover|x|y» in Prozent); alles andere wird verworfen.
         $frame = is_string($input['photoFrame'] ?? null) ? trim($input['photoFrame']) : '';

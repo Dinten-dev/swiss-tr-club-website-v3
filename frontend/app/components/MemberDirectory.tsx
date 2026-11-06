@@ -3,7 +3,7 @@ import {t} from './UILanguage';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import Image from 'next/image';
 import type {Map as LeafletMap} from 'leaflet';
-import {query} from './ClubApi';
+import {query,mutate,fields} from './ClubApi';
 import {vehicleModels} from './FormFields';
 import {Dialog} from './Marketplace';
 import {Pagination} from './EventManager';
@@ -13,20 +13,21 @@ import {vehiclePhotoRatio} from './VehiclePhotoFrame';
 import 'leaflet/dist/leaflet.css';
 
 type Vehicle={id:number;model:string;details?:string;year?:string;colour?:string;registration?:string;status:string;photo:string;photoFrame?:string};
-type Member={id:number;name:string;firstName:string;lastName:string;city:string;postcode:string;region:string;country:string;photo:string;vehicles:Vehicle[];email?:string;phone?:string};
+type Member={id:number;name:string;firstName:string;lastName:string;city:string;postcode:string;region:string;country:string;photo:string;vehicles:Vehicle[];email?:string;phone?:string;canEditVehicleStatus?:boolean;nonce?:string};
 type MapMember={id:number;firstName:string;postcode:string;city:string;country:string;vehicle:string;position:[number,number]|null};
 type Collection={mapMembers:MapMember[];members:Member[];total:number;pages:number;regions:string[]};
 const sorts:[string,string][]=[['lastName','Nachname'],['firstName','Vorname'],['postcode','PLZ / Ort'],['region','Region'],['vehicle','Fahrzeug']];
-const statusLabel=(status:string)=>status==='restoration'?'In Restauration':'Fahrbereit';
+// Fahrzeugstatus: drei Werte (Wunsch Redaktion 6.11.2026); ohne Angabe gilt «Fahrbereit».
+const statusLabel=(status:string)=>status==='restoration'?'In Restauration':status==='unroadworthy'?'Nicht fahrbereit':'Fahrbereit';
+const statusClass=(status:string)=>status==='restoration'?'is-restoration':status==='unroadworthy'?'is-unroadworthy':'is-ready';
 
 function VehicleChip({vehicle}:{vehicle:Vehicle}){
-  const ready=vehicle.status!=='restoration';
-  return <span className="dir-vehicle" title={t(statusLabel(vehicle.status))}><i className={'dir-dot '+(ready?'is-ready':'is-restoration')} aria-hidden="true"/>{vehicle.model}<span className="sr-only"> ({t(statusLabel(vehicle.status))})</span></span>;
+  return <span className="dir-vehicle" title={t(statusLabel(vehicle.status))}><i className={'dir-dot '+statusClass(vehicle.status)} aria-hidden="true"/>{vehicle.model}<span className="sr-only"> ({t(statusLabel(vehicle.status))})</span></span>;
 }
 
 export default function MemberDirectory(){
  const {text:c}=useSiteContent();
- const [data,setData]=useState<Collection|null>(null);const [search,setSearch]=useState('');const [region,setRegion]=useState('');const [model,setModel]=useState('');const [sort,setSort]=useState('lastName');const [page,setPage]=useState(1);const [error,setError]=useState('');const [selected,setSelected]=useState<Member|null>(null);const [map,setMap]=useState(false);const [revision,setRevision]=useState(0);const [loading,setLoading]=useState(true);
+ const [data,setData]=useState<Collection|null>(null);const [search,setSearch]=useState('');const [region,setRegion]=useState('');const [model,setModel]=useState('');const [sort,setSort]=useState('lastName');const [page,setPage]=useState(1);const [error,setError]=useState('');const [selected,setSelected]=useState<Member|null>(null);const [statusNote,setStatusNote]=useState('');const [map,setMap]=useState(false);const [revision,setRevision]=useState(0);const [loading,setLoading]=useState(true);
  useEffect(()=>{const controller=new AbortController();const timer=setTimeout(()=>{setLoading(true);query<Collection>('strc_directory',{operation:'list',search,region,model,sort,map:map?'1':'0',page:String(page)},controller.signal).then(result=>{setData(result);setError('');}).catch(reason=>{if(!controller.signal.aborted)setError(reason.message);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});},180);return()=>{clearTimeout(timer);controller.abort();};},[search,region,model,sort,page,map,revision]);
  const detail=useCallback(async(id:number)=>{try{setSelected(await query<Member>('strc_directory',{operation:'detail',id:String(id)}));}catch(reason){setError((reason as Error).message);}},[]);
  const change=(apply:()=>void)=>{apply();setPage(1);};
@@ -45,12 +46,12 @@ export default function MemberDirectory(){
    <p className="dir-count" role="status">{data.total} {t(data.total===1?'Mitglied':'Mitglieder')}{loading?' · '+t('wird aktualisiert …'):''}</p>
    {data.members.length?<div className="table-scroll"><table className="dir-table"><thead><tr>{([['lastName','Name'],['postcode','PLZ / Ort'],['region','Region'],['vehicle','Fahrzeuge']] as [string,string][]).map(([key,label])=><th key={key} scope="col" aria-sort={sort===key?'ascending':undefined}><button type="button" onClick={()=>setSort(key)}>{t(label)} {sort===key?'↓':'↕'}</button></th>)}<th><span className="sr-only">{t('Profil')}</span></th></tr></thead>
     <tbody>{data.members.map(member=><tr key={member.id} onClick={()=>void detail(member.id)}><td><button type="button" className="dir-name" onClick={e=>{e.stopPropagation();void detail(member.id);}}>{member.lastName||member.name}{member.firstName?', '+member.firstName:''}</button></td><td>{[member.postcode,member.city].filter(Boolean).join(' ')}</td><td>{member.region&&<span className="dir-region">{t(member.region)}</span>}</td><td>{member.vehicles.map(vehicle=><VehicleChip key={vehicle.id} vehicle={vehicle}/>)}</td><td className="dir-arrow" aria-hidden="true">→</td></tr>)}</tbody></table></div>:<p className="collection-state">{t('Keine passenden Mitglieder gefunden.')}</p>}
-   <p className="dir-legend"><i className="dir-dot is-ready" aria-hidden="true"/> {t('Fahrbereit')} <i className="dir-dot is-restoration" aria-hidden="true"/> {t('Nicht fahrbereit / in Restauration')}</p>
+   <p className="dir-legend"><i className="dir-dot is-ready" aria-hidden="true"/> {t('Fahrbereit')} <i className="dir-dot is-unroadworthy" aria-hidden="true"/> {t('Nicht fahrbereit')} <i className="dir-dot is-restoration" aria-hidden="true"/> {t('In Restauration')}</p>
    <Pagination page={page} pages={data.pages} change={setPage}/></>}
  </section>
- {selected&&<Dialog title={selected.name} close={()=>setSelected(null)}><div className="club-dialog-body dir-detail">
+ {selected&&<Dialog title={selected.name} close={()=>{setSelected(null);setStatusNote('');}}><div className="club-dialog-body dir-detail">
   <div className="dir-detail-head">{selected.photo&&<Image unoptimized src={selected.photo} alt={selected.name} width={96} height={96}/>}<div><p>{[selected.postcode,selected.city].filter(Boolean).join(' ')}{selected.region?' · '+t(selected.region):''}</p>{selected.email&&<p><a href={'mailto:'+selected.email}>{selected.email}</a></p>}{selected.phone&&<p><a href={'tel:'+selected.phone.replace(/[^+0-9]/g,'')}>{selected.phone}</a></p>}</div></div>
-  <h3>{t('Fahrzeuge')}</h3>{selected.vehicles.length?selected.vehicles.map(vehicle=><article key={vehicle.id} className="dir-vehicle-card">{vehicle.photo&&<Image unoptimized src={vehicle.photo} alt={vehicle.model} width={640} height={360} style={{...imageFrameStyle(vehicle.photoFrame,'cover'),aspectRatio:vehiclePhotoRatio,height:'auto'}}/>}<h4><VehicleChip vehicle={vehicle}/> {vehicle.details}</h4><dl className="profile-facts">{([['year','Baujahr'],['colour','Farbe'],['registration','Kennzeichen']] as [keyof Vehicle,string][]).map(([key,label])=><div key={key}><dt>{t(label)}</dt><dd>{String(vehicle[key]||'–')}</dd></div>)}<div><dt>{t('Status')}</dt><dd>{t(statusLabel(vehicle.status))}</dd></div></dl></article>):<p>{t('Keine Fahrzeuge erfasst.')}</p>}
+  <h3>{t('Fahrzeuge')}</h3>{statusNote&&<p className="club-notice" role="status">{statusNote}</p>}{selected.vehicles.length?selected.vehicles.map(vehicle=><article key={vehicle.id} className="dir-vehicle-card">{vehicle.photo&&<Image unoptimized src={vehicle.photo} alt={vehicle.model} width={640} height={360} style={{...imageFrameStyle(vehicle.photoFrame,'cover'),aspectRatio:vehiclePhotoRatio,height:'auto'}}/>}<h4><VehicleChip vehicle={vehicle}/> {vehicle.details}</h4><dl className="profile-facts">{([['year','Baujahr'],['colour','Farbe'],['registration','Kennzeichen']] as [keyof Vehicle,string][]).map(([key,label])=><div key={key}><dt>{t(label)}</dt><dd>{String(vehicle[key]||'–')}</dd></div>)}<div><dt>{t('Status')}</dt><dd>{selected.canEditVehicleStatus&&selected.nonce?<select aria-label={`${t('Fahrzeugstatus')} ${vehicle.model}`} value={vehicle.status||'roadworthy'} onChange={e=>{const status=e.target.value;const nonce=selected.nonce||'';void mutate<{status:string}>('strc_directory',nonce,fields({operation:'vehicle-status',vehicle:String(vehicle.id),status})).then(()=>{setStatusNote(t('Fahrzeugstatus gespeichert.'));setSelected(current=>current&&{...current,vehicles:current.vehicles.map(item=>item.id===vehicle.id?{...item,status}:item)});}).catch(reason=>setStatusNote((reason as Error).message));}}><option value="roadworthy">{t('Fahrbereit')}</option><option value="unroadworthy">{t('Nicht fahrbereit')}</option><option value="restoration">{t('In Restauration')}</option></select>:t(statusLabel(vehicle.status))}</dd></div></dl></article>):<p>{t('Keine Fahrzeuge erfasst.')}</p>}
  </div></Dialog>}</>;
 }
 
