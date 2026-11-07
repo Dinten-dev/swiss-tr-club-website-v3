@@ -185,6 +185,24 @@
         ]
       },
       {
+        "key": "wallVideo",
+        "label": "Momente aus dem Clubleben – Video (MP4, optional)",
+        "type": "video",
+        "default": ""
+      },
+      {
+        "key": "wallVideoPoster",
+        "label": "Momente aus dem Clubleben – Vorschaubild zum Video",
+        "type": "image",
+        "default": ""
+      },
+      {
+        "key": "wallVideoTitle",
+        "label": "Momente aus dem Clubleben – Videotitel",
+        "type": "text",
+        "default": ""
+      },
+      {
         "key": "partners",
         "label": "Sponsoren",
         "type": "partners",

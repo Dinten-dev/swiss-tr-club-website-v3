@@ -825,6 +825,21 @@ button:focus-visible,a:focus-visible { outline:3px solid #187bb1; outline-offset
 .hx-wall.is-6 figure:nth-child(5){grid-column:span 2}
 .hx-wall.is-3 figure:nth-child(n+2),.hx-wall.is-4 figure:nth-child(4){grid-column:span 2}
 .hx-wall.is-5 figure:nth-child(n+2){grid-column:span 1}
+/* Video in «Momente aus dem Clubleben» (Wunsch Redaktion 7.11.2026): Hochformat als Spalte neben der Foto-Wand, Querformat breit darüber. */
+.hx-wall-media{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.hx-wall-media.has-video.is-portrait:not(.no-wall){grid-template-columns:minmax(0,1fr) clamp(220px,24vw,320px)}
+.hx-wall-media.is-portrait:not(.no-wall) .hx-wall-video{order:2}
+.hx-wall-video{position:relative;margin:0;overflow:hidden;border-radius:8px;background:#0a253f;min-height:370px}
+.hx-wall-media.is-landscape .hx-wall-video{aspect-ratio:16/9;min-height:0;max-height:560px}
+.hx-wall-media.no-wall.is-portrait .hx-wall-video{width:min(100%,360px);aspect-ratio:9/16;min-height:0;justify-self:center}
+.hx-wall-video video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0a253f}
+.hx-wall-video.is-playing video{object-fit:contain}
+.hx-wall-play{position:absolute;inset:0;display:grid;place-items:center;width:100%;border:0;padding:0;background:linear-gradient(transparent 55%,rgba(10,37,63,.55));cursor:pointer}
+.hx-wall-play span{display:grid;place-items:center;width:68px;height:68px;border-radius:50%;background:rgba(200,16,46,.92);color:#fff;font-size:26px;padding-left:5px;box-shadow:0 10px 24px rgba(0,0,0,.3);transition:transform .2s}
+.hx-wall-play:hover span,.hx-wall-play:focus-visible span{transform:scale(1.08)}
+.hx-wall-play:focus-visible{outline:3px solid #fff;outline-offset:-6px}
+.hx-wall-video figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 14px 12px;color:#fff;font-size:14px;font-weight:700;pointer-events:none}
+@media(max-width:700px){.hx-wall-media.has-video.is-portrait:not(.no-wall){grid-template-columns:minmax(0,1fr)}.hx-wall-media.is-portrait .hx-wall-video{order:-1;width:min(100%,360px);aspect-ratio:9/16;min-height:0;justify-self:center}}
 .home-arrival.hx-mission{background:#fff;padding-block:56px;border-bottom:0}
 .home-sponsor-logos.hx-marquee{display:block;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
 .hx-marquee-track{display:flex;width:max-content}
