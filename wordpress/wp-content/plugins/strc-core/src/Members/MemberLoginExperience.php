@@ -3,6 +3,8 @@
 declare(strict_types=1);
 namespace SwissTRClub\Core\Members;
 
+use SwissTRClub\Core\Roles\RoleDefinitions;
+
 /**
  * Login im Look der Clubseite; Mitglieder landen nach dem Login (auch nach «Passwort vergessen»)
  * im eigenen Dashboard statt in wp-admin oder im Shop-Konto.
@@ -13,6 +15,8 @@ final class MemberLoginExperience
     {
         add_filter('login_redirect',[$this,'loginRedirect'],30,3);
         add_filter('woocommerce_login_redirect',[$this,'shopLoginRedirect'],30,2);
+        add_action('admin_init',[$this,'restrictAdmin'],1);
+        add_filter('woocommerce_prevent_admin_access',[$this,'allowStaffAdmin']);
         add_action('template_redirect',[$this,'accountDashboard']);
         add_action('login_enqueue_scripts',[$this,'loginStyles']);
         add_action('login_enqueue_scripts',[$this,'resetPasswordField']);
@@ -31,12 +35,48 @@ final class MemberLoginExperience
         return $user instanceof \WP_User && user_can($user,'strc_access_member_area');
     }
 
-    /** Ohne ausdrückliches Ziel (oder mit dem WordPress-Standard wp-admin) geht ein Mitglied ins Dashboard. Administratoren behalten wp-admin. */
+    private static function mayUseAdmin(\WP_User $user): bool
+    {
+        foreach(['manage_options','manage_woocommerce','edit_posts','strc_manage_platform','strc_manage_members','strc_manage_content_roles','strc_manage_shop','strc_manage_finance'] as $capability) {
+            if(user_can($user,$capability))return true;
+        }
+        $staffRoles=array_merge(RoleDefinitions::ADMIN_ROLES,RoleDefinitions::MODERATOR_ROLES,RoleDefinitions::LEGACY_ADMIN_ROLES,['strc_developer','strc_board_member','strc_moderator']);
+        return (bool)array_intersect($user->roles,$staffRoles);
+    }
+
+    /** Der normale Login führt zur Clubseite; berechtigte Personen können wp-admin weiterhin direkt öffnen. */
     public function loginRedirect(string $redirect,string $requested,mixed $user): string
     {
-        if(!self::member($user)||user_can($user,'manage_options'))return $redirect;
-        $default=$requested===''||untrailingslashit($requested)===untrailingslashit(admin_url())||str_contains($requested,'/my-account');
-        return $default?self::dashboard():$redirect;
+        if(!$user instanceof \WP_User||(!self::member($user)&&!self::mayUseAdmin($user)))return $redirect;
+        $path=(string)wp_parse_url($requested,PHP_URL_PATH);
+        $adminPath=rtrim((string)wp_parse_url(admin_url(),PHP_URL_PATH),'/');
+        $adminRequest=$path===$adminPath||str_starts_with($path,$adminPath.'/');
+        $defaultAdmin=$path===$adminPath||$path===$adminPath.'/'||$path===$adminPath.'/index.php';
+        $actionEndpoint=in_array(basename($path),['admin-ajax.php','admin-post.php'],true);
+        if($requested===''||$defaultAdmin||str_contains($requested,'/my-account'))return self::dashboard();
+        if($adminRequest&&!$actionEndpoint&&!self::mayUseAdmin($user))return self::dashboard();
+        return $redirect;
+    }
+
+    public function shouldRedirectAdmin(mixed $user,string $script): bool
+    {
+        return self::member($user)&&!self::mayUseAdmin($user)
+            &&!in_array(basename($script),['admin-ajax.php','admin-post.php'],true);
+    }
+
+    public function allowStaffAdmin(bool $prevent): bool
+    {
+        $user=wp_get_current_user();
+        return $user instanceof \WP_User&&self::mayUseAdmin($user)?false:$prevent;
+    }
+
+    public function restrictAdmin(): void
+    {
+        if((function_exists('wp_doing_ajax')&&wp_doing_ajax())||(function_exists('wp_doing_cron')&&wp_doing_cron()))return;
+        global $pagenow;
+        if(!$this->shouldRedirectAdmin(wp_get_current_user(),(string)($pagenow??'')))return;
+        wp_safe_redirect(self::dashboard(),302,'Swiss TR-Club');
+        exit;
     }
 
     /** WooCommerce-Login (Mein Konto / Passwort zurückgesetzt) → Dashboard, ausser es ging um Warenkorb oder Kasse. */
