@@ -145,7 +145,7 @@ final class EditorialEndpoint
 
     public function respond(): void
     {
-        [$operation,$input] = AjaxRequest::read('strc_editorial', array('save','preview','post-save','upload','upload-document','delete-document','rename-document','assign','highlights-save'));
+        [$operation,$input] = AjaxRequest::read('strc_editorial', array('save','preview','post-save','upload','upload-video','upload-document','delete-document','rename-document','assign','highlights-save'));
         $schema = self::schema();
         if ('public' === $operation) {
             $values = $published = array();
@@ -172,6 +172,7 @@ final class EditorialEndpoint
             'posts' => $this->posts($input),
             'post-save' => $this->savePost($input),
             'upload' => $this->upload($input,$schema),
+            'upload-video' => $this->uploadVideo($input,$schema),
             'documents','upload-document' => $this->documents($input,$schema,$operation==='upload-document'),
             'rename-document' => PublicDocumentUpload::rename($this->readDocument($input,$schema)['key'], absint($input['id'] ?? 0), (string) ($input['title'] ?? '')),
             'delete-document' => PublicDocumentUpload::delete($this->readDocument($input,$schema)['key'], absint($input['id'] ?? 0)),
@@ -244,7 +245,7 @@ final class EditorialEndpoint
             } else {
                 if (! is_string($value) || mb_strlen($value)>50000) AjaxRequest::fail('Der Text ist zu lang.');
                 $clean[$field['key']] = match ($field['type']) {
-                    'textarea'=>sanitize_textarea_field($value), 'imageFrame'=>$this->frame($value), 'rich'=>EditorialAccess::html($value), 'image','url'=>$this->url($value), default=>sanitize_text_field($value),
+                    'textarea'=>sanitize_textarea_field($value), 'imageFrame'=>$this->frame($value), 'rich'=>EditorialAccess::html($value), 'image','url','video'=>$this->url($value), default=>sanitize_text_field($value),
                 };
             }
         }
@@ -388,6 +389,13 @@ final class EditorialEndpoint
         if ('news' === ($input['kind'] ?? '')) $this->kind($input);
         else $this->readDocument($input,$schema);
         return PublicImageUpload::receive();
+    }
+
+    private function uploadVideo(array $input,array $schema): array
+    {
+        $document=$this->readDocument($input,$schema);
+        if(!in_array('video',array_column($document['schema']['fields']??array(),'type'),true))AjaxRequest::fail('Für diese Seite sind keine Videos vorgesehen.');
+        return PublicVideoUpload::receive();
     }
 
     private function people(): array

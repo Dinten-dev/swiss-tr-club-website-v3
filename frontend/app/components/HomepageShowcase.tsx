@@ -170,17 +170,36 @@ export function HomeRegionMap({regions}:{regions:{name:string;slug:string}[]}){
 
 /* Vorschlag 6 · Foto-Wand ohne Namen */
 export function HomePhotoWall(){
- const {values}=useSiteContent();const {language}=useUILanguage();
+ const {values,text:c}=useSiteContent();const {language}=useUILanguage();
+ const video=c('home.wallVideo').trim(),videoPoster=c('home.wallVideoPoster').trim(),videoTitle=c('home.wallVideoTitle').trim();
+ const [portrait,setPortrait]=useState(true);
  // Momente aus dem Clubleben: in den Alben für die Startseite ausgewählte Bilder (zuletzt ausgewählte zuerst); Redaktionsbilder als Ersatz.
  const [albumPhotos,setAlbumPhotos]=useState<{url:string;caption:string}[]>([]);
  useEffect(()=>{const controller=new AbortController();query<{url:string;caption:string}[]>('strc_community',{operation:'teasers'},controller.signal).then(rows=>{if(Array.isArray(rows))setAlbumPhotos(rows);}).catch(()=>{});return()=>controller.abort();},[]);
  const editorial=((values.home?.photos??[]) as ContentImage[]).filter(photo=>photo.url).slice(0,6);
  const fromAlbums=albumPhotos.length>=3;
  const count=fromAlbums?Math.min(6,albumPhotos.length):editorial.length;
- if(count<3)return null;
+ const hasWall=count>=3;
+ if(!hasWall&&!video)return null;
  return <section className="hx-wall-section" aria-labelledby="hx-wall-title"><div className="home-width">
   <div className="hx-head"><div><p className="eyebrow">{t('Galerie')}</p><h2 id="hx-wall-title">{t('Momente aus dem Clubleben')}</h2></div></div>
-  <div className={`hx-wall is-${count}`}>{fromAlbums?albumPhotos.slice(0,6).map((photo,index)=><figure key={photo.url+index}><Image unoptimized src={photo.url} alt={photo.caption||t('Clubfoto')} width={900} height={640} loading="lazy" style={{objectFit:'cover'}}/>{photo.caption&&<figcaption aria-hidden="true">{photo.caption.replace(/[.!?]+$/,'')}</figcaption>}</figure>)
-   :editorial.map((photo,index)=>{const alt=photoAlt(photo,language);return <figure key={photo.url+index}><Image src={assetUrl(photo.url)} alt={alt} width={900} height={640} loading="lazy" style={imageFrameStyle(photo.frame,'cover')}/>{alt&&<figcaption aria-hidden="true">{alt.replace(/[.!?]+$/,'')}</figcaption>}</figure>;})}</div>
+  <div className={`hx-wall-media${video?' has-video':''}${portrait?' is-portrait':' is-landscape'}${hasWall?'':' no-wall'}`}>
+  {video&&<WallVideo src={video} poster={videoPoster} title={videoTitle} orientation={setPortrait}/>}
+  {hasWall&&<div className={`hx-wall is-${count}`}>{fromAlbums?albumPhotos.slice(0,6).map((photo,index)=><figure key={photo.url+index}><Image unoptimized src={photo.url} alt={photo.caption||t('Clubfoto')} width={900} height={640} loading="lazy" style={{objectFit:'cover'}}/>{photo.caption&&<figcaption aria-hidden="true">{photo.caption.replace(/[.!?]+$/,'')}</figcaption>}</figure>)
+   :editorial.map((photo,index)=>{const alt=photoAlt(photo,language);return <figure key={photo.url+index}><Image src={assetUrl(photo.url)} alt={alt} width={900} height={640} loading="lazy" style={imageFrameStyle(photo.frame,'cover')}/>{alt&&<figcaption aria-hidden="true">{alt.replace(/[.!?]+$/,'')}</figcaption>}</figure>;})}</div>}
+  </div>
  </div></section>;
+}
+
+/** Kurzvideo in «Momente aus dem Clubleben» (Wunsch Redaktion 7.11.2026): lädt erst beim Abspielen, Hoch- und Querformat. */
+function WallVideo({src,poster,title,orientation}:{src:string;poster:string;title:string;orientation:(portrait:boolean)=>void}){
+ const ref=useRef<HTMLVideoElement>(null);const [playing,setPlaying]=useState(false);
+ useEffect(()=>{if(!poster)return;const image=new window.Image();image.onload=()=>{if(image.naturalWidth&&image.naturalHeight)orientation(image.naturalHeight>=image.naturalWidth);};image.src=assetUrl(poster);},[poster,orientation]);
+ const label=title||t('Video aus dem Clubleben');
+ const play=()=>{setPlaying(true);const element=ref.current;if(element){element.controls=true;void element.play().catch(()=>{});element.focus();}};
+ return <figure className={`hx-wall-video${playing?' is-playing':''}`}>
+  <video ref={ref} src={assetUrl(src)+(poster?'':'#t=0.5')} poster={poster?assetUrl(poster):undefined} preload={poster?'none':'metadata'} playsInline controls={playing} aria-label={label} tabIndex={playing?0:-1} onLoadedMetadata={event=>{const element=event.currentTarget;if(element.videoWidth&&element.videoHeight)orientation(element.videoHeight>=element.videoWidth);}} onPlay={()=>setPlaying(true)}/>
+  {!playing&&<button type="button" className="hx-wall-play" onClick={play} aria-label={`${t('Video abspielen')}: ${label}`}><span aria-hidden="true">▶</span></button>}
+  {title&&!playing&&<figcaption>{title}</figcaption>}
+ </figure>;
 }
