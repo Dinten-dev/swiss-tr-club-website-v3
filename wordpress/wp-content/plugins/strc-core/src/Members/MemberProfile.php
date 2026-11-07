@@ -129,11 +129,15 @@ final class MemberProfile
         $changes=array_diff_assoc($data,$guest['values']);
         if(!$changes&&$guest['source'])return ['message'=>'Keine Änderungen.'];
         $contactId=(string)(((new MembershipRepository())->findForUser($owner))['fairgate_contact_id']??'');
-        $written=$changes&&$this->writer->withCurrent($data)->write($contactId,'copilot',$changes);
-        update_user_meta($owner,'strc_copilot',['values'=>$data,'updatedAt'=>gmdate(DATE_ATOM),'pendingSync'=>!$written]);
-        if($written)return ['message'=>'Co-Pilot gespeichert und in Fairgate übernommen.'];
+        // Write only configured fields; keep the remainder visible for manual review.
+        $mapped=$this->writer->mappedOnly('copilot',$changes);
+        $written=$mapped&&$this->writer->withCurrent($data)->write($contactId,'copilot',$mapped);
+        $needsReview=!$written||array_diff_key($changes,$mapped)!==[]||!empty($guest['pending']);
+        // Keep the local values authoritative until the next Fairgate read-back.
+        update_user_meta($owner,'strc_copilot',['values'=>$data,'updatedAt'=>gmdate(DATE_ATOM),'pendingSync'=>true]);
+        if(!$needsReview)return ['message'=>'Co-Pilot gespeichert und in Fairgate übernommen.'];
         FormStore::intake('copilot',$data+['forMember'=>get_userdata($owner)->display_name],wp_generate_uuid4(),$owner);
-        return ['message'=>'Co-Pilot gespeichert. Die Mitgliederverwaltung übernimmt die Angaben in Fairgate.'];
+        return ['message'=>$written?'Co-Pilot gespeichert. Zugeordnete Angaben wurden an Fairgate übertragen; die Mitgliederverwaltung prüft die übrigen Angaben.':'Co-Pilot gespeichert. Die Mitgliederverwaltung übernimmt die Angaben in Fairgate.'];
     }
 
     /** Wechsel zur Paarmitgliedschaft beantragen: Formularpostfach, E-Mail an den Aktuar, Aufgabe im Dashboard. */
@@ -151,7 +155,6 @@ final class MemberProfile
         $contactId=(string)($m['fairgate_contact_id']??'');
         $mapped=$this->writer->mappedOnly('copilot',$copilot);
         $inFairgate=$mapped&&$this->writer->withCurrent($copilot)->write($contactId,'copilot',$mapped);
-        if($inFairgate){$local=get_user_meta($actor,'strc_copilot',true);$local=is_array($local)?$local:['values'=>$copilot];$local['pendingSync']=false;$local['updatedAt']=gmdate(DATE_ATOM);update_user_meta($actor,'strc_copilot',$local);}
         $payload=['member'=>['name'=>$user->display_name,'memberNumber'=>$number,'email'=>$user->user_email,'fairgateContactId'=>(string)($m['fairgate_contact_id']??'')],'copilot'=>$copilot,'newMembership'=>'Paarmitgliedschaft','fee'=>'CHF 160.–','task'=>self::COUPLE_TASK,'copilotInFairgate'=>$inFairgate];
         $form=FormStore::intake('couple',$payload,wp_generate_uuid4(),$actor);
         update_user_meta($actor,'strc_couple_request',['state'=>'pending','at'=>gmdate(DATE_ATOM),'formId'=>$form]);
